@@ -41,9 +41,13 @@ The versioned REST contract is served at `GET /v1/openapi.yaml` and documented
 in [`docs/api/v1-http-contract.md`](docs/api/v1-http-contract.md). Contract
 routes fail closed: authentication and mutation preconditions are active now.
 Canonical import, export jobs, job status, and artifact download are implemented;
-services assigned to later ADRs return a typed `503` until installed. The
+scoped bearer-key issuance, revocation, atomic commits, and redacted audit events
+are also implemented. Services assigned to later ADRs return a typed `503` until
+installed. The
 transfer format and recovery guarantees are documented in
 [`docs/transfer/canonical-import-export.md`](docs/transfer/canonical-import-export.md).
+Security configuration and audit retention are documented in
+[`docs/security/scoped-access-and-audit.md`](docs/security/scoped-access-and-audit.md).
 
 ## Modules
 

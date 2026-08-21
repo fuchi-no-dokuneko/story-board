@@ -5,6 +5,7 @@ import dev.storyblock.contracts.NarrativeCanonicalMapper;
 import dev.storyblock.domain.EditOperation;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.security.AuditContext;
 import dev.storyblock.storage.CommitRequest;
 import dev.storyblock.storage.CommitResult;
 import dev.storyblock.storage.IdempotencyConflictException;
@@ -30,8 +31,27 @@ public final class CommitService {
             Instant committedAt
     ) {
         Objects.requireNonNull(requestedOperation, "requestedOperation");
+        return commit(
+                requestedOperation,
+                candidateRevisionId,
+                committedAt,
+                AuditContext.system(
+                        "req_internal_" + requestedOperation.context().operationId().value(),
+                        committedAt
+                )
+        );
+    }
+
+    public CommitResult commit(
+            EditOperation requestedOperation,
+            Ids.RevisionId candidateRevisionId,
+            Instant committedAt,
+            AuditContext auditContext
+    ) {
+        Objects.requireNonNull(requestedOperation, "requestedOperation");
         Objects.requireNonNull(candidateRevisionId, "candidateRevisionId");
         Objects.requireNonNull(committedAt, "committedAt");
+        Objects.requireNonNull(auditContext, "auditContext");
 
         EditOperation operation = EditOperationNormalizer.normalize(requestedOperation);
         String operationHash = EditOperationCanonicalMapper.hash(operation);
@@ -39,7 +59,9 @@ public final class CommitService {
                 operation.context().novelId(), operation.context().idempotencyKey()
         );
         if (prior.isPresent()) {
-            return priorResult(operation, operationHash, prior.get());
+            CommitResult result = priorResult(operation, operationHash, prior.get());
+            store.recordCommitReplayAudit(prior.get(), auditContext);
+            return result;
         }
 
         StoredRevision base = store.getRevision(
@@ -71,9 +93,12 @@ public final class CommitService {
             throw new IllegalStateException("Preview and commit candidate hashes diverged");
         }
 
-        return store.commitCas(new CommitRequest(
-                expectedHead, operation, operationHash, candidate, candidateHash
-        ));
+        return store.commitCas(
+                new CommitRequest(
+                        expectedHead, operation, operationHash, candidate, candidateHash
+                ),
+                auditContext
+        );
     }
 
     private static CommitResult priorResult(

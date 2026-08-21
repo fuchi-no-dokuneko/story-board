@@ -8,13 +8,15 @@ authentication at `GET /v1/openapi.yaml`.
 ## Runtime Boundary
 
 All documented routes are mapped and protected by their declared scope.
-Canonical import, export submission, export-job status, and artifact download
-have concrete storage-backed handlers. For a route whose owning application
+Canonical import, export submission, export-job status, artifact download,
+commit, and access-key lifecycle routes have concrete storage-backed handlers.
+For a route whose owning application
 service is not implemented yet, a correctly authenticated and well-formed
 request receives `503 application/problem+json` with
 `code=DEPENDENCY_UNAVAILABLE` and `Retry-After: 1`. There is no generated user,
 form login, HTTP Basic fallback, or session state. Bearer credential validation
-is owned by ADR-300.
+uses opaque, novel-bound credentials as described in
+[`../security/scoped-access-and-audit.md`](../security/scoped-access-and-audit.md).
 
 ## Mutation Preconditions
 
@@ -64,7 +66,8 @@ dependencies have been bootstrapped:
 ```
 
 The tests parse every local OpenAPI reference, compare all 22 required routes,
-exercise each concrete Spring mapping with its required scope, verify all
-status-policy entries, and cover authentication, problem details, request IDs,
-ETags, idempotency, wildcard restrictions, body limits, and a complete
-import/export/job/artifact round trip.
+exercise each scaffold Spring mapping with its required scope, verify all
+status-policy entries, and cover real bearer authentication, object-level novel
+isolation, problem details, request IDs, ETags, idempotency, wildcard
+restrictions, body limits, commits, and a complete import/export/job/artifact
+round trip.

@@ -2,6 +2,7 @@ package dev.storyblock.api.http;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -17,6 +18,9 @@ import dev.storyblock.contracts.CanonicalNovelPackage;
 import dev.storyblock.contracts.CanonicalRevision;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.OrderKey;
+import dev.storyblock.security.AuditAction;
+import dev.storyblock.security.AuditResult;
+import dev.storyblock.storage.sqlite.SqliteRevisionStore;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -43,6 +47,8 @@ import org.springframework.test.context.DynamicPropertySource;
 @SpringBootTest
 @AutoConfigureMockMvc
 class ApiHttpContractTest {
+    private static final String OWNER_TOKEN =
+            "test-owner-bootstrap-token-material-32-bytes";
     private static final String VALID_ETAG = "\"sha256:"
             + "0".repeat(64)
             + "\"";
@@ -53,10 +59,15 @@ class ApiHttpContractTest {
     @DynamicPropertySource
     static void configureDatabase(DynamicPropertyRegistry registry) {
         registry.add("storyblock.database.path", DATABASE_PATH::toString);
+        registry.add("storyblock.security.pepper", () -> "test-pepper-material-32-bytes-minimum");
+        registry.add("storyblock.security.owner-token", () -> OWNER_TOKEN);
     }
 
     @Autowired
     private MockMvc mvc;
+
+    @Autowired
+    private SqliteRevisionStore store;
 
     @Test
     void servesOpenApiWithoutAuthentication() throws Exception {
@@ -302,6 +313,240 @@ class ApiHttpContractTest {
         );
     }
 
+    @Test
+    void realBearerCredentialsEnforceScopesNovelBoundariesAndRevocation()
+            throws Exception {
+        CanonicalRevision first = genesis();
+        CanonicalRevision second = genesis();
+        String firstNovel = stringField(first.canonicalContent(), "novel_id");
+        String secondNovel = stringField(second.canonicalContent(), "novel_id");
+        String secondRevision = stringField(second.canonicalContent(), "revision_id");
+        importAsOwner(first, "security-import-first");
+        importAsOwner(second, "security-import-second");
+
+        Map<String, Object> key = issueAsOwner(
+                first,
+                "security-issue-first",
+                List.of(
+                        "novel:read",
+                        "novel:analyze",
+                        "novel:admin",
+                        "novel:commit",
+                        "style:analyze",
+                        "rewrite:propose"
+                )
+        );
+        String bearer = stringField(key, "secret");
+        String keyId = stringField(key, "key_id");
+
+        byte[] escalationBody = CanonicalJson.bytes(Map.of(
+                "actor_id", "escalated-worker",
+                "scopes", List.of("worker:execute"),
+                "expires_at", "2099-01-01T00:00:00Z"
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/access-keys", firstNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(escalationBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_DELEGATION_DENIED"));
+        byte[] expiryEscalationBody = CanonicalJson.bytes(Map.of(
+                "actor_id", "long-lived-reader",
+                "scopes", List.of("novel:read"),
+                "expires_at", "2100-01-01T00:00:00Z"
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/access-keys", firstNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "expiry-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(expiryEscalationBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EXPIRY_DELEGATION_DENIED"));
+        mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-route-denied")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        Map<String, Object> ownExport = startExport(
+                first, bearer, "security-export-first"
+        );
+        String ownJobId = stringField(ownExport, "job_id");
+        mvc.perform(get("/v1/jobs/{jobId}", ownJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.novel_id").value(firstNovel));
+
+        mvc.perform(get("/v1/novels/{novelId}", secondNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(jsonPath("$.detail")
+                        .value("The requested resource does not exist."));
+
+        mvc.perform(post("/v1/novels/{novelId}/style-analyses", secondNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "cross-analysis")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(second.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        byte[] rewriteBody = CanonicalJson.bytes(Map.of(
+                "novel_id", secondNovel,
+                "revision_id", secondRevision,
+                "revision_hash", second.contentHash(),
+                "finding_ids", List.of("finding_test")
+        ));
+        mvc.perform(post("/v1/rewrite-proposals")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "cross-rewrite")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(second.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(rewriteBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        String mismatchKey = "cross-body-commit";
+        Map<String, Object> mismatchedOperation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", mismatchKey,
+                "novel_id", secondNovel,
+                "base_revision_id", secondRevision,
+                "expected_head_hash", second.contentHash(),
+                "type", "restore_revision_content",
+                "payload", Map.of(
+                        "restore_revision_id", secondRevision,
+                        "expected_restore_hash", second.contentHash()
+                )
+        );
+        byte[] mismatchBody = CanonicalJson.bytes(Map.of(
+                "operation", mismatchedOperation,
+                "candidate_revision_id", Ids.RevisionId.create().value(),
+                "candidate_created_at", "2026-08-21T12:10:00Z"
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/commits", firstNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, mismatchKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mismatchBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        Map<String, Object> otherExport = startExport(
+                second, OWNER_TOKEN, "security-export-second"
+        );
+        String otherJobId = stringField(otherExport, "job_id");
+        MvcResult otherJobResult = mvc.perform(get("/v1/jobs/{jobId}", otherJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN)))
+                .andExpect(status().isOk())
+                .andReturn();
+        String otherArtifactId = stringField(
+                object(otherJobResult), "result_artifact_id"
+        );
+        mvc.perform(get("/v1/jobs/{jobId}", otherJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isNotFound());
+        mvc.perform(get("/v1/artifacts/{artifactId}", otherArtifactId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(delete("/v1/access-keys/{keyId}", keyId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "security-revoke")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.revoked").value(true));
+        mvc.perform(get("/v1/jobs/{jobId}", ownJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_BEARER_CREDENTIAL"));
+
+    }
+
+    @Test
+    void realBearerCommitAndReplayWriteCompleteAuditEvents() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "commit-audit-import");
+        Map<String, Object> key = issueAsOwner(
+                revision, "commit-audit-issue", List.of("novel:commit")
+        );
+        String token = stringField(key, "secret");
+        String keyId = stringField(key, "key_id");
+        String operationId = Ids.OperationId.create().value();
+        String idempotencyKey = "http-commit-audit";
+        Map<String, Object> operation = Map.of(
+                "operation_id", operationId,
+                "idempotency_key", idempotencyKey,
+                "novel_id", novelId,
+                "base_revision_id", revisionId,
+                "expected_head_hash", revision.contentHash(),
+                "type", "restore_revision_content",
+                "payload", Map.of(
+                        "restore_revision_id", revisionId,
+                        "expected_restore_hash", revision.contentHash()
+                )
+        );
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "operation", operation,
+                "candidate_revision_id", Ids.RevisionId.create().value(),
+                "candidate_created_at", "2026-08-21T12:01:00Z"
+        ));
+        MockHttpServletRequestBuilder request = post(
+                        "/v1/novels/{novelId}/commits", novelId
+                )
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                .header(ApiRequestMetadata.REQUEST_ID_HEADER, "req_http_commit_first")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body);
+        MvcResult first = mvc.perform(request)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.operation_id").value(operationId))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        String committedRevision = stringField(object(first), "revision_id");
+
+        mvc.perform(post("/v1/novels/{novelId}/commits", novelId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .header(ApiRequestMetadata.REQUEST_ID_HEADER, "req_http_commit_retry")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.revision_id").value(committedRevision))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        var commitEvents = store.listAuditEvents(new Ids.NovelId(novelId)).stream()
+                .filter(event -> event.action() == AuditAction.COMMIT)
+                .toList();
+        assertEquals(2, commitEvents.size());
+        assertEquals(AuditResult.SUCCEEDED, commitEvents.get(0).result());
+        assertEquals(AuditResult.IDEMPOTENT, commitEvents.get(1).result());
+        assertEquals("req_http_commit_first", commitEvents.get(0).requestId());
+        assertEquals("req_http_commit_retry", commitEvents.get(1).requestId());
+        commitEvents.forEach(event -> {
+            assertEquals("security-test-actor", event.actorId());
+            assertEquals(keyId, event.actorKeyId().value());
+            assertEquals(operationId, event.operationId().value());
+            assertEquals(committedRevision, event.revisionId().value());
+            assertTrue(event.operationHash().startsWith("sha256:"));
+            assertTrue(event.contentHash().startsWith("sha256:"));
+        });
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("requiredRoutes")
     void everyScaffoldRouteIsMappedAndUsesItsDocumentedScope(
@@ -337,7 +582,6 @@ class ApiHttpContractTest {
                 route("read revision", "GET", "/v1/novels/nov_test/revisions/rev_test", "novel:read", false),
                 route("render", "POST", "/v1/novels/nov_test/renders", "novel:read", false),
                 route("edit preview", "POST", "/v1/novels/nov_test/edit-previews", "novel:propose", false),
-                route("commit", "POST", "/v1/novels/nov_test/commits", "novel:commit", false),
                 route("undo preview", "POST", "/v1/novels/nov_test/undo-previews", "novel:propose", false),
                 route("detector", "POST", "/v1/novels/nov_test/detector-runs", "novel:analyze", false),
                 route("style analysis", "POST", "/v1/novels/nov_test/style-analyses", "style:analyze", false),
@@ -346,8 +590,6 @@ class ApiHttpContractTest {
                 route("read rewrite", "GET", "/v1/rewrite-proposals/proposal_test", "novel:read", false),
                 route("create profile", "POST", "/v1/style-profiles", "style:admin", true),
                 route("profile version", "POST", "/v1/style-profiles/profile_test/versions", "style:admin", false),
-                route("create key", "POST", "/v1/novels/nov_test/access-keys", "novel:admin", false),
-                route("revoke key", "DELETE", "/v1/access-keys/key_test", "novel:admin", false),
                 route("claim job", "POST", "/v1/internal/jobs/claims", "worker:execute", true),
                 route("submit worker result", "POST", "/v1/internal/jobs/job_test/results", "worker:execute", false)
         );
@@ -397,6 +639,72 @@ class ApiHttpContractTest {
         return CanonicalRevision.of(document);
     }
 
+    private void importAsOwner(CanonicalRevision revision, String idempotencyKey)
+            throws Exception {
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "format", CanonicalExportFormat.REVISION.canonicalName(),
+                "document", revision.envelope()
+        ));
+        mvc.perform(post("/v1/imports")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
+    private Map<String, Object> issueAsOwner(
+            CanonicalRevision revision,
+            String idempotencyKey,
+            List<String> scopes
+    ) throws Exception {
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "actor_id", "security-test-actor",
+                "scopes", scopes,
+                "expires_at", "2099-01-01T00:00:00Z"
+        ));
+        MvcResult result = mvc.perform(post(
+                        "/v1/novels/{novelId}/access-keys", novelId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"))
+                .andExpect(header().string(HttpHeaders.PRAGMA, "no-cache"))
+                .andExpect(jsonPath("$.secret").isString())
+                .andReturn();
+        return object(result);
+    }
+
+    private Map<String, Object> startExport(
+            CanonicalRevision revision,
+            String token,
+            String idempotencyKey
+    ) throws Exception {
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "format", CanonicalExportFormat.PACKAGE.canonicalName()
+        ));
+        MvcResult result = mvc.perform(post(
+                        "/v1/novels/{novelId}/exports", novelId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isAccepted())
+                .andReturn();
+        return object(result);
+    }
+
     @SuppressWarnings("unchecked")
     private static Map<String, Object> object(MvcResult result) {
         return CanonicalJson.parse(
@@ -410,6 +718,10 @@ class ApiHttpContractTest {
 
     private static String quotedEtag(String hash) {
         return "\"" + hash + "\"";
+    }
+
+    private static String bearer(String token) {
+        return "Bearer " + token;
     }
 
     private static org.springframework.test.web.servlet.request.RequestPostProcessor

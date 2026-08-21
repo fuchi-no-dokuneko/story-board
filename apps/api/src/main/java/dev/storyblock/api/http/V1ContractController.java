@@ -1,8 +1,9 @@
 package dev.storyblock.api.http;
 
+import dev.storyblock.domain.Ids;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,14 +50,6 @@ public final class V1ContractController {
         return unavailable();
     }
 
-    @PostMapping("/novels/{novelId}/commits")
-    ResponseEntity<Map<String, Object>> commit(
-            @PathVariable String novelId,
-            @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
     @PostMapping("/novels/{novelId}/undo-previews")
     ResponseEntity<Map<String, Object>> previewUndo(
             @PathVariable String novelId,
@@ -91,8 +84,15 @@ public final class V1ContractController {
 
     @PostMapping("/rewrite-proposals")
     ResponseEntity<Map<String, Object>> startRewriteProposal(
-            @RequestBody JsonNode request
+            @RequestBody JsonNode request,
+            Authentication authentication
     ) {
+        JsonNode novelId = request.get("novel_id");
+        if (novelId != null && novelId.isString()) {
+            AccessPrincipalSupport.requireNovel(
+                    authentication, new Ids.NovelId(novelId.stringValue())
+            );
+        }
         return unavailable();
     }
 
@@ -115,19 +115,6 @@ public final class V1ContractController {
             @PathVariable String profileId,
             @RequestBody JsonNode request
     ) {
-        return unavailable();
-    }
-
-    @PostMapping("/novels/{novelId}/access-keys")
-    ResponseEntity<Map<String, Object>> createAccessKey(
-            @PathVariable String novelId,
-            @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
-    @DeleteMapping("/access-keys/{keyId}")
-    ResponseEntity<Map<String, Object>> revokeAccessKey(@PathVariable String keyId) {
         return unavailable();
     }
 

@@ -94,6 +94,26 @@ public final class Ids {
         }
     }
 
+    public record AccessKeyId(String value) {
+        public AccessKeyId {
+            value = StableIds.require(value, "key");
+        }
+
+        public static AccessKeyId create() {
+            return new AccessKeyId(StableIds.generate("key"));
+        }
+    }
+
+    public record AuditEventId(String value) {
+        public AuditEventId {
+            value = StableIds.require(value, "aud");
+        }
+
+        public static AuditEventId create() {
+            return new AuditEventId(StableIds.generate("aud"));
+        }
+    }
+
     public record ProposalId(String value) {
         public ProposalId {
             value = StableIds.require(value, "prp");

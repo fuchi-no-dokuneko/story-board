@@ -20,6 +20,10 @@
     </dependency>
     <dependency>
       <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
       <artifactId>storyblock-renderer</artifactId>
     </dependency>
     <dependency>

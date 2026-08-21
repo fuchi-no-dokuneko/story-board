@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import dev.storyblock.security.CrossNovelAccessException;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -77,6 +78,25 @@ class ApiProblemStatusPolicyTest {
                 IllegalArgumentException.class,
                 () -> ApiProblemFactory.create(request, collision)
         );
+    }
+
+    @Test
+    void crossNovelErrorsHonorTheConfiguredDisclosurePolicy() {
+        var hidden = new ApiExceptionHandler(true).crossNovel(
+                new CrossNovelAccessException(), request("/v1/novels/hidden")
+        );
+        assertEquals(404, hidden.getStatusCode().value());
+        assertEquals("RESOURCE_NOT_FOUND", hidden.getBody().get("code"));
+        assertEquals(
+                "The requested resource does not exist.",
+                hidden.getBody().get("detail")
+        );
+
+        var disclosed = new ApiExceptionHandler(false).crossNovel(
+                new CrossNovelAccessException(), request("/v1/novels/disclosed")
+        );
+        assertEquals(403, disclosed.getStatusCode().value());
+        assertEquals("NOVEL_ACCESS_DENIED", disclosed.getBody().get("code"));
     }
 
     private static MockHttpServletRequest request(String uri) {

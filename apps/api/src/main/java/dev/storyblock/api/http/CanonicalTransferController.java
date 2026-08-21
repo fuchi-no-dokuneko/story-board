@@ -6,10 +6,16 @@ import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.contracts.CanonicalPackageException;
 import dev.storyblock.contracts.CanonicalRevision;
 import dev.storyblock.domain.Ids;
+import dev.storyblock.security.AccessKeyStore;
+import dev.storyblock.security.AuditAction;
+import dev.storyblock.security.AuditContext;
+import dev.storyblock.security.AuditEvent;
+import dev.storyblock.security.AuditResult;
 import dev.storyblock.storage.CanonicalImportResult;
 import dev.storyblock.storage.ExportJobResult;
 import dev.storyblock.storage.StoredArtifact;
 import dev.storyblock.storage.StoredExportJob;
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.time.Clock;
 import java.time.Instant;
@@ -20,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,29 +41,58 @@ public final class CanonicalTransferController {
     public static final String ARTIFACT_CODEC_HEADER = "X-Artifact-Codec";
 
     private final CanonicalTransferService transfers;
+    private final AccessKeyStore securityStore;
     private final Clock clock;
 
-    public CanonicalTransferController(CanonicalTransferService transfers, Clock clock) {
+    public CanonicalTransferController(
+            CanonicalTransferService transfers,
+            AccessKeyStore securityStore,
+            Clock clock
+    ) {
         this.transfers = java.util.Objects.requireNonNull(transfers, "transfers");
+        this.securityStore = java.util.Objects.requireNonNull(
+                securityStore, "securityStore"
+        );
         this.clock = java.util.Objects.requireNonNull(clock, "clock");
     }
 
     @PostMapping("/imports")
     ResponseEntity<Map<String, Object>> importNovel(
             @RequestBody byte[] requestBytes,
-            @RequestHeader(MutationPreconditionFilter.IDEMPOTENCY_KEY) String idempotencyKey
+            @RequestHeader(MutationPreconditionFilter.IDEMPOTENCY_KEY) String idempotencyKey,
+            Authentication authentication,
+            HttpServletRequest servletRequest
     ) {
         Map<String, Object> request = parseObject(requestBytes, "import request");
         requireKeys(request, Set.of("format", "document"), "import request");
         CanonicalExportFormat format = CanonicalExportFormat.fromCanonicalName(
                 string(request, "format", "import request")
         );
-        byte[] document = CanonicalJson.bytes(object(
+        Map<String, Object> documentObject = object(
                 request.get("document"), "import request.document"
-        ));
-        CanonicalImportResult result = transfers.importDocument(
-                format, document, idempotencyKey, Instant.now(clock)
         );
+        Ids.NovelId requestedNovel = importNovelId(format, documentObject);
+        AccessPrincipalSupport.requireNovel(authentication, requestedNovel);
+        byte[] document = CanonicalJson.bytes(documentObject);
+        Instant now = Instant.now(clock);
+        AuditContext auditContext = AccessPrincipalSupport.auditContext(
+                authentication, servletRequest, now
+        );
+        CanonicalImportResult result = transfers.importDocument(
+                format, document, idempotencyKey, now
+        );
+        securityStore.appendAuditEvent(AuditEvent.create(
+                auditContext,
+                result.novelId(),
+                AuditAction.CANONICAL_IMPORT,
+                result.head().revisionId().value(),
+                null,
+                result.head().revisionId(),
+                result.idempotentReplay()
+                        ? AuditResult.IDEMPOTENT : AuditResult.SUCCEEDED,
+                null,
+                result.head().contentHash()
+        ));
         Map<String, Object> body = novelHead(result);
         HttpStatus status = result.idempotentReplay() ? HttpStatus.OK : HttpStatus.CREATED;
         return ResponseEntity.status(status)
@@ -70,21 +106,41 @@ public final class CanonicalTransferController {
             @PathVariable String novelId,
             @RequestBody byte[] requestBytes,
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch,
-            @RequestHeader(MutationPreconditionFilter.IDEMPOTENCY_KEY) String idempotencyKey
+            @RequestHeader(MutationPreconditionFilter.IDEMPOTENCY_KEY) String idempotencyKey,
+            Authentication authentication,
+            HttpServletRequest servletRequest
     ) {
+        Ids.NovelId requestedNovel = new Ids.NovelId(novelId);
+        AccessPrincipalSupport.requireNovel(authentication, requestedNovel);
         Map<String, Object> request = parseObject(requestBytes, "export request");
         requireKeys(request, Set.of("revision_id", "format"), "export request");
         CanonicalExportFormat format = CanonicalExportFormat.fromCanonicalName(
                 string(request, "format", "export request")
         );
+        Instant now = Instant.now(clock);
+        AuditContext auditContext = AccessPrincipalSupport.auditContext(
+                authentication, servletRequest, now
+        );
         ExportJobResult result = transfers.requestExport(
-                new Ids.NovelId(novelId),
+                requestedNovel,
                 new Ids.RevisionId(string(request, "revision_id", "export request")),
                 unquoteEtag(ifMatch),
                 format,
                 idempotencyKey,
-                Instant.now(clock)
+                now
         );
+        securityStore.appendAuditEvent(AuditEvent.create(
+                auditContext,
+                requestedNovel,
+                AuditAction.CANONICAL_EXPORT,
+                result.job().jobId().value(),
+                null,
+                result.job().revision().revisionId(),
+                result.idempotentReplay()
+                        ? AuditResult.IDEMPOTENT : AuditResult.SUCCEEDED,
+                null,
+                result.job().revision().contentHash()
+        ));
         String statusUri = "/v1/jobs/" + result.job().jobId().value();
         return ResponseEntity.accepted()
                 .location(URI.create(statusUri))
@@ -136,6 +192,21 @@ public final class CanonicalTransferController {
                 "head_hash", result.head().contentHash(),
                 "schema_version", CanonicalRevision.SCHEMA_VERSION
         );
+    }
+
+    private static Ids.NovelId importNovelId(
+            CanonicalExportFormat format,
+            Map<String, Object> document
+    ) {
+        String value = switch (format) {
+            case REVISION -> string(document, "novel_id", "import request.document");
+            case PACKAGE -> string(
+                    object(document.get("manifest"), "import request.document.manifest"),
+                    "novel_id",
+                    "import request.document.manifest"
+            );
+        };
+        return new Ids.NovelId(value);
     }
 
     private static String quotedEtag(String hash) {

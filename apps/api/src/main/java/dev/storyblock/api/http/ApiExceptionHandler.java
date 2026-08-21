@@ -1,16 +1,22 @@
 package dev.storyblock.api.http;
 
 import dev.storyblock.application.CommitRejectedException;
+import dev.storyblock.security.AccessAuthenticationException;
+import dev.storyblock.security.AccessKeyRequestConflictException;
+import dev.storyblock.security.CrossNovelAccessException;
+import dev.storyblock.security.MissingAccessKeyException;
+import dev.storyblock.security.SecretAlreadyIssuedException;
 import dev.storyblock.storage.IdempotencyConflictException;
-import dev.storyblock.storage.MissingNovelException;
-import dev.storyblock.storage.MissingRevisionException;
 import dev.storyblock.storage.MissingArtifactException;
 import dev.storyblock.storage.MissingExportJobException;
+import dev.storyblock.storage.MissingNovelException;
+import dev.storyblock.storage.MissingRevisionException;
 import dev.storyblock.storage.NovelConflictException;
 import dev.storyblock.storage.StaleHeadException;
 import dev.storyblock.storage.StorageException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,6 +31,14 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public final class ApiExceptionHandler {
+    private final boolean hideCrossNovel;
+
+    public ApiExceptionHandler(
+            @Value("${storyblock.security.hide-cross-novel:true}") boolean hideCrossNovel
+    ) {
+        this.hideCrossNovel = hideCrossNovel;
+    }
+
     @ExceptionHandler(ApiFailureException.class)
     ResponseEntity<Map<String, Object>> apiFailure(
             ApiFailureException failure,
@@ -95,7 +109,8 @@ public final class ApiExceptionHandler {
             MissingNovelException.class,
             MissingRevisionException.class,
             MissingExportJobException.class,
-            MissingArtifactException.class
+            MissingArtifactException.class,
+            MissingAccessKeyException.class
     })
     ResponseEntity<Map<String, Object>> missingResource(
             RuntimeException failure,
@@ -106,6 +121,60 @@ public final class ApiExceptionHandler {
                 "RESOURCE_NOT_FOUND",
                 "Resource not found",
                 "resource-not-found",
+                failure.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(CrossNovelAccessException.class)
+    ResponseEntity<Map<String, Object>> crossNovel(
+            CrossNovelAccessException ignored,
+            HttpServletRequest request
+    ) {
+        ApiFailureException failure = hideCrossNovel
+                ? ApiFailureException.of(
+                        HttpStatus.NOT_FOUND,
+                        "RESOURCE_NOT_FOUND",
+                        "Resource not found",
+                        "resource-not-found",
+                        "The requested resource does not exist."
+                )
+                : ApiFailureException.of(
+                        HttpStatus.FORBIDDEN,
+                        "NOVEL_ACCESS_DENIED",
+                        "Novel access denied",
+                        "novel-access-denied",
+                        "The credential cannot access the requested novel."
+                );
+        return response(request, failure);
+    }
+
+    @ExceptionHandler(AccessAuthenticationException.class)
+    ResponseEntity<Map<String, Object>> invalidCredential(
+            AccessAuthenticationException ignored,
+            HttpServletRequest request
+    ) {
+        return response(request, ApiFailureException.of(
+                HttpStatus.UNAUTHORIZED,
+                "INVALID_BEARER_CREDENTIAL",
+                "Invalid bearer credential",
+                "invalid-bearer-credential",
+                "The bearer credential is invalid, expired, or revoked."
+        ));
+    }
+
+    @ExceptionHandler({
+            SecretAlreadyIssuedException.class,
+            AccessKeyRequestConflictException.class
+    })
+    ResponseEntity<Map<String, Object>> accessKeyConflict(
+            RuntimeException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, ApiFailureException.of(
+                HttpStatus.CONFLICT,
+                "ACCESS_KEY_CONFLICT",
+                "Access key conflict",
+                "access-key-conflict",
                 failure.getMessage()
         ));
     }

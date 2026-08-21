@@ -12,6 +12,13 @@ import dev.storyblock.domain.NarrativeChapter;
 import dev.storyblock.domain.NarrativeScene;
 import dev.storyblock.domain.OrderKey;
 import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.security.AccessKeyInsertResult;
+import dev.storyblock.security.AccessKeyStore;
+import dev.storyblock.security.AuditAction;
+import dev.storyblock.security.AuditContext;
+import dev.storyblock.security.AuditEvent;
+import dev.storyblock.security.AuditResult;
+import dev.storyblock.security.StoredAccessKey;
 import dev.storyblock.storage.BlockTombstone;
 import dev.storyblock.storage.CanonicalImportRequest;
 import dev.storyblock.storage.CanonicalImportResult;
@@ -46,7 +53,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
+public final class SqliteRevisionStore implements RevisionStore, AccessKeyStore, AutoCloseable {
     private final SqliteDatabase database;
     private final CheckpointPolicy checkpointPolicy;
     private final CommitFaultInjector faultInjector;
@@ -351,10 +358,109 @@ public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
     }
 
     @Override
+    public AccessKeyInsertResult issueAccessKey(
+            StoredAccessKey key,
+            String idempotencyKey,
+            String requestHash,
+            AuditContext auditContext
+    ) {
+        Objects.requireNonNull(key, "key");
+        Objects.requireNonNull(auditContext, "auditContext");
+        return write(connection -> SqliteSecurityStore.issueAccessKey(
+                connection, key, idempotencyKey, requestHash, auditContext
+        ));
+    }
+
+    @Override
+    public Optional<StoredAccessKey> findAccessKey(Ids.AccessKeyId keyId) {
+        Objects.requireNonNull(keyId, "keyId");
+        return read(connection -> SqliteSecurityStore.findAccessKey(connection, keyId));
+    }
+
+    @Override
+    public boolean revokeAccessKey(
+            Ids.AccessKeyId keyId,
+            Ids.NovelId expectedNovelId,
+            AuditContext auditContext
+    ) {
+        Objects.requireNonNull(keyId, "keyId");
+        Objects.requireNonNull(expectedNovelId, "expectedNovelId");
+        Objects.requireNonNull(auditContext, "auditContext");
+        return write(connection -> SqliteSecurityStore.revokeAccessKey(
+                connection, keyId, expectedNovelId, auditContext
+        ));
+    }
+
+    @Override
+    public boolean touchAccessKeyLastUsed(
+            Ids.AccessKeyId keyId,
+            Instant usedAt,
+            Instant staleBefore
+    ) {
+        Objects.requireNonNull(keyId, "keyId");
+        Objects.requireNonNull(usedAt, "usedAt");
+        Objects.requireNonNull(staleBefore, "staleBefore");
+        return write(connection -> SqliteSecurityStore.touchAccessKeyLastUsed(
+                connection, keyId, usedAt, staleBefore
+        ));
+    }
+
+    @Override
+    public void appendAuditEvent(AuditEvent event) {
+        Objects.requireNonNull(event, "event");
+        write(connection -> {
+            SqliteSecurityStore.insertAuditEvent(connection, event);
+            return null;
+        });
+    }
+
+    @Override
+    public List<AuditEvent> listAuditEvents(Ids.NovelId novelId) {
+        Objects.requireNonNull(novelId, "novelId");
+        return read(connection -> SqliteSecurityStore.listAuditEvents(
+                connection, novelId
+        ));
+    }
+
+    @Override
     public CommitResult commitCas(CommitRequest request) {
         Objects.requireNonNull(request, "request");
+        return commitCas(
+                request,
+                AuditContext.system(
+                        "req_internal_" + request.operation().context().operationId().value(),
+                        request.candidate().createdAt()
+                )
+        );
+    }
+
+    @Override
+    public CommitResult commitCas(CommitRequest request, AuditContext auditContext) {
+        Objects.requireNonNull(request, "request");
+        Objects.requireNonNull(auditContext, "auditContext");
         verifyRequestHashes(request);
-        return write(connection -> commit(connection, request));
+        return write(connection -> commit(connection, request, auditContext));
+    }
+
+    @Override
+    public void recordCommitReplayAudit(
+            StoredOperation operation,
+            AuditContext auditContext
+    ) {
+        Objects.requireNonNull(operation, "operation");
+        Objects.requireNonNull(auditContext, "auditContext");
+        write(connection -> {
+            SqliteSecurityStore.insertAuditEvent(connection, commitAuditEvent(
+                    operation.operation().context().novelId(),
+                    operation.operation().context().operationId(),
+                    operation.resultRevisionId(),
+                    operation.operationHash(),
+                    operation.resultHash(),
+                    AuditResult.IDEMPOTENT,
+                    auditContext
+            ));
+            return null;
+        });
     }
 
     @Override
@@ -372,7 +478,11 @@ public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
         database.close();
     }
 
-    private CommitResult commit(Connection connection, CommitRequest request) throws SQLException {
+    private CommitResult commit(
+            Connection connection,
+            CommitRequest request,
+            AuditContext auditContext
+    ) throws SQLException {
         Ids.NovelId novelId = request.operation().context().novelId();
         Optional<StoredOperation> prior = findByIdempotencyKey(
                 connection, novelId, request.operation().context().idempotencyKey()
@@ -387,13 +497,24 @@ public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
                         request.operationHash()
                 );
             }
-            return new CommitResult(
+            CommitResult result = new CommitResult(
                     new RevisionRef(
                             stored.resultRevisionId(), stored.sequence(), stored.resultHash()
                     ),
                     stored.operation().context().operationId(),
                     true
             );
+            SqliteSecurityStore.insertAuditEvent(connection, commitAuditEvent(
+                    novelId,
+                    stored.operation().context().operationId(),
+                    stored.resultRevisionId(),
+                    stored.operationHash(),
+                    stored.resultHash(),
+                    AuditResult.IDEMPOTENT,
+                    auditContext
+            ));
+            faultInjector.after(CommitStage.AFTER_AUDIT);
+            return result;
         }
 
         RevisionRef actualHead = requireHead(connection, novelId);
@@ -450,10 +571,42 @@ public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
                 );
             }
         }
+        SqliteSecurityStore.insertAuditEvent(connection, commitAuditEvent(
+                novelId,
+                request.operation().context().operationId(),
+                request.candidate().id(),
+                request.operationHash(),
+                request.candidateHash(),
+                AuditResult.SUCCEEDED,
+                auditContext
+        ));
+        faultInjector.after(CommitStage.AFTER_AUDIT);
         return new CommitResult(
                 new RevisionRef(request.candidate().id(), sequence, request.candidateHash()),
                 request.operation().context().operationId(),
                 false
+        );
+    }
+
+    private static AuditEvent commitAuditEvent(
+            Ids.NovelId novelId,
+            Ids.OperationId operationId,
+            Ids.RevisionId revisionId,
+            String operationHash,
+            String contentHash,
+            AuditResult result,
+            AuditContext context
+    ) {
+        return AuditEvent.create(
+                context,
+                novelId,
+                AuditAction.COMMIT,
+                operationId.value(),
+                operationId,
+                revisionId,
+                result,
+                operationHash,
+                contentHash
         );
     }
 

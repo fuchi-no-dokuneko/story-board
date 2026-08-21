@@ -3,6 +3,7 @@ package dev.storyblock.storage;
 import dev.storyblock.contracts.CanonicalNovelPackage;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.security.AuditContext;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +46,10 @@ public interface RevisionStore {
     StoredArtifact getArtifact(Ids.ArtifactId artifactId);
 
     CommitResult commitCas(CommitRequest request);
+
+    CommitResult commitCas(CommitRequest request, AuditContext auditContext);
+
+    void recordCommitReplayAudit(StoredOperation operation, AuditContext auditContext);
 
     long revisionCount(Ids.NovelId novelId);
 

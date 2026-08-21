@@ -1,5 +1,9 @@
 package dev.storyblock.api.http;
 
+import dev.storyblock.application.CanonicalTransferService;
+import dev.storyblock.security.AccessKeyService;
+import java.time.Clock;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -8,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 
 @Configuration
 public class ApiSecurityConfiguration {
@@ -16,8 +21,20 @@ public class ApiSecurityConfiguration {
     @Bean
     SecurityFilterChain apiSecurityFilterChain(
             HttpSecurity http,
-            ApiProblemWriter problemWriter
+            ApiProblemWriter problemWriter,
+            AccessKeyService accessKeys,
+            CanonicalTransferService transfers,
+            Clock clock,
+            @Value("${storyblock.security.owner-token:}") String ownerToken,
+            @Value("${storyblock.security.hide-cross-novel:true}") boolean hideCrossNovel
     ) throws Exception {
+        AccessKeyAuthenticationFilter authenticationFilter =
+                new AccessKeyAuthenticationFilter(
+                        accessKeys, clock, ownerToken, problemWriter
+                );
+        NovelBoundaryFilter boundaryFilter = new NovelBoundaryFilter(
+                transfers, accessKeys, problemWriter, hideCrossNovel
+        );
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
@@ -91,7 +108,9 @@ public class ApiSecurityConfiguration {
                 .addFilterAfter(
                         new MutationPreconditionFilter(problemWriter),
                         AuthorizationFilter.class
-                );
+                )
+                .addFilterBefore(authenticationFilter, AnonymousAuthenticationFilter.class)
+                .addFilterAfter(boundaryFilter, AccessKeyAuthenticationFilter.class);
         return http.build();
     }
 

@@ -197,6 +197,43 @@ class OpenApiContractTest {
     }
 
     @Test
+    void accessKeyContractDocumentsOpaqueSecretsAndExactScopes() {
+        Map<String, Object> components = map(document.get("components"));
+        Map<String, Object> schemas = map(components.get("schemas"));
+        Map<String, Object> requestProperties = map(
+                map(schemas.get("AccessKeyRequest")).get("properties")
+        );
+        Map<String, Object> scopeItems = map(
+                map(requestProperties.get("scopes")).get("items")
+        );
+        assertEquals(
+                List.of(
+                        "novel:read", "novel:analyze", "novel:propose",
+                        "novel:commit", "novel:admin", "style:analyze",
+                        "style:admin", "rewrite:propose", "monitor:submit",
+                        "worker:execute"
+                ),
+                list(scopeItems.get("enum"))
+        );
+
+        Map<String, Object> createdProperties = map(
+                map(schemas.get("AccessKeyCreated")).get("properties")
+        );
+        Map<String, Object> secret = map(createdProperties.get("secret"));
+        assertEquals(Boolean.TRUE, secret.get("readOnly"));
+        assertEquals(
+                "^nv_key_[0-9a-f-]{36}\\.[A-Za-z0-9_-]{43}$",
+                secret.get("pattern")
+        );
+
+        Map<String, Object> parameters = map(components.get("parameters"));
+        assertEquals(
+                "^key_[0-9a-f-]{36}$",
+                map(map(parameters.get("KeyId")).get("schema")).get("pattern")
+        );
+    }
+
+    @Test
     void everyLocalReferenceResolves() {
         walkReferences(document, "#");
     }

@@ -14,5 +14,9 @@
       <groupId>dev.storyblock</groupId>
       <artifactId>storyblock-domain</artifactId>
     </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-contracts</artifactId>
+    </dependency>
   </dependencies>
 </project>

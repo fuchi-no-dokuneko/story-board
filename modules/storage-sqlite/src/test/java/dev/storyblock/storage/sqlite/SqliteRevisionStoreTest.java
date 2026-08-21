@@ -17,6 +17,13 @@ import dev.storyblock.contracts.NarrativeCanonicalMapper;
 import dev.storyblock.domain.EditOperation;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.security.AccessKeyService;
+import dev.storyblock.security.AccessScope;
+import dev.storyblock.security.AuditAction;
+import dev.storyblock.security.AuditContext;
+import dev.storyblock.security.AuditEvent;
+import dev.storyblock.security.AuditResult;
+import dev.storyblock.security.IssueAccessKeyCommand;
 import dev.storyblock.storage.CommitRequest;
 import dev.storyblock.storage.CommitResult;
 import dev.storyblock.storage.IdempotencyConflictException;
@@ -26,6 +33,7 @@ import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -121,6 +129,77 @@ class SqliteRevisionStoreTest {
     }
 
     @Test
+    void successfulAndIdempotentCommitsWriteRedactedAudits() throws Exception {
+        Path path = temporaryDirectory.resolve("commit-audit.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        Instant issuedAt = Instant.parse("2026-08-21T12:00:00Z");
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            var issued = new AccessKeyService(store, new byte[32]).issue(
+                    new IssueAccessKeyCommand(
+                            genesis.novel().id(),
+                            "audit-actor",
+                            Set.of(AccessScope.NOVEL_COMMIT),
+                            issuedAt.plusSeconds(3600),
+                            "issue-audit-key",
+                            new AuditContext("req_issue_audit", "owner", null, issuedAt)
+                    )
+            );
+            EditOperation operation = RevisionStoreTestFixture.replace(
+                    genesis,
+                    "commit-audit-key",
+                    "Audit prose must remain outside event rows."
+            );
+            CommitService commits = new CommitService(store);
+
+            CommitResult first = commits.commit(
+                    operation,
+                    Ids.RevisionId.create(),
+                    issuedAt.plusSeconds(60),
+                    new AuditContext(
+                            "req_commit_first",
+                            issued.key().actorId(),
+                            issued.key().keyId(),
+                            issuedAt.plusSeconds(60)
+                    )
+            );
+            CommitResult retry = commits.commit(
+                    operation,
+                    Ids.RevisionId.create(),
+                    issuedAt.plusSeconds(120),
+                    new AuditContext(
+                            "req_commit_retry",
+                            issued.key().actorId(),
+                            issued.key().keyId(),
+                            issuedAt.plusSeconds(120)
+                    )
+            );
+
+            List<AuditEvent> commitEvents = store.listAuditEvents(genesis.novel().id())
+                    .stream()
+                    .filter(event -> event.action() == AuditAction.COMMIT)
+                    .toList();
+            assertEquals(2, commitEvents.size());
+            assertEquals(AuditResult.SUCCEEDED, commitEvents.get(0).result());
+            assertEquals(AuditResult.IDEMPOTENT, commitEvents.get(1).result());
+            assertEquals("req_commit_first", commitEvents.get(0).requestId());
+            assertEquals("req_commit_retry", commitEvents.get(1).requestId());
+            for (AuditEvent event : commitEvents) {
+                assertEquals("audit-actor", event.actorId());
+                assertEquals(issued.key().keyId(), event.actorKeyId());
+                assertEquals(genesis.novel().id(), event.novelId());
+                assertEquals(first.operationId(), event.operationId());
+                assertEquals(first.revision().revisionId(), event.revisionId());
+                assertEquals(71, event.operationHash().length());
+                assertEquals(71, event.contentHash().length());
+                assertEquals(71, event.eventHash().length());
+                assertFalse(event.toString().contains("Audit prose"));
+            }
+            assertTrue(retry.idempotentReplay());
+        }
+    }
+
+    @Test
     void deterministicValidationFailureNeverEntersTheWriteTransaction() throws Exception {
         Path path = temporaryDirectory.resolve("rejected.db");
         RevisionManifest genesis = RevisionStoreTestFixture.genesis();
@@ -180,6 +259,7 @@ class SqliteRevisionStoreTest {
             assertEquals(0, count(path, "operations"), stage.name());
             assertEquals(1, count(path, "checkpoints"), stage.name());
             assertEquals(1, count(path, "head_block_projection"), stage.name());
+            assertEquals(0, count(path, "audit_events"), stage.name());
         }
     }
 
@@ -367,7 +447,8 @@ class SqliteRevisionStoreTest {
 
     private static long count(Path path, String table) throws Exception {
         if (!List.of(
-                "revisions", "operations", "checkpoints", "head_block_projection"
+                "revisions", "operations", "checkpoints", "head_block_projection",
+                "audit_events"
         ).contains(table)) {
             throw new IllegalArgumentException("Unexpected test table " + table);
         }
