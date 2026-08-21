@@ -5,6 +5,7 @@ import dev.storyblock.application.CommitService;
 import dev.storyblock.application.DetectorService;
 import dev.storyblock.application.MonitorService;
 import dev.storyblock.application.RenderService;
+import dev.storyblock.application.StyleProfileService;
 import dev.storyblock.security.AccessKeyService;
 import dev.storyblock.storage.sqlite.SqliteRevisionStore;
 import java.io.IOException;
@@ -50,6 +51,11 @@ public class ApiStorageConfiguration {
     @Bean
     MonitorService monitorService(SqliteRevisionStore store) {
         return new MonitorService(store, store);
+    }
+
+    @Bean
+    StyleProfileService styleProfileService(SqliteRevisionStore store) {
+        return new StyleProfileService(store);
     }
 
     @Bean

@@ -177,4 +177,34 @@ public final class Ids {
             return new MonitorProposalId(StableIds.generate("mpr"));
         }
     }
+
+    public record StyleProfileId(String value) {
+        public StyleProfileId {
+            value = StableIds.require(value, "spf");
+        }
+
+        public static StyleProfileId create() {
+            return new StyleProfileId(StableIds.generate("spf"));
+        }
+    }
+
+    public record StyleProfileVersionId(String value) {
+        public StyleProfileVersionId {
+            value = StableIds.require(value, "spv");
+        }
+
+        public static StyleProfileVersionId create() {
+            return new StyleProfileVersionId(StableIds.generate("spv"));
+        }
+    }
+
+    public record StyleLifecycleEventId(String value) {
+        public StyleLifecycleEventId {
+            value = StableIds.require(value, "sle");
+        }
+
+        public static StyleLifecycleEventId create() {
+            return new StyleLifecycleEventId(StableIds.generate("sle"));
+        }
+    }
 }

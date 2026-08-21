@@ -13,7 +13,8 @@ final class RevisionStoreSchema {
             "/db/migration/V001__immutable_revision_store.sql",
             "/db/migration/V002__canonical_transfer.sql",
             "/db/migration/V003__access_keys_and_audit.sql",
-            "/db/migration/V004__monitor_runs.sql"
+            "/db/migration/V004__monitor_runs.sql",
+            "/db/migration/V005__style_profiles.sql"
     );
 
     private RevisionStoreSchema() {

@@ -22,6 +22,14 @@ import dev.storyblock.security.StoredAccessKey;
 import dev.storyblock.monitor.MonitorSaveResult;
 import dev.storyblock.monitor.MonitorStore;
 import dev.storyblock.monitor.StoredMonitorRun;
+import dev.storyblock.style.CreateStyleProfileCommand;
+import dev.storyblock.style.CreateStyleProfileVersionCommand;
+import dev.storyblock.style.StyleProfile;
+import dev.storyblock.style.StyleProfileSaveResult;
+import dev.storyblock.style.StyleProfileStore;
+import dev.storyblock.style.StyleProfileVersionSaveResult;
+import dev.storyblock.style.StyleProfileVersionView;
+import dev.storyblock.style.TransitionStyleProfileVersionCommand;
 import dev.storyblock.storage.BlockTombstone;
 import dev.storyblock.storage.CanonicalImportRequest;
 import dev.storyblock.storage.CanonicalImportResult;
@@ -57,7 +65,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class SqliteRevisionStore implements
-        RevisionStore, AccessKeyStore, MonitorStore, AutoCloseable {
+        RevisionStore, AccessKeyStore, MonitorStore, StyleProfileStore, AutoCloseable {
     private final SqliteDatabase database;
     private final CheckpointPolicy checkpointPolicy;
     private final CommitFaultInjector faultInjector;
@@ -481,6 +489,54 @@ public final class SqliteRevisionStore implements
         Objects.requireNonNull(novelId, "novelId");
         Objects.requireNonNull(runId, "runId");
         return read(connection -> SqliteMonitorStore.get(connection, novelId, runId));
+    }
+
+    @Override
+    public StyleProfileSaveResult createStyleProfile(CreateStyleProfileCommand command) {
+        Objects.requireNonNull(command, "command");
+        return write(connection -> SqliteStyleProfileStore.createProfile(
+                connection, command
+        ));
+    }
+
+    @Override
+    public StyleProfile getStyleProfile(Ids.StyleProfileId profileId) {
+        Objects.requireNonNull(profileId, "profileId");
+        return read(connection -> SqliteStyleProfileStore.getProfile(
+                connection, profileId
+        ));
+    }
+
+    @Override
+    public StyleProfileVersionSaveResult createStyleProfileVersion(
+            CreateStyleProfileVersionCommand command
+    ) {
+        Objects.requireNonNull(command, "command");
+        return write(connection -> SqliteStyleProfileStore.createVersion(
+                connection, command
+        ));
+    }
+
+    @Override
+    public StyleProfileVersionView getStyleProfileVersion(
+            Ids.StyleProfileId profileId,
+            Ids.StyleProfileVersionId versionId
+    ) {
+        Objects.requireNonNull(profileId, "profileId");
+        Objects.requireNonNull(versionId, "versionId");
+        return read(connection -> SqliteStyleProfileStore.getVersion(
+                connection, profileId, versionId
+        ));
+    }
+
+    @Override
+    public StyleProfileVersionSaveResult transitionStyleProfileVersion(
+            TransitionStyleProfileVersionCommand command
+    ) {
+        Objects.requireNonNull(command, "command");
+        return write(connection -> SqliteStyleProfileStore.transition(
+                connection, command
+        ));
     }
 
     @Override

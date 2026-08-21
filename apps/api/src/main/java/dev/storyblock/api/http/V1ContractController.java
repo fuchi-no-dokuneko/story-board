@@ -87,21 +87,6 @@ public final class V1ContractController {
         return unavailable();
     }
 
-    @PostMapping("/style-profiles")
-    ResponseEntity<Map<String, Object>> createStyleProfile(
-            @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
-    @PostMapping("/style-profiles/{profileId}/versions")
-    ResponseEntity<Map<String, Object>> createStyleProfileVersion(
-            @PathVariable String profileId,
-            @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
     @PostMapping("/internal/jobs/claims")
     ResponseEntity<Map<String, Object>> claimJob(@RequestBody JsonNode request) {
         return unavailable();

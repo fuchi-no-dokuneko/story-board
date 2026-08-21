@@ -46,6 +46,9 @@ commits, adjacent metadata detection, and redacted audit events are also
 implemented. Bounded monitor packets, immutable finding/proposal submission,
 and stale-output invalidation are documented in
 [`docs/monitoring/monitor-submission.md`](docs/monitoring/monitor-submission.md).
+Immutable style profiles, explicit baseline promotion, and versioned feature
+channels are implemented and documented in
+[`docs/style/style-profiles-and-features.md`](docs/style/style-profiles-and-features.md).
 Services assigned to later ADRs return a typed `503` until
 installed. The
 transfer format and recovery guarantees are documented in

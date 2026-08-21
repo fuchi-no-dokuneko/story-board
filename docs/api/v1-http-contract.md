@@ -11,7 +11,9 @@ All documented routes are mapped and protected by their declared scope.
 Canonical import, export submission, export-job status, artifact download,
 deterministic render, adjacent metadata detection, commit, and access-key
 lifecycle routes have concrete storage-backed handlers. Monitor packet,
-submission, and stale-status routes are also storage-backed. For a route whose
+submission, and stale-status routes are also storage-backed. Style profile,
+immutable version, and lifecycle transition routes are storage-backed as well.
+For a route whose
 owning application service is not implemented yet, a correctly authenticated
 and well-formed request receives
 `503 application/problem+json` with
@@ -38,8 +40,8 @@ Wildcard `If-Match: *` is accepted only for collection creation at:
 
 Other mutations must identify the exact current resource version. An owning
 service maps a stale but valid ETag to `412` and returns the current revision ID
-and hash. Request bodies are limited to 2 MiB for both fixed-length and chunked
-requests.
+and hash, or the current style resource ETag for a style lifecycle conflict.
+Request bodies are limited to 2 MiB for both fixed-length and chunked requests.
 
 ## Response Contracts
 
@@ -74,6 +76,15 @@ an evidence-bound finding or inert proposed operation. `GET
 derives stale state without rebasing. See
 [`../monitoring/monitor-submission.md`](../monitoring/monitor-submission.md).
 
+`POST /v1/style-profiles` creates an immutable novel-scoped profile. `POST
+/v1/style-profiles/{profileId}/versions` creates an immutable `DRAFT` baseline;
+it does not approve it. The transition resource enforces
+`DRAFT -> CALIBRATING -> READY -> DEPRECATED`, records the authenticated actor,
+and requires an explicit acknowledgement before generated or mixed corpus can
+be promoted to `READY`. Profile and version GETs enforce the stored novel
+boundary. See
+[`../style/style-profiles-and-features.md`](../style/style-profiles-and-features.md).
+
 The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
 `409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.
 
@@ -86,9 +97,10 @@ dependencies have been bootstrapped:
 ./mvnw -o -pl apps/api -am test
 ```
 
-The tests parse every local OpenAPI reference, compare all 25 required routes,
+The tests parse every local OpenAPI reference, compare all 28 required routes,
 exercise each remaining scaffold Spring mapping with its required scope, verify
 all status-policy entries, and cover real bearer authentication, object-level
 novel isolation, problem details, request IDs, ETags, idempotency, wildcard
-restrictions, body limits, deterministic rendering, commits, and a complete
-detector and monitor runs, and an import/export/job/artifact round trip.
+restrictions, body limits, deterministic rendering, commits, complete detector
+and monitor runs, the style profile promotion lifecycle, and an
+import/export/job/artifact round trip.

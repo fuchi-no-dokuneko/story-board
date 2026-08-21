@@ -7,6 +7,10 @@ import dev.storyblock.security.CrossNovelAccessException;
 import dev.storyblock.security.MissingAccessKeyException;
 import dev.storyblock.security.SecretAlreadyIssuedException;
 import dev.storyblock.monitor.MissingMonitorRunException;
+import dev.storyblock.style.MissingStyleProfileException;
+import dev.storyblock.style.MissingStyleProfileVersionException;
+import dev.storyblock.style.StyleLifecycleConflictException;
+import dev.storyblock.style.StyleStatusPreconditionException;
 import dev.storyblock.storage.IdempotencyConflictException;
 import dev.storyblock.storage.MissingArtifactException;
 import dev.storyblock.storage.MissingExportJobException;
@@ -112,7 +116,9 @@ public final class ApiExceptionHandler {
             MissingExportJobException.class,
             MissingArtifactException.class,
             MissingAccessKeyException.class,
-            MissingMonitorRunException.class
+            MissingMonitorRunException.class,
+            MissingStyleProfileException.class,
+            MissingStyleProfileVersionException.class
     })
     ResponseEntity<Map<String, Object>> missingResource(
             RuntimeException failure,
@@ -123,6 +129,36 @@ public final class ApiExceptionHandler {
                 "RESOURCE_NOT_FOUND",
                 "Resource not found",
                 "resource-not-found",
+                failure.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(StyleStatusPreconditionException.class)
+    ResponseEntity<Map<String, Object>> staleStyleStatus(
+            StyleStatusPreconditionException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, new ApiFailureException(
+                HttpStatus.PRECONDITION_FAILED,
+                "STYLE_STATUS_CONFLICT",
+                "Style status conflict",
+                "style-status-conflict",
+                failure.getMessage(),
+                Map.of("current_etag", failure.currentHash()),
+                null
+        ));
+    }
+
+    @ExceptionHandler(StyleLifecycleConflictException.class)
+    ResponseEntity<Map<String, Object>> styleLifecycleConflict(
+            StyleLifecycleConflictException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, ApiFailureException.of(
+                HttpStatus.CONFLICT,
+                "STYLE_LIFECYCLE_CONFLICT",
+                "Style lifecycle conflict",
+                "style-lifecycle-conflict",
                 failure.getMessage()
         ));
     }

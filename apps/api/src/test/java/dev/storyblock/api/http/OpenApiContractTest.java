@@ -40,7 +40,10 @@ class OpenApiContractTest {
             "POST /rewrite-proposals",
             "GET /rewrite-proposals/{proposalId}",
             "POST /style-profiles",
+            "GET /style-profiles/{profileId}",
             "POST /style-profiles/{profileId}/versions",
+            "GET /style-profiles/{profileId}/versions/{versionId}",
+            "POST /style-profiles/{profileId}/versions/{versionId}/transitions",
             "GET /jobs/{jobId}",
             "GET /artifacts/{artifactId}",
             "POST /novels/{novelId}/exports",
@@ -166,6 +169,16 @@ class OpenApiContractTest {
         assertStrongEtag("POST /novels/{novelId}/monitor-runs", "200");
         assertStrongEtag("POST /novels/{novelId}/monitor-runs", "201");
         assertStrongEtag("GET /novels/{novelId}/monitor-runs/{monitorRunId}", "200");
+        assertStrongEtag("POST /style-profiles", "200");
+        assertStrongEtag("POST /style-profiles", "201");
+        assertStrongEtag("GET /style-profiles/{profileId}", "200");
+        assertStrongEtag("POST /style-profiles/{profileId}/versions", "200");
+        assertStrongEtag("POST /style-profiles/{profileId}/versions", "201");
+        assertStrongEtag("GET /style-profiles/{profileId}/versions/{versionId}", "200");
+        assertStrongEtag(
+                "POST /style-profiles/{profileId}/versions/{versionId}/transitions",
+                "200"
+        );
         assertStrongEtag("POST /novels/{novelId}/commits", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "201");
         assertStrongEtag("GET /artifacts/{artifactId}", "200");
@@ -338,6 +351,35 @@ class OpenApiContractTest {
         assertTrue(schemas.containsKey("MonitorEvidence"));
         assertTrue(schemas.containsKey("MonitorFindingOutput"));
         assertTrue(schemas.containsKey("MonitorProposedOperationOutput"));
+    }
+
+    @Test
+    void styleContractMakesPromotionExplicitAndKlDiagnosticOnly() {
+        assertEquals(
+                List.of("style:admin"),
+                list(operation("POST /style-profiles/{profileId}/versions/{versionId}/transitions")
+                        .get("x-required-scopes"))
+        );
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        Map<String, Object> transition = map(schemas.get("StyleProfileTransitionRequest"));
+        assertTrue(strings(transition.get("required"))
+                .contains("confirm_generated_corpus_promotion"));
+
+        Map<String, Object> featureSet = map(schemas.get("StyleFeatureSet"));
+        assertEquals(5, map(map(featureSet.get("properties")).get("channels"))
+                .get("minItems"));
+        Map<String, Object> report = map(schemas.get("StyleDistanceReport"));
+        assertEquals(
+                Boolean.TRUE,
+                map(map(report.get("properties")).get("token_kl_diagnostic_only"))
+                        .get("const")
+        );
+        Object primaryMetrics = map(map(map(
+                schemas.get("StyleChannelDistance")
+        ).get("properties")).get("primary_metric")).get("enum");
+        assertTrue(strings(primaryMetrics).stream().noneMatch(metric ->
+                metric.contains("kl")
+        ));
     }
 
     @Test

@@ -17,11 +17,21 @@ import dev.storyblock.contracts.CanonicalExportFormat;
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.contracts.CanonicalNovelPackage;
 import dev.storyblock.contracts.CanonicalRevision;
+import dev.storyblock.contracts.NarrativeCanonicalMapper;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.OrderKey;
 import dev.storyblock.security.AuditAction;
 import dev.storyblock.security.AuditResult;
 import dev.storyblock.storage.sqlite.SqliteRevisionStore;
+import dev.storyblock.style.StyleCorpusSource;
+import dev.storyblock.style.StyleCorpusSourceKind;
+import dev.storyblock.style.StyleFeatureAnalyzer;
+import dev.storyblock.style.StyleFeatureContract;
+import dev.storyblock.style.StyleMaskingLexicon;
+import dev.storyblock.style.StyleProfileScope;
+import dev.storyblock.style.StyleProfileVersionContent;
+import dev.storyblock.style.StyleScopeKind;
+import dev.storyblock.style.StyleWindowConfiguration;
 import dev.storyblock.validator.EvidenceSpans;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -800,6 +810,167 @@ class ApiHttpContractTest {
         });
     }
 
+    @Test
+    void styleProfileHttpLifecycleUsesScopedAuthEtagsAndExplicitPromotion()
+            throws Exception {
+        CanonicalRevision revision = genesis();
+        importAsOwner(revision, "style-http-import");
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String token = stringField(issueAsOwner(
+                revision,
+                "style-http-key",
+                List.of("novel:read", "style:admin")
+        ), "secret");
+        StyleProfileScope scope = new StyleProfileScope(
+                new Ids.NovelId(novelId), StyleScopeKind.NOVEL, null
+        );
+        byte[] profileBody = CanonicalJson.bytes(Map.of(
+                "name", "HTTP style baseline",
+                "scope", scope.canonicalValue(),
+                "provenance", "Generated fixture requiring explicit approval"
+        ));
+
+        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-profile")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(profileBody))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.scope.novel_id").value(novelId))
+                .andReturn();
+        Map<String, Object> profile = object(profileResult);
+        String profileId = stringField(profile, "profile_id");
+        String profileEtag = profileResult.getResponse().getHeader(HttpHeaders.ETAG);
+
+        var manifest = NarrativeCanonicalMapper.fromCanonical(revision);
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                manifest.liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleProfileVersionContent versionContent = new StyleProfileVersionContent(
+                scope,
+                List.of(new StyleCorpusSource(
+                        "generated-http-corpus",
+                        features.sourceHash(),
+                        StyleCorpusSourceKind.GENERATED,
+                        "HTTP integration fixture",
+                        "test-only",
+                        "test-owner"
+                )),
+                features,
+                StyleWindowConfiguration.defaults(),
+                Map.of()
+        );
+        MvcResult versionResult = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions", profileId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-version")
+                        .header(HttpHeaders.IF_MATCH, profileEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(versionContent.canonicalValue())))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(jsonPath("$.state").value("draft"))
+                .andExpect(jsonPath("$.can_gate_rewrites").value(false))
+                .andReturn();
+        Map<String, Object> versionView = object(versionResult);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> storedVersion = (Map<String, Object>)
+                versionView.get("profile_version");
+        String versionId = stringField(storedVersion, "version_id");
+
+        MvcResult calibrating = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-calibrating")
+                        .header(HttpHeaders.IF_MATCH,
+                                versionResult.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "target_state", "calibrating",
+                                "reason", "Calibration started",
+                                "confirm_generated_corpus_promotion", false
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.state").value("calibrating"))
+                .andReturn();
+
+        mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-ready-unconfirmed")
+                        .header(HttpHeaders.IF_MATCH,
+                                calibrating.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "target_state", "ready",
+                                "reason", "Attempt without confirmation",
+                                "confirm_generated_corpus_promotion", false
+                        ))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STYLE_LIFECYCLE_CONFLICT"));
+
+        MvcResult ready = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-ready-confirmed")
+                        .header(HttpHeaders.IF_MATCH,
+                                calibrating.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "target_state", "ready",
+                                "reason", "Human approved generated baseline",
+                                "confirm_generated_corpus_promotion", true
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(jsonPath("$.state").value("ready"))
+                .andExpect(jsonPath("$.approved_by").value("security-test-actor"))
+                .andExpect(jsonPath("$.can_gate_rewrites").value(true))
+                .andReturn();
+
+        mvc.perform(get(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG,
+                        ready.getResponse().getHeader(HttpHeaders.ETAG)
+                ))
+                .andExpect(jsonPath("$.state").value("ready"));
+
+        CanonicalRevision otherRevision = genesis();
+        importAsOwner(otherRevision, "style-http-other-import");
+        String otherToken = stringField(issueAsOwner(
+                otherRevision,
+                "style-http-other-key",
+                List.of("novel:read", "style:admin")
+        ), "secret");
+        mvc.perform(get("/v1/style-profiles/{profileId}", profileId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(otherToken)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("requiredRoutes")
     void everyScaffoldRouteIsMappedAndUsesItsDocumentedScope(
@@ -839,8 +1010,6 @@ class ApiHttpContractTest {
                 route("read analysis", "GET", "/v1/style-analyses/analysis_test", "novel:read", false),
                 route("rewrite", "POST", "/v1/rewrite-proposals", "rewrite:propose", false),
                 route("read rewrite", "GET", "/v1/rewrite-proposals/proposal_test", "novel:read", false),
-                route("create profile", "POST", "/v1/style-profiles", "style:admin", true),
-                route("profile version", "POST", "/v1/style-profiles/profile_test/versions", "style:admin", false),
                 route("claim job", "POST", "/v1/internal/jobs/claims", "worker:execute", true),
                 route("submit worker result", "POST", "/v1/internal/jobs/job_test/results", "worker:execute", false)
         );
