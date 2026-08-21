@@ -42,19 +42,19 @@ public final class NarrativeEditor {
         NarrativeNovel updated = switch (operation) {
             case EditOperation.InsertBlocks insert -> applyInsert(base, insert);
             case EditOperation.ReplaceBlockRange replace -> applyReplacement(
-                    base, replace.range(), replace.newBlocks()
+                    base, replace.context().operationId(), replace.range(), replace.newBlocks()
             );
             case EditOperation.DeleteBlockRange delete -> applyReplacement(
-                    base, delete.range(), List.of()
+                    base, delete.context().operationId(), delete.range(), List.of()
             );
             case EditOperation.SplitBlock split -> applyReplacement(
-                    base, split.block(), split.newBlocks()
+                    base, split.context().operationId(), split.block(), split.newBlocks()
             );
             case EditOperation.MergeBlocks merge -> applyReplacement(
-                    base, merge.range(), List.of(merge.newBlock())
+                    base, merge.context().operationId(), merge.range(), List.of(merge.newBlock())
             );
             case EditOperation.ExtendBlock extend -> applyReplacement(
-                    base, extend.block(), List.of(extend.replacement())
+                    base, extend.context().operationId(), extend.block(), List.of(extend.replacement())
             );
             case EditOperation.MoveBlockRange move -> applyMove(base, move);
             case EditOperation.CorrectBlockMeta correction -> applyCorrection(base, correction);
@@ -71,12 +71,15 @@ public final class NarrativeEditor {
     ) {
         NarrativeScene scene = base.requireScene(operation.insertionPoint().sceneId());
         int index = EditOperationValidator.insertionIndex(scene, operation.insertionPoint());
-        NarrativeScene updated = scene.withBlocks(insertDrafts(scene.blocks(), index, operation.blocks()));
+        NarrativeScene updated = scene.withBlocks(insertDrafts(
+                scene.blocks(), index, operation.blocks(), operation.context().operationId()
+        ));
         return replaceScene(base.novel(), updated);
     }
 
     private static NarrativeNovel applyReplacement(
             RevisionManifest base,
+            Ids.OperationId operationId,
             BlockRangeGuard guard,
             List<BlockDraft> replacements
     ) {
@@ -84,7 +87,7 @@ public final class NarrativeEditor {
         List<NarrativeBlock> retained = new ArrayList<>(range.scene().blocks());
         retained.subList(range.firstIndex(), range.lastIndex() + 1).clear();
         NarrativeScene updated = range.scene().withBlocks(
-                insertDrafts(retained, range.firstIndex(), replacements)
+                insertDrafts(retained, range.firstIndex(), replacements, operationId)
         );
         return replaceScene(base.novel(), updated);
     }
@@ -129,7 +132,12 @@ public final class NarrativeEditor {
         List<NarrativeBlock> blocks = new ArrayList<>(scene.blocks());
         int index = indexOf(blocks, operation.block().blockId());
         NarrativeBlock current = blocks.get(index);
-        blocks.set(index, current.revise(current.text(), operation.correctedMetadata(), current.extensions()));
+        blocks.set(index, current.revise(
+                current.text(),
+                operation.correctedMetadata(),
+                current.extensions(),
+                derivedVersion(operation.context().operationId(), current.id())
+        ));
         return replaceScene(base.novel(), scene.withBlocks(blocks));
     }
 
@@ -162,7 +170,8 @@ public final class NarrativeEditor {
     private static List<NarrativeBlock> insertDrafts(
             List<NarrativeBlock> retained,
             int insertionIndex,
-            List<BlockDraft> drafts
+            List<BlockDraft> drafts,
+            Ids.OperationId operationId
     ) {
         if (drafts.isEmpty()) {
             return List.copyOf(retained);
@@ -174,13 +183,15 @@ public final class NarrativeEditor {
             int offset = 0;
             for (BlockDraft draft : drafts) {
                 OrderKey key = OrderKey.between(left, right);
-                inserted.add(insertionIndex + offset, draft.materialize(key));
+                inserted.add(insertionIndex + offset, draft.materialize(
+                        key, derivedVersion(operationId, draft.id())
+                ));
                 left = key;
                 offset++;
             }
             return List.copyOf(inserted);
         } catch (IllegalStateException exhaustedOrderSpace) {
-            return rebalanceWithDrafts(retained, insertionIndex, drafts);
+            return rebalanceWithDrafts(retained, insertionIndex, drafts, operationId);
         }
     }
 
@@ -211,7 +222,8 @@ public final class NarrativeEditor {
     private static List<NarrativeBlock> rebalanceWithDrafts(
             List<NarrativeBlock> retained,
             int insertionIndex,
-            List<BlockDraft> drafts
+            List<BlockDraft> drafts,
+            Ids.OperationId operationId
     ) {
         int total = retained.size() + drafts.size();
         List<NarrativeBlock> result = new ArrayList<>(total);
@@ -220,7 +232,8 @@ public final class NarrativeEditor {
         for (int index = 0; index < total; index++) {
             OrderKey key = OrderKey.rebalanced(index, total);
             if (index >= insertionIndex && draftIndex < drafts.size()) {
-                result.add(drafts.get(draftIndex++).materialize(key));
+                BlockDraft draft = drafts.get(draftIndex++);
+                result.add(draft.materialize(key, derivedVersion(operationId, draft.id())));
             } else {
                 result.add(retained.get(retainedIndex++).moveTo(key));
             }
@@ -275,5 +288,14 @@ public final class NarrativeEditor {
 
     private static EditInvariantException invalid(String message) {
         return new EditInvariantException(EditInvariantException.Code.INVALID_OPERATION, message);
+    }
+
+    private static Ids.BlockVersionId derivedVersion(
+            Ids.OperationId operationId,
+            Ids.BlockId blockId
+    ) {
+        return new Ids.BlockVersionId(dev.storyblock.domain.StableIds.derive(
+                "blv", operationId.value(), "block-version:" + blockId.value()
+        ));
     }
 }

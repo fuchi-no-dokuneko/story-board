@@ -11,7 +11,7 @@ public record BlockDraft(
 ) {
     public BlockDraft {
         Objects.requireNonNull(id, "id");
-        UnicodeText.validateBlock(text);
+        Objects.requireNonNull(text, "text");
         Objects.requireNonNull(metadata, "metadata");
         extensions = CanonicalValues.freezeMap(extensions, "block_draft.extensions");
     }
@@ -21,6 +21,10 @@ public record BlockDraft(
     }
 
     public NarrativeBlock materialize(OrderKey orderKey) {
-        return NarrativeBlock.create(id, orderKey, text, metadata, extensions);
+        return materialize(orderKey, Ids.BlockVersionId.create());
+    }
+
+    public NarrativeBlock materialize(OrderKey orderKey, Ids.BlockVersionId versionId) {
+        return new NarrativeBlock(id, versionId, orderKey, text, metadata, extensions);
     }
 }

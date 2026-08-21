@@ -24,4 +24,18 @@ class StableIdsTest {
         String novel = Ids.NovelId.create().value();
         assertThrows(IllegalArgumentException.class, () -> new Ids.BlockId(novel));
     }
+
+    @Test
+    void derivesRepeatableDistinctUuidVersionSevenIdentifiers() {
+        Ids.OperationId operationId = Ids.OperationId.create();
+
+        String first = StableIds.derive("blv", operationId.value(), "first");
+        String repeated = StableIds.derive("blv", operationId.value(), "first");
+        String second = StableIds.derive("blv", operationId.value(), "second");
+
+        assertEquals(first, repeated);
+        assertNotEquals(first, second);
+        new Ids.BlockVersionId(first);
+        new Ids.BlockVersionId(second);
+    }
 }

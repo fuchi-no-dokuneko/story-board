@@ -1,0 +1,22 @@
+[
+  {"name":"block length accepted","code":"BLOCK_TOO_LONG","scenario":"valid_block","expected_violation":false},
+  {"name":"block length rejected","code":"BLOCK_TOO_LONG","scenario":"overlong_block","expected_violation":true},
+  {"name":"sentence count accepted","code":"INVALID_SENTENCE_COUNT","scenario":"valid_block","expected_violation":false},
+  {"name":"sentence count rejected","code":"INVALID_SENTENCE_COUNT","scenario":"incomplete_block","expected_violation":true},
+  {"name":"single direct speaker accepted","code":"MULTIPLE_DIRECT_SPEAKERS","scenario":"single_speaker","expected_violation":false},
+  {"name":"multiple direct speakers rejected","code":"MULTIPLE_DIRECT_SPEAKERS","scenario":"multiple_speakers","expected_violation":true},
+  {"name":"present speaker accepted","code":"SPEAKER_NOT_PRESENT","scenario":"present_speaker","expected_violation":false},
+  {"name":"absent speaker rejected","code":"SPEAKER_NOT_PRESENT","scenario":"absent_speaker","expected_violation":true},
+  {"name":"presence evidence accepted","code":"META_EVIDENCE_REQUIRED","scenario":"valid_presence_evidence","expected_violation":false},
+  {"name":"missing presence evidence rejected","code":"META_EVIDENCE_REQUIRED","scenario":"missing_presence_evidence","expected_violation":true},
+  {"name":"matching presence event accepted","code":"PRESENCE_EVENT_REQUIRED","scenario":"valid_presence_evidence","expected_violation":false},
+  {"name":"missing presence event rejected","code":"PRESENCE_EVENT_REQUIRED","scenario":"missing_presence_event","expected_violation":true},
+  {"name":"current evidence accepted","code":"EVIDENCE_SPAN_STALE","scenario":"current_evidence","expected_violation":false},
+  {"name":"stale evidence rejected","code":"EVIDENCE_SPAN_STALE","scenario":"stale_evidence","expected_violation":true},
+  {"name":"adjacent range accepted","code":"INVALID_BLOCK_ADJACENCY","scenario":"adjacent_range","expected_violation":false},
+  {"name":"non-adjacent range rejected","code":"INVALID_BLOCK_ADJACENCY","scenario":"non_adjacent_range","expected_violation":true},
+  {"name":"matching revision accepted","code":"REVISION_CONFLICT","scenario":"matching_revision","expected_violation":false},
+  {"name":"stale revision rejected","code":"REVISION_CONFLICT","scenario":"stale_revision","expected_violation":true},
+  {"name":"evidence-bound explicit value accepted","code":"UNKNOWN_META_VALUE_INVENTED","scenario":"evidenced_unknown_upgrade","expected_violation":false},
+  {"name":"invented explicit value rejected","code":"UNKNOWN_META_VALUE_INVENTED","scenario":"invented_unknown_upgrade","expected_violation":true}
+]

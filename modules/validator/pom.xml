@@ -14,5 +14,19 @@
       <groupId>dev.storyblock</groupId>
       <artifactId>storyblock-domain</artifactId>
     </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-renderer</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-contracts</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

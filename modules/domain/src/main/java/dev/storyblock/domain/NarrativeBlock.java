@@ -42,12 +42,21 @@ public record NarrativeBlock(
     }
 
     public NarrativeBlock revise(String newText, BlockMetadata newMetadata, Map<String, Object> newExtensions) {
+        return revise(newText, newMetadata, newExtensions, Ids.BlockVersionId.create());
+    }
+
+    public NarrativeBlock revise(
+            String newText,
+            BlockMetadata newMetadata,
+            Map<String, Object> newExtensions,
+            Ids.BlockVersionId newVersionId
+    ) {
         if (text.equals(newText) && metadata.equals(newMetadata) && extensions.equals(newExtensions)) {
             return this;
         }
         return new NarrativeBlock(
                 id,
-                Ids.BlockVersionId.create(),
+                Objects.requireNonNull(newVersionId, "newVersionId"),
                 orderKey,
                 newText,
                 newMetadata,
