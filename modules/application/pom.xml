@@ -32,6 +32,10 @@
     </dependency>
     <dependency>
       <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-detector</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
       <artifactId>storyblock-storage-api</artifactId>
     </dependency>
     <dependency>

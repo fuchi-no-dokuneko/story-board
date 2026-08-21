@@ -42,8 +42,9 @@ in [`docs/api/v1-http-contract.md`](docs/api/v1-http-contract.md). Contract
 routes fail closed: authentication and mutation preconditions are active now.
 Canonical import, export jobs, job status, and artifact download are implemented;
 deterministic revision rendering, scoped bearer-key issuance, revocation, atomic
-commits, and redacted audit events are also implemented. Services assigned to
-later ADRs return a typed `503` until installed. The
+commits, adjacent metadata detection, and redacted audit events are also
+implemented. Services assigned to later ADRs return a typed `503` until
+installed. The
 transfer format and recovery guarantees are documented in
 [`docs/transfer/canonical-import-export.md`](docs/transfer/canonical-import-export.md).
 Security configuration and audit retention are documented in
@@ -51,6 +52,8 @@ Security configuration and audit retention are documented in
 Deterministic text, offset, metadata-state, and scene-boundary semantics are
 documented in
 [`docs/rendering/deterministic-renderer.md`](docs/rendering/deterministic-renderer.md).
+Adjacent-state rules and reset-boundary behavior are documented in
+[`docs/detection/adjacent-metadata-detector.md`](docs/detection/adjacent-metadata-detector.md).
 
 ## Modules
 

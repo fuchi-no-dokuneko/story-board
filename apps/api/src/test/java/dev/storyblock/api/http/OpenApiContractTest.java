@@ -158,6 +158,7 @@ class OpenApiContractTest {
         assertStrongEtag("POST /imports", "201");
         assertStrongEtag("POST /imports", "200");
         assertStrongEtag("POST /novels/{novelId}/renders", "200");
+        assertStrongEtag("POST /novels/{novelId}/detector-runs", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "201");
         assertStrongEtag("GET /artifacts/{artifactId}", "200");
@@ -259,6 +260,44 @@ class OpenApiContractTest {
         assertEquals(Set.of(
                 "time", "location", "weather", "pov", "present_character_ids"
         ), strings(state.get("required")));
+    }
+
+    @Test
+    void detectorContractDocumentsStableFindingsAndEveryRuleCode() {
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        Map<String, Object> response = map(schemas.get("DetectorRunResponse"));
+        Map<String, Object> finding = map(schemas.get("DetectorFinding"));
+        Map<String, Object> properties = map(finding.get("properties"));
+
+        assertEquals(Set.of(
+                "finding_id", "code", "severity", "revision_id", "revision_hash",
+                "rule_version", "affected_block_ids", "affected_scene_ids",
+                "context_block_ids", "evidence"
+        ), strings(finding.get("required")));
+        assertEquals(Set.of(
+                "LOCATION_CHANGED_WITHOUT_TRANSITION",
+                "CHARACTER_APPEARED_WITHOUT_ENTER",
+                "CHARACTER_DISAPPEARED_WITHOUT_EXIT",
+                "WEATHER_CHANGED_WITHOUT_EVIDENCE",
+                "TIME_DISCONTINUITY",
+                "POV_CHANGED_WITHOUT_BOUNDARY",
+                "META_TEXT_MISMATCH",
+                "INTENTIONAL_SCENE_RESET"
+        ), strings(map(properties.get("code")).get("enum")));
+        assertEquals(
+                Set.of("error", "warning", "info"),
+                strings(map(properties.get("severity")).get("enum"))
+        );
+        assertEquals(Boolean.TRUE, map(properties.get("affected_block_ids"))
+                .get("uniqueItems"));
+        assertEquals(Boolean.TRUE, map(properties.get("affected_scene_ids"))
+                .get("uniqueItems"));
+        assertEquals(3, map(properties.get("context_block_ids")).get("maxItems"));
+        assertEquals(
+                "#/components/schemas/DetectorFinding",
+                map(map(map(response.get("properties")).get("findings")).get("items"))
+                        .get("$ref")
+        );
     }
 
     @Test

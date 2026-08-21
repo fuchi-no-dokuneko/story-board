@@ -253,6 +253,9 @@ paths:
       responses:
         "200":
           description: Revision-bound detector findings
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
           content:
             application/json:
               schema:
@@ -1110,6 +1113,7 @@ components:
           type: string
         revision_hash:
           type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
         from_block_id:
           type: [string, "null"]
         to_block_id:
@@ -1128,7 +1132,48 @@ components:
         findings:
           type: array
           items:
-            type: object
+            $ref: "#/components/schemas/DetectorFinding"
+      additionalProperties: false
+    DetectorFinding:
+      type: object
+      required: [finding_id, code, severity, revision_id, revision_hash, rule_version, affected_block_ids, affected_scene_ids, context_block_ids, evidence]
+      properties:
+        finding_id:
+          type: string
+          pattern: '^fnd_[0-9a-f-]{36}$'
+        code:
+          type: string
+          enum: [LOCATION_CHANGED_WITHOUT_TRANSITION, CHARACTER_APPEARED_WITHOUT_ENTER, CHARACTER_DISAPPEARED_WITHOUT_EXIT, WEATHER_CHANGED_WITHOUT_EVIDENCE, TIME_DISCONTINUITY, POV_CHANGED_WITHOUT_BOUNDARY, META_TEXT_MISMATCH, INTENTIONAL_SCENE_RESET]
+        severity:
+          type: string
+          enum: [error, warning, info]
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        rule_version:
+          type: string
+        affected_block_ids:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+        affected_scene_ids:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+        context_block_ids:
+          type: array
+          maxItems: 3
+          uniqueItems: true
+          items:
+            type: string
+        evidence:
+          type: object
+          additionalProperties: true
       additionalProperties: false
     StyleAnalysisRequest:
       type: object

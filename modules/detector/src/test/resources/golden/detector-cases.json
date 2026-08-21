@@ -1,0 +1,50 @@
+[
+  {
+    "name": "location change without transition",
+    "scenario": "location_change",
+    "code": "LOCATION_CHANGED_WITHOUT_TRANSITION",
+    "severity": "warning"
+  },
+  {
+    "name": "character appears across continuous boundary",
+    "scenario": "character_appeared",
+    "code": "CHARACTER_APPEARED_WITHOUT_ENTER",
+    "severity": "error"
+  },
+  {
+    "name": "character disappears across continuous boundary",
+    "scenario": "character_disappeared",
+    "code": "CHARACTER_DISAPPEARED_WITHOUT_EXIT",
+    "severity": "error"
+  },
+  {
+    "name": "weather changes without evidence",
+    "scenario": "weather_change",
+    "code": "WEATHER_CHANGED_WITHOUT_EVIDENCE",
+    "severity": "warning"
+  },
+  {
+    "name": "time changes without transition evidence",
+    "scenario": "time_change",
+    "code": "TIME_DISCONTINUITY",
+    "severity": "warning"
+  },
+  {
+    "name": "point of view changes inside a scene",
+    "scenario": "pov_change",
+    "code": "POV_CHANGED_WITHOUT_BOUNDARY",
+    "severity": "warning"
+  },
+  {
+    "name": "claimed metadata evidence does not match text",
+    "scenario": "metadata_mismatch",
+    "code": "META_TEXT_MISMATCH",
+    "severity": "error"
+  },
+  {
+    "name": "cut records an intentional scene reset",
+    "scenario": "intentional_reset",
+    "code": "INTENTIONAL_SCENE_RESET",
+    "severity": "info"
+  }
+]

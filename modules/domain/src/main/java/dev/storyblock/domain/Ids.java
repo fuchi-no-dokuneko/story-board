@@ -123,4 +123,14 @@ public final class Ids {
             return new ProposalId(StableIds.generate("prp"));
         }
     }
+
+    public record FindingId(String value) {
+        public FindingId {
+            value = StableIds.require(value, "fnd");
+        }
+
+        public static FindingId create() {
+            return new FindingId(StableIds.generate("fnd"));
+        }
+    }
 }

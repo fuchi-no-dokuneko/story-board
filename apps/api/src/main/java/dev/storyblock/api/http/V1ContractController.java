@@ -50,14 +50,6 @@ public final class V1ContractController {
         return unavailable();
     }
 
-    @PostMapping("/novels/{novelId}/detector-runs")
-    ResponseEntity<Map<String, Object>> runDetector(
-            @PathVariable String novelId,
-            @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
     @PostMapping("/novels/{novelId}/style-analyses")
     ResponseEntity<Map<String, Object>> startStyleAnalysis(
             @PathVariable String novelId,

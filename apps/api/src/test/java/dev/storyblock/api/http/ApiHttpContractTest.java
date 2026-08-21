@@ -379,6 +379,90 @@ class ApiHttpContractTest {
     }
 
     @Test
+    void runsRevisionBoundDetectorWithStableFindingBytes() throws Exception {
+        CanonicalRevision revision = detectorRevision();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "detector-import");
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", revision.contentHash()
+        ));
+
+        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult first = mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-first")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ))
+                .andExpect(jsonPath("$.revision_id").value(revisionId))
+                .andExpect(jsonPath("$.revision_hash").value(revision.contentHash()))
+                .andExpect(jsonPath("$.rule_version").value("detector-1.0.0"))
+                .andExpect(jsonPath("$.findings[0].finding_id").isString())
+                .andExpect(jsonPath("$.findings[0].code")
+                        .value("LOCATION_CHANGED_WITHOUT_TRANSITION"))
+                .andExpect(jsonPath("$.findings[0].severity").value("warning"))
+                .andExpect(jsonPath("$.findings[0].affected_scene_ids.length()")
+                        .value(2))
+                .andExpect(jsonPath("$.findings[0].context_block_ids.length()")
+                        .value(2))
+                .andExpect(jsonPath("$.findings[0].evidence.kind")
+                        .value("scene_boundary"))
+                .andReturn();
+
+        MvcResult second = mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-second")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertArrayEquals(
+                first.getResponse().getContentAsByteArray(),
+                second.getResponse().getContentAsByteArray()
+        );
+
+        String staleHash = "sha256:" + "0".repeat(64);
+        byte[] mismatchedBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", staleHash
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-mismatch")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mismatchedBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+
+        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-stale")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(staleHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mismatchedBody))
+                .andExpect(status().isPreconditionFailed())
+                .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
+                .andExpect(jsonPath("$.current_revision_id").value(revisionId))
+                .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
+    }
+
+    @Test
     void realBearerCredentialsEnforceScopesNovelBoundariesAndRevocation()
             throws Exception {
         CanonicalRevision first = genesis();
@@ -647,7 +731,6 @@ class ApiHttpContractTest {
                 route("read revision", "GET", "/v1/novels/nov_test/revisions/rev_test", "novel:read", false),
                 route("edit preview", "POST", "/v1/novels/nov_test/edit-previews", "novel:propose", false),
                 route("undo preview", "POST", "/v1/novels/nov_test/undo-previews", "novel:propose", false),
-                route("detector", "POST", "/v1/novels/nov_test/detector-runs", "novel:analyze", false),
                 route("style analysis", "POST", "/v1/novels/nov_test/style-analyses", "style:analyze", false),
                 route("read analysis", "GET", "/v1/style-analyses/analysis_test", "novel:read", false),
                 route("rewrite", "POST", "/v1/rewrite-proposals", "rewrite:propose", false),
@@ -692,6 +775,63 @@ class ApiHttpContractTest {
                 "order_key", OrderKey.initial().value(),
                 "title", "Chapter",
                 "scenes", List.of(scene)
+        );
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
+        document.put("novel_id", novelId);
+        document.put("revision_id", Ids.RevisionId.create().value());
+        document.put("parent_revision_id", null);
+        document.put("chapters", List.of(chapter));
+        document.put("created_at", Instant.parse("2026-08-21T12:00:00Z").toString());
+        return CanonicalRevision.of(document);
+    }
+
+    private static CanonicalRevision detectorRevision() {
+        String novelId = Ids.NovelId.create().value();
+        String chapterId = Ids.ChapterId.create().value();
+        Map<String, Object> firstBlock = Map.of(
+                "id", Ids.BlockId.create().value(),
+                "block_version_id", Ids.BlockVersionId.create().value(),
+                "order_key", OrderKey.initial().value(),
+                "text", "The story starts here.",
+                "meta", Map.of()
+        );
+        Map<String, Object> secondBlock = Map.of(
+                "id", Ids.BlockId.create().value(),
+                "block_version_id", Ids.BlockVersionId.create().value(),
+                "order_key", OrderKey.initial().value(),
+                "text", "The story continues here.",
+                "meta", Map.of()
+        );
+        Map<String, Object> firstScene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.rebalanced(0, 2).value(),
+                "title", "First",
+                "transition_mode", "opening",
+                "initial_meta", Map.of(
+                        "location", Map.of("mode", "explicit", "value", "room_a"),
+                        "present_character_ids", List.of()
+                ),
+                "blocks", List.of(firstBlock)
+        );
+        Map<String, Object> secondScene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.rebalanced(1, 2).value(),
+                "title", "Second",
+                "transition_mode", "continuous",
+                "initial_meta", Map.of(
+                        "location", Map.of("mode", "explicit", "value", "room_b"),
+                        "present_character_ids", List.of()
+                ),
+                "blocks", List.of(secondBlock)
+        );
+        Map<String, Object> chapter = Map.of(
+                "id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "Detector chapter",
+                "scenes", List.of(firstScene, secondScene)
         );
         Map<String, Object> document = new LinkedHashMap<>();
         document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);

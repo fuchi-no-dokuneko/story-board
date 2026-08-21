@@ -9,9 +9,10 @@ authentication at `GET /v1/openapi.yaml`.
 
 All documented routes are mapped and protected by their declared scope.
 Canonical import, export submission, export-job status, artifact download,
-deterministic render, commit, and access-key lifecycle routes have concrete
-storage-backed handlers. For a route whose owning application service is not
-implemented yet, a correctly authenticated and well-formed request receives
+deterministic render, adjacent metadata detection, commit, and access-key
+lifecycle routes have concrete storage-backed handlers. For a route whose
+owning application service is not implemented yet, a correctly authenticated
+and well-formed request receives
 `503 application/problem+json` with
 `code=DEPENDENCY_UNAVAILABLE` and `Retry-After: 1`. There is no generated user,
 form login, HTTP Basic fallback, or session state. Bearer credential validation
@@ -58,6 +59,11 @@ hash in `If-Match`, returns that hash as its response `ETag`, and emits the
 canonical packet described in
 [`../rendering/deterministic-renderer.md`](../rendering/deterministic-renderer.md).
 
+`POST /v1/novels/{novelId}/detector-runs` additionally requires
+`revision_hash` in the request body to equal `If-Match`. It returns stable,
+revision-bound findings and the analyzed hash as `ETag`; see
+[`../detection/adjacent-metadata-detector.md`](../detection/adjacent-metadata-detector.md).
+
 The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
 `409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.
 
@@ -75,4 +81,4 @@ exercise each remaining scaffold Spring mapping with its required scope, verify
 all status-policy entries, and cover real bearer authentication, object-level
 novel isolation, problem details, request IDs, ETags, idempotency, wildcard
 restrictions, body limits, deterministic rendering, commits, and a complete
-import/export/job/artifact round trip.
+detector run and import/export/job/artifact round trip.
