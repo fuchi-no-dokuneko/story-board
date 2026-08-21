@@ -1,0 +1,11 @@
+package dev.storyblock.storage.sqlite;
+
+enum CommitStage {
+    AFTER_IDEMPOTENCY_CHECK,
+    AFTER_OPERATION_APPEND,
+    AFTER_REVISION_APPEND,
+    AFTER_TOMBSTONES,
+    AFTER_PROJECTION,
+    AFTER_CHECKPOINT,
+    BEFORE_HEAD_CAS
+}

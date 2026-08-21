@@ -24,6 +24,17 @@ The bootstrap is unprivileged and keeps downloaded tooling in the current
 user's Maven cache. The Unix wrapper download and every Maven JVM are configured
 for IPv4 only.
 
+Verify every SQLite novel head from the full immutable operation log with:
+
+```bash
+java -jar apps/cli/target/storyblock-cli-0.1.0-SNAPSHOT.jar \
+  replay-verify data/storyblock.db
+```
+
+The command emits one canonical JSON report and exits nonzero when any head
+cannot be reproduced. It requires an existing database file, preventing a path
+typo from being reported as an empty valid store.
+
 ## Modules
 
 - `apps/api`: Spring MVC API and commit coordinator

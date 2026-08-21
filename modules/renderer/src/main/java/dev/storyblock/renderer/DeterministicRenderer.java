@@ -35,6 +35,22 @@ public final class DeterministicRenderer {
         Objects.requireNonNull(requestedRange, "requestedRange");
 
         List<ResolvedEntry> resolved = resolveAll(revision);
+        if (resolved.isEmpty()) {
+            if (!requestedRange.isAll()) {
+                throw new IllegalArgumentException("An empty revision has no render endpoints");
+            }
+            return new RenderPacket(
+                    revision.novel().id(),
+                    revision.id(),
+                    revisionHash,
+                    RendererModule.VERSION,
+                    RenderRange.all(),
+                    "",
+                    List.of(),
+                    List.of(),
+                    List.of()
+            );
+        }
         int from = requestedRange.isAll() ? 0 : indexOf(resolved, requestedRange.fromBlockId());
         int to = requestedRange.isAll()
                 ? resolved.size() - 1

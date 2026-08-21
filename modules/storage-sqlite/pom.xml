@@ -15,6 +15,10 @@
       <artifactId>storyblock-storage-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-contracts</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-jdbc</artifactId>
     </dependency>
@@ -34,6 +38,11 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-application</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

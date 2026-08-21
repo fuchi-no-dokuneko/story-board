@@ -63,6 +63,38 @@ class DeterministicRendererTest {
         assertEquals("他坐下。", packet.renderedText());
     }
 
+    @Test
+    void emptyRevisionProducesAnEmptyAllRangePacket() {
+        RevisionManifest populated = revision();
+        NarrativeScene original = populated.novel().chapters().getFirst().scenes().getFirst();
+        NarrativeScene emptyScene = original.withBlocks(List.of());
+        NarrativeChapter emptyChapter = new NarrativeChapter(
+                populated.novel().chapters().getFirst().id(),
+                populated.novel().chapters().getFirst().orderKey(),
+                populated.novel().chapters().getFirst().title(),
+                List.of(emptyScene),
+                populated.novel().chapters().getFirst().extensions()
+        );
+        RevisionManifest empty = new RevisionManifest(
+                Ids.RevisionId.create(),
+                populated.id(),
+                Instant.parse("2026-08-21T12:01:00Z"),
+                new NarrativeNovel(
+                        populated.novel().id(), List.of(emptyChapter), populated.novel().extensions()
+                )
+        );
+
+        RenderPacket packet = new DeterministicRenderer().render(
+                empty, HASH, RenderRange.all()
+        );
+
+        assertEquals("", packet.renderedText());
+        assertEquals(RenderRange.all(), packet.range());
+        assertEquals(List.of(), packet.blocks());
+        assertEquals(List.of(), packet.resolvedMetadata());
+        assertEquals(List.of(), packet.offsetMap());
+    }
+
     private static RevisionManifest revision() {
         Ids.ChapterId chapterId = Ids.ChapterId.create();
         NarrativeBlock first = NarrativeBlock.create(
