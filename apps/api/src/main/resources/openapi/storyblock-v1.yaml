@@ -9,7 +9,7 @@ security:
   - bearerAuth: []
 x-http-status-policy:
   "200": Synchronous read, preview, worker result, or idempotent result
-  "201": Novel, profile, key, or canonical revision created
+  "201": Novel, profile, key, monitor output, or canonical revision created
   "202": Durable analysis, rewrite, or export job accepted
   "400": Malformed JSON, header, cursor, or request contract
   "401": Authentication is missing or invalid
@@ -260,6 +260,93 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/DetectorRunResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/monitor-packets:
+    post:
+      operationId: createMonitorPacket
+      summary: Resolve a bounded read-only packet for one monitor target
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitorPacketRequest"
+      responses:
+        "200":
+          description: Bounded render, detector context, and local invariants
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitorPacket"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/monitor-runs:
+    post:
+      operationId: submitMonitorOutput
+      summary: Persist an evidence-bound finding or inert proposed operation
+      x-required-scopes: ["monitor:submit"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitorSubmissionRequest"
+      responses:
+        "200":
+          description: Existing idempotent monitor submission
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitorSubmissionResponse"
+        "201":
+          description: Immutable monitor output created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitorSubmissionResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/monitor-runs/{monitorRunId}:
+    get:
+      operationId: getMonitorRun
+      summary: Get an immutable monitor output with derived stale state
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/MonitorRunId"
+      responses:
+        "200":
+          description: Monitor output and current invalidation state
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitorRunStatus"
         default:
           $ref: "#/components/responses/Problem"
   /novels/{novelId}/style-analyses:
@@ -583,6 +670,13 @@ components:
       schema:
         type: string
         pattern: '^prp_[0-9a-f-]{36}$'
+    MonitorRunId:
+      name: monitorRunId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^mrun_[0-9a-f-]{36}$'
     ProfileId:
       name: profileId
       in: path
@@ -651,7 +745,7 @@ components:
         type: string
         pattern: '^"sha256:[0-9a-f]{64}"$'
     Location:
-      description: Absolute or origin-relative durable job status URI.
+      description: Absolute or origin-relative durable resource URI.
       required: true
       schema:
         type: string
@@ -1175,6 +1269,277 @@ components:
           type: object
           additionalProperties: true
       additionalProperties: false
+    MonitorPacketRequest:
+      type: object
+      required: [revision_id, revision_hash, target_block_id, neighbor_count]
+      properties:
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        target_block_id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        neighbor_count:
+          type: integer
+          minimum: 1
+          maximum: 2
+      additionalProperties: false
+    MonitorPacket:
+      type: object
+      required: [novel_id, revision_id, revision_hash, monitor_version, rule_version, detector_rule_version, target_block_id, neighbor_count, render_packet, detector_findings, local_invariants, allowed_tools]
+      properties:
+        novel_id:
+          type: string
+          pattern: '^nov_[0-9a-f-]{36}$'
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        monitor_version:
+          type: string
+        rule_version:
+          type: string
+        detector_rule_version:
+          type: string
+        target_block_id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        neighbor_count:
+          type: integer
+          minimum: 1
+          maximum: 2
+        render_packet:
+          $ref: "#/components/schemas/RenderPacket"
+        detector_findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetectorFinding"
+        local_invariants:
+          $ref: "#/components/schemas/MonitorLocalInvariants"
+        allowed_tools:
+          type: array
+          minItems: 2
+          maxItems: 2
+          prefixItems:
+            - const: submit_finding
+            - const: submit_proposed_operation
+      additionalProperties: false
+    MonitorLocalInvariants:
+      type: object
+      required: [affected_ids_must_be_within_window, evidence_required, max_block_graphemes, max_direct_speakers, max_sentences, min_sentences, target_block_version_id, target_scene_id, window_blocks]
+      properties:
+        affected_ids_must_be_within_window:
+          const: true
+        evidence_required:
+          const: true
+        max_block_graphemes:
+          const: 100
+        max_direct_speakers:
+          const: 1
+        max_sentences:
+          const: 2
+        min_sentences:
+          const: 1
+        target_block_version_id:
+          type: string
+          pattern: '^blv_[0-9a-f-]{36}$'
+        target_scene_id:
+          type: string
+          pattern: '^scn_[0-9a-f-]{36}$'
+        window_blocks:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/MonitorBlockFingerprint"
+      additionalProperties: false
+    MonitorBlockFingerprint:
+      type: object
+      required: [block_id, block_version_id, content_hash]
+      properties:
+        block_id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        block_version_id:
+          type: string
+          pattern: '^blv_[0-9a-f-]{36}$'
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+      additionalProperties: false
+    MonitorSubmissionRequest:
+      type: object
+      required: [revision_id, revision_hash, target_block_id, neighbor_count, rule_version, affected_block_ids, output]
+      properties:
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        target_block_id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        neighbor_count:
+          type: integer
+          minimum: 1
+          maximum: 2
+        rule_version:
+          type: string
+        affected_block_ids:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          contains:
+            type: string
+          items:
+            type: string
+            pattern: '^blk_[0-9a-f-]{36}$'
+        output:
+          oneOf:
+            - $ref: "#/components/schemas/MonitorFindingOutput"
+            - $ref: "#/components/schemas/MonitorProposedOperationOutput"
+          discriminator:
+            propertyName: kind
+            mapping:
+              finding: "#/components/schemas/MonitorFindingOutput"
+              proposed_operation: "#/components/schemas/MonitorProposedOperationOutput"
+      additionalProperties: false
+    MonitorFindingOutput:
+      type: object
+      required: [kind, code, severity, message, evidence]
+      properties:
+        kind:
+          const: finding
+        code:
+          type: string
+          pattern: '^[A-Z][A-Z0-9_]{2,63}$'
+        severity:
+          type: string
+          enum: [error, warning, info]
+        message:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        evidence:
+          $ref: "#/components/schemas/MonitorEvidenceList"
+      additionalProperties: false
+    MonitorProposedOperationOutput:
+      type: object
+      required: [kind, operation, evidence]
+      properties:
+        kind:
+          const: proposed_operation
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        evidence:
+          $ref: "#/components/schemas/MonitorEvidenceList"
+      additionalProperties: false
+    MonitorEvidenceList:
+      type: array
+      minItems: 1
+      maxItems: 16
+      items:
+        $ref: "#/components/schemas/MonitorEvidence"
+    MonitorEvidence:
+      type: object
+      required: [block_id, start_grapheme, end_grapheme, quote, quote_hash]
+      properties:
+        block_id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        start_grapheme:
+          type: integer
+          minimum: 0
+        end_grapheme:
+          type: integer
+          minimum: 1
+        quote:
+          type: string
+          minLength: 1
+        quote_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+      additionalProperties: false
+    MonitorRunStatus:
+      type: object
+      required: [monitor_run_id, output_id, output_kind, novel_id, revision_id, revision_hash, target_block_id, neighbor_count, monitor_version, rule_version, affected_blocks, output, request_hash, submitted_at, state, stale_reasons, rebase_allowed]
+      properties:
+        monitor_run_id:
+          type: string
+          pattern: '^mrun_[0-9a-f-]{36}$'
+        output_id:
+          type: string
+          pattern: '^(mis|mpr)_[0-9a-f-]{36}$'
+        output_kind:
+          type: string
+          enum: [finding, proposed_operation]
+        novel_id:
+          type: string
+          pattern: '^nov_[0-9a-f-]{36}$'
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        target_block_id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        neighbor_count:
+          type: integer
+          minimum: 1
+          maximum: 2
+        monitor_version:
+          type: string
+        rule_version:
+          type: string
+        affected_blocks:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/MonitorBlockFingerprint"
+        output:
+          oneOf:
+            - $ref: "#/components/schemas/MonitorFindingOutput"
+            - $ref: "#/components/schemas/MonitorProposedOperationOutput"
+        request_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        submitted_at:
+          type: string
+          format: date-time
+        state:
+          type: string
+          enum: [current, stale]
+        stale_reasons:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            enum: [head_changed, affected_block_changed, affected_block_missing, rule_version_changed]
+        rebase_allowed:
+          const: false
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false
+    MonitorSubmissionResponse:
+      allOf:
+        - $ref: "#/components/schemas/MonitorRunStatus"
+        - type: object
+          required: [idempotent_replay]
+          properties:
+            idempotent_replay:
+              type: boolean
     StyleAnalysisRequest:
       type: object
       required: [revision_id, revision_hash, profile_version_id]

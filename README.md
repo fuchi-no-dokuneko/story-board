@@ -43,7 +43,10 @@ routes fail closed: authentication and mutation preconditions are active now.
 Canonical import, export jobs, job status, and artifact download are implemented;
 deterministic revision rendering, scoped bearer-key issuance, revocation, atomic
 commits, adjacent metadata detection, and redacted audit events are also
-implemented. Services assigned to later ADRs return a typed `503` until
+implemented. Bounded monitor packets, immutable finding/proposal submission,
+and stale-output invalidation are documented in
+[`docs/monitoring/monitor-submission.md`](docs/monitoring/monitor-submission.md).
+Services assigned to later ADRs return a typed `503` until
 installed. The
 transfer format and recovery guarantees are documented in
 [`docs/transfer/canonical-import-export.md`](docs/transfer/canonical-import-export.md).

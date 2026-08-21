@@ -133,4 +133,48 @@ public final class Ids {
             return new FindingId(StableIds.generate("fnd"));
         }
     }
+
+    public record MonitorRunId(String value) {
+        public MonitorRunId {
+            value = StableIds.require(value, "mrun");
+        }
+
+        public static MonitorRunId create() {
+            return new MonitorRunId(StableIds.generate("mrun"));
+        }
+    }
+
+    public sealed interface MonitorOutputId permits MonitorIssueId, MonitorProposalId {
+        String value();
+
+        static MonitorOutputId parse(String value) {
+            if (value != null && value.startsWith("mis_")) {
+                return new MonitorIssueId(value);
+            }
+            if (value != null && value.startsWith("mpr_")) {
+                return new MonitorProposalId(value);
+            }
+            throw new IllegalArgumentException("Unsupported monitor output identifier");
+        }
+    }
+
+    public record MonitorIssueId(String value) implements MonitorOutputId {
+        public MonitorIssueId {
+            value = StableIds.require(value, "mis");
+        }
+
+        public static MonitorIssueId create() {
+            return new MonitorIssueId(StableIds.generate("mis"));
+        }
+    }
+
+    public record MonitorProposalId(String value) implements MonitorOutputId {
+        public MonitorProposalId {
+            value = StableIds.require(value, "mpr");
+        }
+
+        public static MonitorProposalId create() {
+            return new MonitorProposalId(StableIds.generate("mpr"));
+        }
+    }
 }

@@ -3,6 +3,7 @@ package dev.storyblock.api.http;
 import dev.storyblock.application.CanonicalTransferService;
 import dev.storyblock.application.CommitService;
 import dev.storyblock.application.DetectorService;
+import dev.storyblock.application.MonitorService;
 import dev.storyblock.application.RenderService;
 import dev.storyblock.security.AccessKeyService;
 import dev.storyblock.storage.sqlite.SqliteRevisionStore;
@@ -44,6 +45,11 @@ public class ApiStorageConfiguration {
     @Bean
     DetectorService detectorService(SqliteRevisionStore store) {
         return new DetectorService(store);
+    }
+
+    @Bean
+    MonitorService monitorService(SqliteRevisionStore store) {
+        return new MonitorService(store, store);
     }
 
     @Bean

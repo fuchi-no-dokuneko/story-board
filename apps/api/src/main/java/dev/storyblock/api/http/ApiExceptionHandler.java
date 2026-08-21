@@ -6,6 +6,7 @@ import dev.storyblock.security.AccessKeyRequestConflictException;
 import dev.storyblock.security.CrossNovelAccessException;
 import dev.storyblock.security.MissingAccessKeyException;
 import dev.storyblock.security.SecretAlreadyIssuedException;
+import dev.storyblock.monitor.MissingMonitorRunException;
 import dev.storyblock.storage.IdempotencyConflictException;
 import dev.storyblock.storage.MissingArtifactException;
 import dev.storyblock.storage.MissingExportJobException;
@@ -110,7 +111,8 @@ public final class ApiExceptionHandler {
             MissingRevisionException.class,
             MissingExportJobException.class,
             MissingArtifactException.class,
-            MissingAccessKeyException.class
+            MissingAccessKeyException.class,
+            MissingMonitorRunException.class
     })
     ResponseEntity<Map<String, Object>> missingResource(
             RuntimeException failure,

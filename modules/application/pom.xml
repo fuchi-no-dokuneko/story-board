@@ -36,6 +36,10 @@
     </dependency>
     <dependency>
       <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-monitor-adapter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
       <artifactId>storyblock-storage-api</artifactId>
     </dependency>
     <dependency>

@@ -12,7 +12,8 @@ final class RevisionStoreSchema {
     private static final java.util.List<String> MIGRATIONS = java.util.List.of(
             "/db/migration/V001__immutable_revision_store.sql",
             "/db/migration/V002__canonical_transfer.sql",
-            "/db/migration/V003__access_keys_and_audit.sql"
+            "/db/migration/V003__access_keys_and_audit.sql",
+            "/db/migration/V004__monitor_runs.sql"
     );
 
     private RevisionStoreSchema() {

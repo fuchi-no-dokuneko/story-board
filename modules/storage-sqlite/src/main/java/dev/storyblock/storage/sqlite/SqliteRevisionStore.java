@@ -19,6 +19,9 @@ import dev.storyblock.security.AuditContext;
 import dev.storyblock.security.AuditEvent;
 import dev.storyblock.security.AuditResult;
 import dev.storyblock.security.StoredAccessKey;
+import dev.storyblock.monitor.MonitorSaveResult;
+import dev.storyblock.monitor.MonitorStore;
+import dev.storyblock.monitor.StoredMonitorRun;
 import dev.storyblock.storage.BlockTombstone;
 import dev.storyblock.storage.CanonicalImportRequest;
 import dev.storyblock.storage.CanonicalImportResult;
@@ -53,7 +56,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class SqliteRevisionStore implements RevisionStore, AccessKeyStore, AutoCloseable {
+public final class SqliteRevisionStore implements
+        RevisionStore, AccessKeyStore, MonitorStore, AutoCloseable {
     private final SqliteDatabase database;
     private final CheckpointPolicy checkpointPolicy;
     private final CommitFaultInjector faultInjector;
@@ -461,6 +465,22 @@ public final class SqliteRevisionStore implements RevisionStore, AccessKeyStore,
             ));
             return null;
         });
+    }
+
+    @Override
+    public MonitorSaveResult saveMonitorRun(StoredMonitorRun run) {
+        Objects.requireNonNull(run, "run");
+        return write(connection -> SqliteMonitorStore.save(connection, run));
+    }
+
+    @Override
+    public StoredMonitorRun getMonitorRun(
+            Ids.NovelId novelId,
+            Ids.MonitorRunId runId
+    ) {
+        Objects.requireNonNull(novelId, "novelId");
+        Objects.requireNonNull(runId, "runId");
+        return read(connection -> SqliteMonitorStore.get(connection, novelId, runId));
     }
 
     @Override

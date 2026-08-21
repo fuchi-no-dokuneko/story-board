@@ -10,7 +10,8 @@ authentication at `GET /v1/openapi.yaml`.
 All documented routes are mapped and protected by their declared scope.
 Canonical import, export submission, export-job status, artifact download,
 deterministic render, adjacent metadata detection, commit, and access-key
-lifecycle routes have concrete storage-backed handlers. For a route whose
+lifecycle routes have concrete storage-backed handlers. Monitor packet,
+submission, and stale-status routes are also storage-backed. For a route whose
 owning application service is not implemented yet, a correctly authenticated
 and well-formed request receives
 `503 application/problem+json` with
@@ -64,6 +65,15 @@ canonical packet described in
 revision-bound findings and the analyzed hash as `ETag`; see
 [`../detection/adjacent-metadata-detector.md`](../detection/adjacent-metadata-detector.md).
 
+`POST /v1/novels/{novelId}/monitor-packets` requires `novel:read` and returns
+only the target, one or two neighbors on each side, resolved metadata, local
+invariants, and in-window detector findings. `POST
+/v1/novels/{novelId}/monitor-runs` requires `monitor:submit` and persists only
+an evidence-bound finding or inert proposed operation. `GET
+/v1/novels/{novelId}/monitor-runs/{monitorRunId}` requires `novel:read` and
+derives stale state without rebasing. See
+[`../monitoring/monitor-submission.md`](../monitoring/monitor-submission.md).
+
 The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
 `409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.
 
@@ -76,9 +86,9 @@ dependencies have been bootstrapped:
 ./mvnw -o -pl apps/api -am test
 ```
 
-The tests parse every local OpenAPI reference, compare all 22 required routes,
+The tests parse every local OpenAPI reference, compare all 25 required routes,
 exercise each remaining scaffold Spring mapping with its required scope, verify
 all status-policy entries, and cover real bearer authentication, object-level
 novel isolation, problem details, request IDs, ETags, idempotency, wildcard
 restrictions, body limits, deterministic rendering, commits, and a complete
-detector run and import/export/job/artifact round trip.
+detector and monitor runs, and an import/export/job/artifact round trip.

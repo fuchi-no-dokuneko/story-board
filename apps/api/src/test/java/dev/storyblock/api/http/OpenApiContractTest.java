@@ -32,6 +32,9 @@ class OpenApiContractTest {
             "POST /novels/{novelId}/commits",
             "POST /novels/{novelId}/undo-previews",
             "POST /novels/{novelId}/detector-runs",
+            "POST /novels/{novelId}/monitor-packets",
+            "POST /novels/{novelId}/monitor-runs",
+            "GET /novels/{novelId}/monitor-runs/{monitorRunId}",
             "POST /novels/{novelId}/style-analyses",
             "GET /style-analyses/{analysisId}",
             "POST /rewrite-proposals",
@@ -159,6 +162,10 @@ class OpenApiContractTest {
         assertStrongEtag("POST /imports", "200");
         assertStrongEtag("POST /novels/{novelId}/renders", "200");
         assertStrongEtag("POST /novels/{novelId}/detector-runs", "200");
+        assertStrongEtag("POST /novels/{novelId}/monitor-packets", "200");
+        assertStrongEtag("POST /novels/{novelId}/monitor-runs", "200");
+        assertStrongEtag("POST /novels/{novelId}/monitor-runs", "201");
+        assertStrongEtag("GET /novels/{novelId}/monitor-runs/{monitorRunId}", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "201");
         assertStrongEtag("GET /artifacts/{artifactId}", "200");
@@ -298,6 +305,39 @@ class OpenApiContractTest {
                 map(map(map(response.get("properties")).get("findings")).get("items"))
                         .get("$ref")
         );
+    }
+
+    @Test
+    void monitorContractIsBoundedEvidenceOnlyAndNeverRebases() {
+        assertEquals(
+                List.of("novel:read"),
+                list(operation("POST /novels/{novelId}/monitor-packets")
+                        .get("x-required-scopes"))
+        );
+        assertEquals(
+                List.of("monitor:submit"),
+                list(operation("POST /novels/{novelId}/monitor-runs")
+                        .get("x-required-scopes"))
+        );
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        Map<String, Object> invariants = map(schemas.get("MonitorLocalInvariants"));
+        Map<String, Object> window = map(map(invariants.get("properties")).get("window_blocks"));
+        assertEquals(5, window.get("maxItems"));
+
+        Map<String, Object> packet = map(schemas.get("MonitorPacket"));
+        Map<String, Object> tools = map(map(packet.get("properties")).get("allowed_tools"));
+        List<?> toolSlots = list(tools.get("prefixItems"));
+        assertEquals("submit_finding", map(toolSlots.get(0)).get("const"));
+        assertEquals("submit_proposed_operation", map(toolSlots.get(1)).get("const"));
+
+        Map<String, Object> status = map(schemas.get("MonitorRunStatus"));
+        assertEquals(
+                Boolean.FALSE,
+                map(map(status.get("properties")).get("rebase_allowed")).get("const")
+        );
+        assertTrue(schemas.containsKey("MonitorEvidence"));
+        assertTrue(schemas.containsKey("MonitorFindingOutput"));
+        assertTrue(schemas.containsKey("MonitorProposedOperationOutput"));
     }
 
     @Test

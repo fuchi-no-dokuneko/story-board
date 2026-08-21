@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public enum ApiHttpStatusPolicy {
     OK(200, "Synchronous read, preview, worker result, or idempotent result"),
-    CREATED(201, "Novel, profile, key, or canonical revision created"),
+    CREATED(201, "Novel, profile, key, monitor output, or canonical revision created"),
     ACCEPTED(202, "Durable analysis, rewrite, or export job accepted"),
     BAD_REQUEST(400, "Malformed JSON, header, cursor, or request contract"),
     UNAUTHORIZED(401, "Authentication is missing or invalid"),

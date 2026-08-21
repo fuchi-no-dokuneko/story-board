@@ -22,6 +22,7 @@ import dev.storyblock.domain.OrderKey;
 import dev.storyblock.security.AuditAction;
 import dev.storyblock.security.AuditResult;
 import dev.storyblock.storage.sqlite.SqliteRevisionStore;
+import dev.storyblock.validator.EvidenceSpans;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -460,6 +461,109 @@ class ApiHttpContractTest {
                 .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
                 .andExpect(jsonPath("$.current_revision_id").value(revisionId))
                 .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
+    }
+
+    @Test
+    void monitorPacketsAndSubmissionsUseSeparateLeastPrivilegeScopes() throws Exception {
+        CanonicalRevision revision = detectorRevision();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        String blockId = firstBlockId(revision);
+        importAsOwner(revision, "monitor-import");
+        byte[] packetBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", revision.contentHash(),
+                "target_block_id", blockId,
+                "neighbor_count", 1
+        ));
+
+        mvc.perform(post("/v1/novels/{novelId}/monitor-packets", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "packet-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(packetBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        mvc.perform(post("/v1/novels/{novelId}/monitor-packets", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "packet-read")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(packetBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ))
+                .andExpect(jsonPath("$.target_block_id").value(blockId))
+                .andExpect(jsonPath("$.render_packet.blocks.length()").value(2))
+                .andExpect(jsonPath("$.local_invariants.window_blocks.length()").value(2))
+                .andExpect(jsonPath("$.allowed_tools[0]").value("submit_finding"))
+                .andExpect(jsonPath("$.allowed_tools[1]")
+                        .value("submit_proposed_operation"));
+
+        String quote = "The";
+        byte[] submissionBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", revision.contentHash(),
+                "target_block_id", blockId,
+                "neighbor_count", 1,
+                "rule_version", "monitor-rules-1.0.0",
+                "affected_block_ids", List.of(blockId),
+                "output", Map.of(
+                        "kind", "finding",
+                        "code", "LOCAL_NOTE",
+                        "severity", "info",
+                        "message", "Review this local passage.",
+                        "evidence", List.of(Map.of(
+                                "block_id", blockId,
+                                "start_grapheme", 0,
+                                "end_grapheme", 3,
+                                "quote", quote,
+                                "quote_hash", EvidenceSpans.quoteHash(quote)
+                        ))
+                )
+        ));
+        MockHttpServletRequestBuilder submit = post(
+                "/v1/novels/{novelId}/monitor-runs", novelId
+        )
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "monitor-submit")
+                .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(submissionBody);
+
+        mvc.perform(post("/v1/novels/{novelId}/monitor-runs", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "submit-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(submissionBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult created = mvc.perform(submit.with(userWithScope("monitor:submit")))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.output_kind").value("finding"))
+                .andExpect(jsonPath("$.state").value("current"))
+                .andExpect(jsonPath("$.stale_reasons.length()").value(0))
+                .andExpect(jsonPath("$.rebase_allowed").value(false))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        String runId = stringField(object(created), "monitor_run_id");
+
+        mvc.perform(submit.with(userWithScope("monitor:submit")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.monitor_run_id").value(runId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        mvc.perform(get("/v1/novels/{novelId}/monitor-runs/{runId}", novelId, runId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.monitor_run_id").value(runId))
+                .andExpect(jsonPath("$.state").value("current"))
+                .andExpect(jsonPath("$.rebase_allowed").value(false));
     }
 
     @Test
@@ -918,6 +1022,17 @@ class ApiHttpContractTest {
 
     private static String stringField(Map<String, Object> object, String field) {
         return (String) object.get(field);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String firstBlockId(CanonicalRevision revision) {
+        List<Map<String, Object>> chapters = (List<Map<String, Object>>)
+                revision.canonicalContent().get("chapters");
+        List<Map<String, Object>> scenes = (List<Map<String, Object>>)
+                chapters.getFirst().get("scenes");
+        List<Map<String, Object>> blocks = (List<Map<String, Object>>)
+                scenes.getFirst().get("blocks");
+        return stringField(blocks.getFirst(), "id");
     }
 
     private static String quotedEtag(String hash) {
