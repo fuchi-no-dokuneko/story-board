@@ -84,6 +84,16 @@ public final class Ids {
         }
     }
 
+    public record ArtifactId(String value) {
+        public ArtifactId {
+            value = StableIds.require(value, "art");
+        }
+
+        public static ArtifactId create() {
+            return new ArtifactId(StableIds.generate("art"));
+        }
+    }
+
     public record ProposalId(String value) {
         public ProposalId {
             value = StableIds.require(value, "prp");

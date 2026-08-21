@@ -7,9 +7,11 @@ authentication at `GET /v1/openapi.yaml`.
 
 ## Runtime Boundary
 
-All documented routes are mapped and protected by their declared scope. Until
-the owning application service is implemented, a correctly authenticated and
-well-formed request receives `503 application/problem+json` with
+All documented routes are mapped and protected by their declared scope.
+Canonical import, export submission, export-job status, and artifact download
+have concrete storage-backed handlers. For a route whose owning application
+service is not implemented yet, a correctly authenticated and well-formed
+request receives `503 application/problem+json` with
 `code=DEPENDENCY_UNAVAILABLE` and `Retry-After: 1`. There is no generated user,
 form login, HTTP Basic fallback, or session state. Bearer credential validation
 is owned by ADR-300.
@@ -42,6 +44,13 @@ rewrite, and export submissions return `202` with a `Location` status URI.
 Large style-analysis results use an opaque cursor. Errors use RFC problem JSON
 with stable `code` and `request_id` fields.
 
+`POST /v1/imports` returns `201` for a new atomic import and `200` when the same
+idempotency key and canonical request are replayed. `POST
+/v1/novels/{novelId}/exports` creates an immutable completed export and returns
+its durable job URI. `GET /v1/jobs/{jobId}` exposes the result artifact URI, and
+`GET /v1/artifacts/{artifactId}` returns offline-downloadable canonical bytes.
+See [`../transfer/canonical-import-export.md`](../transfer/canonical-import-export.md).
+
 The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
 `409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.
 
@@ -54,7 +63,8 @@ dependencies have been bootstrapped:
 ./mvnw -o -pl apps/api -am test
 ```
 
-The tests parse every local OpenAPI reference, compare all 21 required routes,
+The tests parse every local OpenAPI reference, compare all 22 required routes,
 exercise each concrete Spring mapping with its required scope, verify all
 status-policy entries, and cover authentication, problem details, request IDs,
-ETags, idempotency, wildcard restrictions, and body limits.
+ETags, idempotency, wildcard restrictions, body limits, and a complete
+import/export/job/artifact round trip.

@@ -13,8 +13,12 @@ import dev.storyblock.domain.NarrativeScene;
 import dev.storyblock.domain.OrderKey;
 import dev.storyblock.domain.RevisionManifest;
 import dev.storyblock.storage.BlockTombstone;
+import dev.storyblock.storage.CanonicalImportRequest;
+import dev.storyblock.storage.CanonicalImportResult;
 import dev.storyblock.storage.CommitRequest;
 import dev.storyblock.storage.CommitResult;
+import dev.storyblock.storage.ExportJobRequest;
+import dev.storyblock.storage.ExportJobResult;
 import dev.storyblock.storage.IdempotencyConflictException;
 import dev.storyblock.storage.MissingNovelException;
 import dev.storyblock.storage.MissingRevisionException;
@@ -23,6 +27,8 @@ import dev.storyblock.storage.RevisionStore;
 import dev.storyblock.storage.StaleHeadException;
 import dev.storyblock.storage.StorageException;
 import dev.storyblock.storage.StoredCheckpoint;
+import dev.storyblock.storage.StoredArtifact;
+import dev.storyblock.storage.StoredExportJob;
 import dev.storyblock.storage.StoredOperation;
 import dev.storyblock.storage.StoredRevision;
 import java.io.IOException;
@@ -44,15 +50,20 @@ public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
     private final SqliteDatabase database;
     private final CheckpointPolicy checkpointPolicy;
     private final CommitFaultInjector faultInjector;
+    private final ImportFaultInjector importFaultInjector;
 
     private SqliteRevisionStore(
             SqliteDatabase database,
             CheckpointPolicy checkpointPolicy,
-            CommitFaultInjector faultInjector
+            CommitFaultInjector faultInjector,
+            ImportFaultInjector importFaultInjector
     ) {
         this.database = Objects.requireNonNull(database, "database");
         this.checkpointPolicy = Objects.requireNonNull(checkpointPolicy, "checkpointPolicy");
         this.faultInjector = Objects.requireNonNull(faultInjector, "faultInjector");
+        this.importFaultInjector = Objects.requireNonNull(
+                importFaultInjector, "importFaultInjector"
+        );
         write(connection -> {
             RevisionStoreSchema.initialize(connection);
             return null;
@@ -70,7 +81,8 @@ public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
         return new SqliteRevisionStore(
                 SqliteDatabase.open(databasePath),
                 checkpointPolicy,
-                CommitFaultInjector.NONE
+                CommitFaultInjector.NONE,
+                ImportFaultInjector.NONE
         );
     }
 
@@ -80,7 +92,24 @@ public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
             CommitFaultInjector faultInjector
     ) throws IOException {
         return new SqliteRevisionStore(
-                SqliteDatabase.open(databasePath), checkpointPolicy, faultInjector
+                SqliteDatabase.open(databasePath),
+                checkpointPolicy,
+                faultInjector,
+                ImportFaultInjector.NONE
+        );
+    }
+
+    static SqliteRevisionStore open(
+            Path databasePath,
+            CheckpointPolicy checkpointPolicy,
+            CommitFaultInjector faultInjector,
+            ImportFaultInjector importFaultInjector
+    ) throws IOException {
+        return new SqliteRevisionStore(
+                SqliteDatabase.open(databasePath),
+                checkpointPolicy,
+                faultInjector,
+                importFaultInjector
         );
     }
 
@@ -286,6 +315,39 @@ public final class SqliteRevisionStore implements RevisionStore, AutoCloseable {
             }
             return List.copyOf(tombstones);
         });
+    }
+
+    @Override
+    public dev.storyblock.contracts.CanonicalNovelPackage loadCanonicalPackage(
+            Ids.NovelId novelId
+    ) {
+        return read(connection -> SqliteCanonicalTransfer.loadPackage(connection, novelId));
+    }
+
+    @Override
+    public CanonicalImportResult importCanonicalPackage(CanonicalImportRequest request) {
+        Objects.requireNonNull(request, "request");
+        return write(connection -> SqliteCanonicalTransfer.importPackage(
+                connection, request, importFaultInjector
+        ));
+    }
+
+    @Override
+    public ExportJobResult createCompletedExport(ExportJobRequest request) {
+        Objects.requireNonNull(request, "request");
+        return write(connection -> SqliteCanonicalTransfer.createCompletedExport(
+                connection, request
+        ));
+    }
+
+    @Override
+    public StoredExportJob getExportJob(Ids.JobId jobId) {
+        return read(connection -> SqliteCanonicalTransfer.getExportJob(connection, jobId));
+    }
+
+    @Override
+    public StoredArtifact getArtifact(Ids.ArtifactId artifactId) {
+        return read(connection -> SqliteCanonicalTransfer.getArtifact(connection, artifactId));
     }
 
     @Override

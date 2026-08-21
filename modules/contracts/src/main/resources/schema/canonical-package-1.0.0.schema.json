@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/schema/canonical-package-1.0.0.schema.json",
+  "title": "StoryBlock complete canonical novel package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifacts", "manifest", "operations", "package_version", "revisions"],
+  "properties": {
+    "package_version": {"const": "1.0.0"},
+    "manifest": {"$ref": "#/$defs/manifest"},
+    "revisions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100000,
+      "items": {"$ref": "#/$defs/revisionEntry"}
+    },
+    "operations": {
+      "type": "array",
+      "maxItems": 99999,
+      "items": {"$ref": "#/$defs/operationEntry"}
+    },
+    "artifacts": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {"$ref": "#/$defs/artifactEntry"}
+    }
+  },
+  "$defs": {
+    "novelId": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revisionId": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^op_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "artifactId": {
+      "type": "string",
+      "pattern": "^art_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_count",
+        "head_hash",
+        "head_revision_id",
+        "head_sequence",
+        "novel_id",
+        "operation_count",
+        "revision_count",
+        "schema_version"
+      ],
+      "properties": {
+        "novel_id": {"$ref": "#/$defs/novelId"},
+        "schema_version": {"const": "1.0.0"},
+        "head_revision_id": {"$ref": "#/$defs/revisionId"},
+        "head_sequence": {"type": "integer", "minimum": 0},
+        "head_hash": {"$ref": "#/$defs/hash"},
+        "revision_count": {"type": "integer", "minimum": 1},
+        "operation_count": {"type": "integer", "minimum": 0},
+        "artifact_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "revisionEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document", "sequence"],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 0},
+        "document": {
+          "$ref": "canonical-novel-1.0.0.schema.json"
+        }
+      }
+    },
+    "operationEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "committed_at",
+        "operation",
+        "operation_hash",
+        "result_hash",
+        "result_revision_id",
+        "sequence"
+      ],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "operation_hash": {"$ref": "#/$defs/hash"},
+        "operation": {"$ref": "#/$defs/operationEnvelope"},
+        "result_revision_id": {"$ref": "#/$defs/revisionId"},
+        "result_hash": {"$ref": "#/$defs/hash"},
+        "committed_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "artifactEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "codec",
+        "content_base64",
+        "content_hash",
+        "created_at",
+        "kind",
+        "media_type",
+        "revision_id",
+        "size_bytes"
+      ],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/artifactId"},
+        "revision_id": {"$ref": "#/$defs/revisionId"},
+        "kind": {"type": "string", "pattern": "^[a-z][a-z0-9.-]{1,63}$"},
+        "media_type": {"type": "string"},
+        "codec": {"type": "string", "pattern": "^[a-z][a-z0-9.-]{1,63}$"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 16777216},
+        "created_at": {"type": "string", "format": "date-time"},
+        "content_base64": {"type": "string", "contentEncoding": "base64"}
+      }
+    },
+    "operationEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_revision_id",
+        "expected_head_hash",
+        "idempotency_key",
+        "novel_id",
+        "operation_id",
+        "payload",
+        "type"
+      ],
+      "properties": {
+        "operation_id": {"$ref": "#/$defs/operationId"},
+        "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 200},
+        "novel_id": {"$ref": "#/$defs/novelId"},
+        "base_revision_id": {"$ref": "#/$defs/revisionId"},
+        "expected_head_hash": {"$ref": "#/$defs/hash"},
+        "type": {
+          "enum": [
+            "correct_block_meta",
+            "delete_block_range",
+            "extend_block",
+            "insert_blocks",
+            "merge_blocks",
+            "move_block_range",
+            "replace_block_range",
+            "restore_revision_content",
+            "set_scene_initial_meta",
+            "split_block"
+          ]
+        },
+        "payload": {"type": "object"}
+      }
+    }
+  }
+}

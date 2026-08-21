@@ -1,0 +1,13 @@
+package dev.storyblock.storage.sqlite;
+
+enum ImportStage {
+    AFTER_RECEIPT_CHECK,
+    AFTER_NOVEL,
+    AFTER_REVISIONS,
+    AFTER_OPERATIONS,
+    AFTER_ARTIFACTS,
+    AFTER_TOMBSTONES,
+    AFTER_CHECKPOINT,
+    AFTER_PROJECTION,
+    AFTER_RECEIPT
+}

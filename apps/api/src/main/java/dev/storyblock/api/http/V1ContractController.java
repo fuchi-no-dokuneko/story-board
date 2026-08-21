@@ -20,11 +20,6 @@ public final class V1ContractController {
         return unavailable();
     }
 
-    @PostMapping("/imports")
-    ResponseEntity<Map<String, Object>> importNovel(@RequestBody JsonNode request) {
-        return unavailable();
-    }
-
     @GetMapping("/novels/{novelId}")
     ResponseEntity<Map<String, Object>> getNovel(@PathVariable String novelId) {
         return unavailable();
@@ -118,19 +113,6 @@ public final class V1ContractController {
     @PostMapping("/style-profiles/{profileId}/versions")
     ResponseEntity<Map<String, Object>> createStyleProfileVersion(
             @PathVariable String profileId,
-            @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
-    @GetMapping("/jobs/{jobId}")
-    ResponseEntity<Map<String, Object>> getJob(@PathVariable String jobId) {
-        return unavailable();
-    }
-
-    @PostMapping("/novels/{novelId}/exports")
-    ResponseEntity<Map<String, Object>> startExport(
-            @PathVariable String novelId,
             @RequestBody JsonNode request
     ) {
         return unavailable();

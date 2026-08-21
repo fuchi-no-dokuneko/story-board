@@ -4,6 +4,9 @@ import dev.storyblock.application.CommitRejectedException;
 import dev.storyblock.storage.IdempotencyConflictException;
 import dev.storyblock.storage.MissingNovelException;
 import dev.storyblock.storage.MissingRevisionException;
+import dev.storyblock.storage.MissingArtifactException;
+import dev.storyblock.storage.MissingExportJobException;
+import dev.storyblock.storage.NovelConflictException;
 import dev.storyblock.storage.StaleHeadException;
 import dev.storyblock.storage.StorageException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -88,7 +91,12 @@ public final class ApiExceptionHandler {
         ));
     }
 
-    @ExceptionHandler({MissingNovelException.class, MissingRevisionException.class})
+    @ExceptionHandler({
+            MissingNovelException.class,
+            MissingRevisionException.class,
+            MissingExportJobException.class,
+            MissingArtifactException.class
+    })
     ResponseEntity<Map<String, Object>> missingResource(
             RuntimeException failure,
             HttpServletRequest request
@@ -98,6 +106,20 @@ public final class ApiExceptionHandler {
                 "RESOURCE_NOT_FOUND",
                 "Resource not found",
                 "resource-not-found",
+                failure.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(NovelConflictException.class)
+    ResponseEntity<Map<String, Object>> resourceConflict(
+            NovelConflictException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, ApiFailureException.of(
+                HttpStatus.CONFLICT,
+                "RESOURCE_CONFLICT",
+                "Resource conflict",
+                "resource-conflict",
                 failure.getMessage()
         ));
     }

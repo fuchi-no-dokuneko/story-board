@@ -144,9 +144,13 @@ public final class CanonicalRevision {
     }
 
     public byte[] envelopeBytes() {
+        return CanonicalJson.bytes(envelope());
+    }
+
+    public Map<String, Object> envelope() {
         Map<String, Object> envelope = new TreeMap<>(canonicalContent);
         envelope.put("content_hash", contentHash);
-        return CanonicalJson.bytes(envelope);
+        return Collections.unmodifiableMap(envelope);
     }
 
     public byte[] diagnosticExportBytes() {

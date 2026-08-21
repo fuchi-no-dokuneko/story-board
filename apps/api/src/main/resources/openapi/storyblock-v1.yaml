@@ -65,6 +65,15 @@ paths:
             schema:
               $ref: "#/components/schemas/ImportRequest"
       responses:
+        "200":
+          description: Existing idempotent import result
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
         "201":
           description: Canonical package imported atomically
           headers:
@@ -382,6 +391,38 @@ paths:
                 $ref: "#/components/schemas/Job"
         default:
           $ref: "#/components/responses/Problem"
+  /artifacts/{artifactId}:
+    get:
+      operationId: downloadArtifact
+      summary: Download a novel-scoped immutable result artifact
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/ArtifactId"
+      responses:
+        "200":
+          description: Immutable artifact bytes
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            X-Artifact-Codec:
+              $ref: "#/components/headers/ArtifactCodec"
+            Content-Disposition:
+              $ref: "#/components/headers/ContentDisposition"
+          content:
+            application/vnd.storyblock.package+json:
+              schema:
+                type: string
+                format: binary
+            application/vnd.storyblock.revision+json:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        default:
+          $ref: "#/components/responses/Problem"
   /novels/{novelId}/exports:
     post:
       operationId: startExport
@@ -550,6 +591,13 @@ components:
         type: string
         minLength: 1
         maxLength: 128
+    ArtifactId:
+      name: artifactId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^art_[0-9a-f-]{36}$'
     Cursor:
       name: cursor
       in: query
@@ -594,6 +642,17 @@ components:
       schema:
         type: string
         format: uri-reference
+    ArtifactCodec:
+      description: Storage encoding applied to the returned bytes.
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9.-]{1,63}$'
+    ContentDisposition:
+      description: Attachment filename for offline use.
+      required: true
+      schema:
+        type: string
   responses:
     Problem:
       description: RFC problem response with a stable machine code
@@ -653,8 +712,9 @@ components:
           type: string
           enum: [canonical-revision, canonical-package]
         document:
-          type: object
-          additionalProperties: true
+          oneOf:
+            - $ref: "#/components/schemas/CanonicalRevision"
+            - $ref: "#/components/schemas/CanonicalPackage"
       additionalProperties: false
     NovelHead:
       type: object
@@ -699,6 +759,116 @@ components:
         extensions:
           type: object
           additionalProperties: true
+      additionalProperties: false
+    CanonicalPackage:
+      type: object
+      required: [package_version, manifest, revisions, operations, artifacts]
+      properties:
+        package_version:
+          const: 1.0.0
+        manifest:
+          $ref: "#/components/schemas/CanonicalPackageManifest"
+        revisions:
+          type: array
+          minItems: 1
+          maxItems: 100000
+          items:
+            $ref: "#/components/schemas/CanonicalPackageRevision"
+        operations:
+          type: array
+          maxItems: 99999
+          items:
+            $ref: "#/components/schemas/CanonicalPackageOperation"
+        artifacts:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/CanonicalPackageArtifact"
+      additionalProperties: false
+    CanonicalPackageManifest:
+      type: object
+      required: [novel_id, schema_version, head_revision_id, head_sequence, head_hash, revision_count, operation_count, artifact_count]
+      properties:
+        novel_id:
+          type: string
+        schema_version:
+          const: 1.0.0
+        head_revision_id:
+          type: string
+        head_sequence:
+          type: integer
+          minimum: 0
+        head_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        revision_count:
+          type: integer
+          minimum: 1
+        operation_count:
+          type: integer
+          minimum: 0
+        artifact_count:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    CanonicalPackageRevision:
+      type: object
+      required: [sequence, document]
+      properties:
+        sequence:
+          type: integer
+          minimum: 0
+        document:
+          $ref: "#/components/schemas/CanonicalRevision"
+      additionalProperties: false
+    CanonicalPackageOperation:
+      type: object
+      required: [sequence, operation_hash, operation, result_revision_id, result_hash, committed_at]
+      properties:
+        sequence:
+          type: integer
+          minimum: 1
+        operation_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        result_revision_id:
+          type: string
+        result_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        committed_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    CanonicalPackageArtifact:
+      type: object
+      required: [artifact_id, revision_id, kind, media_type, codec, content_hash, size_bytes, created_at, content_base64]
+      properties:
+        artifact_id:
+          type: string
+        revision_id:
+          type: string
+        kind:
+          type: string
+        media_type:
+          type: string
+        codec:
+          type: string
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        size_bytes:
+          type: integer
+          minimum: 0
+          maximum: 16777216
+        created_at:
+          type: string
+          format: date-time
+        content_base64:
+          type: string
+          contentEncoding: base64
       additionalProperties: false
     RenderRequest:
       type: object
@@ -928,6 +1098,9 @@ components:
           minimum: 0
         result_artifact_id:
           type: [string, "null"]
+        result_uri:
+          type: [string, "null"]
+          format: uri-reference
         created_at:
           type: string
           format: date-time

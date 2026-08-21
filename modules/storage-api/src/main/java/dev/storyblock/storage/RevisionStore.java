@@ -1,5 +1,6 @@
 package dev.storyblock.storage;
 
+import dev.storyblock.contracts.CanonicalNovelPackage;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.RevisionManifest;
 import java.util.List;
@@ -32,6 +33,16 @@ public interface RevisionStore {
     );
 
     List<BlockTombstone> listTombstones(Ids.NovelId novelId);
+
+    CanonicalNovelPackage loadCanonicalPackage(Ids.NovelId novelId);
+
+    CanonicalImportResult importCanonicalPackage(CanonicalImportRequest request);
+
+    ExportJobResult createCompletedExport(ExportJobRequest request);
+
+    StoredExportJob getExportJob(Ids.JobId jobId);
+
+    StoredArtifact getArtifact(Ids.ArtifactId artifactId);
 
     CommitResult commitCas(CommitRequest request);
 

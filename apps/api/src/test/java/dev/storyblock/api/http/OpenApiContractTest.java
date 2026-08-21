@@ -39,6 +39,7 @@ class OpenApiContractTest {
             "POST /style-profiles",
             "POST /style-profiles/{profileId}/versions",
             "GET /jobs/{jobId}",
+            "GET /artifacts/{artifactId}",
             "POST /novels/{novelId}/exports",
             "POST /novels/{novelId}/access-keys",
             "DELETE /access-keys/{keyId}",
@@ -155,8 +156,10 @@ class OpenApiContractTest {
         assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
         assertStrongEtag("POST /novels", "201");
         assertStrongEtag("POST /imports", "201");
+        assertStrongEtag("POST /imports", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "201");
+        assertStrongEtag("GET /artifacts/{artifactId}", "200");
 
         assertTrue(
                 parameterRefs(operation("GET /style-analyses/{analysisId}"))
@@ -186,6 +189,11 @@ class OpenApiContractTest {
         assertTrue(schemas.containsKey("WorkerClaimResponse"));
         assertTrue(schemas.containsKey("WorkerResultRequest"));
         assertTrue(schemas.containsKey("WorkerResultResponse"));
+        assertTrue(schemas.containsKey("CanonicalPackage"));
+        assertTrue(schemas.containsKey("CanonicalPackageManifest"));
+        assertTrue(schemas.containsKey("CanonicalPackageRevision"));
+        assertTrue(schemas.containsKey("CanonicalPackageOperation"));
+        assertTrue(schemas.containsKey("CanonicalPackageArtifact"));
     }
 
     @Test
