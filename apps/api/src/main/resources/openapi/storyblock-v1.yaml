@@ -1,0 +1,1150 @@
+openapi: 3.1.0
+info:
+  title: StoryBlock Engine API
+  version: 1.0.0
+  description: Immutable, evidence-bound narrative editing contracts.
+servers:
+  - url: /v1
+security:
+  - bearerAuth: []
+x-http-status-policy:
+  "200": Synchronous read, preview, worker result, or idempotent result
+  "201": Novel, profile, key, or canonical revision created
+  "202": Durable analysis, rewrite, or export job accepted
+  "400": Malformed JSON, header, cursor, or request contract
+  "401": Authentication is missing or invalid
+  "403": Authenticated principal lacks the required scope
+  "404": Resource does not exist or is not visible
+  "409": Idempotency payload or operation state conflicts
+  "410": Proposal or retained artifact has expired
+  "412": If-Match does not identify the current head
+  "413": Request, batch, or artifact exceeds its configured limit
+  "422": Deterministic validation rejected the request
+  "428": If-Match or Idempotency-Key is missing
+  "429": Rate or concurrency limit exceeded
+  "503": Storage or worker dependency is unavailable
+paths:
+  /novels:
+    post:
+      operationId: createNovel
+      summary: Create a novel from an initial canonical revision
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNovelRequest"
+      responses:
+        "201":
+          description: Novel created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
+        default:
+          $ref: "#/components/responses/Problem"
+  /imports:
+    post:
+      operationId: importCanonicalPackage
+      summary: Import a versioned canonical JSON document or package
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportRequest"
+      responses:
+        "201":
+          description: Canonical package imported atomically
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}:
+    get:
+      operationId: getNovelHead
+      summary: Get current novel head metadata
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+      responses:
+        "200":
+          description: Current head metadata
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/revisions/{revisionId}:
+    get:
+      operationId: getRevision
+      summary: Get an immutable canonical revision
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/RevisionId"
+      responses:
+        "200":
+          description: Canonical revision
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CanonicalRevision"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/renders:
+    post:
+      operationId: renderRevision
+      summary: Render a revision range with resolved metadata
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenderRequest"
+      responses:
+        "200":
+          description: Deterministic render packet
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RenderPacket"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/edit-previews:
+    post:
+      operationId: previewEdit
+      summary: Preview and validate one typed edit operation
+      x-required-scopes: ["novel:propose"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditPreviewRequest"
+      responses:
+        "200":
+          description: Side-effect-free preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/commits:
+    post:
+      operationId: commitEdit
+      summary: Commit one validated operation with atomic head CAS
+      x-required-scopes: ["novel:commit"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommitRequest"
+      responses:
+        "200":
+          description: Existing idempotent commit result
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommitResponse"
+        "201":
+          description: New immutable revision committed
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommitResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/undo-previews:
+    post:
+      operationId: previewUndo
+      summary: Preview restoration of historical canonical content
+      x-required-scopes: ["novel:propose"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UndoPreviewRequest"
+      responses:
+        "200":
+          description: Restore operation preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/detector-runs:
+    post:
+      operationId: runAdjacentDetector
+      summary: Run the deterministic adjacent metadata detector
+      x-required-scopes: ["novel:analyze"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DetectorRunRequest"
+      responses:
+        "200":
+          description: Revision-bound detector findings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetectorRunResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/style-analyses:
+    post:
+      operationId: startStyleAnalysis
+      summary: Submit a durable style analysis job
+      x-required-scopes: ["style:analyze"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StyleAnalysisRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/JobAccepted"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-analyses/{analysisId}:
+    get:
+      operationId: getStyleAnalysis
+      summary: Get a cursor-paged style analysis result
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/AnalysisId"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: Analysis summary and one findings page
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleAnalysisPage"
+        default:
+          $ref: "#/components/responses/Problem"
+  /rewrite-proposals:
+    post:
+      operationId: startRewriteProposal
+      summary: Submit a durable LLM rewrite proposal job
+      x-required-scopes: ["rewrite:propose"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RewriteProposalRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/JobAccepted"
+        default:
+          $ref: "#/components/responses/Problem"
+  /rewrite-proposals/{proposalId}:
+    get:
+      operationId: getRewriteProposal
+      summary: Get an immutable rewrite proposal and its validation results
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/ProposalId"
+      responses:
+        "200":
+          description: Rewrite proposal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewriteProposal"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-profiles:
+    post:
+      operationId: createStyleProfile
+      summary: Create an immutable style profile
+      x-required-scopes: ["style:admin"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StyleProfileRequest"
+      responses:
+        "201":
+          description: Style profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfile"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-profiles/{profileId}/versions:
+    post:
+      operationId: publishStyleProfileVersion
+      summary: Publish a manually approved immutable profile baseline
+      x-required-scopes: ["style:admin"]
+      parameters:
+        - $ref: "#/components/parameters/ProfileId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StyleProfileVersionRequest"
+      responses:
+        "201":
+          description: Profile version published
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfileVersion"
+        default:
+          $ref: "#/components/responses/Problem"
+  /jobs/{jobId}:
+    get:
+      operationId: getJob
+      summary: Get durable job status within its novel authorization boundary
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+      responses:
+        "200":
+          description: Durable job state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/exports:
+    post:
+      operationId: startExport
+      summary: Submit a canonical JSON or package export job
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/JobAccepted"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/access-keys:
+    post:
+      operationId: createAccessKey
+      summary: Issue a scoped per-novel bearer credential
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessKeyRequest"
+      responses:
+        "201":
+          description: Credential issued; secret is returned only once
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessKeyCreated"
+        default:
+          $ref: "#/components/responses/Problem"
+  /access-keys/{keyId}:
+    delete:
+      operationId: revokeAccessKey
+      summary: Revoke a scoped bearer credential
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/KeyId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Key is revoked or was already revoked idempotently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevokeResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /internal/jobs/claims:
+    post:
+      operationId: claimWorkerJob
+      summary: Claim one available or expired durable worker lease
+      x-required-scopes: ["worker:execute"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkerClaimRequest"
+      responses:
+        "200":
+          description: Lease claim result; job is null when no work is ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerClaimResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /internal/jobs/{jobId}/results:
+    post:
+      operationId: submitWorkerResult
+      summary: Submit an idempotent version-bound worker result
+      x-required-scopes: ["worker:execute"]
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkerResultRequest"
+      responses:
+        "200":
+          description: Result accepted or returned idempotently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerResultResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: nv_<public-key-id>.<256-bit-secret>
+  parameters:
+    NovelId:
+      name: novelId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^nov_[0-9a-f-]{36}$'
+    RevisionId:
+      name: revisionId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^rev_[0-9a-f-]{36}$'
+    AnalysisId:
+      name: analysisId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    ProposalId:
+      name: proposalId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^prp_[0-9a-f-]{36}$'
+    ProfileId:
+      name: profileId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^job_[0-9a-f-]{36}$'
+    KeyId:
+      name: keyId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 512
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: A single quoted strong canonical SHA-256 ETag.
+      schema:
+        type: string
+        pattern: '^"sha256:[0-9a-f]{64}"$'
+    IfMatchForCreation:
+      name: If-Match
+      in: header
+      required: true
+      description: Wildcard precondition for creation in a collection.
+      schema:
+        const: '*'
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 200
+  headers:
+    StrongEtag:
+      description: Quoted strong ETag of the canonical revision.
+      required: true
+      schema:
+        type: string
+        pattern: '^"sha256:[0-9a-f]{64}"$'
+    Location:
+      description: Absolute or origin-relative durable job status URI.
+      required: true
+      schema:
+        type: string
+        format: uri-reference
+  responses:
+    Problem:
+      description: RFC problem response with a stable machine code
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    JobAccepted:
+      description: Durable job accepted
+      headers:
+        Location:
+          $ref: "#/components/headers/Location"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/JobAccepted"
+  schemas:
+    Problem:
+      type: object
+      required: [type, title, status, code, detail, instance, request_id]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        code:
+          type: string
+          pattern: '^[A-Z][A-Z0-9_]{1,63}$'
+        detail:
+          type: string
+        instance:
+          type: string
+        request_id:
+          type: string
+        current_revision_id:
+          type: string
+        current_etag:
+          type: string
+      additionalProperties: true
+    CreateNovelRequest:
+      type: object
+      required: [initial_revision]
+      properties:
+        initial_revision:
+          $ref: "#/components/schemas/CanonicalRevision"
+      additionalProperties: false
+    ImportRequest:
+      type: object
+      required: [format, document]
+      properties:
+        format:
+          type: string
+          enum: [canonical-revision, canonical-package]
+        document:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    NovelHead:
+      type: object
+      required: [novel_id, head_revision_id, head_sequence, head_hash, schema_version]
+      properties:
+        novel_id:
+          type: string
+        head_revision_id:
+          type: string
+        head_sequence:
+          type: integer
+          minimum: 0
+        head_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        schema_version:
+          type: string
+      additionalProperties: false
+    CanonicalRevision:
+      type: object
+      required: [schema_version, novel_id, revision_id, parent_revision_id, chapters, created_at, content_hash]
+      properties:
+        schema_version:
+          const: 1.0.0
+        novel_id:
+          type: string
+        revision_id:
+          type: string
+        parent_revision_id:
+          type: [string, "null"]
+        chapters:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        extensions:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    RenderRequest:
+      type: object
+      required: [revision_id]
+      properties:
+        revision_id:
+          type: string
+        from_block_id:
+          type: [string, "null"]
+        to_block_id:
+          type: [string, "null"]
+      additionalProperties: false
+    RenderPacket:
+      type: object
+      required: [novel_id, revision_id, revision_hash, renderer_version, range, blocks, resolved_meta, offset_map]
+      properties:
+        novel_id:
+          type: string
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+        renderer_version:
+          type: string
+        range:
+          type: object
+        blocks:
+          type: array
+          items:
+            type: object
+        resolved_meta:
+          type: array
+          items:
+            type: object
+        offset_map:
+          type: array
+          items:
+            type: object
+      additionalProperties: false
+    OperationEnvelope:
+      type: object
+      required: [operation_id, idempotency_key, novel_id, base_revision_id, expected_head_hash, type, payload]
+      properties:
+        operation_id:
+          type: string
+        idempotency_key:
+          type: string
+          minLength: 1
+          maxLength: 200
+        novel_id:
+          type: string
+        base_revision_id:
+          type: string
+        expected_head_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        type:
+          type: string
+          enum: [insert_blocks, replace_block_range, delete_block_range, split_block, merge_blocks, extend_block, move_block_range, correct_block_meta, set_scene_initial_meta, restore_revision_content]
+        payload:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    EditPreviewRequest:
+      type: object
+      required: [operation, candidate_revision_id, candidate_created_at]
+      properties:
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        candidate_revision_id:
+          type: string
+        candidate_created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    CommitRequest:
+      allOf:
+        - $ref: "#/components/schemas/EditPreviewRequest"
+    UndoPreviewRequest:
+      type: object
+      required: [base_revision_id, restore_revision_id, expected_restore_hash, candidate_revision_id, candidate_created_at]
+      properties:
+        base_revision_id:
+          type: string
+        restore_revision_id:
+          type: string
+        expected_restore_hash:
+          type: string
+        candidate_revision_id:
+          type: string
+        candidate_created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    PreviewResponse:
+      type: object
+      required: [base_revision_id, base_hash, normalized_operation, candidate_hash, diff, render_packet, violations, warnings, committable]
+      properties:
+        base_revision_id:
+          type: string
+        base_hash:
+          type: string
+        normalized_operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        candidate_hash:
+          type: string
+        diff:
+          type: object
+        render_packet:
+          oneOf:
+            - $ref: "#/components/schemas/RenderPacket"
+            - type: "null"
+        violations:
+          type: array
+          items:
+            type: object
+        warnings:
+          type: array
+          items:
+            type: object
+        committable:
+          type: boolean
+      additionalProperties: false
+    CommitResponse:
+      type: object
+      required: [revision_id, sequence, content_hash, operation_id, idempotent_replay]
+      properties:
+        revision_id:
+          type: string
+        sequence:
+          type: integer
+          minimum: 1
+        content_hash:
+          type: string
+        operation_id:
+          type: string
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false
+    DetectorRunRequest:
+      type: object
+      required: [revision_id, revision_hash]
+      properties:
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+        from_block_id:
+          type: [string, "null"]
+        to_block_id:
+          type: [string, "null"]
+      additionalProperties: false
+    DetectorRunResponse:
+      type: object
+      required: [revision_id, revision_hash, rule_version, findings]
+      properties:
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+        rule_version:
+          type: string
+        findings:
+          type: array
+          items:
+            type: object
+      additionalProperties: false
+    StyleAnalysisRequest:
+      type: object
+      required: [revision_id, revision_hash, profile_version_id]
+      properties:
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+        profile_version_id:
+          type: string
+        window_size:
+          type: integer
+          minimum: 1
+      additionalProperties: false
+    RewriteProposalRequest:
+      type: object
+      required: [novel_id, revision_id, revision_hash, finding_ids]
+      properties:
+        novel_id:
+          type: string
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+        finding_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+      additionalProperties: false
+    JobAccepted:
+      type: object
+      required: [job_id, status, status_uri]
+      properties:
+        job_id:
+          type: string
+        status:
+          const: queued
+        status_uri:
+          type: string
+          format: uri-reference
+      additionalProperties: false
+    Job:
+      type: object
+      required: [job_id, novel_id, revision_id, kind, status, attempt, created_at, updated_at]
+      properties:
+        job_id:
+          type: string
+        novel_id:
+          type: string
+        revision_id:
+          type: string
+        kind:
+          type: string
+        status:
+          type: string
+          enum: [queued, leased, succeeded, failed, cancelled]
+        attempt:
+          type: integer
+          minimum: 0
+        result_artifact_id:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    StyleAnalysisPage:
+      type: object
+      required: [analysis_id, job, summary, findings, next_cursor]
+      properties:
+        analysis_id:
+          type: string
+        job:
+          $ref: "#/components/schemas/Job"
+        summary:
+          type: object
+        findings:
+          type: array
+          items:
+            type: object
+        next_cursor:
+          type: [string, "null"]
+      additionalProperties: false
+    RewriteProposal:
+      type: object
+      required: [proposal_id, novel_id, revision_id, revision_hash, diff, scores, validator_result, status]
+      properties:
+        proposal_id:
+          type: string
+        novel_id:
+          type: string
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+        diff:
+          type: object
+        scores:
+          type: object
+        validator_result:
+          type: object
+        status:
+          type: string
+          enum: [pending, ready, stale, expired, rejected]
+      additionalProperties: false
+    StyleProfileRequest:
+      type: object
+      required: [name, provenance]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        provenance:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    StyleProfile:
+      type: object
+      required: [profile_id, name, created_at]
+      properties:
+        profile_id:
+          type: string
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    StyleProfileVersionRequest:
+      type: object
+      required: [feature_config, distributions, provenance, approved_by]
+      properties:
+        feature_config:
+          type: object
+        distributions:
+          type: object
+        provenance:
+          type: object
+        approved_by:
+          type: string
+      additionalProperties: false
+    StyleProfileVersion:
+      type: object
+      required: [profile_id, version_id, version, created_at]
+      properties:
+        profile_id:
+          type: string
+        version_id:
+          type: string
+        version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    ExportRequest:
+      type: object
+      required: [revision_id, format]
+      properties:
+        revision_id:
+          type: string
+        format:
+          type: string
+          enum: [canonical-revision, canonical-package]
+      additionalProperties: false
+    AccessKeyRequest:
+      type: object
+      required: [actor_id, scopes, expires_at]
+      properties:
+        actor_id:
+          type: string
+        scopes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+        expires_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    AccessKeyCreated:
+      type: object
+      required: [key_id, novel_id, actor_id, scopes, expires_at, secret]
+      properties:
+        key_id:
+          type: string
+        novel_id:
+          type: string
+        actor_id:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        expires_at:
+          type: string
+          format: date-time
+        secret:
+          type: string
+          writeOnly: true
+      additionalProperties: false
+    RevokeResponse:
+      type: object
+      required: [key_id, revoked]
+      properties:
+        key_id:
+          type: string
+        revoked:
+          type: boolean
+      additionalProperties: false
+    WorkerClaimRequest:
+      type: object
+      required: [worker_id, kinds, lease_seconds]
+      properties:
+        worker_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        kinds:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            enum: [style-analysis, llm-rewrite, export]
+        lease_seconds:
+          type: integer
+          minimum: 10
+          maximum: 900
+      additionalProperties: false
+    WorkerClaimResponse:
+      type: object
+      required: [job, lease_token]
+      properties:
+        job:
+          oneOf:
+            - $ref: "#/components/schemas/Job"
+            - type: "null"
+        lease_token:
+          type: [string, "null"]
+          writeOnly: true
+      additionalProperties: false
+    WorkerResultRequest:
+      type: object
+      required: [worker_id, lease_token, outcome, revision_hash, result]
+      properties:
+        worker_id:
+          type: string
+        lease_token:
+          type: string
+          writeOnly: true
+        outcome:
+          type: string
+          enum: [succeeded, failed]
+        revision_hash:
+          type: string
+        profile_version_id:
+          type: [string, "null"]
+        analyzer_version:
+          type: [string, "null"]
+        result:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    WorkerResultResponse:
+      type: object
+      required: [job_id, status, idempotent_replay]
+      properties:
+        job_id:
+          type: string
+        status:
+          type: string
+          enum: [succeeded, failed]
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false

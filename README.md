@@ -35,6 +35,13 @@ The command emits one canonical JSON report and exits nonzero when any head
 cannot be reproduced. It requires an existing database file, preventing a path
 typo from being reported as an empty valid store.
 
+## HTTP Contract
+
+The versioned REST contract is served at `GET /v1/openapi.yaml` and documented
+in [`docs/api/v1-http-contract.md`](docs/api/v1-http-contract.md). Contract
+routes fail closed: authentication and mutation preconditions are active now,
+while services assigned to later ADRs return a typed `503` until installed.
+
 ## Modules
 
 - `apps/api`: Spring MVC API and commit coordinator

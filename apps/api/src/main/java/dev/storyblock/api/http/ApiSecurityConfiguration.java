@@ -1,0 +1,101 @@
+package dev.storyblock.api.http;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
+
+@Configuration
+public class ApiSecurityConfiguration {
+    private static final String SCOPE_PREFIX = "SCOPE_";
+
+    @Bean
+    SecurityFilterChain apiSecurityFilterChain(
+            HttpSecurity http,
+            ApiProblemWriter problemWriter
+    ) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
+                .logout(logout -> logout.disable())
+                .requestCache(cache -> cache.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS
+                ))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                "/v1/openapi.yaml",
+                                "/actuator/health",
+                                "/actuator/health/**"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/v1/novels", "/v1/imports")
+                        .hasAuthority(scope("novel:admin"))
+                        .requestMatchers(HttpMethod.POST, "/v1/style-profiles/**")
+                        .hasAuthority(scope("style:admin"))
+                        .requestMatchers(HttpMethod.POST, "/v1/rewrite-proposals")
+                        .hasAuthority(scope("rewrite:propose"))
+                        .requestMatchers(HttpMethod.POST, "/v1/internal/jobs/claims")
+                        .hasAuthority(scope("worker:execute"))
+                        .requestMatchers(HttpMethod.POST, "/v1/internal/jobs/*/results")
+                        .hasAuthority(scope("worker:execute"))
+                        .requestMatchers(HttpMethod.POST, "/v1/novels/*/commits")
+                        .hasAuthority(scope("novel:commit"))
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/v1/novels/*/edit-previews",
+                                "/v1/novels/*/undo-previews"
+                        ).hasAuthority(scope("novel:propose"))
+                        .requestMatchers(HttpMethod.POST, "/v1/novels/*/detector-runs")
+                        .hasAuthority(scope("novel:analyze"))
+                        .requestMatchers(HttpMethod.POST, "/v1/novels/*/style-analyses")
+                        .hasAuthority(scope("style:analyze"))
+                        .requestMatchers(HttpMethod.POST, "/v1/novels/*/access-keys")
+                        .hasAuthority(scope("novel:admin"))
+                        .requestMatchers(HttpMethod.DELETE, "/v1/access-keys/*")
+                        .hasAuthority(scope("novel:admin"))
+                        .requestMatchers(HttpMethod.GET, "/v1/**")
+                        .hasAuthority(scope("novel:read"))
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/v1/novels/*/renders",
+                                "/v1/novels/*/exports"
+                        ).hasAuthority(scope("novel:read"))
+                        .anyRequest().denyAll()
+                )
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, ignored) ->
+                                problemWriter.write(request, response, ApiFailureException.of(
+                                        HttpStatus.UNAUTHORIZED,
+                                        "AUTHENTICATION_REQUIRED",
+                                        "Authentication required",
+                                        "authentication-required",
+                                        "A valid bearer credential is required."
+                                ))
+                        )
+                        .accessDeniedHandler((request, response, ignored) ->
+                                problemWriter.write(request, response, ApiFailureException.of(
+                                        HttpStatus.FORBIDDEN,
+                                        "SCOPE_REQUIRED",
+                                        "Required scope missing",
+                                        "scope-required",
+                                        "The authenticated principal lacks the required scope."
+                                ))
+                        )
+                )
+                .addFilterAfter(
+                        new MutationPreconditionFilter(problemWriter),
+                        AuthorizationFilter.class
+                );
+        return http.build();
+    }
+
+    private static String scope(String value) {
+        return SCOPE_PREFIX + value;
+    }
+}
