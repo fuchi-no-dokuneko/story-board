@@ -34,14 +34,6 @@ public final class V1ContractController {
         return unavailable();
     }
 
-    @PostMapping("/novels/{novelId}/renders")
-    ResponseEntity<Map<String, Object>> render(
-            @PathVariable String novelId,
-            @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
     @PostMapping("/novels/{novelId}/edit-previews")
     ResponseEntity<Map<String, Object>> previewEdit(
             @PathVariable String novelId,

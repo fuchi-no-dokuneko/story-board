@@ -9,10 +9,10 @@ authentication at `GET /v1/openapi.yaml`.
 
 All documented routes are mapped and protected by their declared scope.
 Canonical import, export submission, export-job status, artifact download,
-commit, and access-key lifecycle routes have concrete storage-backed handlers.
-For a route whose owning application
-service is not implemented yet, a correctly authenticated and well-formed
-request receives `503 application/problem+json` with
+deterministic render, commit, and access-key lifecycle routes have concrete
+storage-backed handlers. For a route whose owning application service is not
+implemented yet, a correctly authenticated and well-formed request receives
+`503 application/problem+json` with
 `code=DEPENDENCY_UNAVAILABLE` and `Retry-After: 1`. There is no generated user,
 form login, HTTP Basic fallback, or session state. Bearer credential validation
 uses opaque, novel-bound credentials as described in
@@ -53,6 +53,11 @@ its durable job URI. `GET /v1/jobs/{jobId}` exposes the result artifact URI, and
 `GET /v1/artifacts/{artifactId}` returns offline-downloadable canonical bytes.
 See [`../transfer/canonical-import-export.md`](../transfer/canonical-import-export.md).
 
+`POST /v1/novels/{novelId}/renders` requires the requested immutable revision's
+hash in `If-Match`, returns that hash as its response `ETag`, and emits the
+canonical packet described in
+[`../rendering/deterministic-renderer.md`](../rendering/deterministic-renderer.md).
+
 The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
 `409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.
 
@@ -66,8 +71,8 @@ dependencies have been bootstrapped:
 ```
 
 The tests parse every local OpenAPI reference, compare all 22 required routes,
-exercise each scaffold Spring mapping with its required scope, verify all
-status-policy entries, and cover real bearer authentication, object-level novel
-isolation, problem details, request IDs, ETags, idempotency, wildcard
-restrictions, body limits, commits, and a complete import/export/job/artifact
-round trip.
+exercise each remaining scaffold Spring mapping with its required scope, verify
+all status-policy entries, and cover real bearer authentication, object-level
+novel isolation, problem details, request IDs, ETags, idempotency, wildcard
+restrictions, body limits, deterministic rendering, commits, and a complete
+import/export/job/artifact round trip.

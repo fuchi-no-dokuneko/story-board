@@ -1,0 +1,105 @@
+{
+  "resolved_meta": [
+    {
+      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000005",
+      "before": {
+        "location": {"id": "alley"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_kai"],
+        "time": "night",
+        "weather": {"mode": "unknown"}
+      },
+      "events": [],
+      "after": {
+        "location": {"id": "alley"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_kai"],
+        "time": "night",
+        "weather": {"mode": "unknown"}
+      }
+    },
+    {
+      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000006",
+      "before": {
+        "location": {"id": "alley"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_kai"],
+        "time": "night",
+        "weather": {"mode": "unknown"}
+      },
+      "events": [
+        {
+          "character_id": "char_min",
+          "evidence": {
+            "end_grapheme": 10,
+            "quote": "Min enters",
+            "quote_hash": "sha256:adcdbf673750ae33de22f40f290f55d516d62e5fb7bfd51b0174e1c49375fab8",
+            "start_grapheme": 0
+          },
+          "type": "enter"
+        }
+      ],
+      "after": {
+        "location": {"id": "alley"},
+        "pov": {"character_id": "char_min"},
+        "present_character_ids": ["char_kai", "char_min"],
+        "time": "night",
+        "weather": "rain"
+      }
+    },
+    {
+      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000007",
+      "before": {
+        "location": {"id": "roof"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_min"],
+        "time": {"mode": "unknown"},
+        "weather": {"mode": "not_applicable"}
+      },
+      "events": [],
+      "after": {
+        "location": {"id": "roof"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_min"],
+        "time": {"mode": "unknown"},
+        "weather": {"mode": "not_applicable"}
+      }
+    }
+  ],
+  "scene_boundaries": [
+    {
+      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000003",
+      "state_in": {
+        "location": {"id": "alley"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_kai"],
+        "time": "night",
+        "weather": {"mode": "unknown"}
+      },
+      "state_out": {
+        "location": {"id": "alley"},
+        "pov": {"character_id": "char_min"},
+        "present_character_ids": ["char_kai", "char_min"],
+        "time": "night",
+        "weather": "rain"
+      }
+    },
+    {
+      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000004",
+      "state_in": {
+        "location": {"id": "roof"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_min"],
+        "time": {"mode": "unknown"},
+        "weather": {"mode": "not_applicable"}
+      },
+      "state_out": {
+        "location": {"id": "roof"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_min"],
+        "time": {"mode": "unknown"},
+        "weather": {"mode": "not_applicable"}
+      }
+    }
+  ]
+}

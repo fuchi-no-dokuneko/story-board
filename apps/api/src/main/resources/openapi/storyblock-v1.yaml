@@ -142,6 +142,9 @@ paths:
       responses:
         "200":
           description: Deterministic render packet
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
           content:
             application/json:
               schema:
@@ -891,7 +894,7 @@ components:
       additionalProperties: false
     RenderPacket:
       type: object
-      required: [novel_id, revision_id, revision_hash, renderer_version, range, blocks, resolved_meta, offset_map]
+      required: [novel_id, revision_id, revision_hash, renderer_version, range, rendered_text, blocks, resolved_meta, offset_map, scene_boundaries]
       properties:
         novel_id:
           type: string
@@ -899,22 +902,105 @@ components:
           type: string
         revision_hash:
           type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
         renderer_version:
           type: string
         range:
-          type: object
+          $ref: "#/components/schemas/RenderRange"
+        rendered_text:
+          type: string
         blocks:
           type: array
           items:
-            type: object
+            $ref: "#/components/schemas/RenderedBlock"
         resolved_meta:
           type: array
           items:
-            type: object
+            $ref: "#/components/schemas/ResolvedBlockMetadata"
         offset_map:
           type: array
           items:
+            $ref: "#/components/schemas/RenderOffset"
+        scene_boundaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolvedSceneBoundary"
+      additionalProperties: false
+    RenderRange:
+      type: object
+      required: [from_block_id, to_block_id]
+      properties:
+        from_block_id:
+          type: [string, "null"]
+        to_block_id:
+          type: [string, "null"]
+      additionalProperties: false
+    RenderedBlock:
+      type: object
+      required: [block_id, block_version_id, text, local_meta]
+      properties:
+        block_id:
+          type: string
+        block_version_id:
+          type: string
+        text:
+          type: string
+        local_meta:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    ResolvedBlockMetadata:
+      type: object
+      required: [block_id, before, events, after]
+      properties:
+        block_id:
+          type: string
+        before:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+        events:
+          type: array
+          items:
             type: object
+            additionalProperties: true
+        after:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+      additionalProperties: false
+    ResolvedMetadataState:
+      type: object
+      required: [time, location, weather, pov, present_character_ids]
+      properties:
+        time: {}
+        location: {}
+        weather: {}
+        pov: {}
+        present_character_ids:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+    RenderOffset:
+      type: object
+      required: [block_id, rendered_start, rendered_end]
+      properties:
+        block_id:
+          type: string
+        rendered_start:
+          type: integer
+          minimum: 0
+        rendered_end:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    ResolvedSceneBoundary:
+      type: object
+      required: [scene_id, state_in, state_out]
+      properties:
+        scene_id:
+          type: string
+        state_in:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+        state_out:
+          $ref: "#/components/schemas/ResolvedMetadataState"
       additionalProperties: false
     OperationEnvelope:
       type: object

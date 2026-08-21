@@ -2,6 +2,7 @@ package dev.storyblock.api.http;
 
 import dev.storyblock.application.CanonicalTransferService;
 import dev.storyblock.application.CommitService;
+import dev.storyblock.application.RenderService;
 import dev.storyblock.security.AccessKeyService;
 import dev.storyblock.storage.sqlite.SqliteRevisionStore;
 import java.io.IOException;
@@ -32,6 +33,11 @@ public class ApiStorageConfiguration {
     @Bean
     CommitService commitService(SqliteRevisionStore store) {
         return new CommitService(store);
+    }
+
+    @Bean
+    RenderService renderService(SqliteRevisionStore store) {
+        return new RenderService(store);
     }
 
     @Bean

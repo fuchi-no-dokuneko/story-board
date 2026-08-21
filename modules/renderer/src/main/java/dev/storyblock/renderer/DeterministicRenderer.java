@@ -1,27 +1,18 @@
 package dev.storyblock.renderer;
 
-import dev.storyblock.domain.CanonicalValues;
+import dev.storyblock.domain.DerivedSceneBoundary;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.NarrativeChapter;
 import dev.storyblock.domain.NarrativeScene;
 import dev.storyblock.domain.RevisionManifest;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 public final class DeterministicRenderer {
     private static final Pattern SHA_256 = Pattern.compile("sha256:[0-9a-f]{64}");
-    private static final List<String> RESOLVED_FIELDS = List.of(
-            "time", "location", "weather", "pov"
-    );
 
     public RenderPacket render(
             RevisionManifest revision,
@@ -34,7 +25,8 @@ public final class DeterministicRenderer {
         }
         Objects.requireNonNull(requestedRange, "requestedRange");
 
-        List<ResolvedEntry> resolved = resolveAll(revision);
+        Resolution resolution = resolveAll(revision);
+        List<ResolvedEntry> resolved = resolution.entries();
         if (resolved.isEmpty()) {
             if (!requestedRange.isAll()) {
                 throw new IllegalArgumentException("An empty revision has no render endpoints");
@@ -48,9 +40,11 @@ public final class DeterministicRenderer {
                     "",
                     List.of(),
                     List.of(),
-                    List.of()
+                    List.of(),
+                    resolution.sceneBoundaries()
             );
         }
+
         int from = requestedRange.isAll() ? 0 : indexOf(resolved, requestedRange.fromBlockId());
         int to = requestedRange.isAll()
                 ? resolved.size() - 1
@@ -63,14 +57,19 @@ public final class DeterministicRenderer {
         List<ResolvedBlockMetadata> metadata = new ArrayList<>();
         List<OffsetMapEntry> offsets = new ArrayList<>();
         StringBuilder text = new StringBuilder();
+        int renderedCodePoints = 0;
         for (int index = from; index <= to; index++) {
             ResolvedEntry entry = resolved.get(index);
             if (!blocks.isEmpty()) {
                 text.append('\n');
+                renderedCodePoints++;
             }
-            int start = text.codePointCount(0, text.length());
+            int start = renderedCodePoints;
             text.append(entry.block().text());
-            int end = text.codePointCount(0, text.length());
+            renderedCodePoints += entry.block().text().codePointCount(
+                    0, entry.block().text().length()
+            );
+            int end = renderedCodePoints;
             blocks.add(new RenderedBlock(
                     entry.block().id(),
                     entry.block().versionId(),
@@ -81,9 +80,15 @@ public final class DeterministicRenderer {
             offsets.add(new OffsetMapEntry(entry.block().id(), start, end));
         }
 
-        RenderRange actualRange = blocks.isEmpty()
-                ? RenderRange.all()
-                : RenderRange.inclusive(blocks.getFirst().blockId(), blocks.getLast().blockId());
+        RenderRange actualRange = RenderRange.inclusive(
+                blocks.getFirst().blockId(), blocks.getLast().blockId()
+        );
+        List<DerivedSceneBoundary> sceneBoundaries = requestedRange.isAll()
+                ? resolution.sceneBoundaries()
+                : resolution.sceneBoundaries().subList(
+                        resolved.get(from).sceneIndex(),
+                        resolved.get(to).sceneIndex() + 1
+                );
         return new RenderPacket(
                 revision.novel().id(),
                 revision.id(),
@@ -93,130 +98,38 @@ public final class DeterministicRenderer {
                 text.toString(),
                 blocks,
                 metadata,
-                offsets
+                offsets,
+                sceneBoundaries
         );
     }
 
-    private static List<ResolvedEntry> resolveAll(RevisionManifest revision) {
+    private static Resolution resolveAll(RevisionManifest revision) {
         List<ResolvedEntry> result = new ArrayList<>();
+        List<DerivedSceneBoundary> boundaries = new ArrayList<>();
+        int sceneIndex = 0;
         for (NarrativeChapter chapter : revision.novel().chapters()) {
             for (NarrativeScene scene : chapter.scenes()) {
-                Map<String, Object> state = initialState(scene);
+                MetadataResolutionState state = MetadataResolutionState.fromSceneSeed(
+                        scene.initialMeta()
+                );
+                var stateIn = state.snapshot();
                 for (NarrativeBlock block : scene.blocks()) {
-                    Map<String, Object> before = snapshot(state);
-                    applyObservations(state, block.metadata().fields());
-                    List<Map<String, Object>> events = presenceEvents(block.metadata().fields());
-                    applyPresenceEvents(state, events);
-                    Map<String, Object> after = snapshot(state);
+                    var before = state.snapshot();
+                    var events = state.apply(block.metadata());
+                    var after = state.snapshot();
                     result.add(new ResolvedEntry(
+                            sceneIndex,
                             block,
                             new ResolvedBlockMetadata(block.id(), before, events, after)
                     ));
                 }
+                boundaries.add(new DerivedSceneBoundary(
+                        scene.id(), stateIn, state.snapshot()
+                ));
+                sceneIndex++;
             }
         }
-        return List.copyOf(result);
-    }
-
-    private static Map<String, Object> initialState(NarrativeScene scene) {
-        Map<String, Object> state = new LinkedHashMap<>();
-        if (scene.initialMeta() == null) {
-            state.put("present_character_ids", List.of());
-            return state;
-        }
-        Map<String, Object> seed = scene.initialMeta().fields();
-        for (String field : List.of("time", "location", "weather")) {
-            if (seed.containsKey(field)) {
-                applyObservation(state, field, seed.get(field));
-            }
-        }
-        state.put("present_character_ids", sortedStrings(seed.get("present_character_ids")));
-        return state;
-    }
-
-    private static void applyObservations(Map<String, Object> state, Map<String, Object> metadata) {
-        for (String field : RESOLVED_FIELDS) {
-            if (metadata.containsKey(field)) {
-                applyObservation(state, field, metadata.get(field));
-            }
-        }
-    }
-
-    private static void applyObservation(Map<String, Object> state, String field, Object observation) {
-        if (!(observation instanceof Map<?, ?> map) || !(map.get("mode") instanceof String mode)) {
-            state.put(field, observation);
-            return;
-        }
-        switch (mode) {
-            case "explicit" -> state.put(field, map.get("value"));
-            case "inherited" -> {
-                // Keep the prior local value exactly as-is.
-            }
-            case "unknown", "not_applicable" -> state.put(field, Map.of("mode", mode));
-            default -> state.put(field, observation);
-        }
-    }
-
-    private static void applyPresenceEvents(
-            Map<String, Object> state,
-            List<Map<String, Object>> events
-    ) {
-        Set<String> present = new TreeSet<>(sortedStrings(state.get("present_character_ids")));
-        for (Map<String, Object> event : events) {
-            Object type = event.get("type");
-            Object character = event.get("character_id");
-            if (!(character instanceof String characterId)) {
-                continue;
-            }
-            if ("enter".equals(type)) {
-                present.add(characterId);
-            } else if ("exit".equals(type)) {
-                present.remove(characterId);
-            }
-        }
-        state.put("present_character_ids", List.copyOf(present));
-    }
-
-    private static List<Map<String, Object>> presenceEvents(Map<String, Object> metadata) {
-        Object value = metadata.get("presence_events");
-        if (!(value instanceof List<?> values)) {
-            return List.of();
-        }
-        List<Map<String, Object>> events = new ArrayList<>();
-        for (Object entry : values) {
-            if (entry instanceof Map<?, ?> map) {
-                Map<String, Object> event = new LinkedHashMap<>();
-                for (Map.Entry<?, ?> field : map.entrySet()) {
-                    if (field.getKey() instanceof String key) {
-                        event.put(key, field.getValue());
-                    }
-                }
-                events.add(event);
-            }
-        }
-        return List.copyOf(events);
-    }
-
-    private static List<String> sortedStrings(Object value) {
-        if (!(value instanceof Collection<?> values)) {
-            return List.of();
-        }
-        Set<String> sorted = new TreeSet<>();
-        for (Object entry : values) {
-            if (entry instanceof String string) {
-                sorted.add(string);
-            }
-        }
-        return List.copyOf(sorted);
-    }
-
-    private static Map<String, Object> snapshot(Map<String, Object> state) {
-        Map<String, Object> snapshot = new LinkedHashMap<>(state);
-        snapshot.put(
-                "present_character_ids",
-                List.copyOf(new LinkedHashSet<>(sortedStrings(state.get("present_character_ids"))))
-        );
-        return CanonicalValues.freezeMap(snapshot, "resolved_state");
+        return new Resolution(List.copyOf(result), List.copyOf(boundaries));
     }
 
     private static int indexOf(List<ResolvedEntry> entries, Ids.BlockId blockId) {
@@ -225,9 +138,21 @@ public final class DeterministicRenderer {
                 return index;
             }
         }
-        throw new IllegalArgumentException("Revision does not contain render endpoint " + blockId.value());
+        throw new IllegalArgumentException(
+                "Revision does not contain render endpoint " + blockId.value()
+        );
     }
 
-    private record ResolvedEntry(NarrativeBlock block, ResolvedBlockMetadata resolved) {
+    private record Resolution(
+            List<ResolvedEntry> entries,
+            List<DerivedSceneBoundary> sceneBoundaries
+    ) {
+    }
+
+    private record ResolvedEntry(
+            int sceneIndex,
+            NarrativeBlock block,
+            ResolvedBlockMetadata resolved
+    ) {
     }
 }

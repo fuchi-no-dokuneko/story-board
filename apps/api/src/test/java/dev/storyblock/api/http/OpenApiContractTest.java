@@ -157,6 +157,7 @@ class OpenApiContractTest {
         assertStrongEtag("POST /novels", "201");
         assertStrongEtag("POST /imports", "201");
         assertStrongEtag("POST /imports", "200");
+        assertStrongEtag("POST /novels/{novelId}/renders", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "201");
         assertStrongEtag("GET /artifacts/{artifactId}", "200");
@@ -231,6 +232,33 @@ class OpenApiContractTest {
                 "^key_[0-9a-f-]{36}$",
                 map(map(parameters.get("KeyId")).get("schema")).get("pattern")
         );
+    }
+
+    @Test
+    void renderPacketDocumentsDeterministicTextOffsetsAndSceneState() {
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        Map<String, Object> packet = map(schemas.get("RenderPacket"));
+        Set<String> required = strings(packet.get("required"));
+
+        assertEquals(Set.of(
+                "novel_id", "revision_id", "revision_hash", "renderer_version",
+                "range", "rendered_text", "blocks", "resolved_meta",
+                "offset_map", "scene_boundaries"
+        ), required);
+        assertEquals(
+                "#/components/schemas/RenderRange",
+                map(map(packet.get("properties")).get("range")).get("$ref")
+        );
+        assertEquals(
+                "#/components/schemas/ResolvedSceneBoundary",
+                map(map(map(packet.get("properties")).get("scene_boundaries")).get("items"))
+                        .get("$ref")
+        );
+
+        Map<String, Object> state = map(schemas.get("ResolvedMetadataState"));
+        assertEquals(Set.of(
+                "time", "location", "weather", "pov", "present_character_ids"
+        ), strings(state.get("required")));
     }
 
     @Test
@@ -334,6 +362,14 @@ class OpenApiContractTest {
             throw new AssertionError("expected string, got " + value);
         }
         return text;
+    }
+
+    private static Set<String> strings(Object value) {
+        Set<String> result = new HashSet<>();
+        for (Object entry : list(value)) {
+            result.add(string(entry));
+        }
+        return result;
     }
 
     private record Operation(

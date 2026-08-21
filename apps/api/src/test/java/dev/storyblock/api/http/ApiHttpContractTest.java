@@ -1,6 +1,7 @@
 package dev.storyblock.api.http;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -314,6 +315,70 @@ class ApiHttpContractTest {
     }
 
     @Test
+    void rendersStoredRevisionAsARepeatableCanonicalPacket() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "render-import");
+        byte[] body = CanonicalJson.bytes(Map.of("revision_id", revisionId));
+
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("style:admin"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult first = mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-first")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ))
+                .andExpect(jsonPath("$.novel_id").value(novelId))
+                .andExpect(jsonPath("$.revision_id").value(revisionId))
+                .andExpect(jsonPath("$.revision_hash").value(revision.contentHash()))
+                .andExpect(jsonPath("$.rendered_text").value("First sentence."))
+                .andExpect(jsonPath("$.offset_map[0].rendered_start").value(0))
+                .andExpect(jsonPath("$.offset_map[0].rendered_end").value(15))
+                .andExpect(jsonPath("$.resolved_meta[0].before.weather.mode")
+                        .value("unknown"))
+                .andExpect(jsonPath("$.scene_boundaries[0].state_out.weather.mode")
+                        .value("unknown"))
+                .andReturn();
+
+        MvcResult second = mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-second")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertArrayEquals(
+                first.getResponse().getContentAsByteArray(),
+                second.getResponse().getContentAsByteArray()
+        );
+
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-stale")
+                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isPreconditionFailed())
+                .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
+                .andExpect(jsonPath("$.current_revision_id").value(revisionId))
+                .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
+    }
+
+    @Test
     void realBearerCredentialsEnforceScopesNovelBoundariesAndRevocation()
             throws Exception {
         CanonicalRevision first = genesis();
@@ -580,7 +645,6 @@ class ApiHttpContractTest {
                 route("create novel", "POST", "/v1/novels", "novel:admin", true),
                 route("read novel", "GET", "/v1/novels/nov_test", "novel:read", false),
                 route("read revision", "GET", "/v1/novels/nov_test/revisions/rev_test", "novel:read", false),
-                route("render", "POST", "/v1/novels/nov_test/renders", "novel:read", false),
                 route("edit preview", "POST", "/v1/novels/nov_test/edit-previews", "novel:propose", false),
                 route("undo preview", "POST", "/v1/novels/nov_test/undo-previews", "novel:propose", false),
                 route("detector", "POST", "/v1/novels/nov_test/detector-runs", "novel:analyze", false),
