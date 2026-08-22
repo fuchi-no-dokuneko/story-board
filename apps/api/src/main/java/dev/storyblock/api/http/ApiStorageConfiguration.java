@@ -6,6 +6,7 @@ import dev.storyblock.application.DetectorService;
 import dev.storyblock.application.MonitorService;
 import dev.storyblock.application.RenderService;
 import dev.storyblock.application.StyleProfileService;
+import dev.storyblock.application.StyleAnalysisService;
 import dev.storyblock.security.AccessKeyService;
 import dev.storyblock.storage.sqlite.SqliteRevisionStore;
 import java.io.IOException;
@@ -56,6 +57,11 @@ public class ApiStorageConfiguration {
     @Bean
     StyleProfileService styleProfileService(SqliteRevisionStore store) {
         return new StyleProfileService(store);
+    }
+
+    @Bean
+    StyleAnalysisService styleAnalysisService(SqliteRevisionStore store) {
+        return new StyleAnalysisService(store, store, store);
     }
 
     @Bean

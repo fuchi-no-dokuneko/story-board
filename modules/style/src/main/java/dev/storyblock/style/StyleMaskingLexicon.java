@@ -8,8 +8,10 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public record StyleMaskingLexicon(List<String> names, List<String> places) {
+    private static final Set<String> FIELDS = Set.of("names", "places");
     public StyleMaskingLexicon {
         names = normalized(names, "names");
         places = normalized(places, "places");
@@ -17,6 +19,14 @@ public record StyleMaskingLexicon(List<String> names, List<String> places) {
 
     public static StyleMaskingLexicon empty() {
         return new StyleMaskingLexicon(List.of(), List.of());
+    }
+
+    public static StyleMaskingLexicon fromCanonical(Map<String, Object> value) {
+        StyleCanonical.requireKeys(value, FIELDS, "style_masking_lexicon");
+        return new StyleMaskingLexicon(
+                strings(value.get("names"), "style_masking_lexicon.names"),
+                strings(value.get("places"), "style_masking_lexicon.places")
+        );
     }
 
     public String mask(String text) {
@@ -54,6 +64,20 @@ public record StyleMaskingLexicon(List<String> names, List<String> places) {
             throw new IllegalArgumentException("Style masking " + field + " has duplicates");
         }
         result.sort(Comparator.comparingInt(String::length).reversed().thenComparing(value -> value));
+        return List.copyOf(result);
+    }
+
+    private static List<String> strings(Object value, String path) {
+        if (!(value instanceof List<?> list)) {
+            throw new IllegalArgumentException(path + " must be an array");
+        }
+        List<String> result = new ArrayList<>();
+        for (Object entry : list) {
+            if (!(entry instanceof String text)) {
+                throw new IllegalArgumentException(path + " must contain strings");
+            }
+            result.add(text);
+        }
         return List.copyOf(result);
     }
 }

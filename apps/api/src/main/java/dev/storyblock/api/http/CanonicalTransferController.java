@@ -1,6 +1,7 @@
 package dev.storyblock.api.http;
 
 import dev.storyblock.application.CanonicalTransferService;
+import dev.storyblock.application.StyleAnalysisService;
 import dev.storyblock.contracts.CanonicalExportFormat;
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.contracts.CanonicalPackageException;
@@ -15,6 +16,7 @@ import dev.storyblock.storage.CanonicalImportResult;
 import dev.storyblock.storage.ExportJobResult;
 import dev.storyblock.storage.StoredArtifact;
 import dev.storyblock.storage.StoredExportJob;
+import dev.storyblock.storage.MissingExportJobException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.time.Clock;
@@ -41,15 +43,18 @@ public final class CanonicalTransferController {
     public static final String ARTIFACT_CODEC_HEADER = "X-Artifact-Codec";
 
     private final CanonicalTransferService transfers;
+    private final StyleAnalysisService analyses;
     private final AccessKeyStore securityStore;
     private final Clock clock;
 
     public CanonicalTransferController(
             CanonicalTransferService transfers,
+            StyleAnalysisService analyses,
             AccessKeyStore securityStore,
             Clock clock
     ) {
         this.transfers = java.util.Objects.requireNonNull(transfers, "transfers");
+        this.analyses = java.util.Objects.requireNonNull(analyses, "analyses");
         this.securityStore = java.util.Objects.requireNonNull(
                 securityStore, "securityStore"
         );
@@ -153,7 +158,16 @@ public final class CanonicalTransferController {
 
     @GetMapping("/jobs/{jobId}")
     ResponseEntity<Map<String, Object>> getJob(@PathVariable String jobId) {
-        StoredExportJob job = transfers.getExportJob(new Ids.JobId(jobId));
+        Ids.JobId id = new Ids.JobId(jobId);
+        final StoredExportJob job;
+        try {
+            job = transfers.getExportJob(id);
+        } catch (MissingExportJobException missingExport) {
+            var analysis = analyses.getJob(id);
+            return ResponseEntity.ok()
+                    .eTag(analysis.statusHash())
+                    .body(StyleAnalysisController.publicJob(analysis));
+        }
         String artifactUri = "/v1/artifacts/" + job.resultArtifactId().value();
         return ResponseEntity.ok(Map.ofEntries(
                 Map.entry("job_id", job.jobId().value()),
@@ -171,15 +185,18 @@ public final class CanonicalTransferController {
 
     @GetMapping("/artifacts/{artifactId}")
     ResponseEntity<byte[]> getArtifact(@PathVariable String artifactId) {
-        StoredArtifact artifact = transfers.getArtifact(new Ids.ArtifactId(artifactId));
+        Ids.ArtifactId id = new Ids.ArtifactId(artifactId);
+        analyses.requireArtifactAvailable(id, Instant.now(clock));
+        StoredArtifact artifact = transfers.getArtifact(id);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(artifact.mediaType()));
         headers.setContentLength(artifact.content().length);
         headers.set(HttpHeaders.ETAG, quotedEtag(artifact.contentHash()));
         headers.setCacheControl("no-store");
         headers.set(ARTIFACT_CODEC_HEADER, artifact.codec());
+        String extension = "gzip".equals(artifact.codec()) ? ".json.gz" : ".json";
         headers.setContentDisposition(ContentDisposition.attachment()
-                .filename(artifact.artifactId().value() + ".json")
+                .filename(artifact.artifactId().value() + extension)
                 .build());
         return new ResponseEntity<>(artifact.content(), headers, HttpStatus.OK);
     }

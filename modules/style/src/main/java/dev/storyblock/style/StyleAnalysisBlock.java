@@ -1,10 +1,15 @@
 package dev.storyblock.style;
 
 import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.BlockMetadata;
+import dev.storyblock.domain.CanonicalValues;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.OrderKey;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public record StyleAnalysisBlock(
@@ -17,6 +22,13 @@ public record StyleAnalysisBlock(
         String intentionalStyleShiftReason
 ) {
     private static final Pattern SUBJECT = Pattern.compile("[A-Za-z0-9._:@-]{1,128}");
+    private static final Set<String> FIELDS = Set.of(
+            "scene_id", "block", "stratum_kind", "speaker_id", "pov",
+            "narrative_mode", "intentional_style_shift_reason"
+    );
+    private static final Set<String> BLOCK_FIELDS = Set.of(
+            "id", "block_version_id", "order_key", "text", "metadata", "extensions"
+    );
 
     public StyleAnalysisBlock {
         Objects.requireNonNull(sceneId, "sceneId");
@@ -70,6 +82,74 @@ public record StyleAnalysisBlock(
                 || speaker(metadata.get("speech")) != null
                 || speechIsDialogue(metadata.get("speech"))
                 || containsDialogueMarks(block.text());
+    }
+
+    public static StyleAnalysisBlock fromCanonical(Map<String, Object> value) {
+        StyleCanonical.requireKeys(value, FIELDS, "style_analysis_block");
+        Map<String, Object> block = StyleCanonical.object(
+                value.get("block"), "style_analysis_block.block"
+        );
+        StyleCanonical.requireKeys(block, BLOCK_FIELDS, "style_analysis_block.block");
+        return new StyleAnalysisBlock(
+                new Ids.SceneId(StyleCanonical.string(
+                        value, "scene_id", "style_analysis_block"
+                )),
+                new NarrativeBlock(
+                        new Ids.BlockId(StyleCanonical.string(
+                                block, "id", "style_analysis_block.block"
+                        )),
+                        new Ids.BlockVersionId(StyleCanonical.string(
+                                block, "block_version_id", "style_analysis_block.block"
+                        )),
+                        new OrderKey(StyleCanonical.string(
+                                block, "order_key", "style_analysis_block.block"
+                        )),
+                        StyleCanonical.string(
+                                block, "text", "style_analysis_block.block"
+                        ),
+                        new BlockMetadata(StyleCanonical.object(
+                                block.get("metadata"), "style_analysis_block.block.metadata"
+                        )),
+                        StyleCanonical.object(
+                                block.get("extensions"), "style_analysis_block.block.extensions"
+                        )
+                ),
+                StyleStratumKind.fromCanonicalName(StyleCanonical.string(
+                        value, "stratum_kind", "style_analysis_block"
+                )),
+                StyleCanonical.optionalString(
+                        value, "speaker_id", "style_analysis_block"
+                ),
+                StyleCanonical.string(value, "pov", "style_analysis_block"),
+                StyleCanonical.string(
+                        value, "narrative_mode", "style_analysis_block"
+                ),
+                StyleCanonical.optionalString(
+                        value,
+                        "intentional_style_shift_reason",
+                        "style_analysis_block"
+                )
+        );
+    }
+
+    public Map<String, Object> canonicalValue() {
+        Map<String, Object> serializedBlock = new LinkedHashMap<>();
+        serializedBlock.put("block_version_id", block.versionId().value());
+        serializedBlock.put("extensions", block.extensions());
+        serializedBlock.put("id", block.id().value());
+        serializedBlock.put("metadata", block.metadata().fields());
+        serializedBlock.put("order_key", block.orderKey().value());
+        serializedBlock.put("text", block.text());
+
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put("block", serializedBlock);
+        value.put("intentional_style_shift_reason", intentionalStyleShiftReason);
+        value.put("narrative_mode", narrativeMode);
+        value.put("pov", pov);
+        value.put("scene_id", sceneId.value());
+        value.put("speaker_id", speakerId);
+        value.put("stratum_kind", stratumKind.canonicalName());
+        return CanonicalValues.freezeMap(value, "style_analysis_block");
     }
 
     private static String normalizedLabel(String value, String field) {

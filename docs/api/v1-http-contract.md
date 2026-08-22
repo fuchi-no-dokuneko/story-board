@@ -13,8 +13,9 @@ deterministic render, adjacent metadata detection, commit, and access-key
 lifecycle routes have concrete storage-backed handlers. Monitor packet,
 submission, and stale-status routes are also storage-backed. Style profile,
 immutable version, and lifecycle transition routes are storage-backed as well.
-For a route whose
-owning application service is not implemented yet, a correctly authenticated
+Durable style-analysis creation, status, paging, leasing, completion, and trace
+download routes are storage-backed. For a route whose owning application service
+is not implemented yet, a correctly authenticated
 and well-formed request receives
 `503 application/problem+json` with
 `code=DEPENDENCY_UNAVAILABLE` and `Retry-After: 1`. There is no generated user,
@@ -42,6 +43,8 @@ Other mutations must identify the exact current resource version. An owning
 service maps a stale but valid ETag to `412` and returns the current revision ID
 and hash, or the current style resource ETag for a style lifecycle conflict.
 Request bodies are limited to 2 MiB for both fixed-length and chunked requests.
+Style workers submit large canonical traces as a hash-verified gzip/base64
+envelope so the expanded trace does not consume that request budget.
 
 ## Response Contracts
 
@@ -86,8 +89,17 @@ boundary. See
 [`../style/style-profiles-and-features.md`](../style/style-profiles-and-features.md).
 The version payload carries a self-validating calibration profile when one is
 available. Window, calibrated score, and anomaly decision schemas are defined
-for the durable ADR-306 analysis API; their deterministic semantics are in
+for the durable analysis API; their deterministic semantics are in
 [`../style/rolling-windows-and-calibration.md`](../style/rolling-windows-and-calibration.md).
+
+`POST /v1/novels/{novelId}/style-analyses` snapshots 1 to 1,000 immutable blocks
+and returns the job and analysis URIs with a status ETag. Internal workers claim
+one novel-scoped lease at a time and must submit the returned fencing ETag,
+attempt, snapshot hash, profile hash, analyzer hash, and window hash. Expired
+leases are reclaimable; duplicate canonical completion is idempotent. Summary
+metadata and paged decisions remain in SQLite while detailed score traces are
+gzip content-addressed artifacts with enforced expiry. See
+[`../style/durable-analysis-jobs.md`](../style/durable-analysis-jobs.md).
 
 The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
 `409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.
@@ -101,10 +113,11 @@ dependencies have been bootstrapped:
 ./mvnw -o -pl apps/api -am test
 ```
 
-The tests parse every local OpenAPI reference, compare all 28 required routes,
+The tests parse every local OpenAPI reference, compare all 29 required routes,
 exercise each remaining scaffold Spring mapping with its required scope, verify
 all status-policy entries, and cover real bearer authentication, object-level
 novel isolation, problem details, request IDs, ETags, idempotency, wildcard
 restrictions, body limits, deterministic rendering, commits, complete detector
 and monitor runs, the style profile promotion lifecycle, and an
-import/export/job/artifact round trip.
+import/export/job/artifact round trip. They also complete an exact 1,000-block
+style job through create, claim, fenced result, paging, and gzip download.

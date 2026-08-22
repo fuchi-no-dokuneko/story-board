@@ -84,6 +84,16 @@ public final class Ids {
         }
     }
 
+    public record StyleAnalysisId(String value) {
+        public StyleAnalysisId {
+            value = StableIds.require(value, "ana");
+        }
+
+        public static StyleAnalysisId create() {
+            return new StyleAnalysisId(StableIds.generate("ana"));
+        }
+    }
+
     public record ArtifactId(String value) {
         public ArtifactId {
             value = StableIds.require(value, "art");
@@ -91,6 +101,12 @@ public final class Ids {
 
         public static ArtifactId create() {
             return new ArtifactId(StableIds.generate("art"));
+        }
+
+        public static ArtifactId derive(StyleAnalysisId analysisId, String discriminator) {
+            return new ArtifactId(StableIds.derive(
+                    "art", analysisId.value(), discriminator
+            ));
         }
     }
 

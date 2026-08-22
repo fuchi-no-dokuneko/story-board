@@ -1,8 +1,9 @@
 # Rolling Windows And Style Calibration
 
 ADR-305 implements deterministic stratification, rolling windows, calibration,
-and anomaly policy. Durable job leasing, result persistence, pagination, and
-trace artifacts remain ADR-306.
+and anomaly policy. ADR-306 persists its summaries and compact decisions through
+the durable job, pagination, and trace-artifact boundary documented in
+[`durable-analysis-jobs.md`](durable-analysis-jobs.md).
 
 ## Stratification
 

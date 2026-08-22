@@ -24,6 +24,15 @@ import dev.storyblock.monitor.MonitorStore;
 import dev.storyblock.monitor.StoredMonitorRun;
 import dev.storyblock.style.CreateStyleProfileCommand;
 import dev.storyblock.style.CreateStyleProfileVersionCommand;
+import dev.storyblock.style.StyleAnalysisClaimCommand;
+import dev.storyblock.style.StyleAnalysisCompletionCommand;
+import dev.storyblock.style.StyleAnalysisCompletionResult;
+import dev.storyblock.style.StyleAnalysisJob;
+import dev.storyblock.style.StyleAnalysisJobSaveResult;
+import dev.storyblock.style.StyleAnalysisLease;
+import dev.storyblock.style.StyleAnalysisResult;
+import dev.storyblock.style.StyleAnalysisStore;
+import dev.storyblock.style.StyleAnalysisWindowSlice;
 import dev.storyblock.style.StyleProfile;
 import dev.storyblock.style.StyleProfileSaveResult;
 import dev.storyblock.style.StyleProfileStore;
@@ -65,7 +74,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class SqliteRevisionStore implements
-        RevisionStore, AccessKeyStore, MonitorStore, StyleProfileStore, AutoCloseable {
+        RevisionStore, AccessKeyStore, MonitorStore, StyleProfileStore,
+        StyleAnalysisStore, AutoCloseable {
     private final SqliteDatabase database;
     private final CheckpointPolicy checkpointPolicy;
     private final CommitFaultInjector faultInjector;
@@ -536,6 +546,96 @@ public final class SqliteRevisionStore implements
         Objects.requireNonNull(command, "command");
         return write(connection -> SqliteStyleProfileStore.transition(
                 connection, command
+        ));
+    }
+
+    @Override
+    public StyleAnalysisJobSaveResult createStyleAnalysisJob(StyleAnalysisJob job) {
+        Objects.requireNonNull(job, "job");
+        return write(connection -> SqliteStyleAnalysisStore.createJob(connection, job));
+    }
+
+    @Override
+    public StyleAnalysisJob getStyleAnalysisJob(Ids.JobId jobId) {
+        Objects.requireNonNull(jobId, "jobId");
+        return read(connection -> SqliteStyleAnalysisStore.getJob(connection, jobId));
+    }
+
+    @Override
+    public StyleAnalysisJob getStyleAnalysis(Ids.StyleAnalysisId analysisId) {
+        Objects.requireNonNull(analysisId, "analysisId");
+        return read(connection -> SqliteStyleAnalysisStore.getAnalysis(
+                connection, analysisId
+        ));
+    }
+
+    @Override
+    public Optional<StyleAnalysisLease> claimStyleAnalysis(
+            StyleAnalysisClaimCommand command
+    ) {
+        Objects.requireNonNull(command, "command");
+        return write(connection -> SqliteStyleAnalysisStore.claim(connection, command));
+    }
+
+    @Override
+    public StyleAnalysisCompletionResult completeStyleAnalysis(
+            StyleAnalysisCompletionCommand command
+    ) {
+        Objects.requireNonNull(command, "command");
+        return write(connection -> SqliteStyleAnalysisStore.complete(
+                connection, command
+        ));
+    }
+
+    @Override
+    public StyleAnalysisJob failStyleAnalysis(
+            Ids.JobId jobId,
+            String leaseOwner,
+            int attempt,
+            String expectedStatusHash,
+            String failureCode,
+            Instant failedAt
+    ) {
+        Objects.requireNonNull(jobId, "jobId");
+        Objects.requireNonNull(failedAt, "failedAt");
+        return write(connection -> SqliteStyleAnalysisStore.fail(
+                connection,
+                jobId,
+                leaseOwner,
+                attempt,
+                expectedStatusHash,
+                failureCode,
+                failedAt
+        ));
+    }
+
+    @Override
+    public Optional<StyleAnalysisResult> findStyleAnalysisResult(
+            Ids.StyleAnalysisId analysisId
+    ) {
+        Objects.requireNonNull(analysisId, "analysisId");
+        return read(connection -> SqliteStyleAnalysisStore.findResult(
+                connection, analysisId
+        ));
+    }
+
+    @Override
+    public StyleAnalysisWindowSlice listStyleAnalysisWindows(
+            Ids.StyleAnalysisId analysisId,
+            int afterOrdinal,
+            int limit
+    ) {
+        Objects.requireNonNull(analysisId, "analysisId");
+        return read(connection -> SqliteStyleAnalysisStore.listWindows(
+                connection, analysisId, afterOrdinal, limit
+        ));
+    }
+
+    @Override
+    public Optional<Instant> findStyleArtifactExpiry(Ids.ArtifactId artifactId) {
+        Objects.requireNonNull(artifactId, "artifactId");
+        return read(connection -> SqliteStyleAnalysisStore.findArtifactExpiry(
+                connection, artifactId
         ));
     }
 

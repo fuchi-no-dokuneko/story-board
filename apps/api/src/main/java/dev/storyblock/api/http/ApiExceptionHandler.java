@@ -9,6 +9,12 @@ import dev.storyblock.security.SecretAlreadyIssuedException;
 import dev.storyblock.monitor.MissingMonitorRunException;
 import dev.storyblock.style.MissingStyleProfileException;
 import dev.storyblock.style.MissingStyleProfileVersionException;
+import dev.storyblock.style.MissingStyleAnalysisException;
+import dev.storyblock.style.MissingStyleAnalysisJobException;
+import dev.storyblock.style.ExpiredStyleArtifactException;
+import dev.storyblock.style.StyleAnalysisLeaseConflictException;
+import dev.storyblock.style.StyleAnalysisResultConflictException;
+import dev.storyblock.style.StyleAnalysisSnapshotConflictException;
 import dev.storyblock.style.StyleLifecycleConflictException;
 import dev.storyblock.style.StyleStatusPreconditionException;
 import dev.storyblock.storage.IdempotencyConflictException;
@@ -32,6 +38,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
@@ -118,7 +125,9 @@ public final class ApiExceptionHandler {
             MissingAccessKeyException.class,
             MissingMonitorRunException.class,
             MissingStyleProfileException.class,
-            MissingStyleProfileVersionException.class
+            MissingStyleProfileVersionException.class,
+            MissingStyleAnalysisException.class,
+            MissingStyleAnalysisJobException.class
     })
     ResponseEntity<Map<String, Object>> missingResource(
             RuntimeException failure,
@@ -129,6 +138,71 @@ public final class ApiExceptionHandler {
                 "RESOURCE_NOT_FOUND",
                 "Resource not found",
                 "resource-not-found",
+                failure.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(StyleAnalysisSnapshotConflictException.class)
+    ResponseEntity<Map<String, Object>> staleAnalysisSnapshot(
+            StyleAnalysisSnapshotConflictException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, new ApiFailureException(
+                HttpStatus.PRECONDITION_FAILED,
+                "ANALYSIS_SNAPSHOT_CONFLICT",
+                "Analysis snapshot conflict",
+                "analysis-snapshot-conflict",
+                failure.getMessage(),
+                Map.of("current_etag", failure.currentRevisionHash()),
+                null
+        ));
+    }
+
+    @ExceptionHandler(StyleAnalysisLeaseConflictException.class)
+    ResponseEntity<Map<String, Object>> analysisLeaseConflict(
+            StyleAnalysisLeaseConflictException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, new ApiFailureException(
+                HttpStatus.PRECONDITION_FAILED,
+                "ANALYSIS_LEASE_CONFLICT",
+                "Analysis lease conflict",
+                "analysis-lease-conflict",
+                failure.getMessage(),
+                Map.of("current_etag", failure.currentStatusHash()),
+                null
+        ));
+    }
+
+    @ExceptionHandler(StyleAnalysisResultConflictException.class)
+    ResponseEntity<Map<String, Object>> analysisResultConflict(
+            StyleAnalysisResultConflictException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, new ApiFailureException(
+                HttpStatus.CONFLICT,
+                "ANALYSIS_RESULT_CONFLICT",
+                "Analysis result conflict",
+                "analysis-result-conflict",
+                failure.getMessage(),
+                Map.of(
+                        "stored_result_hash", failure.storedResultHash(),
+                        "attempted_result_hash", failure.attemptedResultHash()
+                ),
+                null
+        ));
+    }
+
+    @ExceptionHandler(ExpiredStyleArtifactException.class)
+    ResponseEntity<Map<String, Object>> expiredStyleArtifact(
+            ExpiredStyleArtifactException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, ApiFailureException.of(
+                HttpStatus.GONE,
+                "ARTIFACT_EXPIRED",
+                "Artifact expired",
+                "artifact-expired",
                 failure.getMessage()
         ));
     }
@@ -248,6 +322,7 @@ public final class ApiExceptionHandler {
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
             MethodArgumentNotValidException.class,
+            MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class,
             IllegalArgumentException.class
     })

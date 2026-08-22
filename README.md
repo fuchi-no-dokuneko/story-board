@@ -52,6 +52,9 @@ channels are implemented and documented in
 Rolling-window stratification, reproducible calibration, and anomaly decisions
 are documented in
 [`docs/style/rolling-windows-and-calibration.md`](docs/style/rolling-windows-and-calibration.md).
+Durable style-analysis snapshots, leases, result paging, compressed artifacts,
+and the executable worker are documented in
+[`docs/style/durable-analysis-jobs.md`](docs/style/durable-analysis-jobs.md).
 Services assigned to later ADRs return a typed `503` until
 installed. The
 transfer format and recovery guarantees are documented in

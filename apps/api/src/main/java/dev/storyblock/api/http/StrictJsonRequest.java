@@ -8,6 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.math.BigDecimal;
 
 final class StrictJsonRequest {
     private StrictJsonRequest() {
@@ -59,6 +60,31 @@ final class StrictJsonRequest {
                     path + "." + field + " must be an ISO-8601 instant", failure
             );
         }
+    }
+
+    static int integer(Map<String, Object> value, String field, String path) {
+        Object entry = value.get(field);
+        if (!(entry instanceof Number number)) {
+            throw new IllegalArgumentException(path + "." + field + " must be an integer");
+        }
+        try {
+            return new BigDecimal(number.toString()).intValueExact();
+        } catch (ArithmeticException | NumberFormatException failure) {
+            throw new IllegalArgumentException(
+                    path + "." + field + " must be an exact integer", failure
+            );
+        }
+    }
+
+    static List<Map<String, Object>> objects(Object value, String path) {
+        if (!(value instanceof List<?> values)) {
+            throw new IllegalArgumentException(path + " must be an array");
+        }
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (int index = 0; index < values.size(); index++) {
+            result.add(object(values.get(index), path + "[" + index + "]"));
+        }
+        return List.copyOf(result);
     }
 
     static List<String> uniqueStrings(

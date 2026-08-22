@@ -37,6 +37,7 @@ class OpenApiContractTest {
             "GET /novels/{novelId}/monitor-runs/{monitorRunId}",
             "POST /novels/{novelId}/style-analyses",
             "GET /style-analyses/{analysisId}",
+            "GET /style-analyses/{analysisId}/windows",
             "POST /rewrite-proposals",
             "GET /rewrite-proposals/{proposalId}",
             "POST /style-profiles",
@@ -53,7 +54,6 @@ class OpenApiContractTest {
             "POST /internal/jobs/{jobId}/results"
     );
     private static final Set<String> ASYNC_OPERATIONS = Set.of(
-            "POST /novels/{novelId}/style-analyses",
             "POST /rewrite-proposals",
             "POST /novels/{novelId}/exports"
     );
@@ -157,6 +157,18 @@ class OpenApiContractTest {
                 "#/components/headers/Location",
                 map(map(accepted.get("headers")).get("Location")).get("$ref")
         );
+        Map<String, Object> analysisAccepted = map(map(operation(
+                "POST /novels/{novelId}/style-analyses"
+        ).get("responses")).get("202"));
+        assertEquals(
+                "#/components/headers/Location",
+                map(map(analysisAccepted.get("headers")).get("Location")).get("$ref")
+        );
+        assertEquals(
+                "#/components/schemas/StyleAnalysisAccepted",
+                map(map(map(analysisAccepted.get("content")).get("application/json"))
+                        .get("schema")).get("$ref")
+        );
 
         assertStrongEtag("GET /novels/{novelId}", "200");
         assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
@@ -179,13 +191,20 @@ class OpenApiContractTest {
                 "POST /style-profiles/{profileId}/versions/{versionId}/transitions",
                 "200"
         );
+        assertStrongEtag("POST /novels/{novelId}/style-analyses", "202");
+        assertStrongEtag("GET /style-analyses/{analysisId}", "200");
+        assertStrongEtag("POST /internal/jobs/claims", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "200");
         assertStrongEtag("POST /novels/{novelId}/commits", "201");
         assertStrongEtag("GET /artifacts/{artifactId}", "200");
 
         assertTrue(
-                parameterRefs(operation("GET /style-analyses/{analysisId}"))
+                parameterRefs(operation("GET /style-analyses/{analysisId}/windows"))
                         .contains("#/components/parameters/Cursor")
+        );
+        assertTrue(
+                parameterRefs(operation("GET /style-analyses/{analysisId}/windows"))
+                        .contains("#/components/parameters/PageLimit")
         );
     }
 
@@ -211,11 +230,27 @@ class OpenApiContractTest {
         assertTrue(schemas.containsKey("WorkerClaimResponse"));
         assertTrue(schemas.containsKey("WorkerResultRequest"));
         assertTrue(schemas.containsKey("WorkerResultResponse"));
+        assertTrue(schemas.containsKey("StyleAnalysisSnapshot"));
+        assertTrue(schemas.containsKey("StyleAnalysisSummary"));
+        assertTrue(schemas.containsKey("StyleAnalysisWindowFinding"));
+        assertTrue(schemas.containsKey("CompressedStyleAnalysisTrace"));
         assertTrue(schemas.containsKey("CanonicalPackage"));
         assertTrue(schemas.containsKey("CanonicalPackageManifest"));
         assertTrue(schemas.containsKey("CanonicalPackageRevision"));
         assertTrue(schemas.containsKey("CanonicalPackageOperation"));
         assertTrue(schemas.containsKey("CanonicalPackageArtifact"));
+
+        Map<String, Object> claim = map(schemas.get("WorkerClaimRequest"));
+        assertEquals(
+                Set.of("novel_id", "lease_owner", "lease_seconds"),
+                strings(claim.get("required"))
+        );
+        Map<String, Object> result = map(schemas.get("WorkerResultRequest"));
+        assertTrue(strings(result.get("required")).containsAll(Set.of(
+                "snapshot_hash", "profile_version_hash",
+                "analyzer_contract_hash", "window_configuration_hash",
+                "summary", "windows", "trace"
+        )));
     }
 
     @Test

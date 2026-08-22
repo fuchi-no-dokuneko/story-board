@@ -36,6 +36,24 @@ public final class StyleRollingWindowAnalyzer {
     }
 
     public List<StyleWindowFeatures> analyze(
+            List<StyleAnalysisBlock> blocks,
+            StyleMaskingLexicon lexicon,
+            StyleFeatureContract contract,
+            StyleWindowConfiguration configuration
+    ) {
+        Objects.requireNonNull(blocks, "blocks");
+        Map<Ids.BlockId, NarrativeBlock> source = new LinkedHashMap<>();
+        blocks.forEach(block -> source.put(block.block().id(), block.block()));
+        return analyze(
+                planner.plan(blocks, configuration),
+                source,
+                lexicon,
+                contract,
+                Map.of()
+        );
+    }
+
+    public List<StyleWindowFeatures> analyze(
             RevisionManifest revision,
             StyleMaskingLexicon lexicon,
             StyleFeatureContract contract,
@@ -45,8 +63,24 @@ public final class StyleRollingWindowAnalyzer {
         Objects.requireNonNull(revision, "revision");
         Map<Ids.BlockId, NarrativeBlock> blocks = new LinkedHashMap<>();
         revision.liveBlocks().forEach(block -> blocks.put(block.id(), block));
+        return analyze(
+                planner.plan(revision, configuration),
+                blocks,
+                lexicon,
+                contract,
+                contentReducedEmbeddingsByWindow
+        );
+    }
+
+    private List<StyleWindowFeatures> analyze(
+            List<StyleWindow> windows,
+            Map<Ids.BlockId, NarrativeBlock> blocks,
+            StyleMaskingLexicon lexicon,
+            StyleFeatureContract contract,
+            Map<String, List<BigDecimal>> contentReducedEmbeddingsByWindow
+    ) {
         List<StyleWindowFeatures> result = new ArrayList<>();
-        for (StyleWindow window : planner.plan(revision, configuration)) {
+        for (StyleWindow window : windows) {
             List<NarrativeBlock> members = window.blockIds().stream()
                     .map(blocks::get)
                     .toList();

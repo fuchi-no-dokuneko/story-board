@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import tools.jackson.databind.JsonNode;
 
@@ -50,22 +49,6 @@ public final class V1ContractController {
         return unavailable();
     }
 
-    @PostMapping("/novels/{novelId}/style-analyses")
-    ResponseEntity<Map<String, Object>> startStyleAnalysis(
-            @PathVariable String novelId,
-            @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
-    @GetMapping("/style-analyses/{analysisId}")
-    ResponseEntity<Map<String, Object>> getStyleAnalysis(
-            @PathVariable String analysisId,
-            @RequestParam(required = false) String cursor
-    ) {
-        return unavailable();
-    }
-
     @PostMapping("/rewrite-proposals")
     ResponseEntity<Map<String, Object>> startRewriteProposal(
             @RequestBody JsonNode request,
@@ -83,19 +66,6 @@ public final class V1ContractController {
     @GetMapping("/rewrite-proposals/{proposalId}")
     ResponseEntity<Map<String, Object>> getRewriteProposal(
             @PathVariable String proposalId
-    ) {
-        return unavailable();
-    }
-
-    @PostMapping("/internal/jobs/claims")
-    ResponseEntity<Map<String, Object>> claimJob(@RequestBody JsonNode request) {
-        return unavailable();
-    }
-
-    @PostMapping("/internal/jobs/{jobId}/results")
-    ResponseEntity<Map<String, Object>> submitJobResult(
-            @PathVariable String jobId,
-            @RequestBody JsonNode request
     ) {
         return unavailable();
     }

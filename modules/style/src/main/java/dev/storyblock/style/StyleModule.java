@@ -7,6 +7,7 @@ public final class StyleModule {
     public static final String TOKENIZER_ID = "storyblock-grapheme-tokenizer-1.0.0";
     public static final String WINDOW_SCHEMA_VERSION = "style-windows-1.0.0";
     public static final String CALIBRATION_SCHEMA_VERSION = "style-calibration-1.0.0";
+    public static final String ANALYSIS_SCHEMA_VERSION = "style-analysis-1.0.0";
     public static final int MIN_CALIBRATION_WINDOWS = 30;
 
     private StyleModule() {

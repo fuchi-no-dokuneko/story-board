@@ -366,24 +366,53 @@ paths:
               $ref: "#/components/schemas/StyleAnalysisRequest"
       responses:
         "202":
-          $ref: "#/components/responses/JobAccepted"
+          description: Durable style analysis job accepted or replayed idempotently
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleAnalysisAccepted"
         default:
           $ref: "#/components/responses/Problem"
   /style-analyses/{analysisId}:
     get:
       operationId: getStyleAnalysis
-      summary: Get a cursor-paged style analysis result
+      summary: Get durable style analysis state and result metadata
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/AnalysisId"
+      responses:
+        "200":
+          description: Analysis state and canonical result metadata
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleAnalysisView"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-analyses/{analysisId}/windows:
+    get:
+      operationId: listStyleAnalysisWindows
+      summary: Page canonical window findings for a completed style analysis
       x-required-scopes: ["novel:read"]
       parameters:
         - $ref: "#/components/parameters/AnalysisId"
         - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageLimit"
       responses:
         "200":
-          description: Analysis summary and one findings page
+          description: One stable cursor page of operational window findings
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StyleAnalysisPage"
+                $ref: "#/components/schemas/StyleAnalysisWindowPage"
         default:
           $ref: "#/components/responses/Problem"
   /rewrite-proposals:
@@ -611,6 +640,10 @@ paths:
               schema:
                 type: string
                 format: binary
+            application/vnd.storyblock.style-trace+json:
+              schema:
+                type: string
+                format: binary
             application/octet-stream:
               schema:
                 type: string
@@ -704,11 +737,16 @@ paths:
               $ref: "#/components/schemas/WorkerClaimRequest"
       responses:
         "200":
-          description: Lease claim result; job is null when no work is ready
+          description: Claimed style analysis lease and immutable execution snapshot
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/WorkerClaimResponse"
+        "204":
+          description: No queued or expired style analysis job is available
         default:
           $ref: "#/components/responses/Problem"
   /internal/jobs/{jobId}/results:
@@ -762,8 +800,7 @@ components:
       required: true
       schema:
         type: string
-        minLength: 1
-        maxLength: 128
+        pattern: '^ana_[0-9a-f-]{36}$'
     ProposalId:
       name: proposalId
       in: path
@@ -820,7 +857,16 @@ components:
       schema:
         type: string
         minLength: 1
-        maxLength: 512
+        maxLength: 256
+    PageLimit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
     IfMatch:
       name: If-Match
       in: header
@@ -1649,17 +1695,75 @@ components:
               type: boolean
     StyleAnalysisRequest:
       type: object
-      required: [revision_id, revision_hash, profile_version_id]
+      required: [revision_id, profile_id, profile_version_id]
       properties:
         revision_id:
           type: string
-        revision_hash:
+          pattern: '^rev_[0-9a-f-]{36}$'
+        profile_id:
           type: string
+          pattern: '^spf_[0-9a-f-]{36}$'
         profile_version_id:
           type: string
-        window_size:
+          pattern: '^spv_[0-9a-f-]{36}$'
+        from_block_id:
+          type: [string, "null"]
+          pattern: '^blk_[0-9a-f-]{36}$'
+        to_block_id:
+          type: [string, "null"]
+          pattern: '^blk_[0-9a-f-]{36}$'
+        masking_lexicon:
+          $ref: "#/components/schemas/StyleMaskingLexicon"
+        max_attempts:
           type: integer
           minimum: 1
+          maximum: 20
+          default: 3
+        retention_days:
+          type: integer
+          minimum: 1
+          maximum: 365
+          default: 30
+      additionalProperties: false
+    StyleAnalysisAccepted:
+      type: object
+      required: [analysis_id, analysis_uri, idempotent_replay, job_id, status, status_uri]
+      properties:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
+        analysis_uri:
+          type: string
+          format: uri-reference
+        idempotent_replay:
+          type: boolean
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        status:
+          const: queued
+        status_uri:
+          type: string
+          format: uri-reference
+      additionalProperties: false
+    StyleMaskingLexicon:
+      type: object
+      required: [names, places]
+      properties:
+        names:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
+        places:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
       additionalProperties: false
     RewriteProposalRequest:
       type: object
@@ -1690,27 +1794,33 @@ components:
           format: uri-reference
       additionalProperties: false
     Job:
+      oneOf:
+        - $ref: "#/components/schemas/ExportJob"
+        - $ref: "#/components/schemas/StyleAnalysisJob"
+    ExportJob:
       type: object
-      required: [job_id, novel_id, revision_id, kind, status, attempt, created_at, updated_at]
+      required: [job_id, novel_id, revision_id, kind, status, attempt, result_artifact_id, result_uri, created_at, updated_at]
       properties:
         job_id:
           type: string
+          pattern: '^job_[0-9a-f-]{36}$'
         novel_id:
           type: string
+          pattern: '^nov_[0-9a-f-]{36}$'
         revision_id:
           type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
         kind:
-          type: string
+          const: canonical-export
         status:
-          type: string
-          enum: [queued, leased, succeeded, failed, cancelled]
+          const: succeeded
         attempt:
-          type: integer
-          minimum: 0
+          const: 1
         result_artifact_id:
-          type: [string, "null"]
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
         result_uri:
-          type: [string, "null"]
+          type: string
           format: uri-reference
         created_at:
           type: string
@@ -1719,22 +1829,174 @@ components:
           type: string
           format: date-time
       additionalProperties: false
-    StyleAnalysisPage:
+    StyleAnalysisJobFields:
       type: object
-      required: [analysis_id, job, summary, findings, next_cursor]
+      required: [analysis_id, attempt, created_at, failure_code, job_id, kind, max_attempts, novel_id, result_artifact_id, result_hash, retention_until, revision_id, status, updated_at]
       properties:
         analysis_id:
           type: string
-        job:
-          $ref: "#/components/schemas/Job"
+          pattern: '^ana_[0-9a-f-]{36}$'
+        attempt:
+          type: integer
+          minimum: 0
+          maximum: 20
+        created_at:
+          type: string
+          format: date-time
+        failure_code:
+          type: [string, "null"]
+          pattern: '^[a-z][a-z0-9._-]{1,63}$'
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        kind:
+          const: style-analysis
+        max_attempts:
+          type: integer
+          minimum: 1
+          maximum: 20
+        novel_id:
+          type: string
+          pattern: '^nov_[0-9a-f-]{36}$'
+        result_artifact_id:
+          type: [string, "null"]
+          pattern: '^art_[0-9a-f-]{36}$'
+        result_hash:
+          type: [string, "null"]
+          pattern: '^sha256:[0-9a-f]{64}$'
+        retention_until:
+          type: string
+          format: date-time
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+        status:
+          type: string
+          enum: [queued, running, succeeded, failed]
+        updated_at:
+          type: string
+          format: date-time
+    StyleAnalysisJob:
+      allOf:
+        - $ref: "#/components/schemas/StyleAnalysisJobFields"
+      unevaluatedProperties: false
+    StyleAnalysisView:
+      allOf:
+        - $ref: "#/components/schemas/StyleAnalysisJobFields"
+        - type: object
+          properties:
+            result:
+              $ref: "#/components/schemas/StyleAnalysisResult"
+            trace_uri:
+              type: string
+              format: uri-reference
+            windows_uri:
+              type: string
+              format: uri-reference
+      unevaluatedProperties: false
+    StyleAnalysisResult:
+      type: object
+      required: [analysis_id, completed_at, job_id, result_hash, summary, trace_artifact_id, trace_content_hash, trace_expires_at, trace_uncompressed_bytes]
+      properties:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
+        completed_at:
+          type: string
+          format: date-time
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        result_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
         summary:
+          $ref: "#/components/schemas/StyleAnalysisSummary"
+        trace_artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        trace_content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        trace_expires_at:
+          type: string
+          format: date-time
+        trace_uncompressed_bytes:
+          type: integer
+          minimum: 2
+          maximum: 16777216
+      additionalProperties: false
+    StyleAnalysisSummary:
+      type: object
+      required: [analyzed_block_count, calibrated_window_count, decision_counts, operational_window_count]
+      properties:
+        analyzed_block_count:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        calibrated_window_count:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        decision_counts:
           type: object
-        findings:
+          properties:
+            normal: {type: integer, minimum: 0}
+            warning: {type: integer, minimum: 0}
+            rewrite_candidate: {type: integer, minimum: 0}
+            topic_shift_only: {type: integer, minimum: 0}
+            low_confidence: {type: integer, minimum: 0}
+          additionalProperties: false
+        operational_window_count:
+          type: integer
+          minimum: 0
+          maximum: 1000
+      additionalProperties: false
+    StyleAnalysisWindowFinding:
+      type: object
+      required: [block_ids, can_trigger_rewrite, confidence, decision_state, ordinal, payload, window_id]
+      properties:
+        block_ids:
           type: array
+          minItems: 1
+          uniqueItems: true
           items:
-            type: object
+            type: string
+            pattern: '^blk_[0-9a-f-]{36}$'
+        can_trigger_rewrite:
+          type: boolean
+        confidence:
+          type: string
+          enum: [calibrated, low_confidence]
+        decision_state:
+          type: string
+          enum: [normal, warning, rewrite_candidate, topic_shift_only, low_confidence]
+        ordinal:
+          type: integer
+          minimum: 0
+          maximum: 999
+        payload:
+          type: object
+          additionalProperties: true
+        window_id:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+      additionalProperties: false
+    StyleAnalysisWindowPage:
+      type: object
+      required: [analysis_id, items, next_cursor]
+      properties:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
+        items:
+          type: array
+          maxItems: 200
+          items:
+            $ref: "#/components/schemas/StyleAnalysisWindowFinding"
         next_cursor:
           type: [string, "null"]
+          maxLength: 256
       additionalProperties: false
     RewriteProposal:
       type: object
@@ -2374,67 +2636,197 @@ components:
       additionalProperties: false
     WorkerClaimRequest:
       type: object
-      required: [worker_id, kinds, lease_seconds]
+      required: [novel_id, lease_owner, lease_seconds]
       properties:
-        worker_id:
+        novel_id:
           type: string
-          minLength: 1
-          maxLength: 128
-        kinds:
-          type: array
-          minItems: 1
-          uniqueItems: true
-          items:
-            type: string
-            enum: [style-analysis, llm-rewrite, export]
+          pattern: '^nov_[0-9a-f-]{36}$'
+        lease_owner:
+          type: string
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
         lease_seconds:
           type: integer
-          minimum: 10
-          maximum: 900
+          minimum: 15
+          maximum: 1800
       additionalProperties: false
     WorkerClaimResponse:
       type: object
-      required: [job, lease_token]
+      required: [analysis_id, attempt, idempotent_replay, job_id, lease_owner, lease_until, retention_until, snapshot, status_hash]
       properties:
-        job:
-          oneOf:
-            - $ref: "#/components/schemas/Job"
-            - type: "null"
-        lease_token:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
+        attempt:
+          type: integer
+          minimum: 1
+          maximum: 20
+        idempotent_replay:
+          type: boolean
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        lease_owner:
+          type: string
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        lease_until:
+          type: string
+          format: date-time
+        retention_until:
+          type: string
+          format: date-time
+        snapshot:
+          $ref: "#/components/schemas/StyleAnalysisSnapshot"
+        status_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+      additionalProperties: false
+    StyleAnalysisSnapshot:
+      type: object
+      required: [blocks, masking_lexicon, novel_id, profile_version, revision_hash, revision_id]
+      properties:
+        blocks:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/StyleAnalysisBlock"
+        masking_lexicon:
+          $ref: "#/components/schemas/StyleMaskingLexicon"
+        novel_id:
+          type: string
+          pattern: '^nov_[0-9a-f-]{36}$'
+        profile_version:
+          $ref: "#/components/schemas/StyleProfileVersion"
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+      additionalProperties: false
+    StyleAnalysisBlock:
+      type: object
+      required: [block, intentional_style_shift_reason, narrative_mode, pov, scene_id, speaker_id, stratum_kind]
+      properties:
+        block:
+          $ref: "#/components/schemas/StyleAnalysisNarrativeBlock"
+        intentional_style_shift_reason:
           type: [string, "null"]
-          writeOnly: true
+          maxLength: 500
+        narrative_mode:
+          type: string
+          minLength: 1
+          maxLength: 128
+        pov:
+          type: string
+          minLength: 1
+          maxLength: 128
+        scene_id:
+          type: string
+          pattern: '^scn_[0-9a-f-]{36}$'
+        speaker_id:
+          type: [string, "null"]
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        stratum_kind:
+          type: string
+          enum: [narration, dialogue]
+      additionalProperties: false
+    StyleAnalysisNarrativeBlock:
+      type: object
+      required: [block_version_id, extensions, id, metadata, order_key, text]
+      properties:
+        block_version_id:
+          type: string
+          pattern: '^blv_[0-9a-f-]{36}$'
+        extensions:
+          type: object
+          additionalProperties: true
+        id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        metadata:
+          type: object
+          additionalProperties: true
+        order_key:
+          type: string
+          pattern: '^[0-9a-f]{32}$'
+        text:
+          type: string
+          minLength: 1
       additionalProperties: false
     WorkerResultRequest:
       type: object
-      required: [worker_id, lease_token, outcome, revision_hash, result]
+      required: [lease_owner, attempt, snapshot_hash, profile_version_hash, analyzer_contract_hash, window_configuration_hash, summary, windows, trace, completed_at]
       properties:
-        worker_id:
+        lease_owner:
           type: string
-        lease_token:
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        attempt:
+          type: integer
+          minimum: 1
+          maximum: 20
+        snapshot_hash:
           type: string
-          writeOnly: true
-        outcome:
+          pattern: '^sha256:[0-9a-f]{64}$'
+        profile_version_hash:
           type: string
-          enum: [succeeded, failed]
-        revision_hash:
+          pattern: '^sha256:[0-9a-f]{64}$'
+        analyzer_contract_hash:
           type: string
-        profile_version_id:
-          type: [string, "null"]
-        analyzer_version:
-          type: [string, "null"]
-        result:
-          type: object
-          additionalProperties: true
+          pattern: '^sha256:[0-9a-f]{64}$'
+        window_configuration_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        summary:
+          $ref: "#/components/schemas/StyleAnalysisSummary"
+        windows:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/StyleAnalysisWindowFinding"
+        trace:
+          oneOf:
+            - $ref: "#/components/schemas/CompressedStyleAnalysisTrace"
+            - type: object
+              not:
+                required: [codec, content_base64, content_hash, uncompressed_bytes]
+              additionalProperties: true
+        completed_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    CompressedStyleAnalysisTrace:
+      type: object
+      required: [codec, content_base64, content_hash, uncompressed_bytes]
+      properties:
+        codec:
+          const: gzip
+        content_base64:
+          type: string
+          contentEncoding: base64
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        uncompressed_bytes:
+          type: integer
+          minimum: 2
+          maximum: 16777216
       additionalProperties: false
     WorkerResultResponse:
       type: object
-      required: [job_id, status, idempotent_replay]
+      required: [analysis_id, idempotent_replay, job_id, result_hash, status]
       properties:
-        job_id:
+        analysis_id:
           type: string
-        status:
-          type: string
-          enum: [succeeded, failed]
+          pattern: '^ana_[0-9a-f-]{36}$'
         idempotent_replay:
           type: boolean
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        result_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        status:
+          const: succeeded
       additionalProperties: false

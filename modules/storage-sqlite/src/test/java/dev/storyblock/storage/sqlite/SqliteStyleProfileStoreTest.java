@@ -221,7 +221,7 @@ class SqliteStyleProfileStoreTest {
         }
     }
 
-    private static StyleProfileVersionContent content(
+    static StyleProfileVersionContent content(
             RevisionManifest revision,
             StyleProfileScope scope,
             StyleCorpusSourceKind kind
@@ -267,7 +267,7 @@ class SqliteStyleProfileStoreTest {
         );
     }
 
-    private static AuditContext audit(int seconds, String request) {
+    static AuditContext audit(int seconds, String request) {
         return new AuditContext(
                 "req_" + request, "style-owner", null, NOW.plusSeconds(seconds)
         );

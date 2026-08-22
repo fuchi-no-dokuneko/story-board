@@ -27,6 +27,9 @@ import dev.storyblock.style.StyleCorpusSource;
 import dev.storyblock.style.StyleCorpusSourceKind;
 import dev.storyblock.style.StyleCalibrationProfile;
 import dev.storyblock.style.StyleChannelCalibration;
+import dev.storyblock.style.StyleAnalysisExecution;
+import dev.storyblock.style.StyleAnalysisExecutor;
+import dev.storyblock.style.StyleAnalysisTrace;
 import dev.storyblock.style.StyleFeatureAnalyzer;
 import dev.storyblock.style.StyleFeatureChannel;
 import dev.storyblock.style.StyleFeatureContract;
@@ -38,9 +41,11 @@ import dev.storyblock.style.StyleStratum;
 import dev.storyblock.style.StyleStratumCalibration;
 import dev.storyblock.style.StyleWindowConfiguration;
 import dev.storyblock.validator.EvidenceSpans;
-import java.nio.file.Path;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -242,8 +247,44 @@ class ApiHttpContractTest {
                         .header(HttpHeaders.IF_MATCH, "*")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.code").value("DEPENDENCY_UNAVAILABLE"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+    }
+
+    @Test
+    void implementedStyleJobRoutesEnforceTheirDedicatedScopes() throws Exception {
+        mvc.perform(post("/v1/novels/nov_test/style-analyses")
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-style")
+                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(post("/v1/internal/jobs/claims")
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-claim")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(post("/v1/internal/jobs/job_test/results")
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-result")
+                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(get("/v1/style-analyses/analysis_test")
+                        .with(userWithScope("style:analyze")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(get("/v1/style-analyses/analysis_test/windows")
+                        .with(userWithScope("style:analyze")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
     }
 
     @Test
@@ -996,6 +1037,210 @@ class ApiHttpContractTest {
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
     }
 
+    @Test
+    void thousandBlockStyleAnalysisCompletesThroughAsyncApiWithCompressedTrace()
+            throws Exception {
+        CanonicalRevision revision = thousandBlockRevision();
+        importAsOwner(revision, "analysis-http-import");
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        String token = stringField(issueAsOwner(
+                revision,
+                "analysis-http-key",
+                List.of(
+                        "novel:read",
+                        "style:admin",
+                        "style:analyze",
+                        "worker:execute"
+                )
+        ), "secret");
+        ReadyStyleProfile profile = createReadyStyleProfile(
+                revision, token, "analysis-http"
+        );
+        byte[] requestBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "profile_id", profile.profileId(),
+                "profile_version_id", profile.versionId(),
+                "max_attempts", 3,
+                "retention_days", 1
+        ));
+
+        MvcResult requested = mvc.perform(post(
+                        "/v1/novels/{novelId}/style-analyses", novelId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-create")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.status").value("queued"))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        Map<String, Object> requestView = object(requested);
+        String jobId = stringField(requestView, "job_id");
+        String analysisId = stringField(requestView, "analysis_id");
+
+        mvc.perform(post("/v1/novels/{novelId}/style-analyses", novelId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-create")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.job_id").value(jobId))
+                .andExpect(jsonPath("$.analysis_id").value(analysisId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        byte[] claimBody = CanonicalJson.bytes(Map.of(
+                "novel_id", novelId,
+                "lease_owner", "style-worker-http",
+                "lease_seconds", 300
+        ));
+        MvcResult claimed = mvc.perform(post("/v1/internal/jobs/claims")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-claim")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(claimBody))
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(jsonPath("$.job_id").value(jobId))
+                .andExpect(jsonPath("$.analysis_id").value(analysisId))
+                .andExpect(jsonPath("$.attempt").value(1))
+                .andExpect(jsonPath("$.snapshot.blocks.length()").value(1000))
+                .andReturn();
+
+        var persistedJob = store.getStyleAnalysisJob(new Ids.JobId(jobId));
+        StyleAnalysisExecution execution = new StyleAnalysisExecutor().execute(
+                persistedJob.snapshot()
+        );
+        assertTrue(execution.windows().size() > 1);
+        Instant completedAt = Instant.now();
+        Map<String, Object> resultBody = new LinkedHashMap<>();
+        resultBody.put("lease_owner", "style-worker-http");
+        resultBody.put("attempt", 1);
+        resultBody.put("snapshot_hash", persistedJob.snapshot().snapshotHash());
+        resultBody.put(
+                "profile_version_hash", persistedJob.snapshot().profileVersionHash()
+        );
+        resultBody.put(
+                "analyzer_contract_hash", persistedJob.snapshot().analyzerContractHash()
+        );
+        resultBody.put(
+                "window_configuration_hash",
+                persistedJob.snapshot().windowConfigurationHash()
+        );
+        resultBody.put("summary", execution.summary().canonicalValue());
+        resultBody.put("windows", execution.windows().stream()
+                .map(value -> value.canonicalValue()).toList());
+        StyleAnalysisTrace submittedTrace = StyleAnalysisTrace.create(
+                persistedJob.analysisId(),
+                execution.tracePayload(),
+                completedAt,
+                persistedJob.retentionUntil()
+        );
+        resultBody.put("trace", Map.of(
+                "codec", StyleAnalysisTrace.CODEC,
+                "content_base64", Base64.getEncoder().encodeToString(
+                        submittedTrace.compressedContent()
+                ),
+                "content_hash", submittedTrace.contentHash(),
+                "uncompressed_bytes", submittedTrace.uncompressedBytes()
+        ));
+        resultBody.put("completed_at", completedAt.toString());
+        byte[] canonicalResult = CanonicalJson.bytes(resultBody);
+        String claimedEtag = claimed.getResponse().getHeader(HttpHeaders.ETAG);
+
+        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-result")
+                        .header(HttpHeaders.IF_MATCH, claimedEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(canonicalResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("succeeded"))
+                .andExpect(jsonPath("$.idempotent_replay").value(false));
+        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-result")
+                        .header(HttpHeaders.IF_MATCH, claimedEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(canonicalResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("succeeded"))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        mvc.perform(get("/v1/jobs/{jobId}", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.kind").value("style-analysis"))
+                .andExpect(jsonPath("$.status").value("succeeded"));
+        MvcResult analysis = mvc.perform(get(
+                        "/v1/style-analyses/{analysisId}", analysisId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.summary.analyzed_block_count")
+                        .value(1000))
+                .andExpect(jsonPath("$.result.summary.operational_window_count")
+                        .value(execution.windows().size()))
+                .andReturn();
+
+        MvcResult firstPage = mvc.perform(get(
+                        "/v1/style-analyses/{analysisId}/windows", analysisId
+                )
+                        .param("limit", "1")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].ordinal").value(0))
+                .andExpect(jsonPath("$.next_cursor").isString())
+                .andReturn();
+        String cursor = stringField(object(firstPage), "next_cursor");
+        mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
+                        .param("limit", "1")
+                        .param("cursor", cursor)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].ordinal").value(1));
+        mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
+                        .param("cursor", "not-a-valid-cursor")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+        mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
+                        .param("limit", "not-an-integer")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+
+        Map<String, Object> result = objectField(object(analysis), "result");
+        String artifactId = stringField(result, "trace_artifact_id");
+        int uncompressedBytes = ((Number) result.get(
+                "trace_uncompressed_bytes"
+        )).intValue();
+        MvcResult artifact = mvc.perform(get("/v1/artifacts/{artifactId}", artifactId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        CanonicalTransferController.ARTIFACT_CODEC_HEADER, "gzip"
+                ))
+                .andReturn();
+        byte[] compressed = artifact.getResponse().getContentAsByteArray();
+        assertTrue(compressed.length < uncompressedBytes);
+        assertEquals(0x1f, compressed[0] & 0xff);
+        assertEquals(0x8b, compressed[1] & 0xff);
+    }
+
     @ParameterizedTest(name = "{0}")
     @MethodSource("requiredRoutes")
     void everyScaffoldRouteIsMappedAndUsesItsDocumentedScope(
@@ -1031,12 +1276,8 @@ class ApiHttpContractTest {
                 route("read revision", "GET", "/v1/novels/nov_test/revisions/rev_test", "novel:read", false),
                 route("edit preview", "POST", "/v1/novels/nov_test/edit-previews", "novel:propose", false),
                 route("undo preview", "POST", "/v1/novels/nov_test/undo-previews", "novel:propose", false),
-                route("style analysis", "POST", "/v1/novels/nov_test/style-analyses", "style:analyze", false),
-                route("read analysis", "GET", "/v1/style-analyses/analysis_test", "novel:read", false),
                 route("rewrite", "POST", "/v1/rewrite-proposals", "rewrite:propose", false),
-                route("read rewrite", "GET", "/v1/rewrite-proposals/proposal_test", "novel:read", false),
-                route("claim job", "POST", "/v1/internal/jobs/claims", "worker:execute", true),
-                route("submit worker result", "POST", "/v1/internal/jobs/job_test/results", "worker:execute", false)
+                route("read rewrite", "GET", "/v1/rewrite-proposals/proposal_test", "novel:read", false)
         );
     }
 
@@ -1048,6 +1289,123 @@ class ApiHttpContractTest {
             boolean wildcardAllowed
     ) {
         return Arguments.of(label, method, path, scope, wildcardAllowed);
+    }
+
+    private ReadyStyleProfile createReadyStyleProfile(
+            CanonicalRevision revision,
+            String token,
+            String keyPrefix
+    ) throws Exception {
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        StyleProfileScope scope = new StyleProfileScope(
+                new Ids.NovelId(novelId), StyleScopeKind.NOVEL, null
+        );
+        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                keyPrefix + "-profile")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "name", "Durable analysis baseline",
+                                "scope", scope.canonicalValue(),
+                                "provenance", "Generated HTTP durability fixture"
+                        ))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String profileId = stringField(object(profileResult), "profile_id");
+
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                NarrativeCanonicalMapper.fromCanonical(revision).liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
+        List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
+                30, new BigDecimal("0.1")
+        );
+        StyleCalibrationProfile calibration = new StyleCalibrationProfile(
+                dev.storyblock.style.StyleModule.CALIBRATION_SCHEMA_VERSION,
+                features.sourceHash(),
+                features.contract().contractHash(),
+                windows.configurationHash(),
+                List.of(new StyleStratumCalibration(
+                        StyleStratum.narration(),
+                        30,
+                        StyleFeatureChannel.requiredChannels().stream()
+                                .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                                .map(channel -> StyleChannelCalibration.fromDistances(
+                                        channel, referenceDistances
+                                )).toList()
+                ))
+        );
+        StyleProfileVersionContent versionContent = new StyleProfileVersionContent(
+                scope,
+                List.of(new StyleCorpusSource(
+                        "generated-durable-corpus",
+                        features.sourceHash(),
+                        StyleCorpusSourceKind.GENERATED,
+                        "Durable job HTTP fixture",
+                        "test-only",
+                        "test-owner"
+                )),
+                features,
+                windows,
+                calibration.canonicalValue()
+        );
+        MvcResult versionResult = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions", profileId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                keyPrefix + "-version")
+                        .header(HttpHeaders.IF_MATCH,
+                                profileResult.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(versionContent.canonicalValue())))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String versionId = stringField(
+                objectField(object(versionResult), "profile_version"), "version_id"
+        );
+        MvcResult calibrating = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                keyPrefix + "-calibrating")
+                        .header(HttpHeaders.IF_MATCH,
+                                versionResult.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "target_state", "calibrating",
+                                "reason", "Durable analysis calibration",
+                                "confirm_generated_corpus_promotion", false
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn();
+        mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                keyPrefix + "-ready")
+                        .header(HttpHeaders.IF_MATCH,
+                                calibrating.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "target_state", "ready",
+                                "reason", "Human-approved durable analysis fixture",
+                                "confirm_generated_corpus_promotion", true
+                        ))))
+                .andExpect(status().isOk());
+        return new ReadyStyleProfile(profileId, versionId);
+    }
+
+    private record ReadyStyleProfile(String profileId, String versionId) {
     }
 
     private static CanonicalRevision genesis() {
@@ -1072,6 +1430,44 @@ class ApiHttpContractTest {
                 "id", chapterId,
                 "order_key", OrderKey.initial().value(),
                 "title", "Chapter",
+                "scenes", List.of(scene)
+        );
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
+        document.put("novel_id", novelId);
+        document.put("revision_id", Ids.RevisionId.create().value());
+        document.put("parent_revision_id", null);
+        document.put("chapters", List.of(chapter));
+        document.put("created_at", Instant.parse("2026-08-21T12:00:00Z").toString());
+        return CanonicalRevision.of(document);
+    }
+
+    private static CanonicalRevision thousandBlockRevision() {
+        String novelId = Ids.NovelId.create().value();
+        String chapterId = Ids.ChapterId.create().value();
+        List<Map<String, Object>> blocks = new ArrayList<>();
+        for (int index = 0; index < 1_000; index++) {
+            blocks.add(Map.of(
+                    "id", Ids.BlockId.create().value(),
+                    "block_version_id", Ids.BlockVersionId.create().value(),
+                    "order_key", OrderKey.rebalanced(index, 1_000).value(),
+                    "text", "Block %04d contains stable narrative prose with measured cadence."
+                            .formatted(index),
+                    "meta", Map.of()
+            ));
+        }
+        Map<String, Object> scene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "Durability fixture",
+                "transition_mode", "opening",
+                "blocks", List.copyOf(blocks)
+        );
+        Map<String, Object> chapter = Map.of(
+                "id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "One thousand blocks",
                 "scenes", List.of(scene)
         );
         Map<String, Object> document = new LinkedHashMap<>();
@@ -1216,6 +1612,14 @@ class ApiHttpContractTest {
 
     private static String stringField(Map<String, Object> object, String field) {
         return (String) object.get(field);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> objectField(
+            Map<String, Object> object,
+            String field
+    ) {
+        return (Map<String, Object>) object.get(field);
     }
 
     @SuppressWarnings("unchecked")

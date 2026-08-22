@@ -16,4 +16,13 @@ public enum StyleDecisionState {
     public String canonicalName() {
         return canonicalName;
     }
+
+    public static StyleDecisionState fromCanonicalName(String value) {
+        for (StyleDecisionState state : values()) {
+            if (state.canonicalName.equals(value)) {
+                return state;
+            }
+        }
+        throw new IllegalArgumentException("Unsupported style decision state " + value);
+    }
 }

@@ -1,6 +1,7 @@
 package dev.storyblock.api.http;
 
 import dev.storyblock.application.CanonicalTransferService;
+import dev.storyblock.application.StyleAnalysisService;
 import dev.storyblock.security.AccessKeyService;
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +25,7 @@ public class ApiSecurityConfiguration {
             ApiProblemWriter problemWriter,
             AccessKeyService accessKeys,
             CanonicalTransferService transfers,
+            StyleAnalysisService analyses,
             Clock clock,
             @Value("${storyblock.security.owner-token:}") String ownerToken,
             @Value("${storyblock.security.hide-cross-novel:true}") boolean hideCrossNovel
@@ -33,7 +35,7 @@ public class ApiSecurityConfiguration {
                         accessKeys, clock, ownerToken, problemWriter
                 );
         NovelBoundaryFilter boundaryFilter = new NovelBoundaryFilter(
-                transfers, accessKeys, problemWriter, hideCrossNovel
+                transfers, analyses, accessKeys, problemWriter, hideCrossNovel
         );
         http
                 .csrf(csrf -> csrf.disable())
