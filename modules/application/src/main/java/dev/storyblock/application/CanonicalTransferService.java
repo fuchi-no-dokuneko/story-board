@@ -16,6 +16,7 @@ import dev.storyblock.storage.RevisionRef;
 import dev.storyblock.storage.RevisionStore;
 import dev.storyblock.storage.StoredArtifact;
 import dev.storyblock.storage.StoredExportJob;
+import dev.storyblock.storage.StoredRevision;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -133,6 +134,13 @@ public final class CanonicalTransferService {
 
     public RevisionRef getHead(Ids.NovelId novelId) {
         return store.getHead(novelId);
+    }
+
+    public StoredRevision getRevision(
+            Ids.NovelId novelId,
+            Ids.RevisionId revisionId
+    ) {
+        return store.getRevision(novelId, revisionId);
     }
 
     public static void verifyReplay(CanonicalNovelPackage document) {

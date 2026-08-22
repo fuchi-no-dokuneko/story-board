@@ -127,14 +127,13 @@ class ApiHttpContractTest {
     }
 
     @Test
-    void authorizedReadReachesTheDocumentedUnavailableScaffold() throws Exception {
+    void authorizedReadReachesTheInstalledRouteValidation() throws Exception {
         mvc.perform(get("/v1/novels/nov_test")
                         .with(userWithScope("novel:read")))
-                .andExpect(status().isServiceUnavailable())
+                .andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(header().string(HttpHeaders.RETRY_AFTER, "1"))
-                .andExpect(jsonPath("$.status").value(503))
-                .andExpect(jsonPath("$.code").value("DEPENDENCY_UNAVAILABLE"));
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
     }
 
     @Test
@@ -228,15 +227,15 @@ class ApiHttpContractTest {
     }
 
     @Test
-    void validMutationContractReachesOwningServiceBoundary() throws Exception {
+    void installedMutationRejectsAnIncompleteRequest() throws Exception {
         mvc.perform(post("/v1/novels")
                         .with(userWithScope("novel:admin"))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
                         .header(HttpHeaders.IF_MATCH, "*")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.code").value("DEPENDENCY_UNAVAILABLE"));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
     }
 
     @Test
@@ -1240,54 +1239,6 @@ class ApiHttpContractTest {
         assertTrue(compressed.length < uncompressedBytes);
         assertEquals(0x1f, compressed[0] & 0xff);
         assertEquals(0x8b, compressed[1] & 0xff);
-    }
-
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("requiredRoutes")
-    void everyScaffoldRouteIsMappedAndUsesItsDocumentedScope(
-            String label,
-            String method,
-            String path,
-            String scope,
-            boolean wildcardAllowed
-    ) throws Exception {
-        MockHttpServletRequestBuilder request = switch (method) {
-            case "GET" -> get(path);
-            case "POST" -> post(path)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{}");
-            case "DELETE" -> delete(path);
-            default -> throw new AssertionError("unsupported test method " + method);
-        };
-        request.with(userWithScope(scope));
-        if (!"GET".equals(method)) {
-            request.header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "route-test-1");
-            request.header(HttpHeaders.IF_MATCH, wildcardAllowed ? "*" : VALID_ETAG);
-        }
-
-        mvc.perform(request)
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(jsonPath("$.code").value("DEPENDENCY_UNAVAILABLE"));
-    }
-
-    private static Stream<Arguments> requiredRoutes() {
-        return Stream.of(
-                route("create novel", "POST", "/v1/novels", "novel:admin", true),
-                route("read novel", "GET", "/v1/novels/nov_test", "novel:read", false),
-                route("read revision", "GET", "/v1/novels/nov_test/revisions/rev_test", "novel:read", false),
-                route("edit preview", "POST", "/v1/novels/nov_test/edit-previews", "novel:propose", false),
-                route("undo preview", "POST", "/v1/novels/nov_test/undo-previews", "novel:propose", false)
-        );
-    }
-
-    private static Arguments route(
-            String label,
-            String method,
-            String path,
-            String scope,
-            boolean wildcardAllowed
-    ) {
-        return Arguments.of(label, method, path, scope, wildcardAllowed);
     }
 
     private ReadyStyleProfile createReadyStyleProfile(

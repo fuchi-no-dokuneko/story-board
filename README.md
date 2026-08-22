@@ -50,6 +50,9 @@ The command emits one canonical JSON report and exits nonzero when any head
 cannot be reproduced. It requires an existing database file, preventing a path
 typo from being reported as an empty valid store.
 
+Encrypted live backup and isolated restore drills are documented in
+[`docs/operations/backup-and-restore.md`](docs/operations/backup-and-restore.md).
+
 ## HTTP Contract
 
 The versioned REST contract is served at `GET /v1/openapi.yaml` and documented
