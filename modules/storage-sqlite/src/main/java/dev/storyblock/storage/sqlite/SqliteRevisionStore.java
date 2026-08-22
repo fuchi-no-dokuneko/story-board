@@ -22,6 +22,10 @@ import dev.storyblock.security.StoredAccessKey;
 import dev.storyblock.monitor.MonitorSaveResult;
 import dev.storyblock.monitor.MonitorStore;
 import dev.storyblock.monitor.StoredMonitorRun;
+import dev.storyblock.rewrite.policy.ReserveRewriteCandidateCommand;
+import dev.storyblock.rewrite.policy.RewriteCandidateReservation;
+import dev.storyblock.rewrite.policy.RewriteCandidateReservationSaveResult;
+import dev.storyblock.rewrite.policy.RewriteReservationStore;
 import dev.storyblock.style.CreateStyleProfileCommand;
 import dev.storyblock.style.CreateStyleProfileVersionCommand;
 import dev.storyblock.style.StyleAnalysisClaimCommand;
@@ -75,7 +79,7 @@ import java.util.Optional;
 
 public final class SqliteRevisionStore implements
         RevisionStore, AccessKeyStore, MonitorStore, StyleProfileStore,
-        StyleAnalysisStore, AutoCloseable {
+        StyleAnalysisStore, RewriteReservationStore, AutoCloseable {
     private final SqliteDatabase database;
     private final CheckpointPolicy checkpointPolicy;
     private final CommitFaultInjector faultInjector;
@@ -636,6 +640,26 @@ public final class SqliteRevisionStore implements
         Objects.requireNonNull(artifactId, "artifactId");
         return read(connection -> SqliteStyleAnalysisStore.findArtifactExpiry(
                 connection, artifactId
+        ));
+    }
+
+    @Override
+    public RewriteCandidateReservationSaveResult reserveRewriteCandidate(
+            ReserveRewriteCandidateCommand command
+    ) {
+        Objects.requireNonNull(command, "command");
+        return write(connection -> SqliteRewriteReservationStore.reserve(
+                connection, command
+        ));
+    }
+
+    @Override
+    public RewriteCandidateReservation getRewriteCandidateReservation(
+            Ids.ProposalId proposalId
+    ) {
+        Objects.requireNonNull(proposalId, "proposalId");
+        return read(connection -> SqliteRewriteReservationStore.get(
+                connection, proposalId
         ));
     }
 

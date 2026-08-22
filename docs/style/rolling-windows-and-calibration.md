@@ -84,6 +84,9 @@ rewrite. Every channel also reports deterministic Top-10 feature contributors.
 `StyleAnomalyDecision.can_trigger_rewrite` is true only for
 `rewrite_candidate`; constructors reject inconsistent low-confidence,
 topic-only, or unsustained rewrite decisions.
+The compact decision also persists the sorted identities of independently gated
+channels above q99, so a later rewrite gate can verify multi-channel evidence
+without loading or duplicating dense score traces.
 
 ## Verification
 

@@ -1767,19 +1767,33 @@ components:
       additionalProperties: false
     RewriteProposalRequest:
       type: object
-      required: [novel_id, revision_id, revision_hash, finding_ids]
+      required: [analysis_id, novel_id, revision_id, revision_hash, finding_ids]
       properties:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
         novel_id:
           type: string
+          pattern: '^nov_[0-9a-f-]{36}$'
         revision_id:
           type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
         revision_hash:
           type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
         finding_ids:
           type: array
           minItems: 1
+          maxItems: 64
+          uniqueItems: true
           items:
             type: string
+            pattern: '^sha256:[0-9a-f]{64}$'
+        cooldown_seconds:
+          type: integer
+          minimum: 300
+          maximum: 2592000
+          default: 86400
       additionalProperties: false
     JobAccepted:
       type: object
@@ -2536,7 +2550,7 @@ components:
       additionalProperties: false
     StyleAnomalyDecision:
       type: object
-      required: [state, reason, confidence, operational_window_id, sustaining_window_ids, localized_micro_window_ids, intentional_shift_adjusted, can_trigger_rewrite]
+      required: [state, reason, confidence, operational_window_id, independent_q99_channels, sustaining_window_ids, localized_micro_window_ids, intentional_shift_adjusted, can_trigger_rewrite]
       properties:
         state:
           type: string
@@ -2550,6 +2564,14 @@ components:
         operational_window_id:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
+        independent_q99_channels:
+          type: array
+          uniqueItems: true
+          maxItems: 5
+          description: Independently gated calibrated channels above q99 in the operational window.
+          items:
+            type: string
+            enum: [surface, grammar, rhythm, narrative, lexical]
         sustaining_window_ids:
           type: array
           uniqueItems: true

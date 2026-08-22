@@ -102,6 +102,12 @@ public final class StyleAnomalyPolicy {
                 reason,
                 confidence,
                 operational.window().windowId(),
+                operational.channels().stream()
+                        .filter(score -> score.distance().independentGateEvidence())
+                        .filter(StyleCalibratedChannelScore::aboveQ99)
+                        .map(score -> score.distance().channel())
+                        .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                        .toList(),
                 sustaining,
                 localized,
                 adjusted,

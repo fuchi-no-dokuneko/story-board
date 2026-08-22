@@ -1,0 +1,60 @@
+:root {
+  color-scheme: light dark;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background: #f4f5f7;
+  color: #20242a;
+  letter-spacing: 0;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; }
+header {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 14px clamp(18px, 4vw, 48px);
+  background: #15191e;
+  color: #f7f8fa;
+  border-bottom: 3px solid #38a169;
+}
+h1, h2, p { margin: 0; }
+h1 { font-size: 22px; font-weight: 720; }
+header p { margin-top: 3px; color: #b9c0c9; font-size: 13px; }
+.status { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+#status-dot { width: 9px; height: 9px; border-radius: 50%; background: #d69e2e; }
+#status-dot.up { background: #48bb78; }
+#status-dot.down { background: #e05252; }
+main { width: min(1080px, 100%); margin: 0 auto; padding: 28px clamp(16px, 4vw, 40px) 48px; }
+nav { display: flex; gap: 8px; margin-bottom: 20px; }
+section { border-top: 1px solid #c9ced6; padding: 20px 0 24px; }
+h2 { font-size: 15px; margin-bottom: 14px; }
+button, select, input, textarea {
+  border: 1px solid #aeb5bf;
+  border-radius: 4px;
+  background: #fff;
+  color: #20242a;
+  font: inherit;
+}
+button { min-height: 36px; padding: 7px 14px; cursor: pointer; font-weight: 650; }
+button:hover { border-color: #2f855a; }
+#send { background: #24734a; color: #fff; border-color: #24734a; min-width: 76px; }
+.request-line { display: grid; grid-template-columns: 110px 1fr 76px; gap: 8px; }
+select, input { min-height: 38px; padding: 7px 10px; }
+label { display: block; margin: 15px 0 6px; font-size: 12px; font-weight: 700; }
+#token, textarea { width: 100%; }
+textarea, pre { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 13px; line-height: 1.55; }
+textarea { resize: vertical; padding: 10px; }
+.response-heading { display: flex; justify-content: space-between; align-items: baseline; }
+#response-status { font: 700 13px ui-monospace, monospace; }
+pre { min-height: 180px; margin: 0; padding: 14px; overflow: auto; border: 1px solid #aeb5bf; background: #fff; white-space: pre-wrap; }
+@media (prefers-color-scheme: dark) {
+  :root { background: #101316; color: #e7e9ed; }
+  button, select, input, textarea, pre { background: #191e23; color: #e7e9ed; border-color: #49515b; }
+  section { border-color: #343b43; }
+}
+@media (max-width: 620px) {
+  header { align-items: flex-start; }
+  .request-line { grid-template-columns: 90px 1fr; }
+  #send { grid-column: 1 / -1; }
+}

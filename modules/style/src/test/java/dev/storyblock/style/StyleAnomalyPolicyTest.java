@@ -37,6 +37,14 @@ class StyleAnomalyPolicyTest {
         assertEquals(StyleDecisionState.REWRITE_CANDIDATE, decision.state());
         assertTrue(decision.canTriggerRewrite());
         assertEquals(2, decision.sustainingWindowIds().size());
+        assertEquals(
+                List.of(StyleFeatureChannel.SURFACE, StyleFeatureChannel.GRAMMAR),
+                decision.independentQ99Channels()
+        );
+        assertEquals(
+                decision,
+                StyleAnomalyDecision.fromCanonical(decision.canonicalValue())
+        );
     }
 
     @Test

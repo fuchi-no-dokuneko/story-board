@@ -17,4 +17,13 @@ public enum StyleDecisionReason {
     public String canonicalName() {
         return canonicalName;
     }
+
+    public static StyleDecisionReason fromCanonicalName(String value) {
+        for (StyleDecisionReason reason : values()) {
+            if (reason.canonicalName.equals(value)) {
+                return reason;
+            }
+        }
+        throw new IllegalArgumentException("Unsupported style decision reason " + value);
+    }
 }

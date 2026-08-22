@@ -426,6 +426,8 @@ class OpenApiContractTest {
         assertTrue(string(map(map(decision.get("properties"))
                 .get("localized_micro_window_ids")).get("description"))
                 .contains("never sufficient"));
+        assertEquals(5, map(map(decision.get("properties"))
+                .get("independent_q99_channels")).get("maxItems"));
     }
 
     @Test

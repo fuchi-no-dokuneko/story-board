@@ -49,6 +49,10 @@ public class ApiSecurityConfiguration {
                 ))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/app.js",
+                                "/styles.css",
                                 "/v1/openapi.yaml",
                                 "/actuator/health",
                                 "/actuator/health/**"

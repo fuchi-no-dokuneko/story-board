@@ -31,6 +31,7 @@
     <module>modules/storage-sqlite</module>
     <module>modules/monitor-adapter</module>
     <module>modules/rewrite</module>
+    <module>modules/rewrite-policy</module>
     <module>apps/api</module>
     <module>apps/style-worker</module>
     <module>apps/llm-worker</module>
@@ -107,6 +108,11 @@
       <dependency>
         <groupId>dev.storyblock</groupId>
         <artifactId>storyblock-rewrite</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.storyblock</groupId>
+        <artifactId>storyblock-rewrite-policy</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

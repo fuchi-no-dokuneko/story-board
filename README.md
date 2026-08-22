@@ -4,8 +4,8 @@ StoryBlock Engine is a local-first service for immutable, evidence-bound editing
 of long-form narrative blocks. The canonical write path uses typed operations,
 deterministic validation, preview tokens, and compare-and-swap commits.
 
-This repository is intentionally local-only. It has no configured Git remote and
-must not be deployed or pushed without an explicit owner decision.
+The first release provides the API, SQLite storage, style and rewrite workers,
+and a lightweight operator console.
 
 ## Requirements
 
@@ -19,6 +19,21 @@ must not be deployed or pushed without an explicit owner decision.
 ./install.sh
 ./mvnw verify
 ```
+
+## Run
+
+Set two local values of at least 32 characters, then start the API:
+
+```bash
+export STORYBLOCK_SECURITY_OWNER_TOKEN='replace-with-a-local-owner-token-32+'
+export STORYBLOCK_SECURITY_PEPPER='replace-with-a-local-server-pepper-32+'
+./mvnw -pl apps/api -am package -DskipTests
+java -Djava.net.preferIPv4Stack=true \
+  -jar apps/api/target/storyblock-api-0.1.0-SNAPSHOT.jar
+```
+
+Open `http://127.0.0.1:8080/` for the API console. Container users can place
+the same values in an untracked `.env` and run `docker compose up --build`.
 
 The bootstrap is unprivileged and keeps downloaded tooling in the current
 user's Maven cache. The Unix wrapper download and every Maven JVM are configured

@@ -1,9 +1,7 @@
 package dev.storyblock.api.http;
 
-import dev.storyblock.domain.Ids;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,27 +43,6 @@ public final class V1ContractController {
     ResponseEntity<Map<String, Object>> previewUndo(
             @PathVariable String novelId,
             @RequestBody JsonNode request
-    ) {
-        return unavailable();
-    }
-
-    @PostMapping("/rewrite-proposals")
-    ResponseEntity<Map<String, Object>> startRewriteProposal(
-            @RequestBody JsonNode request,
-            Authentication authentication
-    ) {
-        JsonNode novelId = request.get("novel_id");
-        if (novelId != null && novelId.isString()) {
-            AccessPrincipalSupport.requireNovel(
-                    authentication, new Ids.NovelId(novelId.stringValue())
-            );
-        }
-        return unavailable();
-    }
-
-    @GetMapping("/rewrite-proposals/{proposalId}")
-    ResponseEntity<Map<String, Object>> getRewriteProposal(
-            @PathVariable String proposalId
     ) {
         return unavailable();
     }

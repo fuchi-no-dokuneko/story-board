@@ -710,6 +710,7 @@ class ApiHttpContractTest {
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
 
         byte[] rewriteBody = CanonicalJson.bytes(Map.of(
+                "analysis_id", Ids.StyleAnalysisId.create().value(),
                 "novel_id", secondNovel,
                 "revision_id", secondRevision,
                 "revision_hash", second.contentHash(),
@@ -1275,9 +1276,7 @@ class ApiHttpContractTest {
                 route("read novel", "GET", "/v1/novels/nov_test", "novel:read", false),
                 route("read revision", "GET", "/v1/novels/nov_test/revisions/rev_test", "novel:read", false),
                 route("edit preview", "POST", "/v1/novels/nov_test/edit-previews", "novel:propose", false),
-                route("undo preview", "POST", "/v1/novels/nov_test/undo-previews", "novel:propose", false),
-                route("rewrite", "POST", "/v1/rewrite-proposals", "rewrite:propose", false),
-                route("read rewrite", "GET", "/v1/rewrite-proposals/proposal_test", "novel:read", false)
+                route("undo preview", "POST", "/v1/novels/nov_test/undo-previews", "novel:propose", false)
         );
     }
 

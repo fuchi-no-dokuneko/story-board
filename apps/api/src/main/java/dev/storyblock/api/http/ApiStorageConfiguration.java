@@ -5,6 +5,7 @@ import dev.storyblock.application.CommitService;
 import dev.storyblock.application.DetectorService;
 import dev.storyblock.application.MonitorService;
 import dev.storyblock.application.RenderService;
+import dev.storyblock.application.RewriteGateService;
 import dev.storyblock.application.StyleProfileService;
 import dev.storyblock.application.StyleAnalysisService;
 import dev.storyblock.security.AccessKeyService;
@@ -62,6 +63,11 @@ public class ApiStorageConfiguration {
     @Bean
     StyleAnalysisService styleAnalysisService(SqliteRevisionStore store) {
         return new StyleAnalysisService(store, store, store);
+    }
+
+    @Bean
+    RewriteGateService rewriteGateService(SqliteRevisionStore store) {
+        return new RewriteGateService(store, store, store);
     }
 
     @Bean

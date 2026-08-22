@@ -47,6 +47,14 @@
       <artifactId>storyblock-storage-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-rewrite</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-rewrite-policy</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>

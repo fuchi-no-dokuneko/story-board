@@ -1,0 +1,15 @@
+services:
+  api:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      STORYBLOCK_DATABASE_PATH: /app/data/storyblock.db
+      STORYBLOCK_SECURITY_OWNER_TOKEN: ${STORYBLOCK_SECURITY_OWNER_TOKEN:?set owner token}
+      STORYBLOCK_SECURITY_PEPPER: ${STORYBLOCK_SECURITY_PEPPER:?set pepper}
+    volumes:
+      - storyblock-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  storyblock-data:

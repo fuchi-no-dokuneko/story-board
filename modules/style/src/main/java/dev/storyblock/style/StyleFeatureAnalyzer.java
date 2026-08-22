@@ -475,7 +475,13 @@ public final class StyleFeatureAnalyzer {
         return Map.copyOf(result);
     }
 
-    private static String sourceHash(List<NarrativeBlock> blocks) {
+    public static String sourceHash(List<NarrativeBlock> blocks) {
+        blocks = List.copyOf(blocks);
+        if (blocks.isEmpty() || blocks.size() > 1_000) {
+            throw new IllegalArgumentException(
+                    "Style source hash requires 1 to 1000 blocks"
+            );
+        }
         return CanonicalJson.hash(blocks.stream().map(block -> Map.of(
                 "block_id", block.id().value(),
                 "block_version_id", block.versionId().value(),
