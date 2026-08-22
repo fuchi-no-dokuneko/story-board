@@ -16,11 +16,56 @@
     </dependency>
     <dependency>
       <groupId>dev.storyblock</groupId>
-      <artifactId>storyblock-application</artifactId>
+      <artifactId>storyblock-rewrite</artifactId>
     </dependency>
     <dependency>
       <groupId>dev.storyblock</groupId>
-      <artifactId>storyblock-monitor-adapter</artifactId>
+      <artifactId>storyblock-contracts</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.tngtech.archunit</groupId>
+      <artifactId>archunit-junit5</artifactId>
+      <version>${archunit.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>ban-llm-worker-canonical-capabilities</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <bannedDependencies>
+                  <excludes>
+                    <exclude>dev.storyblock:storyblock-application</exclude>
+                    <exclude>dev.storyblock:storyblock-monitor-adapter</exclude>
+                    <exclude>dev.storyblock:storyblock-security</exclude>
+                    <exclude>dev.storyblock:storyblock-storage-api</exclude>
+                    <exclude>dev.storyblock:storyblock-storage-sqlite</exclude>
+                  </excludes>
+                  <searchTransitive>true</searchTransitive>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>

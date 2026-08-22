@@ -101,6 +101,13 @@ metadata and paged decisions remain in SQLite while detailed score traces are
 gzip content-addressed artifacts with enforced expiry. See
 [`../style/durable-analysis-jobs.md`](../style/durable-analysis-jobs.md).
 
+The proposal-only LLM process and its model gateway contract are implemented
+independently of the public rewrite route. `POST /v1/rewrite-proposals` and its
+status resource remain fail-closed scaffolds until ADR-308 and ADR-309 install
+eligibility gates, validation, persistence, re-scoring, and stale policy. The
+worker itself has no API or commit credential; see
+[`../rewrite/sandboxed-llm-worker.md`](../rewrite/sandboxed-llm-worker.md).
+
 The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
 `409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.
 

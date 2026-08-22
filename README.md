@@ -55,6 +55,9 @@ are documented in
 Durable style-analysis snapshots, leases, result paging, compressed artifacts,
 and the executable worker are documented in
 [`docs/style/durable-analysis-jobs.md`](docs/style/durable-analysis-jobs.md).
+The bounded, proposal-only LLM process and its strict model gateway protocol are
+documented in
+[`docs/rewrite/sandboxed-llm-worker.md`](docs/rewrite/sandboxed-llm-worker.md).
 Services assigned to later ADRs return a typed `503` until
 installed. The
 transfer format and recovery guarantees are documented in
@@ -71,9 +74,10 @@ Adjacent-state rules and reset-boundary behavior are documented in
 
 - `apps/api`: Spring MVC API and commit coordinator
 - `apps/style-worker`: durable style-analysis worker
-- `apps/llm-worker`: proposal-only rewrite worker
+- `apps/llm-worker`: isolated one-shot, proposal-only rewrite worker
 - `apps/cli`: replay, backup, restore, and operator commands
-- `modules/*`: framework-independent domain services and adapters
+- `modules/rewrite`: immutable rewrite input and text-proposal contracts
+- `modules/*`: other framework-independent domain services and adapters
 - `modules/storage-sqlite/src/main/resources/db/migration`: Flyway migrations
 - `tests/architecture-tests`: executable module-boundary checks
 
