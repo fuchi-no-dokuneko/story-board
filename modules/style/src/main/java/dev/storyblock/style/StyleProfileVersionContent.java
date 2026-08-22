@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public record StyleProfileVersionContent(
@@ -42,6 +43,23 @@ public record StyleProfileVersionContent(
         calibrationStatistics = CanonicalValues.freezeMap(
                 calibrationStatistics, "style_profile_version.calibration_statistics"
         );
+        if (!calibrationStatistics.isEmpty()) {
+            StyleCalibrationProfile calibration = StyleCalibrationProfile.fromCanonical(
+                    calibrationStatistics
+            );
+            if (!calibration.targetCorpusHash().equals(featureSet.sourceHash())
+                    || !calibration.contractHash().equals(
+                            featureSet.contract().contractHash()
+                    )
+                    || !calibration.windowConfigurationHash().equals(
+                            windowConfiguration.configurationHash()
+                    )) {
+                throw new IllegalArgumentException(
+                        "Style calibration profile does not match immutable version content"
+                );
+            }
+            calibrationStatistics = calibration.canonicalValue();
+        }
     }
 
     public static StyleProfileVersionContent fromCanonical(Map<String, Object> value) {
@@ -73,6 +91,19 @@ public record StyleProfileVersionContent(
         return corpusSources.stream().anyMatch(source ->
                 source.kind().requiresExplicitGeneratedPromotion()
         );
+    }
+
+    public Optional<StyleCalibrationProfile> calibrationProfile() {
+        return calibrationStatistics.isEmpty()
+                ? Optional.empty()
+                : Optional.of(StyleCalibrationProfile.fromCanonical(
+                        calibrationStatistics
+                ));
+    }
+
+    public boolean hasGateCalibration() {
+        return calibrationProfile().map(StyleCalibrationProfile::hasCalibratedStratum)
+                .orElse(false);
     }
 
     public Map<String, Object> canonicalValue() {

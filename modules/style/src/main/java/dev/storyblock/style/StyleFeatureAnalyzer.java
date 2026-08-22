@@ -260,7 +260,7 @@ public final class StyleFeatureAnalyzer {
         for (NarrativeBlock block : blocks) {
             Map<String, Object> metadata = block.metadata().fields();
             Object speech = metadata.get("speech");
-            boolean dialogue = speech != null || containsDialogueMarks(block.text());
+            boolean dialogue = StyleAnalysisBlock.isDialogue(block);
             boolean action = metadata.get("actions") instanceof List<?> values
                     && !values.isEmpty();
             increment(counts, dialogue ? "mode:dialogue"
@@ -370,6 +370,7 @@ public final class StyleFeatureAnalyzer {
             }
             default -> throw new IllegalStateException("Unsupported style distance metric");
         }
+        diagnostics.put("top_contributors", topContributors(target, current, 10));
         return new StyleChannelDistance(
                 channel,
                 channel.featureVersion(),
@@ -378,6 +379,49 @@ public final class StyleFeatureAnalyzer {
                 channel.required(),
                 diagnostics
         );
+    }
+
+    private static List<Map<String, Object>> topContributors(
+            StyleFeatureVector target,
+            StyleFeatureVector current,
+            int limit
+    ) {
+        Map<String, BigDecimal> targetValues = contributorValues(target);
+        Map<String, BigDecimal> currentValues = contributorValues(current);
+        Set<String> keys = new LinkedHashSet<>(targetValues.keySet());
+        keys.addAll(currentValues.keySet());
+        return keys.stream()
+                .map(key -> Map.<String, Object>of(
+                        "absolute_delta",
+                        targetValues.getOrDefault(key, BigDecimal.ZERO)
+                                .subtract(currentValues.getOrDefault(
+                                        key, BigDecimal.ZERO
+                                )).abs().stripTrailingZeros(),
+                        "feature", key
+                ))
+                .sorted(Comparator
+                        .<Map<String, Object>, BigDecimal>comparing(value ->
+                                (BigDecimal) value.get("absolute_delta")
+                        ).reversed()
+                        .thenComparing(value -> (String) value.get("feature")))
+                .limit(limit)
+                .toList();
+    }
+
+    private static Map<String, BigDecimal> contributorValues(
+            StyleFeatureVector vector
+    ) {
+        Map<String, BigDecimal> values = new LinkedHashMap<>();
+        vector.distribution().forEach((key, value) ->
+                values.put("distribution:" + key, value)
+        );
+        vector.measurements().forEach((key, value) ->
+                values.put("measurement:" + key, value)
+        );
+        for (int index = 0; index < vector.embedding().size(); index++) {
+            values.put("embedding:" + index, vector.embedding().get(index));
+        }
+        return Map.copyOf(values);
     }
 
     private static StyleFeatureVector vector(
@@ -509,11 +553,6 @@ public final class StyleFeatureAnalyzer {
             return text;
         }
         return null;
-    }
-
-    private static boolean containsDialogueMarks(String text) {
-        return text.indexOf('"') >= 0 || text.indexOf('\'') >= 0
-                || text.indexOf('\u201c') >= 0 || text.indexOf('\u300c') >= 0;
     }
 
     private static String bucket(String prefix, int value, int width) {

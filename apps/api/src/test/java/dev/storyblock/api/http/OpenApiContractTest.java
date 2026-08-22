@@ -380,6 +380,17 @@ class OpenApiContractTest {
         assertTrue(strings(primaryMetrics).stream().noneMatch(metric ->
                 metric.contains("kl")
         ));
+        assertTrue(schemas.containsKey("StyleWindow"));
+        assertTrue(schemas.containsKey("StyleCalibrationProfile"));
+        assertTrue(schemas.containsKey("StyleWindowScore"));
+        Map<String, Object> decision = map(schemas.get("StyleAnomalyDecision"));
+        assertEquals(Set.of(
+                "normal", "warning", "rewrite_candidate", "topic_shift_only",
+                "low_confidence"
+        ), strings(map(map(decision.get("properties")).get("state")).get("enum")));
+        assertTrue(string(map(map(decision.get("properties"))
+                .get("localized_micro_window_ids")).get("description"))
+                .contains("never sufficient"));
     }
 
     @Test

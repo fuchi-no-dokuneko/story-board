@@ -88,6 +88,7 @@ public record StyleProfileVersionView(
         return state == StyleProfileState.READY
                 && approvedBy != null
                 && approvedAt != null
+                && profileVersion.content().hasGateCalibration()
                 && (!profileVersion.content().containsGeneratedText()
                         || lifecycle.stream().anyMatch(event ->
                                 event.toState() == StyleProfileState.READY

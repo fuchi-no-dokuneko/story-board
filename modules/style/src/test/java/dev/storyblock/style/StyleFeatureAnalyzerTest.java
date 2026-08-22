@@ -93,6 +93,29 @@ class StyleFeatureAnalyzerTest {
                 .findFirst().orElseThrow().primaryDistance());
     }
 
+    @Test
+    void apostrophesAndExplicitNoSpeechRemainNarration() {
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        StyleFeatureContract contract = StyleFeatureContract.defaults(
+                lexicon.vocabularyHash()
+        );
+
+        StyleFeatureSet features = analyzer.extract(
+                List.of(block(
+                        "It's quiet and nobody's speaking.",
+                        Map.of("speech", Map.of("type", "none"))
+                )),
+                lexicon,
+                contract
+        );
+
+        Map<String, BigDecimal> narrative = features.require(
+                StyleFeatureChannel.NARRATIVE
+        ).distribution();
+        assertTrue(narrative.containsKey("mode:description"));
+        assertFalse(narrative.containsKey("mode:dialogue"));
+    }
+
     private static NarrativeBlock block(String text, Map<String, Object> metadata) {
         return NarrativeBlock.create(
                 Ids.BlockId.create(),

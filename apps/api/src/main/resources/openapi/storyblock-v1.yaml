@@ -1923,6 +1923,133 @@ components:
         non_overlap_enabled:
           type: boolean
       additionalProperties: false
+    StyleStratum:
+      type: object
+      required: [kind, speaker_id]
+      properties:
+        kind:
+          type: string
+          enum: [narration, dialogue]
+        speaker_id:
+          type: [string, "null"]
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+      additionalProperties: false
+    StyleWindow:
+      type: object
+      required: [window_id, kind, segment, requested_stratum, pov, narrative_mode, block_ids, grapheme_count, full_sized, intentional_style_shift_reason, localization_only, primary_decision_eligible, sustainment_eligible]
+      properties:
+        window_id:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        kind:
+          type: string
+          enum: [operational, micro, non_overlap]
+        segment:
+          type: integer
+          minimum: 0
+        requested_stratum:
+          $ref: "#/components/schemas/StyleStratum"
+        pov:
+          type: string
+        narrative_mode:
+          type: string
+        block_ids:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            pattern: '^blk_[0-9a-f-]{36}$'
+        grapheme_count:
+          type: integer
+          minimum: 1
+        full_sized:
+          type: boolean
+        intentional_style_shift_reason:
+          type: [string, "null"]
+          maxLength: 500
+        localization_only:
+          type: boolean
+          description: True only for micro windows, which cannot trigger rewrites.
+        primary_decision_eligible:
+          type: boolean
+          description: True only for full operational windows.
+        sustainment_eligible:
+          type: boolean
+          description: True only for full non-overlap windows.
+      additionalProperties: false
+    StyleChannelCalibration:
+      type: object
+      required: [channel, channel_version, primary_metric, reference_distances, median, mad, q95, q99]
+      properties:
+        channel:
+          type: string
+          enum: [surface, grammar, rhythm, narrative, lexical, optional_embedding]
+        channel_version:
+          type: string
+        primary_metric:
+          type: string
+          enum: [jensen_shannon_distance, wasserstein_distance, robust_l1_input, cosine_distance]
+        reference_distances:
+          type: array
+          maxItems: 1000
+          items:
+            type: number
+            minimum: 0
+        median:
+          type: number
+          minimum: 0
+        mad:
+          type: number
+          minimum: 0
+        q95:
+          type: number
+          minimum: 0
+        q99:
+          type: number
+          minimum: 0
+      additionalProperties: false
+    StyleStratumCalibration:
+      type: object
+      required: [stratum, window_count, confidence, channels]
+      properties:
+        stratum:
+          $ref: "#/components/schemas/StyleStratum"
+        window_count:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        confidence:
+          type: string
+          enum: [calibrated, low_confidence]
+        channels:
+          type: array
+          minItems: 5
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/StyleChannelCalibration"
+      additionalProperties: false
+    StyleCalibrationProfile:
+      type: object
+      required: [calibration_schema_version, target_corpus_hash, contract_hash, window_configuration_hash, strata]
+      properties:
+        calibration_schema_version:
+          const: style-calibration-1.0.0
+        target_corpus_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        contract_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        window_configuration_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        strata:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/StyleStratumCalibration"
+      additionalProperties: false
     StyleProfileVersionContent:
       type: object
       required: [scope, corpus_sources, feature_set, window_configuration, calibration_statistics]
@@ -1940,8 +2067,10 @@ components:
         window_configuration:
           $ref: "#/components/schemas/StyleWindowConfiguration"
         calibration_statistics:
-          type: object
-          additionalProperties: true
+          oneOf:
+            - type: object
+              maxProperties: 0
+            - $ref: "#/components/schemas/StyleCalibrationProfile"
       additionalProperties: false
     StyleProfileVersion:
       type: object
@@ -2085,6 +2214,98 @@ components:
             $ref: "#/components/schemas/StyleChannelDistance"
         token_kl_diagnostic_only:
           const: true
+      additionalProperties: false
+    StyleProfileSelection:
+      type: object
+      required: [requested_stratum, selected_stratum, reason, calibration_available, confidence]
+      properties:
+        requested_stratum:
+          $ref: "#/components/schemas/StyleStratum"
+        selected_stratum:
+          $ref: "#/components/schemas/StyleStratum"
+        reason:
+          type: string
+          enum: [exact, speaker_fallback, unavailable]
+        calibration_available:
+          type: boolean
+        confidence:
+          type: string
+          enum: [calibrated, low_confidence]
+      additionalProperties: false
+    StyleCalibratedChannelScore:
+      type: object
+      required: [distance, percentile, robust_z, q95, q99, above_q95, above_q99]
+      properties:
+        distance:
+          $ref: "#/components/schemas/StyleChannelDistance"
+        percentile:
+          type: number
+          minimum: 0
+          maximum: 100
+        robust_z:
+          type: number
+          minimum: 0
+        q95:
+          type: number
+          minimum: 0
+        q99:
+          type: number
+          minimum: 0
+        above_q95:
+          type: boolean
+        above_q99:
+          type: boolean
+      additionalProperties: false
+    StyleWindowScore:
+      type: object
+      required: [window, profile_selection, distance_report, channels]
+      properties:
+        window:
+          $ref: "#/components/schemas/StyleWindow"
+        profile_selection:
+          $ref: "#/components/schemas/StyleProfileSelection"
+        distance_report:
+          $ref: "#/components/schemas/StyleDistanceReport"
+        channels:
+          type: array
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/StyleCalibratedChannelScore"
+      additionalProperties: false
+    StyleAnomalyDecision:
+      type: object
+      required: [state, reason, confidence, operational_window_id, sustaining_window_ids, localized_micro_window_ids, intentional_shift_adjusted, can_trigger_rewrite]
+      properties:
+        state:
+          type: string
+          enum: [normal, warning, rewrite_candidate, topic_shift_only, low_confidence]
+        reason:
+          type: string
+          enum: [within_calibrated_range, insufficient_calibration, token_channel_only, multi_channel_q95, sustained_multi_channel_q99, intentional_style_shift]
+        confidence:
+          type: string
+          enum: [calibrated, low_confidence]
+        operational_window_id:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        sustaining_window_ids:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            pattern: '^sha256:[0-9a-f]{64}$'
+        localized_micro_window_ids:
+          type: array
+          uniqueItems: true
+          description: Localization evidence only; never sufficient for rewrite eligibility.
+          items:
+            type: string
+            pattern: '^sha256:[0-9a-f]{64}$'
+        intentional_shift_adjusted:
+          type: boolean
+        can_trigger_rewrite:
+          type: boolean
+          description: True only for a calibrated sustained rewrite_candidate.
       additionalProperties: false
     ExportRequest:
       type: object

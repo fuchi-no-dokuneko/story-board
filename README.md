@@ -49,6 +49,9 @@ and stale-output invalidation are documented in
 Immutable style profiles, explicit baseline promotion, and versioned feature
 channels are implemented and documented in
 [`docs/style/style-profiles-and-features.md`](docs/style/style-profiles-and-features.md).
+Rolling-window stratification, reproducible calibration, and anomaly decisions
+are documented in
+[`docs/style/rolling-windows-and-calibration.md`](docs/style/rolling-windows-and-calibration.md).
 Services assigned to later ADRs return a typed `503` until
 installed. The
 transfer format and recovery guarantees are documented in

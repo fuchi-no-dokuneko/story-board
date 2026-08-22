@@ -84,6 +84,10 @@ and requires an explicit acknowledgement before generated or mixed corpus can
 be promoted to `READY`. Profile and version GETs enforce the stored novel
 boundary. See
 [`../style/style-profiles-and-features.md`](../style/style-profiles-and-features.md).
+The version payload carries a self-validating calibration profile when one is
+available. Window, calibrated score, and anomaly decision schemas are defined
+for the durable ADR-306 analysis API; their deterministic semantics are in
+[`../style/rolling-windows-and-calibration.md`](../style/rolling-windows-and-calibration.md).
 
 The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
 `409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.

@@ -1,5 +1,6 @@
 package dev.storyblock.style;
 
+import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.CanonicalValues;
 import java.util.Map;
 import java.util.Set;
@@ -59,5 +60,9 @@ public record StyleWindowConfiguration(
                 "operational_graphemes", operationalGraphemes,
                 "operational_stride_graphemes", operationalStrideGraphemes
         ), "style_window_configuration");
+    }
+
+    public String configurationHash() {
+        return CanonicalJson.hash(canonicalValue());
     }
 }

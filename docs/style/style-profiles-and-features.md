@@ -1,8 +1,9 @@
 # Immutable Style Profiles And Feature Channels
 
 ADR-304 implements the governed baseline and deterministic feature boundary for
-style analysis. It does not implement rolling-window stratification, calibrated
-percentiles, or anomaly decisions; those remain ADR-305.
+style analysis. ADR-305 adds the rolling-window, calibration, and anomaly policy
+documented in
+[`rolling-windows-and-calibration.md`](rolling-windows-and-calibration.md).
 
 ## Governance Model
 
@@ -37,7 +38,9 @@ DRAFT -> CALIBRATING -> READY -> DEPRECATED
 The client cannot supply `created_by` or `approved_by`. Both identities and
 timestamps come from the authenticated audit context. A version can gate a
 rewrite only while its current state is `READY` and its READY event supplies the
-approval actor and time.
+approval actor and time. Rewrite gating additionally requires at least one
+stratum with 30 calibration windows; READY versions with only low-confidence
+calibration remain reproducible but cannot gate a rewrite.
 
 Promoting a new version to `READY` deprecates the prior READY version in the
 same SQLite transaction. Generated or mixed corpus additionally requires

@@ -12,6 +12,8 @@ import dev.storyblock.security.AuditContext;
 import dev.storyblock.storage.IdempotencyConflictException;
 import dev.storyblock.style.StyleCorpusSource;
 import dev.storyblock.style.StyleCorpusSourceKind;
+import dev.storyblock.style.StyleCalibrationProfile;
+import dev.storyblock.style.StyleChannelCalibration;
 import dev.storyblock.style.StyleFeatureAnalyzer;
 import dev.storyblock.style.StyleFeatureContract;
 import dev.storyblock.style.StyleFeatureSet;
@@ -21,10 +23,13 @@ import dev.storyblock.style.StyleProfileScope;
 import dev.storyblock.style.StyleProfileState;
 import dev.storyblock.style.StyleProfileVersionContent;
 import dev.storyblock.style.StyleScopeKind;
+import dev.storyblock.style.StyleStratum;
+import dev.storyblock.style.StyleStratumCalibration;
 import dev.storyblock.style.StyleStatusPreconditionException;
 import dev.storyblock.style.StyleWindowConfiguration;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -227,6 +232,25 @@ class SqliteStyleProfileStoreTest {
                 lexicon,
                 StyleFeatureContract.defaults(lexicon.vocabularyHash())
         );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
+        List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
+                30, new BigDecimal("0.1")
+        );
+        StyleCalibrationProfile calibration = new StyleCalibrationProfile(
+                dev.storyblock.style.StyleModule.CALIBRATION_SCHEMA_VERSION,
+                features.sourceHash(),
+                features.contract().contractHash(),
+                windows.configurationHash(),
+                List.of(new StyleStratumCalibration(
+                        StyleStratum.narration(),
+                        30,
+                        dev.storyblock.style.StyleFeatureChannel.requiredChannels().stream()
+                                .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                                .map(channel -> StyleChannelCalibration.fromDistances(
+                                        channel, referenceDistances
+                                )).toList()
+                ))
+        );
         return new StyleProfileVersionContent(
                 scope,
                 List.of(new StyleCorpusSource(
@@ -238,8 +262,8 @@ class SqliteStyleProfileStoreTest {
                         "test-owner"
                 )),
                 features,
-                StyleWindowConfiguration.defaults(),
-                Map.of()
+                windows,
+                calibration.canonicalValue()
         );
     }
 
