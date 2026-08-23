@@ -1,0 +1,18 @@
+modules/domain: no mocks; typed identities, Unicode boundaries, block invariants, and edit contracts tested.
+modules/contracts: no mocks; canonical serialization, hashes, packages, revisions, and operation mappings tested.
+modules/application: in-memory store fixtures; editing, preview, validation, rendering, replay, and commit orchestration tested.
+modules/renderer: no mocks; deterministic text, offsets, resolved metadata, presence, and scene boundaries tested.
+modules/validator: no mocks; all stable violation codes and evidence contracts tested from golden cases.
+modules/detector: no mocks; adjacent metadata finding codes, severities, evidence, and scene resets tested.
+modules/style: no mocks; extraction, distances, calibration, windows, anomaly policy, Chinese, and Cantonese tested.
+modules/security: tested through SQLite and HTTP integration; credential hashing, scope, isolation, revocation, and audit tested.
+modules/storage-api: implemented by SQLite contract tests; no independent mocks.
+modules/storage-sqlite: real temporary SQLite files; migrations, WAL, CAS, replay, jobs, artifacts, and rollback tested.
+modules/monitor-adapter: no mocks; immutable packets, output contracts, and proposal separation tested.
+modules/rewrite: fake model transport; proposal parsing, normalization, provenance, and limits tested.
+modules/rewrite-policy: tested through API and SQLite integration; anomaly, preservation, cooldown, and stale gates tested.
+apps/api: real Spring MockMvc and temporary SQLite; routes, auth, OpenAPI, problems, metrics, and isolation tested.
+apps/style-worker: fake HTTP client; claims, result submission, retries, limits, and credential redaction tested.
+apps/llm-worker: fake model transport; sandbox boundary, response limits, prompt isolation, and output tested.
+apps/cli: temporary SQLite; replay, head hashes, render hashes, usage, and failure reporting tested.
+tests/architecture-tests: no mocks; domain dependency and secure deployment topology constraints tested.

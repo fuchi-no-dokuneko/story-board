@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import dev.storyblock.security.CrossNovelAccessException;
+import dev.storyblock.contracts.CanonicalJson;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -49,6 +52,30 @@ class ApiProblemStatusPolicyTest {
             assertEquals("/v1/status/" + statusValue, problem.get("instance"));
             assertEquals("req_status_test", problem.get("request_id"));
             assertEquals(statusValue, problem.get("policy_status"));
+        }
+    }
+
+    @Test
+    void problemDetailsMatchTheGoldenContract() throws Exception {
+        ApiFailureException failure = new ApiFailureException(
+                HttpStatus.CONFLICT,
+                "STATUS_409",
+                "Status 409",
+                "status-409",
+                "Contract status 409",
+                Map.of("policy_status", 409),
+                null
+        );
+        Map<String, Object> actual = ApiProblemFactory.create(
+                request("/v1/status/409"), failure
+        );
+        try (InputStream input = getClass().getResourceAsStream(
+                "/golden/api-problem-details.json"
+        )) {
+            String expected = new String(
+                    input.readAllBytes(), StandardCharsets.UTF_8
+            ).trim();
+            assertEquals(expected, CanonicalJson.string(actual));
         }
     }
 
