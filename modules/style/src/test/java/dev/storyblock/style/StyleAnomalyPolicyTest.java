@@ -8,7 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.Ids;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -129,6 +132,121 @@ class StyleAnomalyPolicyTest {
         assertThrows(IllegalArgumentException.class, () -> policy.evaluate(
                 operational, List.of(first, second), List.of()
         ));
+    }
+
+    @Test
+    void labeledCalibrationEvaluationReportsConfusionChannelsAndPercentiles()
+            throws Exception {
+        StyleCalibrationProfile profile = calibratedProfile(30);
+        List<EvaluationCase> corpus = List.of(
+                new EvaluationCase("train-normal", "train", false,
+                        normalReport(), List.of(), null),
+                new EvaluationCase("train-topic", "train", false,
+                        topicOnlyReport(), List.of(), null),
+                new EvaluationCase("calibration-drift", "calibration", true,
+                        highReport(), List.of(highReport(), highReport()), null),
+                new EvaluationCase("calibration-intentional", "calibration", false,
+                        highReport(), List.of(highReport(), highReport()),
+                        "Intentional dream sequence")
+        );
+        int truePositive = 0;
+        int trueNegative = 0;
+        int falsePositive = 0;
+        int falseNegative = 0;
+        Map<String, Integer> channelContributions = new LinkedHashMap<>();
+        List<Map<String, Object>> cases = new ArrayList<>();
+
+        for (EvaluationCase value : corpus) {
+            StyleWindowScore operational = score(
+                    window(StyleWindowKind.OPERATIONAL, value.shiftReason()),
+                    value.operational(),
+                    profile
+            );
+            List<StyleWindowScore> sustained = value.sustained().stream()
+                    .map(report -> score(window(
+                            StyleWindowKind.NON_OVERLAP, value.shiftReason()
+                    ), report, profile))
+                    .toList();
+            StyleAnomalyDecision decision = policy.evaluate(
+                    operational, sustained, List.of()
+            );
+            boolean actual = decision.canTriggerRewrite();
+            if (value.expected() && actual) {
+                truePositive++;
+            } else if (!value.expected() && !actual) {
+                trueNegative++;
+            } else if (actual) {
+                falsePositive++;
+            } else {
+                falseNegative++;
+            }
+            decision.independentQ99Channels().forEach(channel ->
+                    channelContributions.merge(channel.canonicalName(), 1, Integer::sum)
+            );
+            cases.add(Map.of(
+                    "actual_rewrite_candidate", actual,
+                    "expected_rewrite_candidate", value.expected(),
+                    "id", value.id(),
+                    "label", value.shiftReason() == null
+                            ? "unwanted_or_normal" : "intentional_shift",
+                    "split", value.split(),
+                    "state", decision.state().canonicalName()
+            ));
+        }
+
+        StyleWindowScore before = score(
+                window(StyleWindowKind.OPERATIONAL, null), highReport(), profile
+        );
+        StyleWindowScore after = score(
+                window(StyleWindowKind.OPERATIONAL, null), normalReport(), profile
+        );
+        Map<String, Object> report = new LinkedHashMap<>();
+        report.put("cases", cases);
+        report.put("channel_contributions", channelContributions);
+        report.put("confusion", Map.of(
+                "false_negative", falseNegative,
+                "false_positive", falsePositive,
+                "true_negative", trueNegative,
+                "true_positive", truePositive
+        ));
+        report.put("corpus_split", Map.of("calibration", 2, "train", 2));
+        report.put("rewrite_percentiles", Map.of(
+                "after", percentiles(after),
+                "before", percentiles(before)
+        ));
+        report.put("schema_version", "adr-317-style-evaluation-1");
+        Path output = Path.of("target/evaluations/style-policy.json");
+        Files.createDirectories(output.getParent());
+        Files.write(output, CanonicalJson.bytes(report));
+
+        assertEquals(1, truePositive);
+        assertEquals(3, trueNegative);
+        assertEquals(0, falsePositive);
+        assertEquals(0, falseNegative);
+        assertEquals(0, new BigDecimal("100").compareTo(
+                before.channels().getFirst().percentile()
+        ));
+        assertEquals(0, BigDecimal.ZERO.compareTo(
+                after.channels().getFirst().percentile()
+        ));
+    }
+
+    private static Map<String, BigDecimal> percentiles(StyleWindowScore score) {
+        Map<String, BigDecimal> result = new LinkedHashMap<>();
+        score.channels().forEach(channel -> result.put(
+                channel.distance().channel().canonicalName(), channel.percentile()
+        ));
+        return result;
+    }
+
+    private record EvaluationCase(
+            String id,
+            String split,
+            boolean expected,
+            StyleDistanceReport operational,
+            List<StyleDistanceReport> sustained,
+            String shiftReason
+    ) {
     }
 
     private static StyleCalibrationProfile calibratedProfile(int windowCount) {

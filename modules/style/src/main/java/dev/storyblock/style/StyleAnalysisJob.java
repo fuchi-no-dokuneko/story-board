@@ -29,6 +29,8 @@ public record StyleAnalysisJob(
         Instant createdAt,
         Instant updatedAt
 ) {
+    public static final int MIN_ATTEMPTS = 1;
+    public static final int MAX_ATTEMPTS = 20;
     private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final Pattern OWNER = Pattern.compile("[A-Za-z0-9._:@-]{1,128}");
     private static final Pattern FAILURE = Pattern.compile("[a-z][a-z0-9._-]{1,63}");
@@ -38,7 +40,7 @@ public record StyleAnalysisJob(
         Objects.requireNonNull(analysisId, "analysisId");
         Objects.requireNonNull(snapshot, "snapshot");
         Objects.requireNonNull(status, "status");
-        if (attempt < 0 || maxAttempts < 1 || maxAttempts > 20
+        if (attempt < 0 || maxAttempts < MIN_ATTEMPTS || maxAttempts > MAX_ATTEMPTS
                 || attempt > maxAttempts) {
             throw new IllegalArgumentException("Style analysis attempt bounds are invalid");
         }
