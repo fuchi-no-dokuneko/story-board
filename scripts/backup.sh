@@ -57,15 +57,18 @@ revision_count=$(sqlite3 "$plain" \
   "SELECT COUNT(*) FROM revisions;" 2>/dev/null || printf '0')
 operation_count=$(sqlite3 "$plain" \
   "SELECT COUNT(*) FROM operations;" 2>/dev/null || printf '0')
+artifact_count=$(sqlite3 "$plain" \
+  "SELECT COUNT(*) FROM artifacts;" 2>/dev/null || printf '0')
 manifest="$artifact.json"
 manifest_pending="$manifest.pending"
-printf '{"artifact":"%s","created_at":"%s","quick_check":"ok","integrity_check":"ok","encrypted_sha256":"%s","migration_version":"%s","revision_count":%d,"operation_count":%d}\n' \
+printf '{"artifact":"%s","created_at":"%s","quick_check":"ok","integrity_check":"ok","encrypted_sha256":"%s","migration_version":"%s","revision_count":%d,"operation_count":%d,"artifact_count":%d}\n' \
   "$(basename "$artifact")" \
   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   "$(cut -d' ' -f1 "$artifact.sha256")" \
   "$migration_version" \
   "$revision_count" \
-  "$operation_count" > "$manifest_pending"
+  "$operation_count" \
+  "$artifact_count" > "$manifest_pending"
 mv "$manifest_pending" "$manifest"
 
 if [[ ${STORYBLOCK_BACKUP_PRUNE_AFTER_WRITE:-true} == true ]]; then

@@ -36,6 +36,7 @@ class StoryBlockCliTest {
         assertEquals(0, status);
         assertTrue(output.contains("\"valid\":true"));
         assertTrue(output.contains("\"novel_count\":0"));
+        assertTrue(output.contains("\"render_hashes\":{}"));
     }
 
     @Test

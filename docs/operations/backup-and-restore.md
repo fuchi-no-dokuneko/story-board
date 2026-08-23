@@ -35,5 +35,9 @@ scripts/restore-drill.sh \
 ```
 
 The drill decrypts into the chosen isolated directory, runs SQLite integrity
-verification, replays every novel, checks each head hash, and records measured
-RTO in `restore-report.json`.
+verification, compares migration/revision/operation/artifact counts with the
+backup manifest, replays every novel, checks each head hash, records a
+deterministic full-head render hash, and records measured RTO plus missing
+artifacts in `restore-report.json`. Legacy backups without Flyway history are
+migrated offline and record both source and restored versions. A reused restore
+directory is rejected.
