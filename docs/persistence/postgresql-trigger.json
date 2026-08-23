@@ -1,0 +1,20 @@
+{
+  "schema_version": "postgresql-trigger-1.0.0",
+  "status": "not_triggered",
+  "evaluated_at": "2026-08-23",
+  "owner": "fuchi-no-dokuneko",
+  "evidence": {
+    "sqlite_commits_per_second": "44.424",
+    "sqlite_target_commits_per_second": "2",
+    "durable_rows": 100,
+    "attempted_rows": 100,
+    "process_crash_stages_passed": 8
+  },
+  "approved_requirements": {
+    "multiple_api_writer_hosts": false,
+    "database_row_level_security": false,
+    "high_availability_or_pitr": false,
+    "distributed_job_claiming": false
+  },
+  "implementation_allowed": false
+}
