@@ -1,15 +1,100 @@
 services:
-  api:
-    build: .
+  proxy:
+    image: caddy:2.10-alpine
     ports:
-      - "127.0.0.1:8080:8080"
+      - "80:80"
+      - "443:443"
+    environment:
+      STORYBLOCK_SITE_ADDRESS: ${STORYBLOCK_SITE_ADDRESS:-localhost}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks:
+      - public
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      target: api
     environment:
       STORYBLOCK_DATABASE_PATH: /app/data/storyblock.db
-      STORYBLOCK_SECURITY_OWNER_TOKEN: ${STORYBLOCK_SECURITY_OWNER_TOKEN:?set owner token}
-      STORYBLOCK_SECURITY_PEPPER: ${STORYBLOCK_SECURITY_PEPPER:?set pepper}
+      STORYBLOCK_SECURITY_OWNER_TOKEN_FILE: /run/secrets/owner-token
+      STORYBLOCK_SECURITY_PEPPER_FILE: /run/secrets/server-pepper
+    secrets:
+      - owner-token
+      - server-pepper
     volumes:
       - storyblock-data:/app/data
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
     restart: unless-stopped
+
+  style-worker:
+    profiles: [workers]
+    build:
+      context: .
+      target: style-worker
+    environment:
+      STORYBLOCK_WORKER_ENABLED: "true"
+      STORYBLOCK_WORKER_API_BASE_URL: http://api:8080/
+      STORYBLOCK_WORKER_TOKEN_FILE: /run/secrets/style-worker-token
+      STORYBLOCK_WORKER_NOVEL_ID: ${STORYBLOCK_WORKER_NOVEL_ID:?set worker novel id}
+      STORYBLOCK_WORKER_ID: ${STORYBLOCK_WORKER_ID:-style-worker-1}
+    secrets:
+      - style-worker-token
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+  llm-worker:
+    profiles: [rewrite]
+    build:
+      context: .
+      target: llm-worker
+    environment:
+      STORYBLOCK_LLM_WORKER_ENABLED: "true"
+      STORYBLOCK_LLM_WORKER_MODEL_ENDPOINT: ${STORYBLOCK_LLM_MODEL_ENDPOINT:?set HTTPS model endpoint}
+      STORYBLOCK_LLM_WORKER_MODEL_TOKEN_FILE: /run/secrets/llm-model-token
+      STORYBLOCK_LLM_WORKER_MODEL_ID: ${STORYBLOCK_LLM_MODEL_ID:?set model id}
+    secrets:
+      - llm-model-token
+    networks:
+      - worker-egress
+    read_only: true
+    tmpfs:
+      - /tmp
+    stdin_open: true
+    tty: true
+
+secrets:
+  owner-token:
+    file: ${STORYBLOCK_OWNER_TOKEN_FILE:?set owner token file}
+  server-pepper:
+    file: ${STORYBLOCK_SERVER_PEPPER_FILE:?set server pepper file}
+  style-worker-token:
+    file: ${STORYBLOCK_STYLE_WORKER_TOKEN_FILE:?set style worker token file}
+  llm-model-token:
+    file: ${STORYBLOCK_LLM_MODEL_TOKEN_FILE:?set model token file}
 
 volumes:
   storyblock-data:
+  caddy-data:
+  caddy-config:
+
+networks:
+  public:
+  internal:
+    internal: true
+  worker-egress:
