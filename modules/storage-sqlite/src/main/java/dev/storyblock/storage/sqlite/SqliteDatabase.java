@@ -19,10 +19,16 @@ import org.sqlite.SQLiteDataSource;
 public final class SqliteDatabase implements AutoCloseable {
     private final HikariDataSource pool;
     private final SqliteMetrics metrics;
+    private final Path databasePath;
 
-    private SqliteDatabase(HikariDataSource pool, SqliteMetrics metrics) {
+    private SqliteDatabase(
+            HikariDataSource pool,
+            SqliteMetrics metrics,
+            Path databasePath
+    ) {
         this.pool = pool;
         this.metrics = metrics;
+        this.databasePath = databasePath;
     }
 
     public static SqliteDatabase open(Path databasePath) throws IOException {
@@ -79,7 +85,7 @@ public final class SqliteDatabase implements AutoCloseable {
         hikari.setValidationTimeout(1_000L);
         hikari.setInitializationFailTimeout(settings.busyTimeoutMillis() + 2_000L);
         hikari.setMaxLifetime(0L);
-        return new SqliteDatabase(new HikariDataSource(hikari), metrics);
+        return new SqliteDatabase(new HikariDataSource(hikari), metrics, absolutePath);
     }
 
     public <T> T readOnly(SqliteWork<T> work) throws SQLException {
@@ -108,12 +114,14 @@ public final class SqliteDatabase implements AutoCloseable {
             if (!result.next()) {
                 throw new SQLException("wal_checkpoint returned no result");
             }
-            return new SqliteWalCheckpoint(
+            SqliteWalCheckpoint checkpoint = new SqliteWalCheckpoint(
                     result.getInt(1),
                     result.getInt(2),
                     result.getInt(3),
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started)
             );
+            metrics.recordCheckpoint(checkpoint.durationMillis());
+            return checkpoint;
         } catch (SQLException exception) {
             metrics.recordFailure(exception);
             throw exception;
@@ -122,6 +130,11 @@ public final class SqliteDatabase implements AutoCloseable {
 
     public SqliteMetrics.Snapshot metrics() {
         return metrics.snapshot();
+    }
+
+    long walBytes() throws IOException {
+        Path wal = Path.of(databasePath + "-wal");
+        return Files.exists(wal) ? Files.size(wal) : 0L;
     }
 
     Connection borrowConnection() throws SQLException {

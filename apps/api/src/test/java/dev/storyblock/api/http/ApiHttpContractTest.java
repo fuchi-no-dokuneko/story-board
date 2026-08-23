@@ -102,6 +102,33 @@ class ApiHttpContractTest {
     }
 
     @Test
+    void operationalMetricsRequireTheOperatorScope() throws Exception {
+        mvc.perform(get("/actuator/metrics"))
+                .andExpect(status().isUnauthorized());
+
+        MvcResult metrics = mvc.perform(get("/actuator/metrics")
+                        .with(user("operator").roles("OPERATOR")))
+                .andExpect(status().isOk())
+                .andReturn();
+        String metricIndex = metrics.getResponse().getContentAsString();
+        for (String name : List.of(
+                "commit_wait_ms", "commit_transaction_ms", "sqlite_busy_total",
+                "wal_bytes", "checkpoint_ms", "queue_depth", "oldest_job_age",
+                "analysis_duration_ms", "rewrite_duration_ms",
+                "stale_proposal_total", "detector_findings_total",
+                "artifact_bytes", "backup_age_seconds", "auth_denied_total"
+        )) {
+            assertTrue(metricIndex.contains(name), name);
+        }
+
+        mvc.perform(get("/actuator/health/sqlite"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/actuator/health/sqlite")
+                        .with(user("operator").roles("OPERATOR")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void rejectsMissingAuthenticationWithProblemContract() throws Exception {
         mvc.perform(get("/v1/novels/nov_test")
                         .header(ApiRequestMetadata.REQUEST_ID_HEADER, "request-test-401"))

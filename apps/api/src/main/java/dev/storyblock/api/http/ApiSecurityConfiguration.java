@@ -27,12 +27,13 @@ public class ApiSecurityConfiguration {
             CanonicalTransferService transfers,
             StyleAnalysisService analyses,
             Clock clock,
+            StoryBlockTelemetry telemetry,
             @Value("${storyblock.security.owner-token:}") String ownerToken,
             @Value("${storyblock.security.hide-cross-novel:true}") boolean hideCrossNovel
     ) throws Exception {
         AccessKeyAuthenticationFilter authenticationFilter =
                 new AccessKeyAuthenticationFilter(
-                        accessKeys, clock, ownerToken, problemWriter
+                        accessKeys, clock, ownerToken, problemWriter, telemetry
                 );
         NovelBoundaryFilter boundaryFilter = new NovelBoundaryFilter(
                 transfers, analyses, accessKeys, problemWriter, hideCrossNovel
@@ -54,9 +55,13 @@ public class ApiSecurityConfiguration {
                                 "/app.js",
                                 "/styles.css",
                                 "/v1/openapi.yaml",
-                                "/actuator/health",
-                                "/actuator/health/**"
+                                "/actuator/health"
                         ).permitAll()
+                        .requestMatchers(
+                                "/actuator/health/**",
+                                "/actuator/metrics",
+                                "/actuator/metrics/**"
+                        ).hasRole("OPERATOR")
                         .requestMatchers(HttpMethod.POST, "/v1/novels", "/v1/imports")
                         .hasAuthority(scope("novel:admin"))
                         .requestMatchers(HttpMethod.POST, "/v1/style-profiles/**")
@@ -97,22 +102,28 @@ public class ApiSecurityConfiguration {
                 )
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((request, response, ignored) ->
-                                problemWriter.write(request, response, ApiFailureException.of(
+                                {
+                                    telemetry.recordAuthDenied("missing");
+                                    problemWriter.write(request, response, ApiFailureException.of(
                                         HttpStatus.UNAUTHORIZED,
                                         "AUTHENTICATION_REQUIRED",
                                         "Authentication required",
                                         "authentication-required",
                                         "A valid bearer credential is required."
-                                ))
+                                    ));
+                                }
                         )
                         .accessDeniedHandler((request, response, ignored) ->
-                                problemWriter.write(request, response, ApiFailureException.of(
+                                {
+                                    telemetry.recordAuthDenied("scope");
+                                    problemWriter.write(request, response, ApiFailureException.of(
                                         HttpStatus.FORBIDDEN,
                                         "SCOPE_REQUIRED",
                                         "Required scope missing",
                                         "scope-required",
                                         "The authenticated principal lacks the required scope."
-                                ))
+                                    ));
+                                }
                         )
                 )
                 .addFilterAfter(

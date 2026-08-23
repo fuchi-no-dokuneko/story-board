@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.AtomicLong;
 import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
 
@@ -15,6 +16,7 @@ public final class SqliteMetrics {
     private final LongAdder sqliteBusyTotal = new LongAdder();
     private final LongAdder writerWaitNanos = new LongAdder();
     private final LongAccumulator maxTransactionNanos = new LongAccumulator(Long::max, 0L);
+    private final AtomicLong lastCheckpointMillis = new AtomicLong();
 
     void recordConnectionVerification() {
         connectionVerifications.increment();
@@ -41,6 +43,10 @@ public final class SqliteMetrics {
         }
     }
 
+    void recordCheckpoint(long durationMillis) {
+        lastCheckpointMillis.set(durationMillis);
+    }
+
     public Snapshot snapshot() {
         return new Snapshot(
                 connectionVerifications.sum(),
@@ -49,7 +55,8 @@ public final class SqliteMetrics {
                 writeCommits.sum(),
                 sqliteBusyTotal.sum(),
                 nanosToMillis(writerWaitNanos.sum()),
-                nanosToMillis(maxTransactionNanos.get())
+                nanosToMillis(maxTransactionNanos.get()),
+                lastCheckpointMillis.get()
         );
     }
 
@@ -83,7 +90,8 @@ public final class SqliteMetrics {
             long writeCommits,
             long sqliteBusyTotal,
             long writerWaitMillis,
-            long maxTransactionMillis
+            long maxTransactionMillis,
+            long lastCheckpointMillis
     ) {
     }
 }
