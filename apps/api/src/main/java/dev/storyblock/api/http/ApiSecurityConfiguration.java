@@ -29,7 +29,8 @@ public class ApiSecurityConfiguration {
             Clock clock,
             StoryBlockTelemetry telemetry,
             @Value("${storyblock.security.owner-token:}") String ownerToken,
-            @Value("${storyblock.security.hide-cross-novel:true}") boolean hideCrossNovel
+            @Value("${storyblock.security.hide-cross-novel:true}") boolean hideCrossNovel,
+            @Value("${storyblock.security.rate-limit-per-minute:600}") int rateLimit
     ) throws Exception {
         AccessKeyAuthenticationFilter authenticationFilter =
                 new AccessKeyAuthenticationFilter(
@@ -131,6 +132,10 @@ public class ApiSecurityConfiguration {
                         AuthorizationFilter.class
                 )
                 .addFilterBefore(authenticationFilter, AnonymousAuthenticationFilter.class)
+                .addFilterAfter(
+                        new RequestRateLimitFilter(rateLimit, clock, problemWriter),
+                        AccessKeyAuthenticationFilter.class
+                )
                 .addFilterAfter(boundaryFilter, AccessKeyAuthenticationFilter.class);
         return http.build();
     }
