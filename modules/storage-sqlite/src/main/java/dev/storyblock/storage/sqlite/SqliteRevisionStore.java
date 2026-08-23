@@ -98,7 +98,6 @@ public final class SqliteRevisionStore implements
                 importFaultInjector, "importFaultInjector"
         );
         write(connection -> {
-            RevisionStoreSchema.initialize(connection);
             return null;
         });
     }

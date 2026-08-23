@@ -11,8 +11,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.flywaydb.core.Flyway;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteDataSource;
 
 public final class SqliteDatabase implements AutoCloseable {
     private final HikariDataSource pool;
@@ -40,21 +42,28 @@ public final class SqliteDatabase implements AutoCloseable {
             throw new IOException("SQLite database path is a directory: " + absolutePath);
         }
 
-        SqliteMetrics metrics = new SqliteMetrics();
-        SQLiteConfig sqlite = new SQLiteConfig();
-        sqlite.setJournalMode(SQLiteConfig.JournalMode.WAL);
-        sqlite.setSynchronous(SQLiteConfig.SynchronousMode.FULL);
-        sqlite.enforceForeignKeys(true);
-        sqlite.setBusyTimeout(settings.busyTimeoutMillis());
-        sqlite.setExplicitReadOnly(true);
-        sqlite.setTransactionMode(SQLiteConfig.TransactionMode.DEFERRED);
-        sqlite.setSharedCache(false);
-        sqlite.enableLoadExtension(false);
-
         String jdbcUrl = "jdbc:sqlite:" + absolutePath;
+        SQLiteDataSource migrationDataSource = new SQLiteDataSource(
+                sqliteConfig(settings, false)
+        );
+        migrationDataSource.setUrl(jdbcUrl);
+        try {
+            Flyway.configure()
+                    .dataSource(migrationDataSource)
+                    .locations("classpath:db/migration")
+                    .validateMigrationNaming(true)
+                    .baselineOnMigrate(true)
+                    .baselineVersion("0")
+                    .load()
+                    .migrate();
+        } catch (RuntimeException exception) {
+            throw new IOException("Could not migrate SQLite database " + absolutePath, exception);
+        }
+
+        SqliteMetrics metrics = new SqliteMetrics();
         VerifyingSqliteDataSource verified = new VerifyingSqliteDataSource(
                 jdbcUrl,
-                sqlite,
+                sqliteConfig(settings, true),
                 settings,
                 metrics
         );
@@ -122,6 +131,19 @@ public final class SqliteDatabase implements AutoCloseable {
     @Override
     public void close() {
         pool.close();
+    }
+
+    private static SQLiteConfig sqliteConfig(SqliteSettings settings, boolean explicitReadOnly) {
+        SQLiteConfig sqlite = new SQLiteConfig();
+        sqlite.setJournalMode(SQLiteConfig.JournalMode.WAL);
+        sqlite.setSynchronous(SQLiteConfig.SynchronousMode.FULL);
+        sqlite.enforceForeignKeys(true);
+        sqlite.setBusyTimeout(settings.busyTimeoutMillis());
+        sqlite.setExplicitReadOnly(explicitReadOnly);
+        sqlite.setTransactionMode(SQLiteConfig.TransactionMode.DEFERRED);
+        sqlite.setSharedCache(false);
+        sqlite.enableLoadExtension(false);
+        return sqlite;
     }
 
     private <T> T transaction(boolean readOnly, SqliteWork<T> work) throws SQLException {
