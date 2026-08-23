@@ -13,8 +13,18 @@ scripts/backup.sh data/storyblock.db /offsite/storyblock
 
 `backup.sh` uses SQLite's online backup command, runs `integrity_check`,
 compresses the snapshot, encrypts it with a PBKDF2-derived AES-256 key, and
-writes a checksum plus a short manifest. The destination must be a versioned
-off-host mount in production. The key must not share that mount.
+writes a checksum plus a short manifest containing migration and canonical row
+counts. Publication is atomic. The destination must be a versioned off-host
+mount in production, and the script rejects a key stored beside either the live
+database or backup artifacts.
+
+Successful backups automatically apply the initial retention policy: the most
+recent 48 snapshots, one daily snapshot for 30 days, and one weekly snapshot
+for 12 weeks. Preview deletions without changing files with:
+
+```bash
+scripts/prune-backups.sh /offsite/storyblock
+```
 
 Run an isolated restore drill without replacing the live database:
 
