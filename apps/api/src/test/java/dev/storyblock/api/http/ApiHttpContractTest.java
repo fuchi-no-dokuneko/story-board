@@ -144,6 +144,21 @@ class ApiHttpContractTest {
     }
 
     @Test
+    void keepsTrustedLanRoutesProtectedInTheDefaultProfile() throws Exception {
+        mvc.perform(get("/v1/admin/novels"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(post("/v1/agent/novels")
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "agent-default-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+    }
+
+    @Test
     void rejectsAnAuthenticatedPrincipalWithoutTheRouteScope() throws Exception {
         mvc.perform(get("/v1/novels/nov_test")
                         .with(userWithScope("style:admin")))

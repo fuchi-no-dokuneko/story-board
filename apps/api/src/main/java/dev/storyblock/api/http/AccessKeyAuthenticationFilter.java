@@ -31,18 +31,21 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
     private final byte[] ownerTokenHash;
     private final ApiProblemWriter problemWriter;
     private final StoryBlockTelemetry telemetry;
+    private final boolean trustedLan;
 
     AccessKeyAuthenticationFilter(
             AccessKeyService accessKeys,
             Clock clock,
             String ownerToken,
             ApiProblemWriter problemWriter,
-            StoryBlockTelemetry telemetry
+            StoryBlockTelemetry telemetry,
+            boolean trustedLan
     ) {
         this.accessKeys = java.util.Objects.requireNonNull(accessKeys, "accessKeys");
         this.clock = java.util.Objects.requireNonNull(clock, "clock");
         this.problemWriter = java.util.Objects.requireNonNull(problemWriter, "problemWriter");
         this.telemetry = java.util.Objects.requireNonNull(telemetry, "telemetry");
+        this.trustedLan = trustedLan;
         this.ownerTokenHash = ownerToken == null || ownerToken.isBlank()
                 ? null : sha256(ownerToken);
         if (ownerTokenHash != null && ownerToken.length() < 32) {
@@ -66,6 +69,11 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if (trustedLan) {
+            authenticate(AccessPrincipal.ownerPrincipal());
             filterChain.doFilter(request, response);
             return;
         }
@@ -96,6 +104,11 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
             ));
             return;
         }
+        authenticate(principal);
+        filterChain.doFilter(request, response);
+    }
+
+    private static void authenticate(AccessPrincipal principal) {
         List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>(
                 principal.scopes().stream()
                 .map(AccessScope::canonicalName)
@@ -109,7 +122,6 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(principal, null, authorities)
         );
-        filterChain.doFilter(request, response);
     }
 
     private boolean isOwnerToken(String token) {

@@ -1,10 +1,12 @@
 package dev.storyblock.api.http;
 
 import dev.storyblock.application.CanonicalTransferService;
+import dev.storyblock.application.AgentNovelRegistrationService;
 import dev.storyblock.application.CommitService;
 import dev.storyblock.application.DetectorService;
 import dev.storyblock.application.MonitorService;
 import dev.storyblock.application.RenderService;
+import dev.storyblock.application.NovelCatalogService;
 import dev.storyblock.application.RewriteGateService;
 import dev.storyblock.application.StyleProfileService;
 import dev.storyblock.application.StyleAnalysisService;
@@ -33,6 +35,19 @@ public class ApiStorageConfiguration {
     @Bean
     CanonicalTransferService canonicalTransferService(SqliteRevisionStore store) {
         return new CanonicalTransferService(store);
+    }
+
+    @Bean
+    NovelCatalogService novelCatalogService(SqliteRevisionStore store) {
+        return new NovelCatalogService(store);
+    }
+
+    @Bean
+    AgentNovelRegistrationService agentNovelRegistrationService(
+            CanonicalTransferService transfers,
+            NovelCatalogService catalog
+    ) {
+        return new AgentNovelRegistrationService(transfers, catalog);
     }
 
     @Bean

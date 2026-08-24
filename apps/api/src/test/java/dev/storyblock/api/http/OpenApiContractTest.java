@@ -23,6 +23,9 @@ class OpenApiContractTest {
             "get", "post", "put", "patch", "delete"
     );
     private static final Set<String> REQUIRED_OPERATIONS = Set.of(
+            "GET /admin/novels",
+            "GET /admin/novels/{novelId}",
+            "POST /agent/novels",
             "POST /novels",
             "POST /imports",
             "GET /novels/{novelId}",
@@ -58,6 +61,7 @@ class OpenApiContractTest {
             "POST /novels/{novelId}/exports"
     );
     private static final Set<String> WILDCARD_CREATION_OPERATIONS = Set.of(
+            "POST /agent/novels",
             "POST /novels",
             "POST /imports",
             "POST /style-profiles",
@@ -171,6 +175,9 @@ class OpenApiContractTest {
         );
 
         assertStrongEtag("GET /novels/{novelId}", "200");
+        assertStrongEtag("GET /admin/novels/{novelId}", "200");
+        assertStrongEtag("POST /agent/novels", "200");
+        assertStrongEtag("POST /agent/novels", "201");
         assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
         assertStrongEtag("POST /novels", "201");
         assertStrongEtag("POST /imports", "201");

@@ -29,12 +29,14 @@ public class ApiSecurityConfiguration {
             Clock clock,
             StoryBlockTelemetry telemetry,
             @Value("${storyblock.security.owner-token:}") String ownerToken,
+            @Value("${storyblock.trusted-lan.enabled:false}") boolean trustedLan,
             @Value("${storyblock.security.hide-cross-novel:true}") boolean hideCrossNovel,
             @Value("${storyblock.security.rate-limit-per-minute:600}") int rateLimit
     ) throws Exception {
         AccessKeyAuthenticationFilter authenticationFilter =
                 new AccessKeyAuthenticationFilter(
-                        accessKeys, clock, ownerToken, problemWriter, telemetry
+                        accessKeys, clock, ownerToken, problemWriter, telemetry,
+                        trustedLan
                 );
         NovelBoundaryFilter boundaryFilter = new NovelBoundaryFilter(
                 transfers, analyses, accessKeys, problemWriter, hideCrossNovel
@@ -64,6 +66,8 @@ public class ApiSecurityConfiguration {
                                 "/actuator/metrics/**"
                         ).hasRole("OPERATOR")
                         .requestMatchers(HttpMethod.POST, "/v1/novels", "/v1/imports")
+                        .hasAuthority(scope("novel:admin"))
+                        .requestMatchers(HttpMethod.POST, "/v1/agent/novels")
                         .hasAuthority(scope("novel:admin"))
                         .requestMatchers(HttpMethod.POST, "/v1/style-profiles/**")
                         .hasAuthority(scope("style:admin"))
