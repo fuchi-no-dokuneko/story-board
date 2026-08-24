@@ -1,42 +1,33 @@
 @demo @recording @english @web
-Feature: English introduction to StoryBlock Console
-  The recording introduces the product and demonstrates the main request flow
-  without changing narrative data.
+Feature: English introduction to the StoryBlock novel library
+  The recording introduces read-only local review without changing narrative data.
 
-  Scenario: Introduce the console and inspect its API safely
+  Scenario: Read an agent-authored novel and inspect its contract
     Given I begin a recorded demo
     And I open the web application at path "/"
-    When I narrate in "en-US" for at least 9 seconds:
-      """
-      StoryBlock is a local-first engine for immutable, evidence-bound editing of long-form narrative blocks. This compact operator console gives an operator a direct, observable window into that API.
-      """
-    Then CSS "#status-text" eventually contains text "API online"
-    When I narrate in "en-US" for at least 7 seconds:
-      """
-      The status at the top confirms whether the API is available. We can begin with the public health request and inspect the exact HTTP result below.
-      """
-    And I click CSS "nav button[data-path='/actuator/health']"
-    Then CSS "#response-status" eventually contains text "200"
-    And CSS "#response" eventually contains text "\"status\": \"UP\""
     When I narrate in "en-US" for at least 8 seconds:
       """
-      JSON responses are formatted for review, while the OpenAPI shortcut opens the versioned contract as readable YAML. This is the quickest way to discover supported operations.
+      StoryBlock is a local-first library for immutable narrative revisions. This trusted-LAN screen lets an administrator review every persisted novel without exposing editing or deletion controls.
       """
-    And I click CSS "nav button[data-path='/v1/openapi.yaml']"
-    Then CSS "#response" eventually contains text "openapi:"
-    And CSS "#response" contains text "/novels:"
+    Then CSS "#status-text" eventually contains text "Service online"
+    And CSS "#reader-content" is visible
     When I narrate in "en-US" for at least 9 seconds:
       """
-      For a custom request, choose GET, POST, or DELETE, enter the path and JSON body, and provide a bearer token only when the route requires one. Tokens remain masked and are never copied into the response.
+      The catalog opens the current revision directly. The reader shows the title, five main characters, chapter navigation, and the exact persisted story blocks in a focused long-form layout.
       """
-    And I choose value "POST" in CSS "#method"
-    And I replace CSS "#path" with "/v1/novels"
-    And I replace CSS "#body" with "{}"
-    And I click CSS "#send"
-    Then CSS "#response-status" eventually contains text "401"
-    And CSS "#response" eventually contains text "AUTHENTICATION_REQUIRED"
+    Then CSS "#reader-title" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+    And CSS "#stat-han" has text "10,000"
+    And CSS "#stat-zombies" has text "1,000"
+    And CSS "#stat-cannons" has text "1,000"
     When I narrate in "en-US" for at least 8 seconds:
       """
-      The typed unauthorized response is expected here and demonstrates the fail-closed boundary. Operators can diagnose status, error code, and request details without exposing a credential or mutating a novel.
+      Counts and hashes come from the stored canonical revision, so the administrator can audit what was actually saved rather than trusting an authoring response.
+      """
+    And I click CSS "#console-tab"
+    And I click CSS ".quick-requests button[data-path='/v1/openapi.yaml']"
+    Then CSS "#response" eventually contains text "/agent/novels:"
+    When I narrate in "en-US" for at least 8 seconds:
+      """
+      The secondary diagnostics view is GET-only. AI authors write through a separate validated skill and registration endpoint, while this browser remains a read-only review surface.
       """
     Then I finish the recorded demo

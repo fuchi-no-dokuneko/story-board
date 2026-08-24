@@ -150,8 +150,8 @@ async function mockInitialHealth(world, mode) {
         const target = typeof input === 'string' ? input : input.url;
         if (target === '/actuator/health') {
           return Promise.resolve(new Response(JSON.stringify({ status: 'DOWN' }), {
-            status: 503,
-            statusText: 'Service Unavailable',
+            status: 200,
+            statusText: 'OK',
             headers: { 'Content-Type': 'application/json' },
           }));
         }

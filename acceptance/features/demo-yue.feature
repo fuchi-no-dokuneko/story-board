@@ -1,41 +1,33 @@
 @demo @recording @cantonese @web
-Feature: StoryBlock Console 廣東話產品介紹
-  呢段錄影會介紹產品同示範主要請求流程，而且唔會改動小說資料。
+Feature: StoryBlock 小說庫廣東話介紹
+  錄影示範本機唯讀審閱流程，全程不會修改小說資料。
 
-  Scenario: 介紹主控台並安全檢視 API
+  Scenario: 閱讀代理創作小說並檢視合約
     Given I begin a recorded demo
     And I open the web application at path "/"
-    When I narrate in "yue-Hant-HK" for at least 10 seconds:
-      """
-      StoryBlock 係一個本機優先嘅長篇故事編輯引擎。每次修改都係不可變，而且連住驗證證據。呢個簡潔主控台，俾操作員直接睇到 API 實際回應。
-      """
-    Then CSS "#status-text" eventually contains text "API online"
-    When I narrate in "yue-Hant-HK" for at least 7 seconds:
-      """
-      頂部狀態會話你知 API 係咪在線。我哋首先撳 Health，確認服務正常，再喺下面核對 HTTP 狀態同 JSON。
-      """
-    And I click CSS "nav button[data-path='/actuator/health']"
-    Then CSS "#response-status" eventually contains text "200"
-    And CSS "#response" eventually contains text "\"status\": \"UP\""
-    When I narrate in "yue-Hant-HK" for at least 9 seconds:
-      """
-      JSON 會自動排版，方便逐項睇。OpenAPI 快捷掣就會顯示版本化 YAML 合約，想了解支援邊啲路徑，可以由呢度開始。
-      """
-    And I click CSS "nav button[data-path='/v1/openapi.yaml']"
-    Then CSS "#response" eventually contains text "openapi:"
-    And CSS "#response" contains text "/novels:"
-    When I narrate in "yue-Hant-HK" for at least 10 seconds:
-      """
-      自訂請求可以揀 GET、POST 或 DELETE，再填路徑同 JSON。只有受保護路徑先需要 bearer token，而密碼欄會遮住內容，回應亦唔應該洩漏憑證。
-      """
-    And I choose value "POST" in CSS "#method"
-    And I replace CSS "#path" with "/v1/novels"
-    And I replace CSS "#body" with "{}"
-    And I click CSS "#send"
-    Then CSS "#response-status" eventually contains text "401"
-    And CSS "#response" eventually contains text "AUTHENTICATION_REQUIRED"
     When I narrate in "yue-Hant-HK" for at least 8 seconds:
       """
-      呢個未授權回應係預期結果，證明系統預設拒絕未認證請求。操作員可以睇狀態同錯誤碼，過程唔會改動任何小說內容。
+      StoryBlock 係本機優先嘅不可變小說版本庫。呢個內聯網管理畫面可以睇晒已儲存小說，而且冇編輯或者刪除掣。
+      """
+    Then CSS "#status-text" eventually contains text "Service online"
+    And CSS "#reader-content" is visible
+    When I narrate in "yue-Hant-HK" for at least 9 seconds:
+      """
+      左邊目錄會開啟目前版本，閱讀器清楚列出書名、五位主角、章節導覽，同埋資料庫實際保存嘅故事段落。
+      """
+    Then CSS "#reader-title" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+    And CSS "#stat-han" has text "10,000"
+    And CSS "#stat-zombies" has text "1,000"
+    And CSS "#stat-cannons" has text "1,000"
+    When I narrate in "yue-Hant-HK" for at least 8 seconds:
+      """
+      字數、殭屍總數、炸藥炮總數同雜湊都來自持久化版本，所以管理員驗證緊嘅係真正落咗資料庫嘅內容。
+      """
+    And I click CSS "#console-tab"
+    And I click CSS ".quick-requests button[data-path='/v1/openapi.yaml']"
+    Then CSS "#response" eventually contains text "/agent/novels:"
+    When I narrate in "yue-Hant-HK" for at least 8 seconds:
+      """
+      診斷畫面只准讀取。人工智能作者會經獨立技能同註冊端點寫入，瀏覽器管理頁就保持唯讀。
       """
     Then I finish the recorded demo

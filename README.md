@@ -35,6 +35,34 @@ java -Djava.net.preferIPv4Stack=true \
 Open `http://127.0.0.1:8080/` for the API console. Container users can place
 the same values in an untracked `.env` and run `docker compose up --build`.
 
+### Trusted-LAN novel library
+
+For local-first admin reading and AI manuscript registration, start the
+dedicated trusted profile:
+
+```bash
+./scripts/run-trusted-lan.sh
+```
+
+Open `https://127.0.0.1:8443/`. The first run creates a self-signed leaf
+certificate, keystore password, and local security pepper under the ignored
+`.local/trusted-lan/` directory. There is no CA and no external certificate or
+key-distribution service; the private certificate key remains on this host.
+The HTTPS protocol still performs its normal per-connection session-key
+agreement.
+
+This profile deliberately treats every request as the owner. It accepts only
+an explicit loopback, RFC1918, or Tailscale/CGNAT IPv4 bind and must never be
+publicly routed. Set `STORYBLOCK_LAN_BIND_ADDRESS`, `STORYBLOCK_LAN_PORT`, and
+`STORYBLOCK_DATABASE_PATH` when a different private interface or database is
+needed. IPv6 is not supported.
+
+The browser library can list, search, and read current persisted revisions but
+contains no write or delete controls. AI authors register manuscripts through
+the tracked `skills/storyblock-author` skill and `POST /v1/agent/novels`; its
+`verify` command compares the source Han sequence and SHA-256 digest with the
+revision read back from storage.
+
 The bootstrap is unprivileged and keeps downloaded tooling in the current
 user's Maven cache. The Unix wrapper download and every Maven JVM are configured
 for IPv4 only.
@@ -104,7 +132,7 @@ and the architectural decisions in `docs/adr`.
 
 ## GUI acceptance and narrated demos
 
-The operator console has executable daily Gherkin UAT plus timed English and
+The novel library has executable daily Gherkin UAT plus timed English and
 Traditional Chinese Cantonese recording guides. Setup, fixture boundaries,
 reports, Sonar import, and the feature coverage matrix are documented in
 [`acceptance/README.md`](acceptance/README.md).

@@ -22,6 +22,17 @@ and well-formed request receives
 form login, HTTP Basic fallback, or session state. Bearer credential validation
 uses opaque, novel-bound credentials as described in
 [`../security/scoped-access-and-audit.md`](../security/scoped-access-and-audit.md).
+The opt-in `trusted-lan` profile is the explicit exception: it authenticates
+each request as the owner and is restricted by its launcher to private IPv4
+binding with local self-signed HTTPS.
+
+The read-only admin surface uses `GET /v1/admin/novels` for paged search and
+`GET /v1/admin/novels/{novelId}` for the current complete canonical revision.
+`POST /v1/agent/novels` validates a complete manuscript, exact Han-code-point
+count, five unique main characters, aggregate narrative counts, and canonical
+registration metadata before importing a genesis revision. It is the write
+boundary used by the `storyblock-author` skill; it is not exposed as a browser
+editing control.
 
 ## Mutation Preconditions
 
@@ -36,6 +47,7 @@ Wildcard `If-Match: *` is accepted only for collection creation at:
 
 - `POST /v1/novels`
 - `POST /v1/imports`
+- `POST /v1/agent/novels`
 - `POST /v1/style-profiles`
 - `POST /v1/internal/jobs/claims`
 
@@ -120,7 +132,7 @@ dependencies have been bootstrapped:
 ./mvnw -o -pl apps/api -am test
 ```
 
-The tests parse every local OpenAPI reference, compare all 29 required routes,
+The tests parse every local OpenAPI reference, compare all 32 required routes,
 exercise each remaining scaffold Spring mapping with its required scope, verify
 all status-policy entries, and cover real bearer authentication, object-level
 novel isolation, problem details, request IDs, ETags, idempotency, wildcard
