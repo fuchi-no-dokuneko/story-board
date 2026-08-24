@@ -101,3 +101,10 @@ Adjacent-state rules and reset-boundary behavior are documented in
 
 The authoritative product requirements are documented in `docs/specification.md`
 and the architectural decisions in `docs/adr`.
+
+## GUI acceptance and narrated demos
+
+The operator console has executable daily Gherkin UAT plus timed English and
+Traditional Chinese Cantonese recording guides. Setup, fixture boundaries,
+reports, Sonar import, and the feature coverage matrix are documented in
+[`acceptance/README.md`](acceptance/README.md).

@@ -16,3 +16,6 @@ apps/style-worker: fake HTTP client; claims, result submission, retries, limits,
 apps/llm-worker: fake model transport; sandbox boundary, response limits, prompt isolation, and output tested.
 apps/cli: temporary SQLite; replay, head hashes, render hashes, usage, and failure reporting tested.
 tests/architecture-tests: no mocks; domain dependency and secure deployment topology constraints tested.
+acceptance/runtime.cjs: no mocks; Chromium interaction, IPv4 resolution, recording hooks, screenshots, and browser recovery infrastructure tested by dry binding and GUI UAT.
+acceptance/run.mjs: Cucumber is external; suite selection, dry binding, report orchestration, and optional Sonar scanner invocation tested.
+acceptance/report.mjs: Cucumber JSON fixture is external; checklist, summary, and Sonar generic execution serialization tested by acceptance runs.

@@ -1,0 +1,13 @@
+{
+  "name": "storyblock-acceptance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Gherkin UAT and narrated browser demos",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "12.9.0",
+    "selenium-webdriver": "4.47.0"
+  }
+}
