@@ -128,7 +128,7 @@ test("registration retries reuse the exact complete payload and deterministic ke
     return { novel_id: NOVEL_ID };
   };
 
-  const first = await registerNovel({ manuscript: source, request });
+  const first = await registerNovel({ manuscript: source, token: "test-owner-token", request });
   const reordered = Object.fromEntries(Object.entries(structuredClone(source)).reverse());
   const second = await registerNovel({ manuscript: reordered, request });
 
@@ -137,6 +137,7 @@ test("registration retries reuse the exact complete payload and deterministic ke
   assert.equal(calls[0].headers["If-Match"], "*");
   assert.equal(calls[0].headers["Content-Type"], "application/json");
   assert.equal(calls[0].headers["Idempotency-Key"], deriveIdempotencyKey(source));
+  assert.equal(calls[0].token, "test-owner-token");
   assert.equal(first.idempotency_key, second.idempotency_key);
   assert.equal(first.payload_sha256, second.payload_sha256);
   assert.equal(stableStringify(calls[0].body), stableStringify(calls[1].body));
@@ -235,13 +236,17 @@ test("verification compares Han sequence, digest, and aggregate metadata", () =>
   );
 });
 
-test("TLS bypass is limited to local/private IPv4 and IPv6 is rejected", () => {
+test("self-signed TLS is limited to local/private IPv4 endpoints", () => {
   assert.equal(connectionPolicy("https://127.0.0.1:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://10.1.2.3:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://172.31.1.2:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://192.168.1.2:8443").rejectUnauthorized, false);
+  assert.equal(connectionPolicy("https://100.64.1.2:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://localhost:8443").rejectUnauthorized, false);
-  assert.equal(connectionPolicy("https://storyblock.example").rejectUnauthorized, true);
+  assert.throws(
+    () => connectionPolicy("https://storyblock.example"),
+    /only localhost or private IPv4/,
+  );
   assert.throws(() => connectionPolicy("http://127.0.0.1:8080"), /must use HTTPS/);
   assert.throws(() => connectionPolicy("https://[::1]:8443"), /IPv4 only/);
 });

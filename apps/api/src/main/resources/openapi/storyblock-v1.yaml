@@ -28,7 +28,7 @@ paths:
     get:
       operationId: listAdminNovels
       summary: List persisted novels for the read-only admin library
-      x-required-scopes: ["novel:read"]
+      x-required-role: operator
       parameters:
         - name: page
           in: query
@@ -65,7 +65,7 @@ paths:
     get:
       operationId: readAdminNovel
       summary: Read a persisted novel and its current canonical revision
-      x-required-scopes: ["novel:read"]
+      x-required-role: operator
       parameters:
         - $ref: "#/components/parameters/NovelId"
       responses:

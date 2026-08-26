@@ -67,6 +67,7 @@ public final class AgentNovelController {
         Ids.NovelId novelId = new Ids.NovelId(StrictJsonRequest.string(
                 request, "novel_id", "agent novel registration"
         ));
+        AccessPrincipalSupport.requireNovel(authentication, novelId);
         List<AgentNovelRegistration.Chapter> chapters = StrictJsonRequest.objects(
                 request.get("chapters"), "agent novel registration.chapters"
         ).stream().map(chapter -> {

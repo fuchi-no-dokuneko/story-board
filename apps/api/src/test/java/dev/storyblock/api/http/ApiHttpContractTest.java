@@ -156,6 +156,11 @@ class ApiHttpContractTest {
                         .content("{}"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(get("/v1/admin/novels")
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
     }
 
     @Test
@@ -689,6 +694,34 @@ class ApiHttpContractTest {
         );
         String bearer = stringField(key, "secret");
         String keyId = stringField(key, "key_id");
+
+        mvc.perform(get("/v1/admin/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        byte[] crossNovelRegistration = CanonicalJson.bytes(Map.of(
+                "chapters", List.of(),
+                "created_at", "2026-08-21T12:00:00Z",
+                "expected_han_characters", 0,
+                "language", "zh-Hant",
+                "main_characters", List.of(),
+                "novel_id", secondNovel,
+                "title", "Cross novel attempt",
+                "tnt_cannon_count", 0,
+                "zombie_count", 0
+        ));
+        mvc.perform(post("/v1/agent/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(
+                                MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "cross-agent-registration"
+                        )
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(crossNovelRegistration))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
 
         byte[] escalationBody = CanonicalJson.bytes(Map.of(
                 "actor_id", "escalated-worker",

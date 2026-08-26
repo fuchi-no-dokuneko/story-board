@@ -15,6 +15,7 @@ The Phase 0 set was approved on 2026-08-21 for Jira work item `ADR-291`.
 | 0006 | Stable identities and fractional ordering | Accepted |
 | 0007 | Stateless preview commit tokens | Accepted |
 | 0008 | Initial product and operating policy | Accepted |
+| 0009 | Application-terminated self-signed TLS | Accepted |
 
 Together these records freeze every Phase 0 canonical-contract decision. ADR
 0007 resolves the security and replay behavior for committing a preview that
