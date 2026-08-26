@@ -17,23 +17,26 @@ and a lightweight operator console.
 
 ```bash
 ./install.sh
-./mvnw verify
 ```
+
+`install.sh` requires Java 21 and writes the Maven distribution, dependency
+cache, generated secrets, self-signed certificate, installed server, database,
+logs, and temporary files only below `.local/storyblock/` in this repository.
+It does not use `sudo`, require root, write to system directories, or upload a
+certificate.
 
 ## Run
 
-Set two local values of at least 32 characters, then start the API:
-
 ```bash
-export STORYBLOCK_SECURITY_OWNER_TOKEN='replace-with-a-local-owner-token-32+'
-export STORYBLOCK_SECURITY_PEPPER='replace-with-a-local-server-pepper-32+'
-./mvnw -pl apps/api -am package -DskipTests
-java -Djava.net.preferIPv4Stack=true \
-  -jar apps/api/target/storyblock-api-0.1.0-SNAPSHOT.jar
+./scripts/local-server.sh start
+./scripts/local-server.sh status
 ```
 
-Open `http://127.0.0.1:8080/` for the API console. Container users can place
-the same values in an untracked `.env` and run `docker compose up --build`.
+Open `https://127.0.0.1:8443/` for the API console. The server uses an
+automatically generated self-signed leaf, so a browser trust warning is
+expected. Stop it with `./scripts/local-server.sh stop`. Container users can
+run `docker compose up --build api`; the API generates its own self-signed leaf
+inside a private local volume and exposes no reverse proxy.
 
 ### Trusted-LAN novel library
 

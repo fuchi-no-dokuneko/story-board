@@ -10,6 +10,7 @@ export const DEFAULT_BASE_URL = "https://127.0.0.1:8443";
 export const E2E_PROFILE = "minecraft-10k";
 
 const REQUEST_TIMEOUT_MS = 15_000;
+const DEFAULT_TOKEN_FILE = ".local/storyblock/secrets/owner-token";
 const HAN_CODE_POINTS = /\p{Script=Han}/gu;
 const UUID_V7 = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
 const UTC_INSTANT = /^((?:\d{4}|\+\d{5,10}|-\d{4,10}))-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d{3}|\d{6}|\d{9}))?Z$/;
@@ -247,7 +248,8 @@ export function isLocalOrPrivateIpv4(hostname) {
   return octets[0] === 127
     || octets[0] === 10
     || (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31)
-    || (octets[0] === 192 && octets[1] === 168);
+    || (octets[0] === 192 && octets[1] === 168)
+    || (octets[0] === 100 && octets[1] >= 64 && octets[1] <= 127);
 }
 
 export function connectionPolicy(baseUrl = DEFAULT_BASE_URL) {
@@ -266,9 +268,14 @@ export function connectionPolicy(baseUrl = DEFAULT_BASE_URL) {
   if (url.hostname.includes(":")) {
     throw new ContractError("StoryBlock helper supports IPv4 only");
   }
+  if (!isLocalOrPrivateIpv4(url.hostname)) {
+    throw new ContractError(
+      "StoryBlock helper permits only localhost or private IPv4 self-signed endpoints",
+    );
+  }
   return Object.freeze({
     origin: url.origin,
-    rejectUnauthorized: !isLocalOrPrivateIpv4(url.hostname),
+    rejectUnauthorized: false,
     family: 4,
   });
 }
@@ -289,10 +296,18 @@ export async function requestJson({
   searchParams,
   headers = {},
   body,
+  token,
 }) {
   const { policy, url } = endpointUrl(baseUrl, pathname, searchParams);
   const payload = body === undefined ? undefined : stableStringify(body);
   const requestHeaders = { Accept: "application/json", ...headers };
+  if (token !== undefined) {
+    requireNonEmptyString(token, "bearer token");
+    if (token.trim() !== token || /\s/.test(token)) {
+      throw new ContractError("bearer token must not contain whitespace");
+    }
+    requestHeaders.Authorization = `Bearer ${token}`;
+  }
   if (payload !== undefined) {
     requestHeaders["Content-Length"] = Buffer.byteLength(payload, "utf8");
   }
@@ -337,8 +352,8 @@ export async function requestJson({
   });
 }
 
-export function health({ baseUrl = DEFAULT_BASE_URL, request = requestJson } = {}) {
-  return request({ baseUrl, pathname: "/actuator/health" });
+export function health({ baseUrl = DEFAULT_BASE_URL, token, request = requestJson } = {}) {
+  return request({ baseUrl, pathname: "/actuator/health", token });
 }
 
 export function listNovels({
@@ -346,6 +361,7 @@ export function listNovels({
   page = 0,
   size = 50,
   query = "",
+  token,
   request = requestJson,
 } = {}) {
   requireNonNegativeInteger(page, "page");
@@ -356,12 +372,21 @@ export function listNovels({
     throw new ContractError("query must be a string");
   }
   const searchParams = new URLSearchParams({ page: String(page), size: String(size), q: query });
-  return request({ baseUrl, pathname: "/v1/admin/novels", searchParams });
+  return request({ baseUrl, pathname: "/v1/admin/novels", searchParams, token });
 }
 
-export function readNovel({ baseUrl = DEFAULT_BASE_URL, novelId, request = requestJson } = {}) {
+export function readNovel({
+  baseUrl = DEFAULT_BASE_URL,
+  novelId,
+  token,
+  request = requestJson,
+} = {}) {
   validateNovelId(novelId, "novelId");
-  return request({ baseUrl, pathname: `/v1/admin/novels/${encodeURIComponent(novelId)}` });
+  return request({
+    baseUrl,
+    pathname: `/v1/admin/novels/${encodeURIComponent(novelId)}`,
+    token,
+  });
 }
 
 export async function registerNovel({
@@ -369,6 +394,7 @@ export async function registerNovel({
   manuscript,
   idempotencyKey,
   profile,
+  token,
   request = requestJson,
 }) {
   const payloadText = stableStringify(manuscript);
@@ -387,6 +413,7 @@ export async function registerNovel({
       "Idempotency-Key": key,
     },
     body: payload,
+    token,
   });
   return {
     command: "register",
@@ -500,6 +527,7 @@ export async function verifyNovel({
   novelId,
   manuscript,
   profile,
+  token,
   request = requestJson,
 }) {
   validateManuscript(manuscript, { profile });
@@ -507,7 +535,7 @@ export async function verifyNovel({
   if (targetNovelId !== manuscript.novel_id) {
     throw new ContractError("novelId must equal manuscript.novel_id");
   }
-  const detail = await readNovel({ baseUrl, novelId: targetNovelId, request });
+  const detail = await readNovel({ baseUrl, novelId: targetNovelId, token, request });
   return verifyDetail(manuscript, detail, { novelId: targetNovelId, profile });
 }
 
@@ -524,6 +552,25 @@ async function readManuscript(path) {
   } catch (error) {
     throw new ContractError(`Source manuscript is not valid JSON: ${error.message}`);
   }
+}
+
+async function readToken(path, { optional = false } = {}) {
+  requireNonEmptyString(path, "token file");
+  let content;
+  try {
+    content = await readFile(path, "utf8");
+  } catch (error) {
+    if (optional && error.code === "ENOENT") {
+      return undefined;
+    }
+    throw new ContractError(`Cannot read token file: ${error.message}`);
+  }
+  const token = content.trim();
+  requireNonEmptyString(token, "bearer token");
+  if (/\s/.test(token)) {
+    throw new ContractError("bearer token must not contain whitespace");
+  }
+  return token;
 }
 
 function parseOptions(args) {
@@ -578,11 +625,11 @@ function requireOption(options, name) {
 
 function usage() {
   return `Usage:
-  storyblock-author.mjs health [--base-url URL]
-  storyblock-author.mjs list [--page N] [--size N] [--query TEXT] [--base-url URL]
-  storyblock-author.mjs register --source FILE [--idempotency-key KEY] [--profile minecraft-10k] [--base-url URL]
-  storyblock-author.mjs read --novel-id ID [--base-url URL]
-  storyblock-author.mjs verify --source FILE [--novel-id ID] [--profile minecraft-10k] [--base-url URL]`;
+  storyblock-author.mjs health [--base-url URL] [--token-file FILE]
+  storyblock-author.mjs list [--page N] [--size N] [--query TEXT] [--base-url URL] [--token-file FILE]
+  storyblock-author.mjs register --source FILE [--idempotency-key KEY] [--profile minecraft-10k] [--base-url URL] [--token-file FILE]
+  storyblock-author.mjs read --novel-id ID [--base-url URL] [--token-file FILE]
+  storyblock-author.mjs verify --source FILE [--novel-id ID] [--profile minecraft-10k] [--base-url URL] [--token-file FILE]`;
 }
 
 async function runCli(argv) {
@@ -593,45 +640,60 @@ async function runCli(argv) {
   }
   const options = parseOptions(args);
   const baseUrl = options["base-url"] ?? process.env.STORYBLOCK_BASE_URL ?? DEFAULT_BASE_URL;
+  const explicitTokenFile = options["token-file"] ?? process.env.STORYBLOCK_TOKEN_FILE;
+  const token = explicitTokenFile === undefined
+    ? await readToken(DEFAULT_TOKEN_FILE, { optional: true })
+    : await readToken(explicitTokenFile);
   let result;
 
   switch (command) {
     case "health":
-      rejectUnknownOptions(options, ["base-url"]);
-      result = await health({ baseUrl });
+      rejectUnknownOptions(options, ["base-url", "token-file"]);
+      result = await health({ baseUrl, token });
       break;
     case "list":
-      rejectUnknownOptions(options, ["base-url", "page", "size", "query"]);
+      rejectUnknownOptions(options, ["base-url", "page", "size", "query", "token-file"]);
       result = await listNovels({
         baseUrl,
         page: integerOption(options.page, 0, "page"),
         size: integerOption(options.size, 50, "size"),
         query: options.query ?? "",
+        token,
       });
       break;
     case "register": {
-      rejectUnknownOptions(options, ["base-url", "source", "idempotency-key", "profile"]);
+      rejectUnknownOptions(options, [
+        "base-url", "source", "idempotency-key", "profile", "token-file",
+      ]);
       const manuscript = await readManuscript(requireOption(options, "source"));
       result = await registerNovel({
         baseUrl,
         manuscript,
         idempotencyKey: options["idempotency-key"],
         profile: options.profile,
+        token,
       });
       break;
     }
     case "read":
-      rejectUnknownOptions(options, ["base-url", "novel-id"]);
-      result = await readNovel({ baseUrl, novelId: requireOption(options, "novel-id") });
+      rejectUnknownOptions(options, ["base-url", "novel-id", "token-file"]);
+      result = await readNovel({
+        baseUrl,
+        novelId: requireOption(options, "novel-id"),
+        token,
+      });
       break;
     case "verify": {
-      rejectUnknownOptions(options, ["base-url", "novel-id", "source", "profile"]);
+      rejectUnknownOptions(options, [
+        "base-url", "novel-id", "source", "profile", "token-file",
+      ]);
       const manuscript = await readManuscript(requireOption(options, "source"));
       result = await verifyNovel({
         baseUrl,
         novelId: options["novel-id"],
         manuscript,
         profile: options.profile,
+        token,
       });
       break;
     }

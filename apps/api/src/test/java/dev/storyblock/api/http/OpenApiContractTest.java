@@ -96,9 +96,14 @@ class OpenApiContractTest {
                     string(operation.contract().get("summary")).isBlank(),
                     "missing summary for " + operation.key()
             );
-            assertFalse(
-                    list(operation.contract().get("x-required-scopes")).isEmpty(),
-                    "missing scopes for " + operation.key()
+            boolean hasScopes = !list(
+                    operation.contract().get("x-required-scopes")
+            ).isEmpty();
+            Object requiredRole = operation.contract().get("x-required-role");
+            boolean hasRole = requiredRole instanceof String role && !role.isBlank();
+            assertTrue(
+                    hasScopes || hasRole,
+                    "missing authorization for " + operation.key()
             );
 
             Map<String, Object> responses = map(operation.contract().get("responses"));
@@ -217,6 +222,15 @@ class OpenApiContractTest {
 
     @Test
     void importAndDurableWorkerContractsHaveSchemasAndScopes() {
+        assertEquals(
+                "operator",
+                string(operation("GET /admin/novels").get("x-required-role"))
+        );
+        assertEquals(
+                "operator",
+                string(operation("GET /admin/novels/{novelId}")
+                        .get("x-required-role"))
+        );
         assertEquals(
                 List.of("novel:admin"),
                 list(operation("POST /imports").get("x-required-scopes"))

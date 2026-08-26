@@ -65,6 +65,8 @@ public class ApiSecurityConfiguration {
                                 "/actuator/metrics",
                                 "/actuator/metrics/**"
                         ).hasRole("OPERATOR")
+                        .requestMatchers(HttpMethod.GET, "/v1/admin/**")
+                        .hasRole("OPERATOR")
                         .requestMatchers(HttpMethod.POST, "/v1/novels", "/v1/imports")
                         .hasAuthority(scope("novel:admin"))
                         .requestMatchers(HttpMethod.POST, "/v1/agent/novels")

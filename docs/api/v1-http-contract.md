@@ -28,11 +28,14 @@ binding with local self-signed HTTPS.
 
 The read-only admin surface uses `GET /v1/admin/novels` for paged search and
 `GET /v1/admin/novels/{novelId}` for the current complete canonical revision.
+Both routes are owner/operator-only; novel-scoped reader credentials cannot use
+the cross-novel catalog.
 `POST /v1/agent/novels` validates a complete manuscript, exact Han-code-point
 count, five unique main characters, aggregate narrative counts, and canonical
 registration metadata before importing a genesis revision. It is the write
 boundary used by the `storyblock-author` skill; it is not exposed as a browser
-editing control.
+editing control. A non-owner credential may register only the novel ID to which
+that credential is bound.
 
 ## Mutation Preconditions
 

@@ -35,33 +35,21 @@ if [[ ! $port =~ ^[0-9]+$ ]] || ((port < 1 || port > 65535)); then
 fi
 
 mkdir -p "$state_dir" "$(dirname "$database")"
-password_file=$state_dir/keystore.password
 pepper_file=$state_dir/security.pepper
-keystore=$state_dir/storyblock-lan.p12
-address_file=$state_dir/certificate.address
+tls_private_dir=$state_dir/tls/private
+tls_public_dir=$state_dir/tls/public
+keystore=$tls_private_dir/storyblock.p12
+password_file=$tls_private_dir/keystore.password
 
-if [[ ! -s $password_file ]]; then
-  openssl rand -hex 32 >"$password_file"
-fi
 if [[ ! -s $pepper_file ]]; then
-  openssl rand -base64 48 >"$pepper_file"
+  od -An -N48 -tx1 /dev/urandom | tr -d ' \n' >"$pepper_file"
 fi
+STORYBLOCK_TLS_PRIVATE_DIR=$tls_private_dir \
+STORYBLOCK_TLS_PUBLIC_DIR=$tls_public_dir \
+STORYBLOCK_TLS_HOST=$bind_address \
+STORYBLOCK_TLS_ALIAS=storyblock-lan \
+  "$root/scripts/generate-self-signed-tls.sh" >/dev/null
 password=$(<"$password_file")
-
-if [[ ! -s $keystore || ! -s $address_file || $(<"$address_file") != "$bind_address" ]]; then
-  rm -f "$keystore"
-  keytool -genkeypair -noprompt \
-    -alias storyblock-lan \
-    -keyalg RSA -keysize 3072 -sigalg SHA256withRSA \
-    -validity 825 \
-    -dname "CN=StoryBlock Trusted LAN, OU=Local, O=StoryBlock" \
-    -ext "SAN=ip:$bind_address,ip:127.0.0.1,dns:localhost" \
-    -storetype PKCS12 \
-    -keystore "$keystore" \
-    -storepass "$password" \
-    -keypass "$password" >/dev/null
-  printf '%s\n' "$bind_address" >"$address_file"
-fi
 
 jar=$(find apps/api/target -maxdepth 1 -name 'storyblock-api-*.jar' \
   ! -name '*.original' -print -quit 2>/dev/null || true)
@@ -85,5 +73,5 @@ STORYBLOCK_SECURITY_PEPPER=$(<"$pepper_file")
 export STORYBLOCK_TRUSTED_LAN_ENABLED=true
 
 echo "StoryBlock trusted LAN: https://$bind_address:$port/"
-echo "Self-signed certificate: $keystore"
+echo "Self-signed certificate: $tls_public_dir/storyblock.crt"
 exec java -Djava.net.preferIPv4Stack=true -jar "$jar"

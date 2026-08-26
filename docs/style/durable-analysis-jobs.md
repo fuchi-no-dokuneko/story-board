@@ -78,7 +78,7 @@ bearer token needs `worker:execute` for exactly one novel and is never logged.
 
 ```text
 STORYBLOCK_WORKER_ENABLED=true
-STORYBLOCK_WORKER_API_BASE_URL=http://127.0.0.1:8080/
+STORYBLOCK_WORKER_API_BASE_URL=https://127.0.0.1:8443/
 STORYBLOCK_WORKER_TOKEN=<opaque novel-bound token>
 STORYBLOCK_WORKER_NOVEL_ID=nov_<uuid>
 STORYBLOCK_WORKER_ID=style-worker-1
@@ -88,7 +88,9 @@ STORYBLOCK_WORKER_RUN_ONCE=false
 ```
 
 The runtime forces the IPv4 stack, rejects IPv6 API origins and redirects, and
-does not include the credential in settings output or protocol errors.
+does not include the credential in settings output or protocol errors. The
+container profile mounts the public trust store generated for the API's
+self-signed leaf; it never mounts the API private key.
 
 ## Verification
 
