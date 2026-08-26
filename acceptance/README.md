@@ -43,6 +43,7 @@ Without wrappers, narration is printed and still waits for its declared timing.
 
 | Visible feature or transition | Daily UAT | English demo | Cantonese demo |
 | --- | --- | --- | --- |
+| Shared memory-only owner-token control | Credential-control scenario | Not recorded | 不錄影 |
 | Online and degraded states | Header-state scenarios | Product opening | 產品開場 |
 | Persisted 10,000-Han story and hashes | Exact reader checks | Main flow | 主要流程 |
 | Five characters and aggregate counts | Exact reader checks | Main flow | 主要流程 |

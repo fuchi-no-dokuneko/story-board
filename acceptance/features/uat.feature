@@ -15,6 +15,16 @@ Feature: Daily acceptance of the StoryBlock read-only novel library
     And no elements match CSS "#library-view [contenteditable='true']"
     And no elements match CSS "button[data-method='POST'], button[data-method='DELETE']"
 
+  Scenario: Expose one shared non-persistent operator credential control
+    Given I open the web application at path "/"
+    Then CSS "#operator-token" is visible
+    And CSS "#operator-connect" has text "Use token"
+    And CSS "#operator-status" eventually contains text "access active"
+    And local storage item "storyblock.operatorToken" is absent
+    And JavaScript expression "sessionStorage.getItem('storyblock.operatorToken') === null" returns true
+    When I click CSS "#console-tab"
+    Then CSS ".console-auth-note" contains text "owner token configured above"
+
   Scenario: Read and count the independently registered Minecraft novel
     Given I open the web application at path "/"
     When I replace CSS "#catalog-search" with environment variable "STORYBLOCK_UAT_NOVEL_TITLE"

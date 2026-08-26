@@ -55,6 +55,7 @@ public class ApiSecurityConfiguration {
                         .requestMatchers(
                                 "/",
                                 "/index.html",
+                                "/auth.js",
                                 "/app.js",
                                 "/styles.css",
                                 "/v1/openapi.yaml",
