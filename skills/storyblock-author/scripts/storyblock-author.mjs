@@ -3,7 +3,6 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { request as httpsRequest } from "node:https";
-import { isIP } from "node:net";
 import { pathToFileURL } from "node:url";
 
 export const DEFAULT_BASE_URL = "https://127.0.0.1:8443";
@@ -230,28 +229,6 @@ export function validateManuscript(manuscript, { profile } = {}) {
   });
 }
 
-function parseIpv4(hostname) {
-  if (isIP(hostname) !== 4) {
-    return null;
-  }
-  return hostname.split(".").map(Number);
-}
-
-export function isLocalOrPrivateIpv4(hostname) {
-  if (hostname.toLowerCase() === "localhost") {
-    return true;
-  }
-  const octets = parseIpv4(hostname);
-  if (octets === null) {
-    return false;
-  }
-  return octets[0] === 127
-    || octets[0] === 10
-    || (octets[0] === 172 && octets[1] >= 16 && octets[1] <= 31)
-    || (octets[0] === 192 && octets[1] === 168)
-    || (octets[0] === 100 && octets[1] >= 64 && octets[1] <= 127);
-}
-
 export function connectionPolicy(baseUrl = DEFAULT_BASE_URL) {
   let url;
   try {
@@ -267,11 +244,6 @@ export function connectionPolicy(baseUrl = DEFAULT_BASE_URL) {
   }
   if (url.hostname.includes(":")) {
     throw new ContractError("StoryBlock helper supports IPv4 only");
-  }
-  if (!isLocalOrPrivateIpv4(url.hostname)) {
-    throw new ContractError(
-      "StoryBlock helper permits only localhost or private IPv4 self-signed endpoints",
-    );
   }
   return Object.freeze({
     origin: url.origin,

@@ -2,7 +2,7 @@
 
 ## Transport and endpoints
 
-The default base URL is `https://127.0.0.1:8443`. Requests use IPv4. A self-signed certificate is accepted only when the URL host is `localhost`, loopback, RFC1918, or Tailscale/CGNAT IPv4. Public hosts, IPv6, and plain HTTP are rejected. The helper reads `.local/storyblock/secrets/owner-token` automatically when present; `--token-file` or `STORYBLOCK_TOKEN_FILE` selects another repository-local token file.
+The default base URL is `https://127.0.0.1:8443`. Requests use IPv4 and accept the server's self-signed certificate; IPv6 and plain HTTP are rejected. Public hosts must use the normal authenticated server profile, firewall-restricted ingress, and an owner token selected with `--token-file` or `STORYBLOCK_TOKEN_FILE`. The helper reads `.local/storyblock/secrets/owner-token` automatically when present.
 
 | Command | Request |
 |---|---|
