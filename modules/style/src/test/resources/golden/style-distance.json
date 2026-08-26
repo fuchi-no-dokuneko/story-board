@@ -1,0 +1,14 @@
+{
+  "target_text": "他慢慢走過長廊。",
+  "current_text": "佢大嗌：「快啲走呀！」",
+  "current_speaker": "char_ming",
+  "token_kl_diagnostic_only": true,
+  "primary_metrics": {
+    "surface": "jensen_shannon_distance",
+    "grammar": "jensen_shannon_distance",
+    "rhythm": "wasserstein_distance",
+    "narrative": "robust_l1_input",
+    "lexical": "robust_l1_input",
+    "optional_embedding": "cosine_distance"
+  }
+}

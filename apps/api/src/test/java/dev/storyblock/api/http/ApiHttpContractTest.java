@@ -102,6 +102,33 @@ class ApiHttpContractTest {
     }
 
     @Test
+    void operationalMetricsRequireTheOperatorScope() throws Exception {
+        mvc.perform(get("/actuator/metrics"))
+                .andExpect(status().isUnauthorized());
+
+        MvcResult metrics = mvc.perform(get("/actuator/metrics")
+                        .with(user("operator").roles("OPERATOR")))
+                .andExpect(status().isOk())
+                .andReturn();
+        String metricIndex = metrics.getResponse().getContentAsString();
+        for (String name : List.of(
+                "commit_wait_ms", "commit_transaction_ms", "sqlite_busy_total",
+                "wal_bytes", "checkpoint_ms", "queue_depth", "oldest_job_age",
+                "analysis_duration_ms", "rewrite_duration_ms",
+                "stale_proposal_total", "detector_findings_total",
+                "artifact_bytes", "backup_age_seconds", "auth_denied_total"
+        )) {
+            assertTrue(metricIndex.contains(name), name);
+        }
+
+        mvc.perform(get("/actuator/health/sqlite"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/actuator/health/sqlite")
+                        .with(user("operator").roles("OPERATOR")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void rejectsMissingAuthenticationWithProblemContract() throws Exception {
         mvc.perform(get("/v1/novels/nov_test")
                         .header(ApiRequestMetadata.REQUEST_ID_HEADER, "request-test-401"))
@@ -114,6 +141,26 @@ class ApiHttpContractTest {
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"))
                 .andExpect(jsonPath("$.request_id").value("request-test-401"));
+    }
+
+    @Test
+    void keepsTrustedLanRoutesProtectedInTheDefaultProfile() throws Exception {
+        mvc.perform(get("/v1/admin/novels"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(post("/v1/agent/novels")
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "agent-default-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(get("/v1/admin/novels")
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
     }
 
     @Test
@@ -647,6 +694,34 @@ class ApiHttpContractTest {
         );
         String bearer = stringField(key, "secret");
         String keyId = stringField(key, "key_id");
+
+        mvc.perform(get("/v1/admin/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        byte[] crossNovelRegistration = CanonicalJson.bytes(Map.of(
+                "chapters", List.of(),
+                "created_at", "2026-08-21T12:00:00Z",
+                "expected_han_characters", 0,
+                "language", "zh-Hant",
+                "main_characters", List.of(),
+                "novel_id", secondNovel,
+                "title", "Cross novel attempt",
+                "tnt_cannon_count", 0,
+                "zombie_count", 0
+        ));
+        mvc.perform(post("/v1/agent/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(
+                                MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "cross-agent-registration"
+                        )
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(crossNovelRegistration))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
 
         byte[] escalationBody = CanonicalJson.bytes(Map.of(
                 "actor_id", "escalated-worker",

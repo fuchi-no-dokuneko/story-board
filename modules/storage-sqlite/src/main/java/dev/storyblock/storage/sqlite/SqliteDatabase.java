@@ -11,16 +11,24 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.flywaydb.core.Flyway;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteDataSource;
 
 public final class SqliteDatabase implements AutoCloseable {
     private final HikariDataSource pool;
     private final SqliteMetrics metrics;
+    private final Path databasePath;
 
-    private SqliteDatabase(HikariDataSource pool, SqliteMetrics metrics) {
+    private SqliteDatabase(
+            HikariDataSource pool,
+            SqliteMetrics metrics,
+            Path databasePath
+    ) {
         this.pool = pool;
         this.metrics = metrics;
+        this.databasePath = databasePath;
     }
 
     public static SqliteDatabase open(Path databasePath) throws IOException {
@@ -40,21 +48,28 @@ public final class SqliteDatabase implements AutoCloseable {
             throw new IOException("SQLite database path is a directory: " + absolutePath);
         }
 
-        SqliteMetrics metrics = new SqliteMetrics();
-        SQLiteConfig sqlite = new SQLiteConfig();
-        sqlite.setJournalMode(SQLiteConfig.JournalMode.WAL);
-        sqlite.setSynchronous(SQLiteConfig.SynchronousMode.FULL);
-        sqlite.enforceForeignKeys(true);
-        sqlite.setBusyTimeout(settings.busyTimeoutMillis());
-        sqlite.setExplicitReadOnly(true);
-        sqlite.setTransactionMode(SQLiteConfig.TransactionMode.DEFERRED);
-        sqlite.setSharedCache(false);
-        sqlite.enableLoadExtension(false);
-
         String jdbcUrl = "jdbc:sqlite:" + absolutePath;
+        SQLiteDataSource migrationDataSource = new SQLiteDataSource(
+                sqliteConfig(settings, false)
+        );
+        migrationDataSource.setUrl(jdbcUrl);
+        try {
+            Flyway.configure()
+                    .dataSource(migrationDataSource)
+                    .locations("classpath:db/migration")
+                    .validateMigrationNaming(true)
+                    .baselineOnMigrate(true)
+                    .baselineVersion("0")
+                    .load()
+                    .migrate();
+        } catch (RuntimeException exception) {
+            throw new IOException("Could not migrate SQLite database " + absolutePath, exception);
+        }
+
+        SqliteMetrics metrics = new SqliteMetrics();
         VerifyingSqliteDataSource verified = new VerifyingSqliteDataSource(
                 jdbcUrl,
-                sqlite,
+                sqliteConfig(settings, true),
                 settings,
                 metrics
         );
@@ -70,7 +85,7 @@ public final class SqliteDatabase implements AutoCloseable {
         hikari.setValidationTimeout(1_000L);
         hikari.setInitializationFailTimeout(settings.busyTimeoutMillis() + 2_000L);
         hikari.setMaxLifetime(0L);
-        return new SqliteDatabase(new HikariDataSource(hikari), metrics);
+        return new SqliteDatabase(new HikariDataSource(hikari), metrics, absolutePath);
     }
 
     public <T> T readOnly(SqliteWork<T> work) throws SQLException {
@@ -99,12 +114,14 @@ public final class SqliteDatabase implements AutoCloseable {
             if (!result.next()) {
                 throw new SQLException("wal_checkpoint returned no result");
             }
-            return new SqliteWalCheckpoint(
+            SqliteWalCheckpoint checkpoint = new SqliteWalCheckpoint(
                     result.getInt(1),
                     result.getInt(2),
                     result.getInt(3),
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started)
             );
+            metrics.recordCheckpoint(checkpoint.durationMillis());
+            return checkpoint;
         } catch (SQLException exception) {
             metrics.recordFailure(exception);
             throw exception;
@@ -115,6 +132,11 @@ public final class SqliteDatabase implements AutoCloseable {
         return metrics.snapshot();
     }
 
+    long walBytes() throws IOException {
+        Path wal = Path.of(databasePath + "-wal");
+        return Files.exists(wal) ? Files.size(wal) : 0L;
+    }
+
     Connection borrowConnection() throws SQLException {
         return pool.getConnection();
     }
@@ -122,6 +144,19 @@ public final class SqliteDatabase implements AutoCloseable {
     @Override
     public void close() {
         pool.close();
+    }
+
+    private static SQLiteConfig sqliteConfig(SqliteSettings settings, boolean explicitReadOnly) {
+        SQLiteConfig sqlite = new SQLiteConfig();
+        sqlite.setJournalMode(SQLiteConfig.JournalMode.WAL);
+        sqlite.setSynchronous(SQLiteConfig.SynchronousMode.FULL);
+        sqlite.enforceForeignKeys(true);
+        sqlite.setBusyTimeout(settings.busyTimeoutMillis());
+        sqlite.setExplicitReadOnly(explicitReadOnly);
+        sqlite.setTransactionMode(SQLiteConfig.TransactionMode.DEFERRED);
+        sqlite.setSharedCache(false);
+        sqlite.enableLoadExtension(false);
+        return sqlite;
     }
 
     private <T> T transaction(boolean readOnly, SqliteWork<T> work) throws SQLException {

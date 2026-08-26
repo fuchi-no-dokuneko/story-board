@@ -30,16 +30,22 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
     private final Clock clock;
     private final byte[] ownerTokenHash;
     private final ApiProblemWriter problemWriter;
+    private final StoryBlockTelemetry telemetry;
+    private final boolean trustedLan;
 
     AccessKeyAuthenticationFilter(
             AccessKeyService accessKeys,
             Clock clock,
             String ownerToken,
-            ApiProblemWriter problemWriter
+            ApiProblemWriter problemWriter,
+            StoryBlockTelemetry telemetry,
+            boolean trustedLan
     ) {
         this.accessKeys = java.util.Objects.requireNonNull(accessKeys, "accessKeys");
         this.clock = java.util.Objects.requireNonNull(clock, "clock");
         this.problemWriter = java.util.Objects.requireNonNull(problemWriter, "problemWriter");
+        this.telemetry = java.util.Objects.requireNonNull(telemetry, "telemetry");
+        this.trustedLan = trustedLan;
         this.ownerTokenHash = ownerToken == null || ownerToken.isBlank()
                 ? null : sha256(ownerToken);
         if (ownerTokenHash != null && ownerToken.length() < 32) {
@@ -53,8 +59,7 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return "/v1/openapi.yaml".equals(path)
-                || path.equals("/actuator/health")
-                || path.startsWith("/actuator/health/");
+                || path.equals("/actuator/health");
     }
 
     @Override
@@ -64,6 +69,11 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        if (trustedLan) {
+            authenticate(AccessPrincipal.ownerPrincipal());
             filterChain.doFilter(request, response);
             return;
         }
@@ -94,15 +104,24 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
             ));
             return;
         }
-        List<SimpleGrantedAuthority> authorities = principal.scopes().stream()
+        authenticate(principal);
+        filterChain.doFilter(request, response);
+    }
+
+    private static void authenticate(AccessPrincipal principal) {
+        List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>(
+                principal.scopes().stream()
                 .map(AccessScope::canonicalName)
                 .sorted()
                 .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
-                .toList();
+                .toList()
+        );
+        if (principal.owner()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_OPERATOR"));
+        }
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(principal, null, authorities)
         );
-        filterChain.doFilter(request, response);
     }
 
     private boolean isOwnerToken(String token) {
@@ -113,6 +132,7 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
 
     private void reject(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
+        telemetry.recordAuthDenied("invalid");
         problemWriter.write(request, response, ApiFailureException.of(
                 HttpStatus.UNAUTHORIZED,
                 "INVALID_BEARER_CREDENTIAL",

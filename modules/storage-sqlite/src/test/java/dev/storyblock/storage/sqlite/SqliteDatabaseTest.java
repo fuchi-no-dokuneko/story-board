@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,6 +22,44 @@ import org.junit.jupiter.api.io.TempDir;
 class SqliteDatabaseTest {
     @TempDir
     Path temporaryDirectory;
+
+    @Test
+    void flywayCreatesTheCompleteCanonicalSchemaAtStartup() throws Exception {
+        Path databasePath = temporaryDirectory.resolve("migrated.db");
+        try (SqliteDatabase database = SqliteDatabase.open(databasePath)) {
+            Set<String> expected = Set.of(
+                    "novels", "revisions", "operations", "checkpoints",
+                    "head_block_projection", "detector_runs", "issues",
+                    "style_profiles", "style_profile_versions", "analysis_jobs",
+                    "analysis_runs", "rewrite_proposals", "access_keys",
+                    "audit_events", "artifacts", "flyway_schema_history"
+            );
+            Set<String> actual = database.readOnly(connection -> {
+                Set<String> tables = new java.util.HashSet<>();
+                try (var statement = connection.createStatement();
+                     var rows = statement.executeQuery(
+                             "SELECT name FROM sqlite_master WHERE type = 'table'"
+                     )) {
+                    while (rows.next()) {
+                        tables.add(rows.getString(1));
+                    }
+                }
+                return tables;
+            });
+            assertTrue(actual.containsAll(expected), () -> "Missing tables: " + expected.stream()
+                    .filter(table -> !actual.contains(table)).toList());
+            long migrationCount = database.readOnly(connection -> {
+                try (var statement = connection.createStatement();
+                     var rows = statement.executeQuery(
+                             "SELECT COUNT(*) FROM flyway_schema_history WHERE success = 1"
+                     )) {
+                    rows.next();
+                    return rows.getLong(1);
+                }
+            });
+            assertEquals(8L, migrationCount);
+        }
+    }
 
     @Test
     void requiredPragmasAreVerifiedOnEveryPhysicalConnection() throws Exception {

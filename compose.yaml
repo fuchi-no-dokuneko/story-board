@@ -1,15 +1,94 @@
 services:
   api:
-    build: .
+    build:
+      context: .
+      target: api
     ports:
-      - "127.0.0.1:8080:8080"
+      - "${STORYBLOCK_BIND_ADDRESS:-127.0.0.1}:${STORYBLOCK_HTTPS_PORT:-8443}:8443"
     environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: 8443
       STORYBLOCK_DATABASE_PATH: /app/data/storyblock.db
-      STORYBLOCK_SECURITY_OWNER_TOKEN: ${STORYBLOCK_SECURITY_OWNER_TOKEN:?set owner token}
-      STORYBLOCK_SECURITY_PEPPER: ${STORYBLOCK_SECURITY_PEPPER:?set pepper}
+      STORYBLOCK_SECURITY_OWNER_TOKEN_FILE: /run/secrets/owner-token
+      STORYBLOCK_SECURITY_PEPPER_FILE: /run/secrets/server-pepper
+      STORYBLOCK_SELF_SIGNED_TLS_ENABLED: "true"
+      STORYBLOCK_TLS_HOST: ${STORYBLOCK_TLS_HOST:-localhost}
+    secrets:
+      - owner-token
+      - server-pepper
     volumes:
       - storyblock-data:/app/data
+      - storyblock-tls-private:/app/tls/private
+      - storyblock-tls-public:/app/tls/public
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
     restart: unless-stopped
+
+  style-worker:
+    profiles: [workers]
+    build:
+      context: .
+      target: style-worker
+    depends_on:
+      - api
+    environment:
+      STORYBLOCK_WORKER_ENABLED: "true"
+      STORYBLOCK_WORKER_API_BASE_URL: https://api:8443/
+      STORYBLOCK_WORKER_TOKEN_FILE: /run/secrets/style-worker-token
+      STORYBLOCK_WORKER_NOVEL_ID: ${STORYBLOCK_WORKER_NOVEL_ID:?set worker novel id}
+      STORYBLOCK_WORKER_ID: ${STORYBLOCK_WORKER_ID:-style-worker-1}
+      STORYBLOCK_TLS_TRUST_STORE: /app/tls/public/storyblock-truststore.p12
+      STORYBLOCK_TLS_TRUST_STORE_PASSWORD_FILE: /app/tls/public/truststore.password
+    secrets:
+      - style-worker-token
+    volumes:
+      - storyblock-tls-public:/app/tls/public:ro
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+
+  llm-worker:
+    profiles: [rewrite]
+    build:
+      context: .
+      target: llm-worker
+    environment:
+      STORYBLOCK_LLM_WORKER_ENABLED: "true"
+      STORYBLOCK_LLM_WORKER_MODEL_ENDPOINT: ${STORYBLOCK_LLM_MODEL_ENDPOINT:?set HTTPS model endpoint}
+      STORYBLOCK_LLM_WORKER_MODEL_TOKEN_FILE: /run/secrets/llm-model-token
+      STORYBLOCK_LLM_WORKER_MODEL_ID: ${STORYBLOCK_LLM_MODEL_ID:?set model id}
+    secrets:
+      - llm-model-token
+    networks:
+      - worker-egress
+    read_only: true
+    tmpfs:
+      - /tmp
+    stdin_open: true
+    tty: true
+
+secrets:
+  owner-token:
+    file: ${STORYBLOCK_OWNER_TOKEN_FILE:-.local/storyblock/secrets/owner-token}
+  server-pepper:
+    file: ${STORYBLOCK_SERVER_PEPPER_FILE:-.local/storyblock/secrets/server-pepper}
+  style-worker-token:
+    file: ${STORYBLOCK_STYLE_WORKER_TOKEN_FILE:-.local/storyblock/secrets/style-worker-token}
+  llm-model-token:
+    file: ${STORYBLOCK_LLM_MODEL_TOKEN_FILE:-.local/storyblock/secrets/llm-model-token}
 
 volumes:
   storyblock-data:
+  storyblock-tls-private:
+  storyblock-tls-public:
+
+networks:
+  internal:
+    internal: true
+  worker-egress:

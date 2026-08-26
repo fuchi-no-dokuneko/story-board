@@ -1,0 +1,7 @@
+{
+  "repository": "story-board",
+  "platform": "web",
+  "baseUrl": "https://127.0.0.1:8443/",
+  "timeoutSeconds": 45,
+  "acceptInsecureTls": true
+}

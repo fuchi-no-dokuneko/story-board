@@ -23,6 +23,9 @@ class OpenApiContractTest {
             "get", "post", "put", "patch", "delete"
     );
     private static final Set<String> REQUIRED_OPERATIONS = Set.of(
+            "GET /admin/novels",
+            "GET /admin/novels/{novelId}",
+            "POST /agent/novels",
             "POST /novels",
             "POST /imports",
             "GET /novels/{novelId}",
@@ -58,6 +61,7 @@ class OpenApiContractTest {
             "POST /novels/{novelId}/exports"
     );
     private static final Set<String> WILDCARD_CREATION_OPERATIONS = Set.of(
+            "POST /agent/novels",
             "POST /novels",
             "POST /imports",
             "POST /style-profiles",
@@ -92,9 +96,14 @@ class OpenApiContractTest {
                     string(operation.contract().get("summary")).isBlank(),
                     "missing summary for " + operation.key()
             );
-            assertFalse(
-                    list(operation.contract().get("x-required-scopes")).isEmpty(),
-                    "missing scopes for " + operation.key()
+            boolean hasScopes = !list(
+                    operation.contract().get("x-required-scopes")
+            ).isEmpty();
+            Object requiredRole = operation.contract().get("x-required-role");
+            boolean hasRole = requiredRole instanceof String role && !role.isBlank();
+            assertTrue(
+                    hasScopes || hasRole,
+                    "missing authorization for " + operation.key()
             );
 
             Map<String, Object> responses = map(operation.contract().get("responses"));
@@ -171,6 +180,9 @@ class OpenApiContractTest {
         );
 
         assertStrongEtag("GET /novels/{novelId}", "200");
+        assertStrongEtag("GET /admin/novels/{novelId}", "200");
+        assertStrongEtag("POST /agent/novels", "200");
+        assertStrongEtag("POST /agent/novels", "201");
         assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
         assertStrongEtag("POST /novels", "201");
         assertStrongEtag("POST /imports", "201");
@@ -210,6 +222,15 @@ class OpenApiContractTest {
 
     @Test
     void importAndDurableWorkerContractsHaveSchemasAndScopes() {
+        assertEquals(
+                "operator",
+                string(operation("GET /admin/novels").get("x-required-role"))
+        );
+        assertEquals(
+                "operator",
+                string(operation("GET /admin/novels/{novelId}")
+                        .get("x-required-role"))
+        );
         assertEquals(
                 List.of("novel:admin"),
                 list(operation("POST /imports").get("x-required-scopes"))

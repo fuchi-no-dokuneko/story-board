@@ -3,6 +3,8 @@ package dev.storyblock.cli;
 import dev.storyblock.application.ReplayVerificationReport;
 import dev.storyblock.application.ReplayService;
 import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.renderer.DeterministicRenderer;
+import dev.storyblock.renderer.RenderRange;
 import dev.storyblock.storage.sqlite.SqliteRevisionStore;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -36,7 +38,25 @@ public final class StoryBlockCli {
         }
         try (SqliteRevisionStore store = SqliteRevisionStore.open(databasePath)) {
             ReplayVerificationReport report = new ReplayService(store).verifyAllHeads();
-            output.println(CanonicalJson.string(report.contractFields()));
+            java.util.Map<String, Object> result = new java.util.LinkedHashMap<>(
+                    report.contractFields()
+            );
+            java.util.Map<String, String> renderHashes = new java.util.TreeMap<>();
+            DeterministicRenderer renderer = new DeterministicRenderer();
+            for (var novel : report.novels()) {
+                if (!novel.valid()) {
+                    continue;
+                }
+                var revision = store.getRevision(
+                        novel.novelId(), novel.headRevisionId()
+                ).manifest();
+                String hash = CanonicalJson.hash(renderer.render(
+                        revision, novel.expectedHash(), RenderRange.all()
+                ).canonicalValue());
+                renderHashes.put(novel.novelId().value(), hash);
+            }
+            result.put("render_hashes", renderHashes);
+            output.println(CanonicalJson.string(result));
             return report.valid() ? 0 : 1;
         } catch (RuntimeException | java.io.IOException exception) {
             error.println("Replay verification failed: " + exception.getMessage());

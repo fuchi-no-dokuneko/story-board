@@ -24,9 +24,14 @@ public final class DetectorController {
     );
 
     private final DetectorService detectors;
+    private final StoryBlockTelemetry telemetry;
 
-    public DetectorController(DetectorService detectors) {
+    public DetectorController(
+            DetectorService detectors,
+            StoryBlockTelemetry telemetry
+    ) {
         this.detectors = java.util.Objects.requireNonNull(detectors, "detectors");
+        this.telemetry = java.util.Objects.requireNonNull(telemetry, "telemetry");
     }
 
     @PostMapping("/novels/{novelId}/detector-runs")
@@ -64,6 +69,7 @@ public final class DetectorController {
                 expectedHash,
                 range
         );
+        telemetry.recordDetectorFindings(run.findings());
         return ResponseEntity.ok()
                 .header(HttpHeaders.ETAG, '"' + run.revisionHash() + '"')
                 .body(run.canonicalValue());

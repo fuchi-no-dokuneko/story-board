@@ -32,6 +32,7 @@ public final class MutationPreconditionFilter extends OncePerRequestFilter {
     );
     private static final Set<String> WILDCARD_CREATION_ROUTES = Set.of(
             "/v1/novels",
+            "/v1/agent/novels",
             "/v1/imports",
             "/v1/style-profiles",
             "/v1/internal/jobs/claims"

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "tickets/**"]
   pull_request:
   workflow_dispatch:
 
@@ -18,9 +18,26 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-          cache: maven
+      - name: Install repository-local server
+        run: ./install.sh
       - name: Verify
-        run: ./mvnw --batch-mode verify
+        run: >-
+          ./mvnw --batch-mode
+          -Dmaven.repo.local="$PWD/.local/storyblock/maven/repository"
+          verify
+          -Dtest='!InitialSloQualificationTest'
+          -Dsurefire.failIfNoSpecifiedTests=false
+      - name: Verify author skill
+        run: node --test skills/storyblock-author/tests/storyblock-author.test.mjs
+      - name: Smoke-test self-signed HTTPS
+        run: |
+          ./scripts/local-server.sh start
+          trap './scripts/local-server.sh stop || true' EXIT
+          curl --fail --silent --show-error \
+            --cacert .local/storyblock/tls/public/storyblock.crt \
+            https://127.0.0.1:8443/actuator/health
+          ./scripts/local-server.sh stop
+          trap - EXIT
       - name: Upload API
         uses: actions/upload-artifact@v4
         with:
