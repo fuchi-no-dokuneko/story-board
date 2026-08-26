@@ -236,17 +236,15 @@ test("verification compares Han sequence, digest, and aggregate metadata", () =>
   );
 });
 
-test("self-signed TLS is limited to local/private IPv4 endpoints", () => {
+test("self-signed TLS supports local, private, and public HTTPS endpoints", () => {
   assert.equal(connectionPolicy("https://127.0.0.1:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://10.1.2.3:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://172.31.1.2:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://192.168.1.2:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://100.64.1.2:8443").rejectUnauthorized, false);
   assert.equal(connectionPolicy("https://localhost:8443").rejectUnauthorized, false);
-  assert.throws(
-    () => connectionPolicy("https://storyblock.example"),
-    /only localhost or private IPv4/,
-  );
+  assert.equal(connectionPolicy("https://203.0.113.10:9000").rejectUnauthorized, false);
+  assert.equal(connectionPolicy("https://storyblock.example:9000").rejectUnauthorized, false);
   assert.throws(() => connectionPolicy("http://127.0.0.1:8080"), /must use HTTPS/);
   assert.throws(() => connectionPolicy("https://[::1]:8443"), /IPv4 only/);
 });

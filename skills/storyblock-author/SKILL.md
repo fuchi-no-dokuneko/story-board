@@ -1,6 +1,6 @@
 ---
 name: storyblock-author
-description: Operate StoryBlock's self-signed local or private-IPv4 authoring API to check health, list or read novels, register a manuscript, and verify persisted Han text and aggregate counts. Use for StoryBlock novel registration and verification; never use it with a public endpoint.
+description: Operate StoryBlock's self-signed HTTPS authoring API to check health, list or read novels, register a manuscript, and verify persisted Han text and aggregate counts. Use for StoryBlock novel registration and verification.
 ---
 
 # StoryBlock Author
@@ -15,7 +15,7 @@ node skills/storyblock-author/scripts/storyblock-author.mjs read --novel-id NOVE
 node skills/storyblock-author/scripts/storyblock-author.mjs verify --source manuscript.json
 ```
 
-The default service is `https://127.0.0.1:8443`; override it with `--base-url` or `STORYBLOCK_BASE_URL`. The helper permits only `localhost`, loopback, RFC1918, or Tailscale/CGNAT IPv4 self-signed endpoints and rejects public hosts. It automatically reads the repo-local `.local/storyblock/secrets/owner-token`; override that path with `--token-file` or `STORYBLOCK_TOKEN_FILE`. It never prints the token.
+The default service is `https://127.0.0.1:8443`; override it with `--base-url` or `STORYBLOCK_BASE_URL`. The helper accepts self-signed HTTPS endpoints and forces IPv4. For a public host, use the normal authenticated server profile, restrict ingress with a firewall allowlist, and provide the owner token with `--token-file` or `STORYBLOCK_TOKEN_FILE`. The helper automatically reads the repo-local `.local/storyblock/secrets/owner-token` when present and never prints the token.
 
 Read [references/schema.md](references/schema.md) before preparing a manuscript or interpreting verification output. `register` is the only mutating command; use it only when novel registration is requested. The source must already contain its typed UUIDv7 `novel_id` and canonical UTC `created_at`; the helper never generates or replaces them.
 
