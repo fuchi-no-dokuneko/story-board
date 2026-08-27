@@ -3,6 +3,10 @@ import { stableStringify } from "./json.mjs";
 import { EXIT_CODES } from "./problem.mjs";
 import { isCanonicalInstant } from "./time.mjs";
 
+const SENTENCE_TERMINATOR = String.raw`(?:[。！？!?]+|(?<!\d)\.{1,3}(?!\d)|…{1,2})`;
+const CLOSING_MARKS = String.raw`[」』”’"'）)】》〉〕］}]*`;
+const REGISTRATION_SENTENCE = /\s*(.*?(?:[。！？!?]+|…{1,2})[」』”’"'）)】》〉〕］}]*?)/gsuy;
+
 export class PayloadValidationError extends Error {
   constructor(dto, issues) {
     super(`${dto} validation failed with ${issues.length} issue${issues.length === 1 ? "" : "s"}`);
@@ -53,6 +57,31 @@ function graphemeLength(text) {
   const segmenter = new Intl.Segmenter("und", { granularity: "grapheme" });
   return [...segmenter.segment(text.normalize("NFC"))]
     .filter(({ segment }) => !["\n", "\r", "\r\n"].includes(segment)).length;
+}
+
+function sentenceShape(text) {
+  const normalized = text.normalize("NFC");
+  const sentenceEnd = new RegExp(`${SENTENCE_TERMINATOR}${CLOSING_MARKS}`, "gu");
+  const completeEnd = new RegExp(`${SENTENCE_TERMINATOR}${CLOSING_MARKS}\\s*$`, "u");
+  return {
+    count: [...normalized.matchAll(sentenceEnd)].length,
+    complete: normalized.trim() !== "" && completeEnd.test(normalized),
+  };
+}
+
+function registrationSentences(text) {
+  const normalized = text.normalize("NFC").trim();
+  const matcher = new RegExp(REGISTRATION_SENTENCE.source, REGISTRATION_SENTENCE.flags);
+  const sentences = [];
+  let consumed = 0;
+  for (let match = matcher.exec(normalized); match !== null; match = matcher.exec(normalized)) {
+    const sentence = match[1].trim();
+    if (sentence !== "") sentences.push(sentence);
+    consumed = matcher.lastIndex;
+  }
+  const trailing = normalized.slice(consumed).trim();
+  if (trailing !== "") sentences.push(`${trailing}。`);
+  return sentences;
 }
 
 function deepEqual(left, right) {
@@ -148,6 +177,13 @@ function validateNode(value, schema, context) {
       && graphemeLength(value) > schema["x-storyblock-max-graphemes"]) {
       issue(`must contain at most ${schema["x-storyblock-max-graphemes"]} grapheme clusters`);
     }
+    if (schema["x-storyblock-sentence-count"] !== undefined) {
+      const shape = sentenceShape(value);
+      const configured = schema["x-storyblock-sentence-count"];
+      const allowed = Array.isArray(configured) ? configured : [configured];
+      if (!allowed.includes(shape.count)) issue(`must contain ${allowed.join(" or ")} complete sentences (found ${shape.count})`);
+      if (!shape.complete) issue("must end at a recognized complete sentence boundary");
+    }
   }
 
   if (typeof value === "number" && Number.isFinite(value)) {
@@ -234,6 +270,14 @@ function registrationIssues(value) {
     value.chapters.forEach((chapter, index) => {
       if (chapter && typeof chapter.title === "string" && chapter.title.trim() === "") issues.push({ path: `#/chapters/${index}/title`, message: "must not be blank" });
       if (chapter && typeof chapter.text === "string" && chapter.text.trim() === "") issues.push({ path: `#/chapters/${index}/text`, message: "must not be blank" });
+      if (chapter && typeof chapter.text === "string") {
+        for (const sentence of registrationSentences(chapter.text)) {
+          if (graphemeLength(sentence) > 100) {
+            issues.push({ path: `#/chapters/${index}/text`, message: "contains a sentence longer than 100 grapheme clusters" });
+            break;
+          }
+        }
+      }
     });
     const complete = value.chapters.map((chapter) => typeof chapter?.text === "string" ? chapter.text : "").join("");
     const actual = countHanCodePoints(complete);

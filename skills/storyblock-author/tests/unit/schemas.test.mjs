@@ -62,6 +62,30 @@ test("registration validation enforces exact Han count and unknown fields", asyn
   );
 });
 
+test("block validation mirrors complete one-or-two-sentence boundaries", async () => {
+  const valid = structuredClone((await getSchema("BlockDraft")).examples[0]);
+  valid.text = "溫度是 3.14 度。結果正常！";
+  assert.equal((await validateDto("BlockDraft", valid)).valid, true);
+
+  const threeSentences = await validateDto("BlockDraft", { ...valid, text: "一。二。三。" }, { throwOnError: false });
+  assert.equal(threeSentences.valid, false);
+  assert.ok(threeSentences.issues.some(({ message }) => message.includes("found 3")));
+
+  const incomplete = await validateDto("BlockDraft", { ...valid, text: "仲未講完" }, { throwOnError: false });
+  assert.equal(incomplete.valid, false);
+  assert.ok(incomplete.issues.some(({ message }) => message.includes("complete sentence boundary")));
+});
+
+test("registration rejects a sentence that the server cannot fit in a block", async () => {
+  const value = structuredClone((await getSchema("AgentNovelRegistrationRequest")).examples[0]);
+  value.chapters[0].text = `${"字".repeat(100)}。`;
+  value.expected_han_characters = 100;
+  const result = await validateDto("AgentNovelRegistrationRequest", value, { throwOnError: false });
+
+  assert.equal(result.valid, false);
+  assert.ok(result.issues.some(({ path, message }) => path === "#/chapters/0/text" && message.includes("longer than 100")));
+});
+
 test("operation range guards bind first and last expected block ids", async () => {
   const value = structuredClone((await getSchema("DeleteBlockRangeOperation")).examples[0]);
   value.payload.range.first_block_id = "blk_018f0f5e-7b4a-7c00-8000-000000000099";
