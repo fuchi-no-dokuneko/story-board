@@ -88,3 +88,54 @@ test("generic call validates and materializes a normal preview request", async (
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("generic call derives Accept from the endpoint response contract", async () => {
+  let captured;
+  const stdout = [];
+  const exitCode = await runCli(["call", "openapi.read", "--json"], {
+    stdout: (value) => stdout.push(value),
+    stderr: () => {},
+    clientOverrides: {
+      transport: async (request) => {
+        captured = request;
+        return {
+          status: 200,
+          headers: { "content-type": "application/yaml" },
+          body: Buffer.from("openapi: 3.1.0\n"),
+        };
+      },
+    },
+  });
+
+  assert.equal(exitCode, EXIT_CODES.SUCCESS);
+  assert.equal(captured.headers.Accept, "application/yaml, application/problem+json");
+  assert.equal(JSON.parse(stdout.join("")).body, "openapi: 3.1.0\n");
+});
+
+test("generic call rejects invalid declared headers before network access", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "storyblock-author-headers-"));
+  try {
+    const paramsPath = join(directory, "params.json");
+    await writeFile(paramsPath, JSON.stringify({
+      headers: { "if-match": "not-a-wildcard", "Idempotency-Key": "header-test" },
+    }));
+    let networkCalls = 0;
+    const stderr = [];
+    const exitCode = await runCli([
+      "call", "agent.novels.register", "--params", paramsPath,
+      "--body", new URL("../../examples/minimal-novel.json", import.meta.url).pathname, "--json",
+    ], {
+      stdout: () => {},
+      stderr: (value) => stderr.push(value),
+      clientOverrides: { transport: async () => { networkCalls += 1; } },
+    });
+
+    assert.equal(exitCode, EXIT_CODES.VALIDATION);
+    assert.equal(networkCalls, 0);
+    const report = JSON.parse(stderr.join(""));
+    assert.equal(report.dto, "agent.novels.register:If-Match");
+    assert.ok(report.issues.some(({ message }) => message.includes("must equal")));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
