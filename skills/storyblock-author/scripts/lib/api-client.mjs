@@ -15,6 +15,10 @@ function normalizedHeaders(headers) {
   ]));
 }
 
+function hasHeader(headers, name) {
+  return Object.keys(headers).some((candidate) => candidate.toLowerCase() === name.toLowerCase());
+}
+
 export function connectionPolicy(baseUrl) {
   let url;
   try {
@@ -95,14 +99,13 @@ export class StoryBlockClient {
   async request({ method = "GET", pathname, headers = {}, body, responseType = "auto" }) {
     const url = new URL(pathname, `${this.policy.origin}/`);
     const payload = body === undefined ? undefined : Buffer.from(stableStringify(body), "utf8");
-    const requestHeaders = {
-      Accept: "application/json, application/problem+json",
-      "User-Agent": this.userAgent,
-      ...headers,
-    };
+    const requestHeaders = { "User-Agent": this.userAgent, ...headers };
+    if (!hasHeader(requestHeaders, "Accept")) {
+      requestHeaders.Accept = "application/json, application/problem+json";
+    }
     if (this.accessKey !== undefined) requestHeaders.Authorization = `Bearer ${this.accessKey}`;
     if (payload !== undefined) {
-      requestHeaders["Content-Type"] ??= "application/json";
+      if (!hasHeader(requestHeaders, "Content-Type")) requestHeaders["Content-Type"] = "application/json";
       requestHeaders["Content-Length"] = String(payload.length);
     }
     let response;

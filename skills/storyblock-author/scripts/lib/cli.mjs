@@ -225,6 +225,13 @@ function caseInsensitiveHeader(headers, name) {
   return found?.[1];
 }
 
+function endpointAccept(endpoint) {
+  const contentTypes = [...endpoint.responses, ...endpoint.errors]
+    .map((response) => response.contentType)
+    .filter((contentType, index, values) => contentType !== undefined && values.indexOf(contentType) === index);
+  return contentTypes.length === 0 ? "application/json, application/problem+json" : contentTypes.join(", ");
+}
+
 async function validateCallParameters(endpoint, params) {
   for (const [groupName, descriptors] of [["path", endpoint.pathParameters], ["query", endpoint.queryParameters]]) {
     const group = params[groupName] ?? {};
@@ -292,6 +299,7 @@ async function execute(parsed, context) {
       if (endpoint.requestBody && body !== undefined) await validateDto(endpoint.requestBody.dto, body);
       if (!endpoint.requestBody && body !== undefined) throw new UsageError(`${endpoint.id} does not accept a JSON request body`);
       const call = materializeEndpoint(endpoint, params);
+      if (caseInsensitiveHeader(call.headers, "Accept") === undefined) call.headers.Accept = endpointAccept(endpoint);
       for (const header of endpoint.requestHeaders.filter((entry) => entry.required)) {
         if (caseInsensitiveHeader(call.headers, header.name) === undefined) throw new UsageError(`${endpoint.id} requires params.headers.${header.name}`);
       }
