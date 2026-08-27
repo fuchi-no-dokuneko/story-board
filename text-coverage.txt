@@ -19,4 +19,4 @@ tests/architecture-tests: no mocks; domain dependency and secure deployment topo
 acceptance/runtime.cjs: no mocks; Chromium interaction, IPv4 resolution, recording hooks, screenshots, and browser recovery infrastructure tested by dry binding and GUI UAT.
 acceptance/run.mjs: Cucumber is external; suite selection, dry binding, report orchestration, and optional Sonar scanner invocation tested.
 acceptance/report.mjs: Cucumber JSON fixture is external; checklist, summary, and Sonar generic execution serialization tested by acceptance runs.
-skills/storyblock-author: mock request transport plus real E2E; payload, IPv4 TLS policy, exact Han profile, idempotency, and persisted digest tested.
+skills/storyblock-author: injected HTTPS transport plus live E2E; endpoint catalog, DTO examples, standalone CLI, problem statuses, authoring, and persistence verification tested.
