@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -135,6 +135,42 @@ test("generic call rejects invalid declared headers before network access", asyn
     const report = JSON.parse(stderr.join(""));
     assert.equal(report.dto, "agent.novels.register:If-Match");
     assert.ok(report.issues.some(({ message }) => message.includes("must equal")));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("artifact force-overwrite restores private permissions and requests binary content", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "storyblock-author-artifact-"));
+  try {
+    const outputPath = join(directory, "artifact.bin");
+    await writeFile(outputPath, "old");
+    await chmod(outputPath, 0o644);
+    let captured;
+    const stdout = [];
+    const exitCode = await runCli([
+      "artifact", "--artifact-id", "art_018f0f5e-7b4a-7c00-8000-000000000001",
+      "--output", outputPath, "--force", "--json",
+    ], {
+      stdout: (value) => stdout.push(value),
+      stderr: () => {},
+      clientOverrides: {
+        transport: async (request) => {
+          captured = request;
+          return {
+            status: 200,
+            headers: { "content-type": "application/octet-stream" },
+            body: Buffer.from("replacement"),
+          };
+        },
+      },
+    });
+
+    assert.equal(exitCode, EXIT_CODES.SUCCESS);
+    assert.equal(captured.headers.Accept, "application/octet-stream, application/problem+json");
+    assert.equal(await readFile(outputPath, "utf8"), "replacement");
+    assert.equal((await stat(outputPath)).mode & 0o777, 0o600);
+    assert.equal(JSON.parse(stdout.join("")).bytes, 11);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

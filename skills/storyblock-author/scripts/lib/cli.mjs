@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { chmod, writeFile } from "node:fs/promises";
 
 import { StoryBlockClient } from "./api-client.mjs";
 import { getSchema, listDtos } from "./dtos.mjs";
@@ -453,11 +453,16 @@ async function execute(parsed, context) {
       expectPositionals(parsed, 0);
       const artifactId = requiredOption(parsed, "artifact-id");
       requireTypedId(artifactId, "art", "artifact_id");
-      const response = await clientFor(parsed, context.clientOverrides).request({ pathname: `/v1/artifacts/${encodeURIComponent(artifactId)}`, responseType: "buffer" });
+      const response = await clientFor(parsed, context.clientOverrides).request({
+        pathname: `/v1/artifacts/${encodeURIComponent(artifactId)}`,
+        headers: { Accept: "application/octet-stream, application/problem+json" },
+        responseType: "buffer",
+      });
       const output = parsed.options.get("output");
       if (output !== undefined) {
         try {
           await writeFile(output, response.data, { flag: parsed.options.get("force") ? "w" : "wx", mode: 0o600 });
+          await chmod(output, 0o600);
         } catch (error) {
           if (error.code === "EEXIST") throw new UsageError(`Refusing to overwrite ${output}; pass --force to replace it`);
           throw error;
