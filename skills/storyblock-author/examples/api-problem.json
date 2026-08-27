@@ -1,0 +1,10 @@
+{
+  "type": "https://storyblock.example/problems/status-409",
+  "title": "Status 409",
+  "status": 409,
+  "code": "STATUS_409",
+  "detail": "Contract status 409",
+  "instance": "/v1/status/409",
+  "policy_status": 409,
+  "request_id": "req_status_test"
+}

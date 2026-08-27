@@ -71,7 +71,7 @@ async function generateEndpoints() {
     if (endpoint.openQuestion) lines.push(`- OPEN QUESTION: ${endpoint.openQuestion}`);
     lines.push(`- Sources: ${endpoint.source.map(code).join(", ")}.`, "");
   }
-  await writeFile(new URL("endpoints.md", references), `${lines.join("\n")}\n`);
+  await writeFile(new URL("endpoints.md", references), `${lines.join("\n").trimEnd()}\n`);
 }
 
 async function generateDtos() {
@@ -97,7 +97,7 @@ async function generateDtos() {
     if (schema["x-open-question"]) lines.push(`- OPEN QUESTION: ${schema["x-open-question"]}`);
     lines.push("");
   }
-  await writeFile(new URL("dtos.md", references), `${lines.join("\n")}\n`);
+  await writeFile(new URL("dtos.md", references), `${lines.join("\n").trimEnd()}\n`);
 }
 
 await generateEndpoints();

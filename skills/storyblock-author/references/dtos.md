@@ -1354,4 +1354,3 @@ This index covers 135 standalone JSON Schema draft 2020-12 files. Each schema em
 - Example: `examples[0]` is embedded in the linked schema.
 - Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `modules/style/src/main/java/dev/storyblock/style`.
 - Confidence: `confirmed-from-code`.
-

@@ -525,4 +525,3 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
 - Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
-
