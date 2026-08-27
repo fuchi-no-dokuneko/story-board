@@ -38,6 +38,12 @@ expected. Stop it with `./scripts/local-server.sh stop`. Container users can
 run `docker compose up --build api`; the API generates its own self-signed leaf
 inside a private local volume and exposes no reverse proxy.
 
+The Library and API console share the **Operator access** control at the top of
+the page. Paste the token from `.local/storyblock/secrets/owner-token` and choose
+**Use token**. The page keeps it only in JavaScript memory for the current page,
+never stores it in browser storage, and sends it only to the same StoryBlock
+origin. Choose **Clear** to remove it and purge protected library content.
+
 ### Trusted-LAN novel library
 
 For local-first admin reading and AI manuscript registration, start the

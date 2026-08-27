@@ -29,6 +29,8 @@ jobs:
           -Dsurefire.failIfNoSpecifiedTests=false
       - name: Verify author skill
         run: node --test skills/storyblock-author/tests/storyblock-author.test.mjs
+      - name: Verify admin UI authentication
+        run: node --test apps/api/src/test/js/*.test.cjs
       - name: Smoke-test self-signed HTTPS
         run: |
           ./scripts/local-server.sh start
