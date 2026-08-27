@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "required": [
+    "operational_graphemes",
+    "operational_stride_graphemes",
+    "micro_graphemes",
+    "micro_stride_graphemes",
+    "non_overlap_enabled"
+  ],
+  "properties": {
+    "operational_graphemes": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 4000
+    },
+    "operational_stride_graphemes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4000
+    },
+    "micro_graphemes": {
+      "type": "integer",
+      "minimum": 500,
+      "maximum": 1000
+    },
+    "micro_stride_graphemes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "non_overlap_enabled": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleWindowConfiguration.schema.json",
+  "title": "StyleWindowConfiguration",
+  "description": "Code-derived StoryBlock Style Window Configuration JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "operational_graphemes": 2000,
+      "operational_stride_graphemes": 1,
+      "micro_graphemes": 500,
+      "micro_stride_graphemes": 1,
+      "non_overlap_enabled": true
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+{
+  "type": "object",
+  "required": [
+    "revision_id",
+    "revision_hash",
+    "target_block_id",
+    "neighbor_count",
+    "rule_version",
+    "affected_block_ids",
+    "output"
+  ],
+  "properties": {
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revision_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "target_block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "neighbor_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2
+    },
+    "rule_version": {
+      "type": "string"
+    },
+    "affected_block_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "contains": {
+        "type": "string"
+      },
+      "items": {
+        "type": "string",
+        "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "output": {
+      "oneOf": [
+        {
+          "$ref": "MonitorFindingOutput.schema.json"
+        },
+        {
+          "$ref": "MonitorProposedOperationOutput.schema.json"
+        }
+      ],
+      "discriminator": {
+        "propertyName": "kind",
+        "mapping": {
+          "finding": "#/components/schemas/MonitorFindingOutput",
+          "proposed_operation": "#/components/schemas/MonitorProposedOperationOutput"
+        }
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/MonitorSubmissionRequest.schema.json",
+  "title": "MonitorSubmissionRequest",
+  "description": "Code-derived StoryBlock Monitor Submission Request JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+  ],
+  "examples": [
+    {
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "neighbor_count": 1,
+      "rule_version": "example-1",
+      "affected_block_ids": [
+        "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+      ],
+      "output": {
+        "kind": "finding",
+        "code": "RULE_FAILED",
+        "severity": "error",
+        "message": "example-1",
+        "evidence": [
+          {
+            "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+            "start_grapheme": 0,
+            "end_grapheme": 1,
+            "quote": "example-1",
+            "quote_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      }
+    }
+  ]
+}

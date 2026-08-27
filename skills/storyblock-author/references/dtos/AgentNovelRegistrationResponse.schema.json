@@ -1,0 +1,56 @@
+{
+  "type": "object",
+  "required": [
+    "idempotent_replay",
+    "novel",
+    "schema_version"
+  ],
+  "properties": {
+    "idempotent_replay": {
+      "type": "boolean"
+    },
+    "novel": {
+      "$ref": "AdminNovelSummary.schema.json"
+    },
+    "schema_version": {
+      "const": "agent-novel-registration-1.0.0"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/AgentNovelRegistrationResponse.schema.json",
+  "title": "AgentNovelRegistrationResponse",
+  "description": "Code-derived StoryBlock Agent Novel Registration Response JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+    "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+  ],
+  "examples": [
+    {
+      "idempotent_replay": true,
+      "novel": {
+        "agent_write_registered": true,
+        "block_count": 0,
+        "chapter_count": 0,
+        "han_character_count": 0,
+        "han_text_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "head_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "head_sequence": 0,
+        "language": "zh-Hant",
+        "main_characters": [
+
+        ],
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "scene_count": 0,
+        "title": "第一章",
+        "tnt_cannon_count": 0,
+        "updated_at": "2026-08-27T12:00:00Z",
+        "zombie_count": 0
+      },
+      "schema_version": "agent-novel-registration-1.0.0"
+    }
+  ]
+}

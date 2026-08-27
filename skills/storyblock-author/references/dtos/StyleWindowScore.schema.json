@@ -1,0 +1,131 @@
+{
+  "type": "object",
+  "required": [
+    "window",
+    "profile_selection",
+    "distance_report",
+    "channels"
+  ],
+  "properties": {
+    "window": {
+      "$ref": "StyleWindow.schema.json"
+    },
+    "profile_selection": {
+      "$ref": "StyleProfileSelection.schema.json"
+    },
+    "distance_report": {
+      "$ref": "StyleDistanceReport.schema.json"
+    },
+    "channels": {
+      "type": "array",
+      "maxItems": 6,
+      "items": {
+        "$ref": "StyleCalibratedChannelScore.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleWindowScore.schema.json",
+  "title": "StyleWindowScore",
+  "description": "Code-derived StoryBlock Style Window Score JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "window": {
+        "window_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "kind": "operational",
+        "segment": 0,
+        "requested_stratum": {
+          "kind": "narration",
+          "speaker_id": "example-1"
+        },
+        "pov": "example-1",
+        "narrative_mode": "example-1",
+        "block_ids": [
+          "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+        ],
+        "grapheme_count": 1,
+        "full_sized": true,
+        "intentional_style_shift_reason": "example-1",
+        "localization_only": true,
+        "primary_decision_eligible": true,
+        "sustainment_eligible": true
+      },
+      "profile_selection": {
+        "requested_stratum": {
+          "kind": "narration",
+          "speaker_id": "example-1"
+        },
+        "selected_stratum": {
+          "kind": "narration",
+          "speaker_id": "example-1"
+        },
+        "reason": "exact",
+        "calibration_available": true,
+        "confidence": "calibrated"
+      },
+      "distance_report": {
+        "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "target_feature_set_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "current_feature_set_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "channels": [
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "primary_metric": "jensen_shannon_distance",
+            "primary_distance": 0,
+            "independent_gate_evidence": true,
+            "diagnostics": {
+            }
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "primary_metric": "jensen_shannon_distance",
+            "primary_distance": 0,
+            "independent_gate_evidence": true,
+            "diagnostics": {
+            }
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "primary_metric": "jensen_shannon_distance",
+            "primary_distance": 0,
+            "independent_gate_evidence": true,
+            "diagnostics": {
+            }
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "primary_metric": "jensen_shannon_distance",
+            "primary_distance": 0,
+            "independent_gate_evidence": true,
+            "diagnostics": {
+            }
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "primary_metric": "jensen_shannon_distance",
+            "primary_distance": 0,
+            "independent_gate_evidence": true,
+            "diagnostics": {
+            }
+          }
+        ],
+        "token_kl_diagnostic_only": true
+      },
+      "channels": [
+
+      ]
+    }
+  ]
+}

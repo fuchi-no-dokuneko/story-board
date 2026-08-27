@@ -1,0 +1,18 @@
+{
+  "type": "string",
+  "contentEncoding": "binary",
+  "description": "Opaque artifact bytes. Interpret Content-Type, X-Artifact-Codec, ETag, and Content-Disposition response headers.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/ArtifactResponse.schema.json",
+  "title": "ArtifactResponse",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+  ],
+  "examples": [
+    "example"
+  ]
+}

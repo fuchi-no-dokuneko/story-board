@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "required": [
+    "analysis_id",
+    "items",
+    "next_cursor"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "pattern": "^ana_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 200,
+      "items": {
+        "$ref": "StyleAnalysisWindowFinding.schema.json"
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 256
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnalysisWindowPage.schema.json",
+  "title": "StyleAnalysisWindowPage",
+  "description": "Code-derived StoryBlock Style Analysis Window Page JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "items": [
+
+      ],
+      "next_cursor": "example-1"
+    }
+  ]
+}

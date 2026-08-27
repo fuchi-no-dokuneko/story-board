@@ -1,0 +1,157 @@
+{
+  "type": "object",
+  "required": [
+    "version_id",
+    "profile_id",
+    "version",
+    "content",
+    "created_by",
+    "created_at"
+  ],
+  "properties": {
+    "version_id": {
+      "type": "string",
+      "pattern": "^spv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^spf_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content": {
+      "$ref": "StyleProfileVersionContent.schema.json"
+    },
+    "created_by": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:@-]{1,128}$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleProfileVersion.schema.json",
+  "title": "StyleProfileVersion",
+  "description": "Code-derived StoryBlock Style Profile Version JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
+      "profile_id": "spf_018f0f5e-7b4a-7c00-8000-000000000001",
+      "version": 1,
+      "content": {
+        "scope": {
+          "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+          "kind": "novel",
+          "subject_id": "example-1"
+        },
+        "corpus_sources": [
+          {
+            "source_id": "example-1",
+            "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "kind": "owner",
+            "provenance": "example-1",
+            "license": "example-1",
+            "ownership": "example-1"
+          }
+        ],
+        "feature_set": {
+          "source_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "contract": {
+            "analyzer_version": "example-1",
+            "feature_schema_version": "example-1",
+            "tokenizer_id": "example-1",
+            "vocabulary_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "normalizer_version": "example-1",
+            "additive_smoothing_alpha": 1,
+            "top_k": 10
+          },
+          "channels": [
+            {
+              "channel": "surface",
+              "channel_version": "example-1",
+              "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "distribution": {
+              },
+              "measurements": {
+              },
+              "embedding": [
+
+              ]
+            },
+            {
+              "channel": "surface",
+              "channel_version": "example-1",
+              "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "distribution": {
+              },
+              "measurements": {
+              },
+              "embedding": [
+
+              ]
+            },
+            {
+              "channel": "surface",
+              "channel_version": "example-1",
+              "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "distribution": {
+              },
+              "measurements": {
+              },
+              "embedding": [
+
+              ]
+            },
+            {
+              "channel": "surface",
+              "channel_version": "example-1",
+              "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "distribution": {
+              },
+              "measurements": {
+              },
+              "embedding": [
+
+              ]
+            },
+            {
+              "channel": "surface",
+              "channel_version": "example-1",
+              "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "distribution": {
+              },
+              "measurements": {
+              },
+              "embedding": [
+
+              ]
+            }
+          ]
+        },
+        "window_configuration": {
+          "operational_graphemes": 2000,
+          "operational_stride_graphemes": 1,
+          "micro_graphemes": 500,
+          "micro_stride_graphemes": 1,
+          "non_overlap_enabled": true
+        },
+        "calibration_statistics": {
+        }
+      },
+      "created_by": "example-1",
+      "created_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

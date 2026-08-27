@@ -1,0 +1,88 @@
+{
+  "type": "object",
+  "required": [
+    "scene_id",
+    "first_block_id",
+    "last_block_id",
+    "expected_blocks",
+    "expected_range_hash",
+    "expected_previous_block_id",
+    "expected_next_block_id"
+  ],
+  "properties": {
+    "scene_id": {
+      "type": "string",
+      "pattern": "^scn_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "first_block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "last_block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "expected_blocks": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "BlockVersionRef.schema.json"
+      }
+    },
+    "expected_range_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "expected_previous_block_id": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "expected_next_block_id": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/BlockRangeGuard.schema.json",
+  "title": "BlockRangeGuard",
+  "description": "Code-derived StoryBlock Block Range Guard JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+    "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+  ],
+  "examples": [
+    {
+      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+      "first_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "last_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "expected_blocks": [
+        {
+          "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001"
+        }
+      ],
+      "expected_range_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "expected_previous_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "expected_next_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+    }
+  ]
+}

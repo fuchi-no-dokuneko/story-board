@@ -1,0 +1,121 @@
+{
+  "type": "object",
+  "required": [
+    "agent_write_registered",
+    "block_count",
+    "chapter_count",
+    "han_character_count",
+    "han_text_sha256",
+    "head_hash",
+    "head_revision_id",
+    "head_sequence",
+    "language",
+    "main_characters",
+    "novel_id",
+    "scene_count",
+    "title",
+    "tnt_cannon_count",
+    "updated_at",
+    "zombie_count"
+  ],
+  "properties": {
+    "agent_write_registered": {
+      "type": "boolean"
+    },
+    "block_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "chapter_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "han_character_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "han_text_sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "head_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "head_revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "head_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "language": {
+      "type": "string"
+    },
+    "main_characters": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "string"
+      }
+    },
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "scene_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "title": {
+      "type": "string"
+    },
+    "tnt_cannon_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "zombie_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/AdminNovelSummary.schema.json",
+  "title": "AdminNovelSummary",
+  "description": "Code-derived StoryBlock Admin Novel Summary JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+    "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+  ],
+  "examples": [
+    {
+      "agent_write_registered": true,
+      "block_count": 0,
+      "chapter_count": 0,
+      "han_character_count": 0,
+      "han_text_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "head_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "head_sequence": 0,
+      "language": "zh-Hant",
+      "main_characters": [
+
+      ],
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "scene_count": 0,
+      "title": "第一章",
+      "tnt_cannon_count": 0,
+      "updated_at": "2026-08-27T12:00:00Z",
+      "zombie_count": 0
+    }
+  ]
+}

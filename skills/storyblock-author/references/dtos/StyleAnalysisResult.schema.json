@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "required": [
+    "analysis_id",
+    "completed_at",
+    "job_id",
+    "result_hash",
+    "summary",
+    "trace_artifact_id",
+    "trace_content_hash",
+    "trace_expires_at",
+    "trace_uncompressed_bytes"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "pattern": "^ana_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^job_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "result_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "summary": {
+      "$ref": "StyleAnalysisSummary.schema.json"
+    },
+    "trace_artifact_id": {
+      "type": "string",
+      "pattern": "^art_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "trace_content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "trace_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "trace_uncompressed_bytes": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 16777216
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnalysisResult.schema.json",
+  "title": "StyleAnalysisResult",
+  "description": "Code-derived StoryBlock Style Analysis Result JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "completed_at": "2026-08-27T12:00:00Z",
+      "job_id": "job_018f0f5e-7b4a-7c00-8000-000000000001",
+      "result_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary": {
+        "analyzed_block_count": 1,
+        "calibrated_window_count": 0,
+        "decision_counts": {
+        },
+        "operational_window_count": 0
+      },
+      "trace_artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000001",
+      "trace_content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "trace_expires_at": "2026-08-27T12:00:00Z",
+      "trace_uncompressed_bytes": 2
+    }
+  ]
+}

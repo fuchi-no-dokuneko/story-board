@@ -1,0 +1,273 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/CanonicalRevision.schema.json",
+  "title": "StoryBlock canonical novel revision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "chapters",
+    "content_hash",
+    "created_at",
+    "novel_id",
+    "parent_revision_id",
+    "revision_id",
+    "schema_version"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "novel_id": {
+      "$ref": "#/$defs/novelId"
+    },
+    "revision_id": {
+      "$ref": "#/$defs/revisionId"
+    },
+    "parent_revision_id": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/revisionId"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "content_hash": {
+      "$ref": "#/$defs/contentHash"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/chapter"
+      }
+    },
+    "extensions": {
+      "$ref": "#/$defs/extensions"
+    }
+  },
+  "$defs": {
+    "novelId": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "chapterId": {
+      "type": "string",
+      "pattern": "^ch_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sceneId": {
+      "type": "string",
+      "pattern": "^scn_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "blockId": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "blockVersionId": {
+      "type": "string",
+      "pattern": "^blv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revisionId": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "orderKey": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "extensions": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9.-]{1,63}$"
+      }
+    },
+    "chapter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "order_key",
+        "scenes"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/chapterId"
+        },
+        "order_key": {
+          "$ref": "#/$defs/orderKey"
+        },
+        "title": {
+          "type": "string"
+        },
+        "scenes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/scene"
+          }
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
+      }
+    },
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocks",
+        "chapter_id",
+        "id",
+        "order_key",
+        "transition_mode"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/sceneId"
+        },
+        "chapter_id": {
+          "$ref": "#/$defs/chapterId"
+        },
+        "order_key": {
+          "$ref": "#/$defs/orderKey"
+        },
+        "title": {
+          "type": "string"
+        },
+        "transition_mode": {
+          "enum": [
+            "opening",
+            "continuous",
+            "cut",
+            "time_skip",
+            "flashback",
+            "parallel"
+          ]
+        },
+        "initial_meta": {
+          "$ref": "#/$defs/initialMeta"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/block"
+          }
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
+      }
+    },
+    "initialMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+        },
+        "location": {
+        },
+        "weather": {
+        },
+        "present_character_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block_version_id",
+        "id",
+        "meta",
+        "order_key",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/blockId"
+        },
+        "block_version_id": {
+          "$ref": "#/$defs/blockVersionId"
+        },
+        "order_key": {
+          "$ref": "#/$defs/orderKey"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "x-storyblock-max-graphemes": 100,
+          "x-storyblock-sentence-count": [
+            1,
+            2
+          ]
+        },
+        "meta": {
+          "$ref": "#/$defs/blockMeta"
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
+      }
+    },
+    "blockMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+        },
+        "location": {
+        },
+        "weather": {
+        },
+        "speech": {
+        },
+        "actions": {
+          "type": "array"
+        },
+        "presence_events": {
+          "type": "array"
+        },
+        "pov": {
+        },
+        "narrative_mode": {
+        },
+        "provenance": {
+        }
+      }
+    }
+  },
+  "description": "Code-derived StoryBlock Canonical Revision JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+  ],
+  "examples": [
+    {
+      "chapters": [
+
+      ],
+      "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "created_at": "2026-08-27T12:00:00Z",
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "parent_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "schema_version": "1.0.0"
+    }
+  ]
+}

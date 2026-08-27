@@ -1,0 +1,123 @@
+{
+  "type": "object",
+  "required": [
+    "analysis_id",
+    "attempt",
+    "created_at",
+    "failure_code",
+    "job_id",
+    "kind",
+    "max_attempts",
+    "novel_id",
+    "result_artifact_id",
+    "result_hash",
+    "retention_until",
+    "revision_id",
+    "status",
+    "updated_at"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "pattern": "^ana_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "failure_code": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z][a-z0-9._-]{1,63}$"
+    },
+    "job_id": {
+      "type": "string",
+      "pattern": "^job_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "kind": {
+      "const": "style-analysis"
+    },
+    "max_attempts": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "result_artifact_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^art_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "result_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "retention_until": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "running",
+        "succeeded",
+        "failed"
+      ]
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnalysisJobFields.schema.json",
+  "title": "StyleAnalysisJobFields",
+  "description": "Code-derived StoryBlock Style Analysis Job Fields JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "attempt": 0,
+      "created_at": "2026-08-27T12:00:00Z",
+      "failure_code": "example-1",
+      "job_id": "job_018f0f5e-7b4a-7c00-8000-000000000001",
+      "kind": "style-analysis",
+      "max_attempts": 1,
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "result_artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000001",
+      "result_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "retention_until": "2026-08-27T12:00:00Z",
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "status": "queued",
+      "updated_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

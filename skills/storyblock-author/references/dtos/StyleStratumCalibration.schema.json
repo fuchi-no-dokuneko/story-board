@@ -1,0 +1,117 @@
+{
+  "type": "object",
+  "required": [
+    "stratum",
+    "window_count",
+    "confidence",
+    "channels"
+  ],
+  "properties": {
+    "stratum": {
+      "$ref": "StyleStratum.schema.json"
+    },
+    "window_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "calibrated",
+        "low_confidence"
+      ]
+    },
+    "channels": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 6,
+      "items": {
+        "$ref": "StyleChannelCalibration.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleStratumCalibration.schema.json",
+  "title": "StyleStratumCalibration",
+  "description": "Code-derived StoryBlock Style Stratum Calibration JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "stratum": {
+        "kind": "narration",
+        "speaker_id": "example-1"
+      },
+      "window_count": 1,
+      "confidence": "calibrated",
+      "channels": [
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "reference_distances": [
+
+          ],
+          "median": 0,
+          "mad": 0,
+          "q95": 0,
+          "q99": 0
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "reference_distances": [
+
+          ],
+          "median": 0,
+          "mad": 0,
+          "q95": 0,
+          "q99": 0
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "reference_distances": [
+
+          ],
+          "median": 0,
+          "mad": 0,
+          "q95": 0,
+          "q99": 0
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "reference_distances": [
+
+          ],
+          "median": 0,
+          "mad": 0,
+          "q95": 0,
+          "q99": 0
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "reference_distances": [
+
+          ],
+          "median": 0,
+          "mad": 0,
+          "q95": 0,
+          "q99": 0
+        }
+      ]
+    }
+  ]
+}

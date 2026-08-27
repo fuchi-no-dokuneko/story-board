@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "required": [
+    "target_state",
+    "reason",
+    "confirm_generated_corpus_promotion"
+  ],
+  "properties": {
+    "target_state": {
+      "type": "string",
+      "enum": [
+        "calibrating",
+        "ready",
+        "deprecated"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "confirm_generated_corpus_promotion": {
+      "type": "boolean",
+      "description": "Must be true when promoting generated or mixed corpus to READY."
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleProfileTransitionRequest.schema.json",
+  "title": "StyleProfileTransitionRequest",
+  "description": "Code-derived StoryBlock Style Profile Transition Request JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "target_state": "calibrating",
+      "reason": "example-1",
+      "confirm_generated_corpus_promotion": true
+    }
+  ]
+}

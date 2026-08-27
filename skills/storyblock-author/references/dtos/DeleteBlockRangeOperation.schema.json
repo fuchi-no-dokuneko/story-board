@@ -1,0 +1,79 @@
+{
+  "type": "object",
+  "required": [
+    "operation_id",
+    "idempotency_key",
+    "novel_id",
+    "base_revision_id",
+    "expected_head_hash",
+    "type",
+    "payload"
+  ],
+  "properties": {
+    "operation_id": {
+      "type": "string",
+      "pattern": "^op_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "base_revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "expected_head_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "type": {
+      "const": "delete_block_range"
+    },
+    "payload": {
+      "$ref": "DeleteBlockRangePayload.schema.json"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/DeleteBlockRangeOperation.schema.json",
+  "title": "DeleteBlockRangeOperation",
+  "description": "Code-derived StoryBlock Delete Block Range Operation JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+    "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+  ],
+  "examples": [
+    {
+      "operation_id": "op_018f0f5e-7b4a-7c00-8000-000000000001",
+      "idempotency_key": "example-1",
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "base_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "expected_head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "type": "delete_block_range",
+      "payload": {
+        "range": {
+          "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+          "first_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "last_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "expected_blocks": [
+            {
+              "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+              "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001"
+            }
+          ],
+          "expected_range_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "expected_previous_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "expected_next_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+        }
+      }
+    }
+  ]
+}

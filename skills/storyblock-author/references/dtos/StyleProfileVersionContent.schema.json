@@ -1,0 +1,153 @@
+{
+  "type": "object",
+  "required": [
+    "scope",
+    "corpus_sources",
+    "feature_set",
+    "window_configuration",
+    "calibration_statistics"
+  ],
+  "properties": {
+    "scope": {
+      "$ref": "StyleProfileScope.schema.json"
+    },
+    "corpus_sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1000,
+      "items": {
+        "$ref": "StyleCorpusSource.schema.json"
+      }
+    },
+    "feature_set": {
+      "$ref": "StyleFeatureSet.schema.json"
+    },
+    "window_configuration": {
+      "$ref": "StyleWindowConfiguration.schema.json"
+    },
+    "calibration_statistics": {
+      "oneOf": [
+        {
+          "type": "object",
+          "maxProperties": 0
+        },
+        {
+          "$ref": "StyleCalibrationProfile.schema.json"
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleProfileVersionContent.schema.json",
+  "title": "StyleProfileVersionContent",
+  "description": "Code-derived StoryBlock Style Profile Version Content JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "scope": {
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "kind": "novel",
+        "subject_id": "example-1"
+      },
+      "corpus_sources": [
+        {
+          "source_id": "example-1",
+          "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "kind": "owner",
+          "provenance": "example-1",
+          "license": "example-1",
+          "ownership": "example-1"
+        }
+      ],
+      "feature_set": {
+        "source_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contract": {
+          "analyzer_version": "example-1",
+          "feature_schema_version": "example-1",
+          "tokenizer_id": "example-1",
+          "vocabulary_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "normalizer_version": "example-1",
+          "additive_smoothing_alpha": 1,
+          "top_k": 10
+        },
+        "channels": [
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          }
+        ]
+      },
+      "window_configuration": {
+        "operational_graphemes": 2000,
+        "operational_stride_graphemes": 1,
+        "micro_graphemes": 500,
+        "micro_stride_graphemes": 1,
+        "non_overlap_enabled": true
+      },
+      "calibration_statistics": {
+      }
+    }
+  ]
+}

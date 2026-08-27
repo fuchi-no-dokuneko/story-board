@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "required": [
+    "block_id",
+    "start_grapheme",
+    "end_grapheme",
+    "quote",
+    "quote_hash"
+  ],
+  "properties": {
+    "block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "start_grapheme": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "end_grapheme": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "quote": {
+      "type": "string",
+      "minLength": 1
+    },
+    "quote_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/MonitorEvidence.schema.json",
+  "title": "MonitorEvidence",
+  "description": "Code-derived StoryBlock Monitor Evidence JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+  ],
+  "examples": [
+    {
+      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "start_grapheme": 0,
+      "end_grapheme": 1,
+      "quote": "example-1",
+      "quote_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

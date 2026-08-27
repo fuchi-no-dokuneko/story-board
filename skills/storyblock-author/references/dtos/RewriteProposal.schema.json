@@ -1,0 +1,63 @@
+{
+  "allOf": [
+    {
+      "$ref": "RewriteProposalResponse.schema.json"
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/RewriteProposal.schema.json",
+  "title": "RewriteProposal",
+  "description": "Code-derived StoryBlock Rewrite Proposal JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+    "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+    "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+  ],
+  "examples": [
+    {
+      "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "cooldown_until": "2026-08-27T12:00:00Z",
+      "finding_ids": [
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "proposal_id": "prp_018f0f5e-7b4a-7c00-8000-000000000001",
+      "reservation_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "status": "pending",
+      "worker_input": {
+        "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+        "analyzer_contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "blocks": [
+          {
+            "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+            "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+            "editable": true,
+            "text": "春風到了。",
+            "text_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "constraints": {
+          "max_changed_blocks": 1,
+          "max_output_graphemes": 1,
+          "style_directives": [
+            "example-1"
+          ]
+        },
+        "finding_ids": [
+          "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        ],
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "profile_version_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "profile_version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
+        "proposal_id": "prp_018f0f5e-7b4a-7c00-8000-000000000001",
+        "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "schema_version": "example-1",
+        "window_configuration_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  ]
+}

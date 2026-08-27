@@ -1,0 +1,111 @@
+{
+  "type": "object",
+  "required": [
+    "event_id",
+    "profile_id",
+    "version_id",
+    "sequence",
+    "from_state",
+    "to_state",
+    "reason",
+    "generated_promotion_confirmed",
+    "request_id",
+    "actor_id",
+    "actor_key_id",
+    "occurred_at"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^sle_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^spf_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "version_id": {
+      "type": "string",
+      "pattern": "^spv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "from_state": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "draft",
+        "calibrating",
+        "ready",
+        "deprecated",
+        null
+      ]
+    },
+    "to_state": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "calibrating",
+        "ready",
+        "deprecated"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "generated_promotion_confirmed": {
+      "type": "boolean"
+    },
+    "request_id": {
+      "type": "string"
+    },
+    "actor_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:@-]{1,128}$"
+    },
+    "actor_key_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^key_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleLifecycleEvent.schema.json",
+  "title": "StyleLifecycleEvent",
+  "description": "Code-derived StoryBlock Style Lifecycle Event JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "event_id": "sle_018f0f5e-7b4a-7c00-8000-000000000001",
+      "profile_id": "spf_018f0f5e-7b4a-7c00-8000-000000000001",
+      "version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
+      "sequence": 1,
+      "from_state": "draft",
+      "to_state": "draft",
+      "reason": "example-1",
+      "generated_promotion_confirmed": true,
+      "request_id": "example-1",
+      "actor_id": "example-1",
+      "actor_key_id": "key_018f0f5e-7b4a-7c00-8000-000000000001",
+      "occurred_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

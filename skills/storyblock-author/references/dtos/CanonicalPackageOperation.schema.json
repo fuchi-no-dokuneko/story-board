@@ -1,0 +1,80 @@
+{
+  "type": "object",
+  "required": [
+    "sequence",
+    "operation_hash",
+    "operation",
+    "result_revision_id",
+    "result_hash",
+    "committed_at"
+  ],
+  "properties": {
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "operation_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "operation": {
+      "$ref": "OperationEnvelope.schema.json"
+    },
+    "result_revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "result_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "committed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/CanonicalPackageOperation.schema.json",
+  "title": "CanonicalPackageOperation",
+  "description": "Code-derived StoryBlock Canonical Package Operation JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+  ],
+  "examples": [
+    {
+      "sequence": 1,
+      "operation_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "operation": {
+        "operation_id": "op_018f0f5e-7b4a-7c00-8000-000000000001",
+        "idempotency_key": "example-1",
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "base_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "expected_head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "type": "insert_blocks",
+        "payload": {
+          "insertion_point": {
+            "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+            "position": "start"
+          },
+          "blocks": [
+            {
+              "id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+              "text": "春風到了。",
+              "meta": {
+              }
+            }
+          ]
+        }
+      },
+      "result_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "result_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "committed_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

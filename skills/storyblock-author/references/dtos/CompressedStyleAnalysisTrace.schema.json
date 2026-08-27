@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "required": [
+    "codec",
+    "content_base64",
+    "content_hash",
+    "uncompressed_bytes"
+  ],
+  "properties": {
+    "codec": {
+      "const": "gzip"
+    },
+    "content_base64": {
+      "type": "string",
+      "contentEncoding": "base64"
+    },
+    "content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "uncompressed_bytes": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 16777216
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/CompressedStyleAnalysisTrace.schema.json",
+  "title": "CompressedStyleAnalysisTrace",
+  "description": "Code-derived StoryBlock Compressed Style Analysis Trace JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "codec": "gzip",
+      "content_base64": "e30=",
+      "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "uncompressed_bytes": 2
+    }
+  ]
+}

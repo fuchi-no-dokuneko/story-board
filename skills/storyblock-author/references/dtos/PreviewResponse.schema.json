@@ -1,0 +1,137 @@
+{
+  "type": "object",
+  "required": [
+    "base_revision_id",
+    "base_hash",
+    "normalized_operation",
+    "candidate_hash",
+    "diff",
+    "render_packet",
+    "violations",
+    "warnings",
+    "committable"
+  ],
+  "properties": {
+    "base_revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "base_hash": {
+      "type": "string"
+    },
+    "normalized_operation": {
+      "$ref": "OperationEnvelope.schema.json"
+    },
+    "candidate_hash": {
+      "type": "string"
+    },
+    "diff": {
+      "$ref": "RevisionDiff.schema.json"
+    },
+    "render_packet": {
+      "oneOf": [
+        {
+          "$ref": "RenderPacket.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "$ref": "ValidationIssue.schema.json"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "ValidationIssue.schema.json"
+      }
+    },
+    "committable": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "x-confidence": "open-question",
+  "x-open-question": "Controller returns nested Java records directly; no controller test fixes their exact Jackson field representation. Top-level fields and operation are confirmed.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/PreviewResponse.schema.json",
+  "title": "PreviewResponse",
+  "description": "Code-derived StoryBlock Preview Response JSON contract.",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+    "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+  ],
+  "examples": [
+    {
+      "base_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "base_hash": "example-1",
+      "normalized_operation": {
+        "operation_id": "op_018f0f5e-7b4a-7c00-8000-000000000001",
+        "idempotency_key": "example-1",
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "base_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "expected_head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "type": "insert_blocks",
+        "payload": {
+          "insertion_point": {
+            "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+            "position": "start"
+          },
+          "blocks": [
+            {
+              "id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+              "text": "春風到了。",
+              "meta": {
+              }
+            }
+          ]
+        }
+      },
+      "candidate_hash": "example-1",
+      "diff": {
+        "blockChanges": [
+
+        ],
+        "sceneSeedChanges": [
+
+        ]
+      },
+      "render_packet": {
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "renderer_version": "example-1",
+        "range": {
+          "from_block_id": "example-1",
+          "to_block_id": "example-1"
+        },
+        "rendered_text": "example-1",
+        "blocks": [
+
+        ],
+        "resolved_meta": [
+
+        ],
+        "offset_map": [
+
+        ],
+        "scene_boundaries": [
+
+        ]
+      },
+      "violations": [
+
+      ],
+      "warnings": [
+
+      ],
+      "committable": true
+    }
+  ]
+}

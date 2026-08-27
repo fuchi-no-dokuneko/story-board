@@ -1,0 +1,63 @@
+{
+  "type": "object",
+  "required": [
+    "kind",
+    "code",
+    "severity",
+    "message",
+    "evidence"
+  ],
+  "properties": {
+    "kind": {
+      "const": "finding"
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "error",
+        "warning",
+        "info"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "evidence": {
+      "$ref": "MonitorEvidenceList.schema.json"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/MonitorFindingOutput.schema.json",
+  "title": "MonitorFindingOutput",
+  "description": "Code-derived StoryBlock Monitor Finding Output JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+  ],
+  "examples": [
+    {
+      "kind": "finding",
+      "code": "RULE_FAILED",
+      "severity": "error",
+      "message": "example-1",
+      "evidence": [
+        {
+          "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "start_grapheme": 0,
+          "end_grapheme": 1,
+          "quote": "example-1",
+          "quote_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "type": "object",
+  "required": [
+    "channel",
+    "channel_version",
+    "contract_hash",
+    "distribution",
+    "measurements",
+    "embedding"
+  ],
+  "properties": {
+    "channel": {
+      "type": "string",
+      "enum": [
+        "surface",
+        "grammar",
+        "rhythm",
+        "narrative",
+        "lexical",
+        "optional_embedding"
+      ]
+    },
+    "channel_version": {
+      "type": "string"
+    },
+    "contract_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "distribution": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "measurements": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "embedding": {
+      "type": "array",
+      "maxItems": 4096,
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleFeatureVector.schema.json",
+  "title": "StyleFeatureVector",
+  "description": "Code-derived StoryBlock Style Feature Vector JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "channel": "surface",
+      "channel_version": "example-1",
+      "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "distribution": {
+      },
+      "measurements": {
+      },
+      "embedding": [
+
+      ]
+    }
+  ]
+}

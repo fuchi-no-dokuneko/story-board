@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "required": [
+    "code",
+    "severity",
+    "blockId",
+    "message",
+    "details"
+  ],
+  "properties": {
+    "code": {
+      "type": "string"
+    },
+    "severity": {
+      "enum": [
+        "ERROR",
+        "WARNING"
+      ]
+    },
+    "blockId": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "type": "string",
+              "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/ValidationIssue.schema.json",
+  "title": "ValidationIssue",
+  "description": "Code-derived StoryBlock Validation Issue JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+    "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+  ],
+  "examples": [
+    {
+      "code": "example-1",
+      "severity": "ERROR",
+      "blockId": {
+        "value": "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+      },
+      "message": "example-1",
+      "details": {
+      }
+    }
+  ]
+}

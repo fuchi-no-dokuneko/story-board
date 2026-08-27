@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "required": [
+    "revision_id",
+    "format"
+  ],
+  "properties": {
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "canonical-revision",
+        "canonical-package"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/ExportRequest.schema.json",
+  "title": "ExportRequest",
+  "description": "Code-derived StoryBlock Export Request JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+  ],
+  "examples": [
+    {
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "format": "canonical-revision"
+    }
+  ]
+}

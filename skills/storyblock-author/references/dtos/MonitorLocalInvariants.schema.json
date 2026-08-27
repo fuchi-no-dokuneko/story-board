@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "required": [
+    "affected_ids_must_be_within_window",
+    "evidence_required",
+    "max_block_graphemes",
+    "max_direct_speakers",
+    "max_sentences",
+    "min_sentences",
+    "target_block_version_id",
+    "target_scene_id",
+    "window_blocks"
+  ],
+  "properties": {
+    "affected_ids_must_be_within_window": {
+      "const": true
+    },
+    "evidence_required": {
+      "const": true
+    },
+    "max_block_graphemes": {
+      "const": 100
+    },
+    "max_direct_speakers": {
+      "const": 1
+    },
+    "max_sentences": {
+      "const": 2
+    },
+    "min_sentences": {
+      "const": 1
+    },
+    "target_block_version_id": {
+      "type": "string",
+      "pattern": "^blv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "target_scene_id": {
+      "type": "string",
+      "pattern": "^scn_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "window_blocks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "MonitorBlockFingerprint.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/MonitorLocalInvariants.schema.json",
+  "title": "MonitorLocalInvariants",
+  "description": "Code-derived StoryBlock Monitor Local Invariants JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+  ],
+  "examples": [
+    {
+      "affected_ids_must_be_within_window": true,
+      "evidence_required": true,
+      "max_block_graphemes": 100,
+      "max_direct_speakers": 1,
+      "max_sentences": 2,
+      "min_sentences": 1,
+      "target_block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+      "target_scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+      "window_blocks": [
+        {
+          "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+          "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ]
+    }
+  ]
+}

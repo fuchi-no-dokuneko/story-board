@@ -1,0 +1,47 @@
+{
+  "type": "object",
+  "required": [
+    "time",
+    "location",
+    "weather",
+    "pov",
+    "present_character_ids"
+  ],
+  "properties": {
+    "time": {
+    },
+    "location": {
+    },
+    "weather": {
+    },
+    "pov": {
+    },
+    "present_character_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/ResolvedMetadataState.schema.json",
+  "title": "ResolvedMetadataState",
+  "description": "Code-derived StoryBlock Resolved Metadata State JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RenderController.java",
+    "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+  ],
+  "examples": [
+    {
+      "time": "example-1",
+      "location": "example-1",
+      "weather": "example-1",
+      "pov": "example-1",
+      "present_character_ids": [
+
+      ]
+    }
+  ]
+}

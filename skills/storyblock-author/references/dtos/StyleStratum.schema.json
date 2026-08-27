@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "required": [
+    "kind",
+    "speaker_id"
+  ],
+  "properties": {
+    "kind": {
+      "type": "string",
+      "enum": [
+        "narration",
+        "dialogue"
+      ]
+    },
+    "speaker_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Za-z0-9._:@-]{1,128}$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleStratum.schema.json",
+  "title": "StyleStratum",
+  "description": "Code-derived StoryBlock Style Stratum JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "kind": "narration",
+      "speaker_id": "example-1"
+    }
+  ]
+}
