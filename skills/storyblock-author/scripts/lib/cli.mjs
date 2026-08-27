@@ -246,6 +246,13 @@ async function validateCallParameters(endpoint, params) {
       }
     }
   }
+  const headers = params.headers ?? {};
+  for (const descriptor of endpoint.requestHeaders) {
+    const value = caseInsensitiveHeader(headers, descriptor.name);
+    if (value === undefined) continue;
+    const result = await validateInline(value, descriptor.schema);
+    if (!result.valid) throw new PayloadValidationError(`${endpoint.id}:${descriptor.name}`, result.issues);
+  }
 }
 
 async function execute(parsed, context) {
