@@ -74,7 +74,8 @@ public final class DeterministicRenderer {
                     entry.block().id(),
                     entry.block().versionId(),
                     entry.block().text(),
-                    entry.block().metadata()
+                    entry.block().metadata(),
+                    entry.block().image().orElse(null)
             ));
             metadata.add(entry.resolved());
             offsets.add(new OffsetMapEntry(entry.block().id(), start, end));

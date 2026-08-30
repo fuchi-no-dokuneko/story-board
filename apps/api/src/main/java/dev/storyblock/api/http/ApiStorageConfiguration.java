@@ -5,8 +5,10 @@ import dev.storyblock.application.AgentNovelRegistrationService;
 import dev.storyblock.application.CommitService;
 import dev.storyblock.application.DetectorService;
 import dev.storyblock.application.MonitorService;
+import dev.storyblock.application.ImageUploadService;
 import dev.storyblock.application.RenderService;
 import dev.storyblock.application.NovelCatalogService;
+import dev.storyblock.application.PdfRenderService;
 import dev.storyblock.application.RewriteGateService;
 import dev.storyblock.application.StyleProfileService;
 import dev.storyblock.application.StyleAnalysisService;
@@ -58,6 +60,16 @@ public class ApiStorageConfiguration {
     @Bean
     RenderService renderService(SqliteRevisionStore store) {
         return new RenderService(store);
+    }
+
+    @Bean
+    ImageUploadService imageUploadService(SqliteRevisionStore store) {
+        return new ImageUploadService(store);
+    }
+
+    @Bean
+    PdfRenderService pdfRenderService(SqliteRevisionStore store) {
+        return new PdfRenderService(store);
     }
 
     @Bean

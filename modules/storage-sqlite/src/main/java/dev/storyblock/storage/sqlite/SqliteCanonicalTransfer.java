@@ -20,6 +20,8 @@ import dev.storyblock.storage.IdempotencyConflictException;
 import dev.storyblock.storage.MissingArtifactException;
 import dev.storyblock.storage.MissingExportJobException;
 import dev.storyblock.storage.NovelConflictException;
+import dev.storyblock.storage.PortableArtifactPutRequest;
+import dev.storyblock.storage.PortableArtifactPutResult;
 import dev.storyblock.storage.RevisionRef;
 import dev.storyblock.storage.StaleHeadException;
 import dev.storyblock.storage.StorageException;
@@ -213,6 +215,66 @@ final class SqliteCanonicalTransfer {
                 return readArtifact(result);
             }
         }
+    }
+
+    static PortableArtifactPutResult putPortableArtifact(
+            Connection connection,
+            PortableArtifactPutRequest request
+    ) throws SQLException {
+        Optional<StoredArtifact> prior = findArtifact(
+                connection, request.artifact().artifactId()
+        );
+        if (prior.isPresent()) {
+            StoredArtifact stored = prior.get();
+            if (!samePortableArtifact(stored, request.artifact())) {
+                throw new IdempotencyConflictException(
+                        request.idempotencyKey(),
+                        stored.contentHash(),
+                        request.artifact().contentHash()
+                );
+            }
+            return new PortableArtifactPutResult(stored, true);
+        }
+
+        RevisionRef actualHead = requireHead(connection, request.artifact().novelId());
+        if (!actualHead.equals(request.expectedHead())) {
+            throw new StaleHeadException(request.expectedHead(), actualHead);
+        }
+        insertArtifact(connection, request.artifact());
+        return new PortableArtifactPutResult(request.artifact(), false);
+    }
+
+    private static Optional<StoredArtifact> findArtifact(
+            Connection connection,
+            Ids.ArtifactId artifactId
+    ) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                SELECT artifact_id, novel_id, revision_id, kind, media_type, codec,
+                       content_hash, content, created_at, portable
+                FROM artifacts
+                WHERE artifact_id = ?
+                """)) {
+            statement.setString(1, artifactId.value());
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? Optional.of(readArtifact(result)) : Optional.empty();
+            }
+        }
+    }
+
+    private static boolean samePortableArtifact(
+            StoredArtifact stored,
+            StoredArtifact attempted
+    ) {
+        return stored.artifactId().equals(attempted.artifactId())
+                && stored.novelId().equals(attempted.novelId())
+                && stored.revisionId().equals(attempted.revisionId())
+                && stored.kind().equals(attempted.kind())
+                && stored.mediaType().equals(attempted.mediaType())
+                && stored.codec().equals(attempted.codec())
+                && stored.contentHash().equals(attempted.contentHash())
+                && java.util.Arrays.equals(stored.content(), attempted.content())
+                && stored.portable()
+                && attempted.portable();
     }
 
     private static List<CanonicalNovelPackage.RevisionEntry> loadRevisions(

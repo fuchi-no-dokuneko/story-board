@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import dev.storyblock.domain.BlockDraft;
 import dev.storyblock.domain.BlockMetadata;
+import dev.storyblock.domain.BlockImage;
 import dev.storyblock.domain.BlockRangeGuard;
 import dev.storyblock.domain.BlockVersionRef;
 import dev.storyblock.domain.EditContext;
@@ -142,6 +143,57 @@ class EditOperationCanonicalMapperTest {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> EditOperationCanonicalMapper.fromCanonical(tampered)
+        );
+    }
+
+    @Test
+    void imageDraftUsesExplicitWireFieldAndCanonicalExtensionStorage() {
+        BlockImage image = new BlockImage(
+                Ids.ArtifactId.create(),
+                HASH_A,
+                "image/png",
+                640,
+                480,
+                "白色背景上的角色參考圖。"
+        );
+        BlockDraft draft = new BlockDraft(
+                Ids.BlockId.create(),
+                "角色參考圖置於此處。",
+                BlockMetadata.empty(),
+                image.attachTo(Map.of("example.test", true))
+        );
+        EditOperation operation = new EditOperation.InsertBlocks(
+                context(Ids.NovelId.create(), Ids.RevisionId.create(), "image"),
+                InsertionPoint.endOf(Ids.SceneId.create()),
+                List.of(draft)
+        );
+
+        Map<String, Object> canonical = EditOperationCanonicalMapper.toCanonical(operation);
+        EditOperation decoded = EditOperationCanonicalMapper.fromCanonical(canonical);
+        BlockDraft decodedDraft = ((EditOperation.InsertBlocks) decoded).blocks().getFirst();
+
+        assertEquals(image, decodedDraft.image().orElseThrow());
+        assertEquals(draft, decodedDraft);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> payload = (Map<String, Object>) canonical.get("payload");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> wireDraft = (Map<String, Object>) ((List<?>) payload.get("blocks"))
+                .getFirst();
+        assertEquals(image.canonicalValue(), wireDraft.get("image"));
+        @SuppressWarnings("unchecked")
+        Map<String, Object> extensions = (Map<String, Object>) wireDraft.get("extensions");
+        assertEquals(Map.of("example.test", true), extensions);
+
+        Map<String, Object> hiddenImage = new LinkedHashMap<>(canonical);
+        Map<String, Object> hiddenPayload = new LinkedHashMap<>(payload);
+        Map<String, Object> hiddenDraft = new LinkedHashMap<>(wireDraft);
+        hiddenDraft.remove("image");
+        hiddenDraft.put("extensions", Map.of(BlockImage.EXTENSION_KEY, image.canonicalValue()));
+        hiddenPayload.put("blocks", List.of(hiddenDraft));
+        hiddenImage.put("payload", hiddenPayload);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> EditOperationCanonicalMapper.fromCanonical(hiddenImage)
         );
     }
 

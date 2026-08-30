@@ -96,9 +96,12 @@ The versioned REST contract is served at `GET /v1/openapi.yaml` and documented
 in [`docs/api/v1-http-contract.md`](docs/api/v1-http-contract.md). Contract
 routes fail closed: authentication and mutation preconditions are active now.
 Canonical import, export jobs, job status, and artifact download are implemented;
-deterministic revision rendering, scoped bearer-key issuance, revocation, atomic
-commits, adjacent metadata detection, and redacted audit events are also
-implemented. Bounded monitor packets, immutable finding/proposal submission,
+first-class PNG/JPEG image blocks, deterministic text rendering, synchronous A4
+PDF rendering, scoped bearer-key issuance, revocation, atomic commits, adjacent
+metadata detection, and redacted audit events are also implemented. Image bytes
+are uploaded directly to the novel, committed by immutable descriptor, and travel
+with `canonical-package` exports. Bounded monitor packets, immutable
+finding/proposal submission,
 and stale-output invalidation are documented in
 [`docs/monitoring/monitor-submission.md`](docs/monitoring/monitor-submission.md).
 Immutable style profiles, explicit baseline promotion, and versioned feature
@@ -119,8 +122,8 @@ transfer format and recovery guarantees are documented in
 [`docs/transfer/canonical-import-export.md`](docs/transfer/canonical-import-export.md).
 Security configuration and audit retention are documented in
 [`docs/security/scoped-access-and-audit.md`](docs/security/scoped-access-and-audit.md).
-Deterministic text, offset, metadata-state, and scene-boundary semantics are
-documented in
+Deterministic text, image-block, PDF, offset, metadata-state, and scene-boundary
+semantics are documented in
 [`docs/rendering/deterministic-renderer.md`](docs/rendering/deterministic-renderer.md).
 Adjacent-state rules and reset-boundary behavior are documented in
 [`docs/detection/adjacent-metadata-detector.md`](docs/detection/adjacent-metadata-detector.md).

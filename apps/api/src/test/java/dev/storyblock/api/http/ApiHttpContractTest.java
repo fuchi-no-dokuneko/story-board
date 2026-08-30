@@ -13,6 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import dev.storyblock.application.ImageUploadService;
 import dev.storyblock.contracts.CanonicalExportFormat;
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.contracts.CanonicalNovelPackage;
@@ -41,6 +42,10 @@ import dev.storyblock.style.StyleStratum;
 import dev.storyblock.style.StyleStratumCalibration;
 import dev.storyblock.style.StyleWindowConfiguration;
 import dev.storyblock.validator.EvidenceSpans;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -51,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
+import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -480,6 +486,180 @@ class ApiHttpContractTest {
                 .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
                 .andExpect(jsonPath("$.current_revision_id").value(revisionId))
                 .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
+    }
+
+    @Test
+    void uploadsImageCommitsImageBlockAndRendersDeterministicPdf() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "image-pdf-import");
+        byte[] png = imagePng();
+
+        MockHttpServletRequestBuilder upload = post(
+                "/v1/novels/{novelId}/images", novelId
+        )
+                .with(userWithScope("novel:commit"))
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-upload-http")
+                .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                .contentType(MediaType.IMAGE_PNG)
+                .content(png);
+        MvcResult uploaded = mvc.perform(upload)
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.media_type").value("image/png"))
+                .andExpect(jsonPath("$.width_px").value(120))
+                .andExpect(jsonPath("$.height_px").value(80))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        Map<String, Object> uploadBody = object(uploaded);
+        String artifactId = stringField(uploadBody, "artifact_id");
+
+        mvc.perform(upload)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.artifact_id").value(artifactId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+        mvc.perform(post("/v1/novels/{novelId}/images", novelId)
+                        .with(userWithScope("novel:commit"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-too-large")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .content(new byte[ImageUploadService.MAX_IMAGE_BYTES + 1]))
+                .andExpect(status().isContentTooLarge())
+                .andExpect(jsonPath("$.code").value("REQUEST_TOO_LARGE"))
+                .andExpect(jsonPath("$.limit_bytes")
+                        .value(ImageUploadService.MAX_IMAGE_BYTES));
+        MvcResult downloaded = mvc.perform(get("/v1/artifacts/{artifactId}", artifactId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_PNG))
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION, containsString(".png")
+                ))
+                .andReturn();
+        assertArrayEquals(png, downloaded.getResponse().getContentAsByteArray());
+
+        Map<String, Object> image = new LinkedHashMap<>();
+        for (String field : List.of(
+                "artifact_id", "content_hash", "media_type", "width_px", "height_px"
+        )) {
+            image.put(field, uploadBody.get(field));
+        }
+        image.put("alt_text", "A blue signal on a plain white background.");
+        Map<String, Object> wrongDimensions = new LinkedHashMap<>(image);
+        wrongDimensions.put(
+                "width_px", ((Number) wrongDimensions.get("width_px")).intValue() + 1
+        );
+        String mismatchKey = "image-dimension-mismatch";
+        Map<String, Object> mismatchOperation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", mismatchKey,
+                "novel_id", novelId,
+                "base_revision_id", revisionId,
+                "expected_head_hash", revision.contentHash(),
+                "type", "insert_blocks",
+                "payload", Map.of(
+                        "insertion_point", Map.of(
+                                "scene_id", firstSceneId(revision),
+                                "position", "end"
+                        ),
+                        "blocks", List.of(Map.of(
+                                "id", Ids.BlockId.create().value(),
+                                "text", "The mismatched blue signal appears on white.",
+                                "meta", Map.of(),
+                                "image", wrongDimensions
+                        ))
+                )
+        );
+        mvc.perform(post("/v1/novels/{novelId}/commits", novelId)
+                        .with(userWithScope("novel:commit"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, mismatchKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "operation", mismatchOperation,
+                                "candidate_revision_id", Ids.RevisionId.create().value(),
+                                "candidate_created_at", "2026-08-29T00:00:00Z"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+        String resultRevisionId = Ids.RevisionId.create().value();
+        Map<String, Object> operation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", "image-block-http",
+                "novel_id", novelId,
+                "base_revision_id", revisionId,
+                "expected_head_hash", revision.contentHash(),
+                "type", "insert_blocks",
+                "payload", Map.of(
+                        "insertion_point", Map.of(
+                                "scene_id", firstSceneId(revision),
+                                "position", "end"
+                        ),
+                        "blocks", List.of(Map.of(
+                                "id", Ids.BlockId.create().value(),
+                                "text", "The blue signal appears on a plain white field.",
+                                "meta", Map.of(),
+                                "image", image
+                        ))
+                )
+        );
+        byte[] commitBody = CanonicalJson.bytes(Map.of(
+                "operation", operation,
+                "candidate_revision_id", resultRevisionId,
+                "candidate_created_at", "2026-08-29T00:00:00Z"
+        ));
+        MvcResult committed = mvc.perform(post("/v1/novels/{novelId}/commits", novelId)
+                        .with(userWithScope("novel:commit"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-block-http")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(commitBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.revision_id").value(resultRevisionId))
+                .andReturn();
+        String resultHash = stringField(object(committed), "content_hash");
+
+        byte[] renderBody = CanonicalJson.bytes(Map.of("revision_id", resultRevisionId));
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-text-render")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(renderBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.blocks[1].image.artifact_id").value(artifactId));
+
+        MvcResult firstPdf = mvc.perform(post(
+                        "/v1/novels/{novelId}/pdf-renders", novelId
+                )
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "pdf-render-one")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(renderBody))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PDF))
+                .andExpect(header().string("X-PDF-Renderer-Version", "pdf-renderer-1.0.0"))
+                .andExpect(header().string("X-PDF-Image-Count", "1"))
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION, containsString(".pdf")
+                ))
+                .andReturn();
+        MvcResult secondPdf = mvc.perform(post(
+                        "/v1/novels/{novelId}/pdf-renders", novelId
+                )
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "pdf-render-two")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(renderBody))
+                .andExpect(status().isOk())
+                .andReturn();
+        byte[] pdf = firstPdf.getResponse().getContentAsByteArray();
+        assertTrue(new String(pdf, 0, 8, java.nio.charset.StandardCharsets.US_ASCII)
+                .startsWith("%PDF-1.4"));
+        assertArrayEquals(pdf, secondPdf.getResponse().getContentAsByteArray());
     }
 
     @Test
@@ -1656,6 +1836,28 @@ class ApiHttpContractTest {
         List<Map<String, Object>> blocks = (List<Map<String, Object>>)
                 scenes.getFirst().get("blocks");
         return stringField(blocks.getFirst(), "id");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String firstSceneId(CanonicalRevision revision) {
+        List<Map<String, Object>> chapters = (List<Map<String, Object>>)
+                revision.canonicalContent().get("chapters");
+        List<Map<String, Object>> scenes = (List<Map<String, Object>>)
+                chapters.getFirst().get("scenes");
+        return stringField(scenes.getFirst(), "id");
+    }
+
+    private static byte[] imagePng() throws Exception {
+        BufferedImage image = new BufferedImage(120, 80, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, 120, 80);
+        graphics.setColor(new Color(20, 95, 155));
+        graphics.fillOval(35, 10, 50, 60);
+        graphics.dispose();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        assertTrue(ImageIO.write(image, "png", output));
+        return output.toByteArray();
     }
 
     private static String quotedEtag(String hash) {

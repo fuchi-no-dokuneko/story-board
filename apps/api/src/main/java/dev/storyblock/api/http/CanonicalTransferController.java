@@ -194,11 +194,23 @@ public final class CanonicalTransferController {
         headers.set(HttpHeaders.ETAG, quotedEtag(artifact.contentHash()));
         headers.setCacheControl("no-store");
         headers.set(ARTIFACT_CODEC_HEADER, artifact.codec());
-        String extension = "gzip".equals(artifact.codec()) ? ".json.gz" : ".json";
+        String extension = artifactExtension(artifact);
         headers.setContentDisposition(ContentDisposition.attachment()
                 .filename(artifact.artifactId().value() + extension)
                 .build());
         return new ResponseEntity<>(artifact.content(), headers, HttpStatus.OK);
+    }
+
+    private static String artifactExtension(StoredArtifact artifact) {
+        if ("gzip".equals(artifact.codec())) {
+            return ".json.gz";
+        }
+        return switch (artifact.mediaType()) {
+            case "application/pdf" -> ".pdf";
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            default -> ".json";
+        };
     }
 
     private static Map<String, Object> novelHead(CanonicalImportResult result) {

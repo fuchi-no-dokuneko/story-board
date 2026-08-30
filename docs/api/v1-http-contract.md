@@ -9,8 +9,9 @@ authentication at `GET /v1/openapi.yaml`.
 
 All documented routes are mapped and protected by their declared scope.
 Canonical import, export submission, export-job status, artifact download,
-deterministic render, adjacent metadata detection, commit, and access-key
-lifecycle routes have concrete storage-backed handlers. Monitor packet,
+PNG/JPEG image upload, deterministic text and PDF render, adjacent metadata
+detection, commit, and access-key lifecycle routes have concrete storage-backed
+handlers. Monitor packet,
 submission, and stale-status routes are also storage-backed. Style profile,
 immutable version, and lifecycle transition routes are storage-backed as well.
 Durable style-analysis creation, status, paging, leasing, completion, and trace
@@ -58,6 +59,10 @@ Other mutations must identify the exact current resource version. An owning
 service maps a stale but valid ETag to `412` and returns the current revision ID
 and hash, or the current style resource ETag for a style lifecycle conflict.
 Request bodies are limited to 2 MiB for both fixed-length and chunked requests.
+The image upload route has a narrower 1,500,000-byte content limit and returns
+`413 REQUEST_TOO_LARGE` when it is exceeded. It accepts raw PNG or JPEG bytes,
+not JSON or Base64, and rejects dimensions above 8192 pixels or 40 million total
+pixels.
 Style workers submit large canonical traces as a hash-verified gzip/base64
 envelope so the expanded trace does not consume that request budget.
 
@@ -79,6 +84,19 @@ See [`../transfer/canonical-import-export.md`](../transfer/canonical-import-expo
 hash in `If-Match`, returns that hash as its response `ETag`, and emits the
 canonical packet described in
 [`../rendering/deterministic-renderer.md`](../rendering/deterministic-renderer.md).
+
+`POST /v1/novels/{novelId}/images` requires `novel:commit`, the current head
+hash, and a stable idempotency key. A new portable artifact returns `201`; an
+identical replay returns `200`. The response descriptor supplies the artifact
+ID, SHA-256, detected media type, and decoded dimensions needed by an image
+block. A commit verifies that every referenced image is portable, belongs to
+the same novel, and matches that descriptor.
+
+`POST /v1/novels/{novelId}/pdf-renders` requires `novel:read` and the exact
+requested revision hash. It synchronously returns `application/pdf`, the
+revision `ETag`, attachment filename, and `X-PDF-Renderer-Version`,
+`X-PDF-Page-Count`, and `X-PDF-Image-Count` headers. Identical revision and
+artifact bytes produce byte-identical A4 PDF output.
 
 `POST /v1/novels/{novelId}/detector-runs` additionally requires
 `revision_hash` in the request body to equal `If-Match`. It returns stable,
@@ -135,11 +153,12 @@ dependencies have been bootstrapped:
 ./mvnw -o -pl apps/api -am test
 ```
 
-The tests parse every local OpenAPI reference, compare all 32 required routes,
+The tests parse every local OpenAPI reference, compare all 34 required routes,
 exercise each remaining scaffold Spring mapping with its required scope, verify
 all status-policy entries, and cover real bearer authentication, object-level
 novel isolation, problem details, request IDs, ETags, idempotency, wildcard
-restrictions, body limits, deterministic rendering, commits, complete detector
+restrictions, body limits, raw image upload, image-block commit, deterministic
+text and PDF rendering, commits, complete detector
 and monitor runs, the style profile promotion lifecycle, and an
 import/export/job/artifact round trip. They also complete an exact 1,000-block
 style job through create, claim, fenced result, paging, and gzip download.

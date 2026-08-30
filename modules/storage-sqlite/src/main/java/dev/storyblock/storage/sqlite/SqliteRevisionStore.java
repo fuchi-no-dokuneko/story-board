@@ -53,6 +53,8 @@ import dev.storyblock.storage.ExportJobResult;
 import dev.storyblock.storage.IdempotencyConflictException;
 import dev.storyblock.storage.MissingNovelException;
 import dev.storyblock.storage.MissingRevisionException;
+import dev.storyblock.storage.PortableArtifactPutRequest;
+import dev.storyblock.storage.PortableArtifactPutResult;
 import dev.storyblock.storage.RevisionRef;
 import dev.storyblock.storage.RevisionStore;
 import dev.storyblock.storage.StaleHeadException;
@@ -380,6 +382,14 @@ public final class SqliteRevisionStore implements
     @Override
     public StoredArtifact getArtifact(Ids.ArtifactId artifactId) {
         return read(connection -> SqliteCanonicalTransfer.getArtifact(connection, artifactId));
+    }
+
+    @Override
+    public PortableArtifactPutResult putPortableArtifact(PortableArtifactPutRequest request) {
+        Objects.requireNonNull(request, "request");
+        return write(connection -> SqliteCanonicalTransfer.putPortableArtifact(
+                connection, request
+        ));
     }
 
     @Override

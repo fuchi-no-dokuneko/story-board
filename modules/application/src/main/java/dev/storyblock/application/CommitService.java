@@ -3,6 +3,8 @@ package dev.storyblock.application;
 import dev.storyblock.contracts.EditOperationCanonicalMapper;
 import dev.storyblock.contracts.NarrativeCanonicalMapper;
 import dev.storyblock.domain.EditOperation;
+import dev.storyblock.domain.BlockDraft;
+import dev.storyblock.domain.BlockImage;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.RevisionManifest;
 import dev.storyblock.security.AuditContext;
@@ -14,7 +16,9 @@ import dev.storyblock.storage.RevisionStore;
 import dev.storyblock.storage.StaleHeadException;
 import dev.storyblock.storage.StoredOperation;
 import dev.storyblock.storage.StoredRevision;
+import dev.storyblock.storage.StoredArtifact;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -74,6 +78,7 @@ public final class CommitService {
         if (!expectedHead.equals(actualHead)) {
             throw new StaleHeadException(expectedHead, actualHead);
         }
+        validateImageReferences(operation);
 
         RevisionLookup lookup = revisionId -> store.getRevision(
                 operation.context().novelId(), revisionId
@@ -99,6 +104,48 @@ public final class CommitService {
                 ),
                 auditContext
         );
+    }
+
+    private void validateImageReferences(EditOperation operation) {
+        for (BlockDraft draft : candidateDrafts(operation)) {
+            draft.image().ifPresent(image -> validateImageReference(
+                    operation.context().novelId(), image
+            ));
+        }
+    }
+
+    private void validateImageReference(Ids.NovelId novelId, BlockImage image) {
+        StoredArtifact artifact = store.getArtifact(image.artifactId());
+        ImageUploadService.ImageInfo decoded = ImageUploadService.inspect(
+                artifact.content()
+        );
+        if (!artifact.novelId().equals(novelId)
+                || !artifact.portable()
+                || !"narrative-image".equals(artifact.kind())
+                || !artifact.mediaType().equals(image.mediaType())
+                || !artifact.contentHash().equals(image.contentHash())
+                || !decoded.mediaType().equals(image.mediaType())
+                || decoded.widthPixels() != image.widthPixels()
+                || decoded.heightPixels() != image.heightPixels()) {
+            throw new IllegalArgumentException(
+                    "Image block must reference a matching portable image artifact in this novel"
+            );
+        }
+    }
+
+    private static List<BlockDraft> candidateDrafts(EditOperation operation) {
+        return switch (operation) {
+            case EditOperation.InsertBlocks insert -> insert.blocks();
+            case EditOperation.ReplaceBlockRange replace -> replace.newBlocks();
+            case EditOperation.SplitBlock split -> split.newBlocks();
+            case EditOperation.MergeBlocks merge -> List.of(merge.newBlock());
+            case EditOperation.ExtendBlock extend -> List.of(extend.replacement());
+            case EditOperation.DeleteBlockRange ignored -> List.of();
+            case EditOperation.MoveBlockRange ignored -> List.of();
+            case EditOperation.CorrectBlockMeta ignored -> List.of();
+            case EditOperation.SetSceneInitialMeta ignored -> List.of();
+            case EditOperation.RestoreRevisionContent ignored -> List.of();
+        };
     }
 
     private static CommitResult priorResult(
