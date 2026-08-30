@@ -1,7 +1,56 @@
 {
   "generatedAt": "2026-08-27T16:43:15Z",
-  "count": 135,
+  "count": 140,
   "dtos": [
+    {
+      "name": "BlockImage",
+      "file": "dtos/BlockImage.schema.json",
+      "description": "Immutable image artifact descriptor attached to an editable narrative block.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "modules/domain/src/main/java/dev/storyblock/domain/BlockImage.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java"
+      ]
+    },
+    {
+      "name": "CharacterImageReferenceConfig",
+      "file": "dtos/CharacterImageReferenceConfig.schema.json",
+      "description": "Five-character identity lock with initial and plain-background reference variants.",
+      "confidence": "skill-policy",
+      "source": [
+        "skills/storyblock-author/SKILL.md",
+        "modules/domain/src/main/java/dev/storyblock/domain/BlockImage.java"
+      ]
+    },
+    {
+      "name": "ImageUploadResponse",
+      "file": "dtos/ImageUploadResponse.schema.json",
+      "description": "Portable immutable image upload receipt.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/ImageController.java",
+        "modules/application/src/main/java/dev/storyblock/application/ImageUploadService.java"
+      ]
+    },
+    {
+      "name": "PdfDocument",
+      "file": "dtos/PdfDocument.schema.json",
+      "description": "Binary deterministic PDF response contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
+        "modules/renderer/src/main/java/dev/storyblock/renderer/DeterministicPdfRenderer.java"
+      ]
+    },
+    {
+      "name": "PdfRenderRequest",
+      "file": "dtos/PdfRenderRequest.schema.json",
+      "description": "Request for deterministic PDF rendering of an immutable revision.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java"
+      ]
+    },
     {
       "name": "AccessKeyCreated",
       "file": "dtos/AccessKeyCreated.schema.json",

@@ -1,6 +1,6 @@
 ---
 name: storyblock-author
-description: Discover and operate the complete StoryBlock self-signed HTTPS API, validate its DTOs offline, register or verify complete manuscripts, preview and commit incremental edits, render, transfer canonical data, and diagnose problem responses. Use for autonomous StoryBlock authoring or API inspection.
+description: Discover and operate the complete StoryBlock self-signed HTTPS API, validate its DTOs offline, register or verify complete manuscripts, upload reference art, edit first-class image blocks, render deterministic PDFs, transfer canonical data, and diagnose problem responses. Use for autonomous StoryBlock authoring or API inspection.
 ---
 
 # StoryBlock Author
@@ -33,7 +33,7 @@ The CLI recognizes:
 - `STORYBLOCK_BASE_URL`: HTTPS origin; default `https://127.0.0.1:8443`.
 - `STORYBLOCK_ACCESS_KEY`: bearer owner token or scoped access-key secret; omit only for public routes or a trusted-LAN server.
 - `STORYBLOCK_TIMEOUT_MS`: integer from 1 through 300000; default 15000.
-- `STORYBLOCK_USER_AGENT`: non-empty request user agent; default `storyblock-author/1.0.0`.
+- `STORYBLOCK_USER_AGENT`: non-empty request user agent; default `storyblock-author/1.1.0`.
 
 Equivalent overrides are `--base-url`, `--access-key`, `--timeout-ms`, and `--user-agent`, placed after the command. Protected requests use `Authorization: Bearer <credential>`. Trusted-LAN mode authenticates every client able to reach the port as the owner; no key or manual client approval is used in that mode. See [references/authentication.md](references/authentication.md) before selecting a scope.
 
@@ -94,11 +94,30 @@ node scripts/storyblock-author.mjs commit \
 
 The high-level commands bind the operation idempotency key to `Idempotency-Key` and quote its expected head hash for `If-Match`. Do not commit when preview reports violations, and do not alter the previewed operation, candidate revision ID, or candidate timestamp. If the head changes, read again and construct a new operation. Use generic `call novels.undo-previews.create` for an undo preview; its exact request is `UndoPreviewRequest`.
 
-## Render, export, import, jobs, and artifacts
+## Image blocks and character references
+
+An image is an editable narrative block, not a base64 field inside text. Upload immutable PNG/JPEG bytes first, then put the returned `block_image` descriptor in `BlockDraft.image`; `BlockDraft.text` is its visible caption. Image blocks support insert, replace, move, and delete. They deliberately reject split, merge, and extend because those operations have no deterministic binary meaning.
+
+```bash
+node scripts/storyblock-author.mjs upload-image \
+  --novel-id nov_UUIDV7 --file character.png \
+  --alt-text 'Plain-background reference portrait of the character.' --json
+node scripts/storyblock-author.mjs validate \
+  --dto BlockDraft --file examples/image-block-draft.json --json
+```
+
+The upload command sends raw bytes, never JSON/base64. Inputs must be PNG or JPEG, 1–1,500,000 bytes, with dimensions no larger than 8192×8192 and no more than 40 million pixels. Uploaded artifacts are immutable, novel-bound, content-hashed, and included in canonical-package transfer.
+
+Before later illustration work, maintain a `CharacterImageReferenceConfig`: exactly five distinct character identities, each with one `initial` image and 2–6 reference variants. Every reference must use a `plain` background; preserve the `identity_lock` across variants. Validate that DTO before using its descriptors as later image-block references.
+
+## Render, PDF, export, import, jobs, and artifacts
 
 ```bash
 node scripts/storyblock-author.mjs render \
   --novel-id nov_UUIDV7 --file examples/render-request.json --json
+node scripts/storyblock-author.mjs render-pdf \
+  --novel-id nov_UUIDV7 --file examples/pdf-render-request.json \
+  --output novel.pdf --json
 node scripts/storyblock-author.mjs export \
   --novel-id nov_UUIDV7 --format canonical-revision --json
 node scripts/storyblock-author.mjs job --job-id job_UUIDV7 --json
@@ -106,7 +125,7 @@ node scripts/storyblock-author.mjs artifact \
   --artifact-id art_UUIDV7 --output export.json
 ```
 
-`render` and `export` fetch the referenced canonical revision first and set its strong ETag. `artifact` refuses to overwrite a file without `--force`. Import is available through the verified generic endpoint:
+`render`, `render-pdf`, and `export` fetch the referenced canonical revision first and set its strong ETag. PDF rendering is synchronous through `POST /v1/novels/{novelId}/pdf-renders`; it lays out complete text, image blocks, and captions in deterministic A4 bytes. `render-pdf` and `artifact` create mode-0600 output and refuse to overwrite a file without `--force`. Import is available through the verified generic endpoint:
 
 ```bash
 node scripts/storyblock-author.mjs call imports.create \

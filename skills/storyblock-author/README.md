@@ -1,6 +1,6 @@
-# StoryBlock Author 1.0.0
+# StoryBlock Author 1.1.0
 
-A standalone, zero-runtime-dependency Node.js skill for discovering and operating the complete StoryBlock HTTPS API. It bundles a code-verified 37-endpoint manifest, 135 DTO schemas, offline validation, high-level authoring commands, generic endpoint calls, examples, and tests.
+A standalone, zero-runtime-dependency Node.js skill for discovering and operating the complete StoryBlock HTTPS API. It bundles a code-verified 39-endpoint manifest, 140 DTO schemas, offline validation, high-level authoring commands, first-class image blocks, deterministic PDF output, generic endpoint calls, examples, and tests.
 
 ## Requirements
 
@@ -54,6 +54,15 @@ node scripts/storyblock-author.mjs preview-edit \
   --novel-id nov_UUIDV7 --file edit-request.json --json
 node scripts/storyblock-author.mjs commit \
   --novel-id nov_UUIDV7 --file edit-request.json --json
+```
+
+Upload a PNG/JPEG reference, use the returned `block_image` in an editable block, and render the committed revision as PDF:
+
+```bash
+node scripts/storyblock-author.mjs upload-image \
+  --novel-id nov_UUIDV7 --file character.png --alt-text 'Character reference.' --json
+node scripts/storyblock-author.mjs render-pdf \
+  --novel-id nov_UUIDV7 --file examples/pdf-render-request.json --output novel.pdf --json
 ```
 
 See [SKILL.md](SKILL.md) for agent instructions and [references/workflows.md](references/workflows.md) for complete workflows.

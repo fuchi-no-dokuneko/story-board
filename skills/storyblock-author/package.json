@@ -1,6 +1,6 @@
 {
   "name": "storyblock-author",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Standalone StoryBlock API discovery, validation, and authoring skill",
   "type": "module",
   "private": false,

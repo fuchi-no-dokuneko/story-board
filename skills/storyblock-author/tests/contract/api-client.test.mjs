@@ -41,6 +41,34 @@ test("client handles 200 and 201 JSON success and emits bearer headers", async (
   }
 });
 
+test("client preserves binary request and response bytes", async () => {
+  const requestBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
+  const responseBytes = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x34]);
+  let captured;
+  const client = new StoryBlockClient({
+    transport: async (request) => {
+      captured = request;
+      return {
+        status: 200,
+        headers: { "content-type": "application/pdf" },
+        body: responseBytes,
+      };
+    },
+  });
+
+  const response = await client.request({
+    method: "POST",
+    pathname: "/v1/binary",
+    body: requestBytes,
+    responseType: "buffer",
+  });
+
+  assert.deepEqual(captured.body, requestBytes);
+  assert.equal(captured.headers["Content-Type"], "application/octet-stream");
+  assert.equal(captured.headers["Content-Length"], String(requestBytes.length));
+  assert.deepEqual(response.data, responseBytes);
+});
+
 test("client maps every contracted problem status and preserves extensions", async (context) => {
   for (const status of [400, 401, 403, 404, 409, 422, 500]) {
     await context.test(String(status), async () => {

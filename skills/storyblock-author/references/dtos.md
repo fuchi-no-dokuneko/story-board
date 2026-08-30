@@ -1,6 +1,6 @@
 # StoryBlock DTO catalog
 
-This index covers 135 standalone JSON Schema draft 2020-12 files. Each schema embeds a machine-valid example and source provenance.
+This index covers 140 standalone JSON Schema draft 2020-12 files. Each schema embeds a machine-valid example and source provenance.
 
 ## AccessKeyCreated
 
@@ -138,10 +138,20 @@ This index covers 135 standalone JSON Schema draft 2020-12 files. Each schema em
 
 - Purpose: Code-derived StoryBlock Block Draft JSON contract.
 - JSON Schema: [BlockDraft.schema.json](dtos/BlockDraft.schema.json).
-- Fields: `id` (required), `text` (required), `meta` (required), `extensions` (optional)
+- Fields: `id` (required), `text` (required), `meta` (required), `extensions` (optional), `image` (optional)
 - Constraints: type="object"; additionalProperties=false
 - Example: `examples[0]` is embedded in the linked schema.
 - Sources: `apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java`, `apps/api/src/main/java/dev/storyblock/api/http/CommitController.java`, `modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java`, `modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java`.
+- Confidence: `confirmed-from-code`.
+
+## BlockImage
+
+- Purpose: Explicit image descriptor attached to an editable narrative block.
+- JSON Schema: [BlockImage.schema.json](dtos/BlockImage.schema.json).
+- Fields: `artifact_id` (required), `content_hash` (required), `media_type` (required), `width_px` (required), `height_px` (required), `alt_text` (required)
+- Constraints: type="object"; additionalProperties=false
+- Example: `examples[0]` is embedded in the linked schema.
+- Sources: `modules/domain/src/main/java/dev/storyblock/domain/BlockImage.java`, `modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`.
 - Confidence: `confirmed-from-code`.
 
 ## BlockMetadata
@@ -233,6 +243,16 @@ This index covers 135 standalone JSON Schema draft 2020-12 files. Each schema em
 - Example: `examples[0]` is embedded in the linked schema.
 - Sources: `apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `apps/api/src/main/java/dev/storyblock/api/http/NovelController.java`, `modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java`, `modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java`.
 - Confidence: `confirmed-from-code`.
+
+## CharacterImageReferenceConfig
+
+- Purpose: Five-character visual identity lock with one initial image and at least two plain-background variants each.
+- JSON Schema: [CharacterImageReferenceConfig.schema.json](dtos/CharacterImageReferenceConfig.schema.json).
+- Fields: `schema_version` (required), `characters` (required)
+- Constraints: type="object"; additionalProperties=false
+- Example: `examples[0]` is embedded in the linked schema.
+- Sources: `skills/storyblock-author/SKILL.md`, `modules/domain/src/main/java/dev/storyblock/domain/BlockImage.java`.
+- Confidence: `skill-policy`.
 
 ## CommitRequest
 
@@ -392,6 +412,16 @@ This index covers 135 standalone JSON Schema draft 2020-12 files. Each schema em
 - Constraints: type="object"; additionalProperties=false
 - Example: `examples[0]` is embedded in the linked schema.
 - Sources: `apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java`, `apps/api/src/main/java/dev/storyblock/api/http/CommitController.java`, `modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java`, `modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java`.
+- Confidence: `confirmed-from-code`.
+
+## ImageUploadResponse
+
+- Purpose: Immutable portable image artifact created by the image upload endpoint.
+- JSON Schema: [ImageUploadResponse.schema.json](dtos/ImageUploadResponse.schema.json).
+- Fields: `schema_version` (required), `artifact_id` (required), `artifact_uri` (required), `content_hash` (required), `media_type` (required), `width_px` (required), `height_px` (required), `idempotent_replay` (required)
+- Constraints: type="object"; additionalProperties=false
+- Example: `examples[0]` is embedded in the linked schema.
+- Sources: `apps/api/src/main/java/dev/storyblock/api/http/ImageController.java`, `modules/application/src/main/java/dev/storyblock/application/ImageUploadService.java`.
 - Confidence: `confirmed-from-code`.
 
 ## ImportRequest
@@ -634,6 +664,26 @@ This index covers 135 standalone JSON Schema draft 2020-12 files. Each schema em
 - Sources: `apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java`, `apps/api/src/main/java/dev/storyblock/api/http/CommitController.java`, `modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java`, `modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java`.
 - Confidence: `confirmed-from-code`.
 
+## PdfDocument
+
+- Purpose: Binary application/pdf response; save it instead of decoding it as text.
+- JSON Schema: [PdfDocument.schema.json](dtos/PdfDocument.schema.json).
+- Fields: No named top-level fields.
+- Constraints: type="string"
+- Example: `examples[0]` is embedded in the linked schema.
+- Sources: `apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java`, `modules/renderer/src/main/java/dev/storyblock/renderer/DeterministicPdfRenderer.java`.
+- Confidence: `confirmed-from-code`.
+
+## PdfRenderRequest
+
+- Purpose: Request to render one immutable full revision as PDF.
+- JSON Schema: [PdfRenderRequest.schema.json](dtos/PdfRenderRequest.schema.json).
+- Fields: `revision_id` (required)
+- Constraints: type="object"; additionalProperties=false
+- Example: `examples[0]` is embedded in the linked schema.
+- Sources: `apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`.
+- Confidence: `confirmed-from-code`.
+
 ## PreviewResponse
 
 - Purpose: Code-derived StoryBlock Preview Response JSON contract.
@@ -699,7 +749,7 @@ This index covers 135 standalone JSON Schema draft 2020-12 files. Each schema em
 
 - Purpose: Code-derived StoryBlock Rendered Block JSON contract.
 - JSON Schema: [RenderedBlock.schema.json](dtos/RenderedBlock.schema.json).
-- Fields: `block_id` (required), `block_version_id` (required), `text` (required), `local_meta` (required)
+- Fields: `block_id` (required), `block_version_id` (required), `text` (required), `local_meta` (required), `image` (optional)
 - Constraints: type="object"; additionalProperties=false
 - Example: `examples[0]` is embedded in the linked schema.
 - Sources: `apps/api/src/main/java/dev/storyblock/api/http/RenderController.java`, `modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java`.

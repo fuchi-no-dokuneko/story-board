@@ -1,4 +1,4 @@
-import { chmod, writeFile } from "node:fs/promises";
+import { chmod, readFile, writeFile } from "node:fs/promises";
 
 import { StoryBlockClient } from "./api-client.mjs";
 import { getSchema, listDtos } from "./dtos.mjs";
@@ -36,6 +36,8 @@ Authoring and reads:
   preview-edit --novel-id <id> --file <request.json> [--json]
   commit --novel-id <id> --file <request.json> [--json]
   render --novel-id <id> --file <request.json> [--json]
+  upload-image --novel-id <id> --file <image.png|image.jpg> [--alt-text <text>] [--idempotency-key <key>] [--json]
+  render-pdf --novel-id <id> --file <request.json> --output <novel.pdf> [--idempotency-key <key>] [--force] [--json]
   export --novel-id <id> [--revision-id <id>] [--format canonical-revision|canonical-package] [--json]
   job --job-id <id> [--json]
   artifact --artifact-id <id> [--output <file>] [--force] [--json]
@@ -232,6 +234,29 @@ function endpointAccept(endpoint) {
   return contentTypes.length === 0 ? "application/json, application/problem+json" : contentTypes.join(", ");
 }
 
+function imageMediaType(content) {
+  if (content.length >= 8
+      && content.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return "image/png";
+  }
+  if (content.length >= 3 && content[0] === 0xff && content[1] === 0xd8 && content[2] === 0xff) {
+    return "image/jpeg";
+  }
+  throw new UsageError("upload-image accepts only PNG or JPEG bytes");
+}
+
+async function writePrivateOutput(path, content, force) {
+  try {
+    await writeFile(path, content, { flag: force ? "w" : "wx", mode: 0o600 });
+    await chmod(path, 0o600);
+  } catch (error) {
+    if (error.code === "EEXIST") {
+      throw new UsageError(`Refusing to overwrite ${path}; pass --force to replace it`);
+    }
+    throw error;
+  }
+}
+
 async function validateCallParameters(endpoint, params) {
   for (const [groupName, descriptors] of [["path", endpoint.pathParameters], ["query", endpoint.queryParameters]]) {
     const group = params[groupName] ?? {};
@@ -299,6 +324,9 @@ async function execute(parsed, context) {
       assertOptions(parsed, ["body", "params"]);
       expectPositionals(parsed, 1, "endpoint id");
       const endpoint = await getEndpoint(parsed.positionals[0]);
+      if (endpoint.requestBody?.binary === true) {
+        throw new UsageError(`${endpoint.id} uses a binary body; use upload-image`);
+      }
       const params = parsed.options.has("params") ? await readJsonFile(parsed.options.get("params")) : {};
       await validateCallParameters(endpoint, params);
       const body = parsed.options.has("body") ? await readJsonFile(parsed.options.get("body")) : undefined;
@@ -319,7 +347,10 @@ async function execute(parsed, context) {
       const response = await clientFor(parsed, context.clientOverrides).request({
         ...call,
         body,
-        responseType: endpoint.id === "artifacts.download" ? "buffer" : "auto",
+        responseType: endpoint.id === "artifacts.download"
+          || endpoint.responses.some(({ dto }) => dto === "PdfDocument")
+          ? "buffer"
+          : "auto",
       });
       return { value: responseReport(response) };
     }
@@ -417,6 +448,90 @@ async function execute(parsed, context) {
       });
       return { value: responseReport(response) };
     }
+    case "upload-image": {
+      assertOptions(parsed, ["alt-text", "file", "idempotency-key", "novel-id"]);
+      expectPositionals(parsed, 0);
+      const novelId = requiredOption(parsed, "novel-id");
+      requireTypedId(novelId, "nov", "novel_id");
+      const content = await readFile(requiredOption(parsed, "file"));
+      if (content.length < 1 || content.length > 1_500_000) {
+        throw new UsageError("image file must contain 1 to 1500000 bytes");
+      }
+      const mediaType = imageMediaType(content);
+      const client = clientFor(parsed, context.clientOverrides);
+      const novel = await fetchNovel(client, novelId);
+      const idempotencyKey = parsed.options.get("idempotency-key")
+        ?? deriveIdempotencyKey("upload-image", {
+          novelId,
+          revision_id: novel.head.head_revision_id,
+          content_sha256: sha256(content),
+        });
+      const response = await client.request({
+        method: "POST",
+        pathname: `/v1/novels/${encodeURIComponent(novelId)}/images`,
+        headers: {
+          "Content-Type": mediaType,
+          "If-Match": quoted(novel.head.head_hash),
+          "Idempotency-Key": idempotencyKey,
+        },
+        body: content,
+      });
+      await validateDto("ImageUploadResponse", response.data);
+      let blockImage = null;
+      if (parsed.options.has("alt-text")) {
+        blockImage = {
+          artifact_id: response.data.artifact_id,
+          content_hash: response.data.content_hash,
+          media_type: response.data.media_type,
+          width_px: response.data.width_px,
+          height_px: response.data.height_px,
+          alt_text: parsed.options.get("alt-text"),
+        };
+        await validateDto("BlockImage", blockImage);
+      }
+      return { value: {
+        command: "upload-image",
+        idempotency_key: idempotencyKey,
+        source_bytes: content.length,
+        source_sha256: `sha256:${sha256(content)}`,
+        block_image: blockImage,
+        http: responseReport(response),
+      } };
+    }
+    case "render-pdf": {
+      assertOptions(parsed, ["file", "force", "idempotency-key", "novel-id", "output"]);
+      expectPositionals(parsed, 0);
+      const novelId = requiredOption(parsed, "novel-id");
+      requireTypedId(novelId, "nov", "novel_id");
+      const body = await readJsonFile(requiredOption(parsed, "file"));
+      await validateDto("PdfRenderRequest", body);
+      const client = clientFor(parsed, context.clientOverrides);
+      const revision = await fetchRevision(client, novelId, body.revision_id);
+      const response = await client.request({
+        method: "POST",
+        pathname: `/v1/novels/${encodeURIComponent(novelId)}/pdf-renders`,
+        headers: {
+          Accept: "application/pdf, application/problem+json",
+          "If-Match": quoted(revision.data.content_hash),
+          "Idempotency-Key": parsed.options.get("idempotency-key")
+            ?? deriveIdempotencyKey("render-pdf", { novelId, body }),
+        },
+        body,
+        responseType: "buffer",
+      });
+      const output = requiredOption(parsed, "output");
+      await writePrivateOutput(output, response.data, parsed.options.get("force") === true);
+      return { value: {
+        command: "render-pdf",
+        status: response.status,
+        revision_id: body.revision_id,
+        bytes: response.data.length,
+        pages: Number(caseInsensitiveHeader(response.headers, "X-PDF-Page-Count")),
+        images: Number(caseInsensitiveHeader(response.headers, "X-PDF-Image-Count")),
+        renderer_version: caseInsensitiveHeader(response.headers, "X-PDF-Renderer-Version"),
+        output,
+      } };
+    }
     case "export": {
       assertOptions(parsed, ["format", "idempotency-key", "novel-id", "revision-id"]);
       expectPositionals(parsed, 0);
@@ -460,13 +575,7 @@ async function execute(parsed, context) {
       });
       const output = parsed.options.get("output");
       if (output !== undefined) {
-        try {
-          await writeFile(output, response.data, { flag: parsed.options.get("force") ? "w" : "wx", mode: 0o600 });
-          await chmod(output, 0o600);
-        } catch (error) {
-          if (error.code === "EEXIST") throw new UsageError(`Refusing to overwrite ${output}; pass --force to replace it`);
-          throw error;
-        }
+        await writePrivateOutput(output, response.data, parsed.options.get("force") === true);
       }
       return { value: {
         status: response.status,

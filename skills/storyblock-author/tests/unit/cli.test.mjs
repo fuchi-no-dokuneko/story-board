@@ -175,3 +175,150 @@ test("artifact force-overwrite restores private permissions and requests binary 
     await rm(directory, { recursive: true, force: true });
   }
 });
+
+test("upload-image sends raw bytes and emits a validated image block", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "storyblock-author-image-"));
+  try {
+    const imagePath = join(directory, "reference.png");
+    const imageBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    await writeFile(imagePath, imageBytes);
+    const novelId = "nov_018f0f5e-7b4a-7c00-8000-000000000001";
+    const revisionId = "rev_018f0f5e-7b4a-7c00-8000-000000000001";
+    const hash = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    const requests = [];
+    const responses = [
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: Buffer.from(JSON.stringify({
+          novel_id: novelId,
+          head_revision_id: revisionId,
+          head_sequence: 0,
+          head_hash: hash,
+          schema_version: "example-1",
+        })),
+      },
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: Buffer.from(JSON.stringify({
+          chapters: [],
+          content_hash: hash,
+          created_at: "2026-08-27T12:00:00Z",
+          novel_id: novelId,
+          parent_revision_id: revisionId,
+          revision_id: revisionId,
+          schema_version: "1.0.0",
+        })),
+      },
+      {
+        status: 201,
+        headers: { "content-type": "application/json" },
+        body: Buffer.from(JSON.stringify({
+          schema_version: "image-upload-1.0.0",
+          artifact_id: "art_018f0f5e-7b4a-7c00-8000-000000000001",
+          artifact_uri: "/v1/artifacts/art_018f0f5e-7b4a-7c00-8000-000000000001",
+          content_hash: hash,
+          media_type: "image/png",
+          width_px: 1024,
+          height_px: 1024,
+          idempotent_replay: false,
+        })),
+      },
+    ];
+    const stdout = [];
+    const exitCode = await runCli([
+      "upload-image", "--novel-id", novelId, "--file", imagePath,
+      "--alt-text", "Plain-background character reference.", "--json",
+    ], {
+      stdout: (value) => stdout.push(value),
+      stderr: () => {},
+      clientOverrides: {
+        transport: async (request) => {
+          requests.push(request);
+          return responses.shift();
+        },
+      },
+    });
+
+    assert.equal(exitCode, EXIT_CODES.SUCCESS);
+    assert.equal(requests.length, 3);
+    assert.equal(requests[2].url.pathname, `/v1/novels/${novelId}/images`);
+    assert.equal(requests[2].headers["Content-Type"], "image/png");
+    assert.equal(requests[2].headers["If-Match"], `"${hash}"`);
+    assert.deepEqual(requests[2].body, imageBytes);
+    const report = JSON.parse(stdout.join(""));
+    assert.equal(report.source_bytes, imageBytes.length);
+    assert.equal(report.block_image.alt_text, "Plain-background character reference.");
+    assert.equal(report.block_image.artifact_id, "art_018f0f5e-7b4a-7c00-8000-000000000001");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("render-pdf writes exact private PDF bytes and reports render metadata", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "storyblock-author-pdf-"));
+  try {
+    const novelId = "nov_018f0f5e-7b4a-7c00-8000-000000000001";
+    const revisionId = "rev_018f0f5e-7b4a-7c00-8000-000000000001";
+    const hash = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    const requestPath = join(directory, "request.json");
+    const outputPath = join(directory, "novel.pdf");
+    await writeFile(requestPath, JSON.stringify({ revision_id: revisionId }));
+    const pdfBytes = Buffer.from("%PDF-1.4\ncontract-test\n%%EOF\n");
+    const requests = [];
+    const responses = [
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: Buffer.from(JSON.stringify({
+          chapters: [],
+          content_hash: hash,
+          created_at: "2026-08-27T12:00:00Z",
+          novel_id: novelId,
+          parent_revision_id: revisionId,
+          revision_id: revisionId,
+          schema_version: "1.0.0",
+        })),
+      },
+      {
+        status: 200,
+        headers: {
+          "content-type": "application/pdf",
+          "x-pdf-page-count": "7",
+          "x-pdf-image-count": "5",
+          "x-pdf-renderer-version": "storyblock-pdf-1",
+        },
+        body: pdfBytes,
+      },
+    ];
+    const stdout = [];
+    const exitCode = await runCli([
+      "render-pdf", "--novel-id", novelId, "--file", requestPath,
+      "--output", outputPath, "--json",
+    ], {
+      stdout: (value) => stdout.push(value),
+      stderr: () => {},
+      clientOverrides: {
+        transport: async (request) => {
+          requests.push(request);
+          return responses.shift();
+        },
+      },
+    });
+
+    assert.equal(exitCode, EXIT_CODES.SUCCESS);
+    assert.equal(requests[1].url.pathname, `/v1/novels/${novelId}/pdf-renders`);
+    assert.equal(requests[1].headers.Accept, "application/pdf, application/problem+json");
+    assert.deepEqual(JSON.parse(requests[1].body.toString("utf8")), { revision_id: revisionId });
+    assert.deepEqual(await readFile(outputPath), pdfBytes);
+    assert.equal((await stat(outputPath)).mode & 0o777, 0o600);
+    const report = JSON.parse(stdout.join(""));
+    assert.equal(report.bytes, pdfBytes.length);
+    assert.equal(report.pages, 7);
+    assert.equal(report.images, 5);
+    assert.equal(report.renderer_version, "storyblock-pdf-1");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

@@ -7,8 +7,8 @@ import { countHanCodePoints, validateDto } from "../../scripts/lib/validation.mj
 test("all DTO schemas parse and every reference resolves", async () => {
   const dtos = await listDtos();
   const schemas = await loadSchemas();
-  assert.equal(dtos.length, 135);
-  assert.equal(schemas.size, 135);
+  assert.equal(dtos.length, 140);
+  assert.equal(schemas.size, 140);
 
   const visit = (value, owner) => {
     if (Array.isArray(value)) {
@@ -92,4 +92,27 @@ test("operation range guards bind first and last expected block ids", async () =
   const result = await validateDto("DeleteBlockRangeOperation", value, { throwOnError: false });
   assert.equal(result.valid, false);
   assert.ok(result.issues.some(({ message }) => message.includes("first expected_blocks")));
+});
+
+test("character image references require five identities and plain-background variants", async () => {
+  const value = structuredClone((await getSchema("CharacterImageReferenceConfig")).examples[0]);
+  assert.equal((await validateDto("CharacterImageReferenceConfig", value)).valid, true);
+
+  const fourCharacters = structuredClone(value);
+  fourCharacters.characters.pop();
+  const missingCharacter = await validateDto("CharacterImageReferenceConfig", fourCharacters, { throwOnError: false });
+  assert.equal(missingCharacter.valid, false);
+  assert.ok(missingCharacter.issues.some(({ message }) => message.includes("at least 5")));
+
+  const oneVariant = structuredClone(value);
+  oneVariant.characters[0].variants.pop();
+  const missingVariant = await validateDto("CharacterImageReferenceConfig", oneVariant, { throwOnError: false });
+  assert.equal(missingVariant.valid, false);
+  assert.ok(missingVariant.issues.some(({ message }) => message.includes("at least 2")));
+
+  const nonPlain = structuredClone(value);
+  nonPlain.characters[0].variants[0].background = "harbor";
+  const background = await validateDto("CharacterImageReferenceConfig", nonPlain, { throwOnError: false });
+  assert.equal(background.valid, false);
+  assert.ok(background.issues.some(({ path, message }) => path.endsWith("/background") && message.includes("plain")));
 });

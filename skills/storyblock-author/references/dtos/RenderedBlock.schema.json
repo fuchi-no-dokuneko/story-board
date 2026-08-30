@@ -21,6 +21,9 @@
     "local_meta": {
       "type": "object",
       "additionalProperties": true
+    },
+    "image": {
+      "$ref": "BlockImage.schema.json"
     }
   },
   "additionalProperties": false,

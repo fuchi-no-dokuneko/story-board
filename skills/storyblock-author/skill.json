@@ -1,6 +1,6 @@
 {
   "name": "storyblock-author",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Standalone StoryBlock API discovery, validation, bulk registration, and incremental authoring skill",
   "entrypoint": "scripts/storyblock-author.mjs",
   "runtime": {
@@ -16,6 +16,8 @@
     "incremental-editing",
     "commit-preview",
     "rendering",
+    "image-blocks",
+    "pdf-rendering",
     "export-import",
     "problem-diagnostics"
   ],

@@ -1977,6 +1977,209 @@
       ]
     },
     {
+      "id": "novels.images.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/images",
+      "summary": "Upload one immutable PNG or JPEG artifact for later image blocks",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:commit"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "image/png or image/jpeg",
+        "binary": true
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Existing idempotent image upload result",
+          "contentType": "application/json",
+          "dto": "ImageUploadResponse",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "Portable immutable image artifact created",
+          "contentType": "application/json",
+          "dto": "ImageUploadResponse",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/ImageController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.pdf-renders.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/pdf-renders",
+      "summary": "Render a complete immutable revision as a deterministic PDF",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "PdfRenderRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Deterministic A4 PDF containing narrative text and image blocks",
+          "contentType": "application/pdf",
+          "dto": "PdfDocument",
+          "headers": [
+            "ETag",
+            "Content-Disposition",
+            "X-PDF-Renderer-Version",
+            "X-PDF-Page-Count",
+            "X-PDF-Image-Count"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+      ]
+    },
+    {
       "id": "novels.renders.create",
       "method": "POST",
       "path": "/v1/novels/{novelId}/renders",

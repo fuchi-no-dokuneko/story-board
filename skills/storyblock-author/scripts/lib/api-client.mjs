@@ -5,7 +5,7 @@ import { ApiResponseError, NetworkError } from "./problem.mjs";
 
 export const DEFAULT_BASE_URL = "https://127.0.0.1:8443";
 export const DEFAULT_TIMEOUT_MS = 15_000;
-export const DEFAULT_USER_AGENT = "storyblock-author/1.0.0";
+export const DEFAULT_USER_AGENT = "storyblock-author/1.1.0";
 const MAX_RESPONSE_BYTES = 128 * 1024 * 1024;
 
 function normalizedHeaders(headers) {
@@ -98,14 +98,21 @@ export class StoryBlockClient {
 
   async request({ method = "GET", pathname, headers = {}, body, responseType = "auto" }) {
     const url = new URL(pathname, `${this.policy.origin}/`);
-    const payload = body === undefined ? undefined : Buffer.from(stableStringify(body), "utf8");
+    const binaryBody = Buffer.isBuffer(body) || body instanceof Uint8Array;
+    const payload = body === undefined
+      ? undefined
+      : binaryBody
+        ? Buffer.from(body)
+        : Buffer.from(stableStringify(body), "utf8");
     const requestHeaders = { "User-Agent": this.userAgent, ...headers };
     if (!hasHeader(requestHeaders, "Accept")) {
       requestHeaders.Accept = "application/json, application/problem+json";
     }
     if (this.accessKey !== undefined) requestHeaders.Authorization = `Bearer ${this.accessKey}`;
     if (payload !== undefined) {
-      if (!hasHeader(requestHeaders, "Content-Type")) requestHeaders["Content-Type"] = "application/json";
+      if (!hasHeader(requestHeaders, "Content-Type")) {
+        requestHeaders["Content-Type"] = binaryBody ? "application/octet-stream" : "application/json";
+      }
       requestHeaders["Content-Length"] = String(payload.length);
     }
     let response;
