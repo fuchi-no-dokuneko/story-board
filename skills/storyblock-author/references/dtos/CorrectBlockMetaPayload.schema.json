@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "required": [
+    "scene_id",
+    "block",
+    "corrected_meta"
+  ],
+  "properties": {
+    "scene_id": {
+      "type": "string",
+      "pattern": "^scn_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "block": {
+      "$ref": "BlockVersionRef.schema.json"
+    },
+    "corrected_meta": {
+      "$ref": "BlockMetadata.schema.json"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/CorrectBlockMetaPayload.schema.json",
+  "title": "CorrectBlockMetaPayload",
+  "description": "Code-derived StoryBlock Correct Block Meta Payload JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+    "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+  ],
+  "examples": [
+    {
+      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+      "block": {
+        "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+        "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001"
+      },
+      "corrected_meta": {
+      }
+    }
+  ]
+}

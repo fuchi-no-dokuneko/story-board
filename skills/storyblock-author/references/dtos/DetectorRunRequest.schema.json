@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "required": [
+    "revision_id",
+    "revision_hash"
+  ],
+  "properties": {
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revision_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "from_block_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "to_block_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/DetectorRunRequest.schema.json",
+  "title": "DetectorRunRequest",
+  "description": "Code-derived StoryBlock Detector Run Request JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/DetectorController.java",
+    "modules/detector/src/main/java/dev/storyblock/detector/DetectorRun.java",
+    "modules/detector/src/main/java/dev/storyblock/detector/DetectorFinding.java"
+  ],
+  "examples": [
+    {
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "required": [
+    "items",
+    "page",
+    "schema_version",
+    "size",
+    "total",
+    "total_pages"
+  ],
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "AdminNovelSummary.schema.json"
+      }
+    },
+    "page": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "schema_version": {
+      "const": "admin-novel-reader-1.0.0"
+    },
+    "size": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "total_pages": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/AdminNovelCatalog.schema.json",
+  "title": "AdminNovelCatalog",
+  "description": "Code-derived StoryBlock Admin Novel Catalog JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+    "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+  ],
+  "examples": [
+    {
+      "items": [
+
+      ],
+      "page": 0,
+      "schema_version": "admin-novel-reader-1.0.0",
+      "size": 1,
+      "total": 0,
+      "total_pages": 0
+    }
+  ]
+}

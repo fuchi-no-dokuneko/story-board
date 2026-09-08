@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "required": [
+    "name",
+    "scope",
+    "provenance"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "scope": {
+      "$ref": "StyleProfileScope.schema.json"
+    },
+    "provenance": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleProfileRequest.schema.json",
+  "title": "StyleProfileRequest",
+  "description": "Code-derived StoryBlock Style Profile Request JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "name": "example-1",
+      "scope": {
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "kind": "novel",
+        "subject_id": "example-1"
+      },
+      "provenance": "example-1"
+    }
+  ]
+}

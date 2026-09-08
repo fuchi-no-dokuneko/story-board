@@ -1,0 +1,69 @@
+{
+  "oneOf": [
+    {
+      "$ref": "InsertBlocksOperation.schema.json"
+    },
+    {
+      "$ref": "ReplaceBlockRangeOperation.schema.json"
+    },
+    {
+      "$ref": "DeleteBlockRangeOperation.schema.json"
+    },
+    {
+      "$ref": "SplitBlockOperation.schema.json"
+    },
+    {
+      "$ref": "MergeBlocksOperation.schema.json"
+    },
+    {
+      "$ref": "ExtendBlockOperation.schema.json"
+    },
+    {
+      "$ref": "MoveBlockRangeOperation.schema.json"
+    },
+    {
+      "$ref": "CorrectBlockMetaOperation.schema.json"
+    },
+    {
+      "$ref": "SetSceneInitialMetaOperation.schema.json"
+    },
+    {
+      "$ref": "RestoreRevisionContentOperation.schema.json"
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/OperationEnvelope.schema.json",
+  "title": "OperationEnvelope",
+  "description": "Code-derived StoryBlock Operation Envelope JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+    "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+  ],
+  "examples": [
+    {
+      "operation_id": "op_018f0f5e-7b4a-7c00-8000-000000000001",
+      "idempotency_key": "example-1",
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "base_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "expected_head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "type": "insert_blocks",
+      "payload": {
+        "insertion_point": {
+          "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+          "position": "start"
+        },
+        "blocks": [
+          {
+            "id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+            "text": "春風到了。",
+            "meta": {
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

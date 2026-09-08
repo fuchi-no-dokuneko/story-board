@@ -1,0 +1,70 @@
+{
+  "type": "object",
+  "required": [
+    "type",
+    "title",
+    "status",
+    "code",
+    "detail",
+    "instance",
+    "request_id"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "format": "uri"
+    },
+    "title": {
+      "type": "string"
+    },
+    "status": {
+      "type": "integer",
+      "minimum": 400,
+      "maximum": 599
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{1,63}$"
+    },
+    "detail": {
+      "type": "string"
+    },
+    "instance": {
+      "type": "string"
+    },
+    "request_id": {
+      "type": "string"
+    },
+    "current_revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "current_etag": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/ApiProblem.schema.json",
+  "title": "ApiProblem",
+  "description": "Code-derived StoryBlock Api Problem JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/ApiExceptionHandler.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/ApiProblemFactory.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/ApiProblemWriter.java",
+    "apps/api/src/test/resources/golden/api-problem-details.json"
+  ],
+  "examples": [
+    {
+      "type": "https://storyblock.example/problems/status-409",
+      "title": "Status 409",
+      "status": 409,
+      "code": "STATUS_409",
+      "detail": "Contract status 409",
+      "instance": "/v1/status/409",
+      "policy_status": 409,
+      "request_id": "req_status_test"
+    }
+  ]
+}

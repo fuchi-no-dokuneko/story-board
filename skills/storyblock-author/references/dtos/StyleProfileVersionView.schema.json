@@ -1,0 +1,192 @@
+{
+  "type": "object",
+  "required": [
+    "profile_version",
+    "lifecycle",
+    "state",
+    "approved_by",
+    "approved_at",
+    "can_gate_rewrites"
+  ],
+  "properties": {
+    "profile_version": {
+      "$ref": "StyleProfileVersion.schema.json"
+    },
+    "lifecycle": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "StyleLifecycleEvent.schema.json"
+      }
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "calibrating",
+        "ready",
+        "deprecated"
+      ]
+    },
+    "approved_by": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Za-z0-9._:@-]{1,128}$"
+    },
+    "approved_at": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "can_gate_rewrites": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleProfileVersionView.schema.json",
+  "title": "StyleProfileVersionView",
+  "description": "Code-derived StoryBlock Style Profile Version View JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "profile_version": {
+        "version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
+        "profile_id": "spf_018f0f5e-7b4a-7c00-8000-000000000001",
+        "version": 1,
+        "content": {
+          "scope": {
+            "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+            "kind": "novel",
+            "subject_id": "example-1"
+          },
+          "corpus_sources": [
+            {
+              "source_id": "example-1",
+              "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "kind": "owner",
+              "provenance": "example-1",
+              "license": "example-1",
+              "ownership": "example-1"
+            }
+          ],
+          "feature_set": {
+            "source_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "contract": {
+              "analyzer_version": "example-1",
+              "feature_schema_version": "example-1",
+              "tokenizer_id": "example-1",
+              "vocabulary_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "normalizer_version": "example-1",
+              "additive_smoothing_alpha": 1,
+              "top_k": 10
+            },
+            "channels": [
+              {
+                "channel": "surface",
+                "channel_version": "example-1",
+                "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "distribution": {
+                },
+                "measurements": {
+                },
+                "embedding": [
+
+                ]
+              },
+              {
+                "channel": "surface",
+                "channel_version": "example-1",
+                "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "distribution": {
+                },
+                "measurements": {
+                },
+                "embedding": [
+
+                ]
+              },
+              {
+                "channel": "surface",
+                "channel_version": "example-1",
+                "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "distribution": {
+                },
+                "measurements": {
+                },
+                "embedding": [
+
+                ]
+              },
+              {
+                "channel": "surface",
+                "channel_version": "example-1",
+                "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "distribution": {
+                },
+                "measurements": {
+                },
+                "embedding": [
+
+                ]
+              },
+              {
+                "channel": "surface",
+                "channel_version": "example-1",
+                "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "distribution": {
+                },
+                "measurements": {
+                },
+                "embedding": [
+
+                ]
+              }
+            ]
+          },
+          "window_configuration": {
+            "operational_graphemes": 2000,
+            "operational_stride_graphemes": 1,
+            "micro_graphemes": 500,
+            "micro_stride_graphemes": 1,
+            "non_overlap_enabled": true
+          },
+          "calibration_statistics": {
+          }
+        },
+        "created_by": "example-1",
+        "created_at": "2026-08-27T12:00:00Z"
+      },
+      "lifecycle": [
+        {
+          "event_id": "sle_018f0f5e-7b4a-7c00-8000-000000000001",
+          "profile_id": "spf_018f0f5e-7b4a-7c00-8000-000000000001",
+          "version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
+          "sequence": 1,
+          "from_state": "draft",
+          "to_state": "draft",
+          "reason": "example-1",
+          "generated_promotion_confirmed": true,
+          "request_id": "example-1",
+          "actor_id": "example-1",
+          "actor_key_id": "key_018f0f5e-7b4a-7c00-8000-000000000001",
+          "occurred_at": "2026-08-27T12:00:00Z"
+        }
+      ],
+      "state": "draft",
+      "approved_by": "example-1",
+      "approved_at": "2026-08-27T12:00:00Z",
+      "can_gate_rewrites": true
+    }
+  ]
+}

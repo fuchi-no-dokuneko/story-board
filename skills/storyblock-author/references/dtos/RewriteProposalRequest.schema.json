@@ -1,0 +1,66 @@
+{
+  "type": "object",
+  "required": [
+    "analysis_id",
+    "novel_id",
+    "revision_id",
+    "revision_hash",
+    "finding_ids"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string",
+      "pattern": "^ana_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revision_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "finding_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^sha256:[0-9a-f]{64}$"
+      }
+    },
+    "cooldown_seconds": {
+      "type": "integer",
+      "minimum": 300,
+      "maximum": 2592000,
+      "default": 86400
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/RewriteProposalRequest.schema.json",
+  "title": "RewriteProposalRequest",
+  "description": "Code-derived StoryBlock Rewrite Proposal Request JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+    "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+    "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+  ],
+  "examples": [
+    {
+      "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "finding_ids": [
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ]
+    }
+  ]
+}

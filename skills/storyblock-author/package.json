@@ -1,0 +1,31 @@
+{
+  "name": "storyblock-author",
+  "version": "1.0.0",
+  "description": "Standalone StoryBlock API discovery, validation, and authoring skill",
+  "type": "module",
+  "private": false,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "storyblock-author": "scripts/storyblock-author.mjs"
+  },
+  "scripts": {
+    "test": "node --test tests/unit/*.test.mjs tests/contract/*.test.mjs tests/cli/*.test.mjs",
+    "smoke": "node --test tests/cli/*.test.mjs",
+    "docs": "node scripts/generate-docs.mjs",
+    "docs:check": "node --test tests/unit/docs.test.mjs"
+  },
+  "files": [
+    "SKILL.md",
+    "README.md",
+    "CHANGELOG.md",
+    "VERSION",
+    "skill.json",
+    "scripts",
+    "references",
+    "examples",
+    "tests"
+  ]
+}

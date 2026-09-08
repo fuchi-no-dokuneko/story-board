@@ -1,0 +1,72 @@
+{
+  "allOf": [
+    {
+      "$ref": "MonitorRunStatus.schema.json"
+    },
+    {
+      "type": "object",
+      "required": [
+        "idempotent_replay"
+      ],
+      "properties": {
+        "idempotent_replay": {
+          "type": "boolean"
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/MonitorSubmissionResponse.schema.json",
+  "title": "MonitorSubmissionResponse",
+  "description": "Code-derived StoryBlock Monitor Submission Response JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+    "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+  ],
+  "examples": [
+    {
+      "monitor_run_id": "mrun_018f0f5e-7b4a-7c00-8000-000000000001",
+      "output_id": "mis_018f0f5e-7b4a-7c00-8000-000000000001",
+      "output_kind": "finding",
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "neighbor_count": 1,
+      "monitor_version": "example-1",
+      "rule_version": "example-1",
+      "affected_blocks": [
+        {
+          "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+          "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "output": {
+        "kind": "finding",
+        "code": "RULE_FAILED",
+        "severity": "error",
+        "message": "example-1",
+        "evidence": [
+          {
+            "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+            "start_grapheme": 0,
+            "end_grapheme": 1,
+            "quote": "example-1",
+            "quote_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      },
+      "request_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "submitted_at": "2026-08-27T12:00:00Z",
+      "state": "current",
+      "stale_reasons": [
+
+      ],
+      "rebase_allowed": false,
+      "idempotent_replay": true
+    }
+  ]
+}

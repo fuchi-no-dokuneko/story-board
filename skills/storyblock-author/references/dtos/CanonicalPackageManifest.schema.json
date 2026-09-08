@@ -1,0 +1,70 @@
+{
+  "type": "object",
+  "required": [
+    "novel_id",
+    "schema_version",
+    "head_revision_id",
+    "head_sequence",
+    "head_hash",
+    "revision_count",
+    "operation_count",
+    "artifact_count"
+  ],
+  "properties": {
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "head_revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "head_sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "head_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "revision_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "operation_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "artifact_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/CanonicalPackageManifest.schema.json",
+  "title": "CanonicalPackageManifest",
+  "description": "Code-derived StoryBlock Canonical Package Manifest JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+  ],
+  "examples": [
+    {
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "schema_version": "1.0.0",
+      "head_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "head_sequence": 0,
+      "head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revision_count": 1,
+      "operation_count": 0,
+      "artifact_count": 0
+    }
+  ]
+}

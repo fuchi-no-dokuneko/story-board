@@ -1,0 +1,35 @@
+{
+  "type": "object",
+  "required": [
+    "title",
+    "text"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "examples": [
+    {
+      "title": "第一章",
+      "text": "春風到了。"
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/AgentNovelRegistrationChapter.schema.json",
+  "title": "AgentNovelRegistrationChapter",
+  "description": "Code-derived StoryBlock Agent Novel Registration Chapter JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+    "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+  ]
+}

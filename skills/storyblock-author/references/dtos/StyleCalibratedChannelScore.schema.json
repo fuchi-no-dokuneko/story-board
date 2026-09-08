@@ -1,0 +1,70 @@
+{
+  "type": "object",
+  "required": [
+    "distance",
+    "percentile",
+    "robust_z",
+    "q95",
+    "q99",
+    "above_q95",
+    "above_q99"
+  ],
+  "properties": {
+    "distance": {
+      "$ref": "StyleChannelDistance.schema.json"
+    },
+    "percentile": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "robust_z": {
+      "type": "number",
+      "minimum": 0
+    },
+    "q95": {
+      "type": "number",
+      "minimum": 0
+    },
+    "q99": {
+      "type": "number",
+      "minimum": 0
+    },
+    "above_q95": {
+      "type": "boolean"
+    },
+    "above_q99": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleCalibratedChannelScore.schema.json",
+  "title": "StyleCalibratedChannelScore",
+  "description": "Code-derived StoryBlock Style Calibrated Channel Score JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "distance": {
+        "channel": "surface",
+        "channel_version": "example-1",
+        "primary_metric": "jensen_shannon_distance",
+        "primary_distance": 0,
+        "independent_gate_evidence": true,
+        "diagnostics": {
+        }
+      },
+      "percentile": 0,
+      "robust_z": 0,
+      "q95": 0,
+      "q99": 0,
+      "above_q95": true,
+      "above_q99": true
+    }
+  ]
+}

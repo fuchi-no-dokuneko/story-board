@@ -1,0 +1,77 @@
+{
+  "type": "object",
+  "required": [
+    "key_id",
+    "novel_id",
+    "actor_id",
+    "scopes",
+    "expires_at",
+    "secret"
+  ],
+  "properties": {
+    "key_id": {
+      "type": "string",
+      "pattern": "^key_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "actor_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:@-]{1,128}$"
+    },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "novel:read",
+          "novel:analyze",
+          "novel:propose",
+          "novel:commit",
+          "novel:admin",
+          "style:analyze",
+          "style:admin",
+          "rewrite:propose",
+          "monitor:submit",
+          "worker:execute"
+        ]
+      }
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "secret": {
+      "type": "string",
+      "pattern": "^nv_key_[0-9a-f-]{36}\\.[A-Za-z0-9_-]{43}$",
+      "readOnly": true,
+      "description": "One-time bearer credential; the response must not be cached."
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/AccessKeyCreated.schema.json",
+  "title": "AccessKeyCreated",
+  "description": "Code-derived StoryBlock Access Key Created JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
+    "modules/security/src/main/java/dev/storyblock/security/AccessKeyService.java",
+    "modules/security/src/main/java/dev/storyblock/security/AccessScope.java"
+  ],
+  "examples": [
+    {
+      "key_id": "key_018f0f5e-7b4a-7c00-8000-000000000001",
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "actor_id": "example-1",
+      "scopes": [
+
+      ],
+      "expires_at": "2026-08-27T12:00:00Z",
+      "secret": "nv_key_018f0f5e-7b4a-7c00-8000-000000000001.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  ]
+}

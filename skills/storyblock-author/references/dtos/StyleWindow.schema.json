@@ -1,0 +1,113 @@
+{
+  "type": "object",
+  "required": [
+    "window_id",
+    "kind",
+    "segment",
+    "requested_stratum",
+    "pov",
+    "narrative_mode",
+    "block_ids",
+    "grapheme_count",
+    "full_sized",
+    "intentional_style_shift_reason",
+    "localization_only",
+    "primary_decision_eligible",
+    "sustainment_eligible"
+  ],
+  "properties": {
+    "window_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "operational",
+        "micro",
+        "non_overlap"
+      ]
+    },
+    "segment": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "requested_stratum": {
+      "$ref": "StyleStratum.schema.json"
+    },
+    "pov": {
+      "type": "string"
+    },
+    "narrative_mode": {
+      "type": "string"
+    },
+    "block_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "grapheme_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "full_sized": {
+      "type": "boolean"
+    },
+    "intentional_style_shift_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 500
+    },
+    "localization_only": {
+      "type": "boolean",
+      "description": "True only for micro windows, which cannot trigger rewrites."
+    },
+    "primary_decision_eligible": {
+      "type": "boolean",
+      "description": "True only for full operational windows."
+    },
+    "sustainment_eligible": {
+      "type": "boolean",
+      "description": "True only for full non-overlap windows."
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleWindow.schema.json",
+  "title": "StyleWindow",
+  "description": "Code-derived StoryBlock Style Window JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "window_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "kind": "operational",
+      "segment": 0,
+      "requested_stratum": {
+        "kind": "narration",
+        "speaker_id": "example-1"
+      },
+      "pov": "example-1",
+      "narrative_mode": "example-1",
+      "block_ids": [
+        "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+      ],
+      "grapheme_count": 1,
+      "full_sized": true,
+      "intentional_style_shift_reason": "example-1",
+      "localization_only": true,
+      "primary_decision_eligible": true,
+      "sustainment_eligible": true
+    }
+  ]
+}

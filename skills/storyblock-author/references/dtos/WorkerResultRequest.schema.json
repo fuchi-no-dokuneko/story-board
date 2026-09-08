@@ -1,0 +1,114 @@
+{
+  "type": "object",
+  "required": [
+    "lease_owner",
+    "attempt",
+    "snapshot_hash",
+    "profile_version_hash",
+    "analyzer_contract_hash",
+    "window_configuration_hash",
+    "summary",
+    "windows",
+    "trace",
+    "completed_at"
+  ],
+  "properties": {
+    "lease_owner": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:@-]{1,128}$"
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "snapshot_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "profile_version_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "analyzer_contract_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "window_configuration_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "summary": {
+      "$ref": "StyleAnalysisSummary.schema.json"
+    },
+    "windows": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "$ref": "StyleAnalysisWindowFinding.schema.json"
+      }
+    },
+    "trace": {
+      "oneOf": [
+        {
+          "$ref": "CompressedStyleAnalysisTrace.schema.json"
+        },
+        {
+          "type": "object",
+          "not": {
+            "required": [
+              "codec",
+              "content_base64",
+              "content_hash",
+              "uncompressed_bytes"
+            ]
+          },
+          "additionalProperties": true
+        }
+      ]
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/WorkerResultRequest.schema.json",
+  "title": "WorkerResultRequest",
+  "description": "Code-derived StoryBlock Worker Result Request JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "lease_owner": "example-1",
+      "attempt": 1,
+      "snapshot_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "profile_version_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "analyzer_contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "window_configuration_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "summary": {
+        "analyzed_block_count": 1,
+        "calibrated_window_count": 0,
+        "decision_counts": {
+        },
+        "operational_window_count": 0
+      },
+      "windows": [
+
+      ],
+      "trace": {
+        "codec": "gzip",
+        "content_base64": "e30=",
+        "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "uncompressed_bytes": 2
+      },
+      "completed_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

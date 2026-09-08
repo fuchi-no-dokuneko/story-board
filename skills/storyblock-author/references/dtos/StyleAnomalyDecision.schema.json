@@ -1,0 +1,118 @@
+{
+  "type": "object",
+  "required": [
+    "state",
+    "reason",
+    "confidence",
+    "operational_window_id",
+    "independent_q99_channels",
+    "sustaining_window_ids",
+    "localized_micro_window_ids",
+    "intentional_shift_adjusted",
+    "can_trigger_rewrite"
+  ],
+  "properties": {
+    "state": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "warning",
+        "rewrite_candidate",
+        "topic_shift_only",
+        "low_confidence"
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "within_calibrated_range",
+        "insufficient_calibration",
+        "token_channel_only",
+        "multi_channel_q95",
+        "sustained_multi_channel_q99",
+        "intentional_style_shift"
+      ]
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "calibrated",
+        "low_confidence"
+      ]
+    },
+    "operational_window_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "independent_q99_channels": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 5,
+      "description": "Independently gated calibrated channels above q99 in the operational window.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "surface",
+          "grammar",
+          "rhythm",
+          "narrative",
+          "lexical"
+        ]
+      }
+    },
+    "sustaining_window_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^sha256:[0-9a-f]{64}$"
+      }
+    },
+    "localized_micro_window_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "Localization evidence only; never sufficient for rewrite eligibility.",
+      "items": {
+        "type": "string",
+        "pattern": "^sha256:[0-9a-f]{64}$"
+      }
+    },
+    "intentional_shift_adjusted": {
+      "type": "boolean"
+    },
+    "can_trigger_rewrite": {
+      "type": "boolean",
+      "description": "True only for a calibrated sustained rewrite_candidate."
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnomalyDecision.schema.json",
+  "title": "StyleAnomalyDecision",
+  "description": "Code-derived StoryBlock Style Anomaly Decision JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "state": "normal",
+      "reason": "within_calibrated_range",
+      "confidence": "calibrated",
+      "operational_window_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "independent_q99_channels": [
+
+      ],
+      "sustaining_window_ids": [
+
+      ],
+      "localized_micro_window_ids": [
+
+      ],
+      "intentional_shift_adjusted": true,
+      "can_trigger_rewrite": true
+    }
+  ]
+}

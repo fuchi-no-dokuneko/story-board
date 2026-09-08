@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "required": [
+    "requested_stratum",
+    "selected_stratum",
+    "reason",
+    "calibration_available",
+    "confidence"
+  ],
+  "properties": {
+    "requested_stratum": {
+      "$ref": "StyleStratum.schema.json"
+    },
+    "selected_stratum": {
+      "$ref": "StyleStratum.schema.json"
+    },
+    "reason": {
+      "type": "string",
+      "enum": [
+        "exact",
+        "speaker_fallback",
+        "unavailable"
+      ]
+    },
+    "calibration_available": {
+      "type": "boolean"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "calibrated",
+        "low_confidence"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleProfileSelection.schema.json",
+  "title": "StyleProfileSelection",
+  "description": "Code-derived StoryBlock Style Profile Selection JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "requested_stratum": {
+        "kind": "narration",
+        "speaker_id": "example-1"
+      },
+      "selected_stratum": {
+        "kind": "narration",
+        "speaker_id": "example-1"
+      },
+      "reason": "exact",
+      "calibration_available": true,
+      "confidence": "calibrated"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "type": "object",
+  "required": [
+    "analyzed_block_count",
+    "calibrated_window_count",
+    "decision_counts",
+    "operational_window_count"
+  ],
+  "properties": {
+    "analyzed_block_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "calibrated_window_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000
+    },
+    "decision_counts": {
+      "type": "object",
+      "properties": {
+        "normal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warning": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rewrite_candidate": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "topic_shift_only": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "low_confidence": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "operational_window_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnalysisSummary.schema.json",
+  "title": "StyleAnalysisSummary",
+  "description": "Code-derived StoryBlock Style Analysis Summary JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "analyzed_block_count": 1,
+      "calibrated_window_count": 0,
+      "decision_counts": {
+      },
+      "operational_window_count": 0
+    }
+  ]
+}

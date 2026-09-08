@@ -1,0 +1,50 @@
+{
+  "type": "object",
+  "required": [
+    "idempotent_replay",
+    "proposal_id",
+    "status",
+    "status_uri",
+    "worker_input_hash"
+  ],
+  "properties": {
+    "idempotent_replay": {
+      "type": "boolean"
+    },
+    "proposal_id": {
+      "type": "string",
+      "pattern": "^prp_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "status": {
+      "const": "pending"
+    },
+    "status_uri": {
+      "type": "string",
+      "format": "uri-reference"
+    },
+    "worker_input_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/RewriteProposalAccepted.schema.json",
+  "title": "RewriteProposalAccepted",
+  "description": "Code-derived StoryBlock Rewrite Proposal Accepted JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+    "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+    "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+  ],
+  "examples": [
+    {
+      "idempotent_replay": true,
+      "proposal_id": "prp_018f0f5e-7b4a-7c00-8000-000000000001",
+      "status": "pending",
+      "status_uri": "/v1/resource",
+      "worker_input_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

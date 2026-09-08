@@ -1,0 +1,14 @@
+{
+  "type": "string",
+  "description": "UTF-8 OpenAPI 3.1 YAML document.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/OpenApiDocument.schema.json",
+  "title": "OpenApiDocument",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java"
+  ],
+  "examples": [
+    "example"
+  ]
+}

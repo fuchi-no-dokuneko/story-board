@@ -1,0 +1,101 @@
+{
+  "type": "object",
+  "required": [
+    "contract_hash",
+    "target_feature_set_hash",
+    "current_feature_set_hash",
+    "channels",
+    "token_kl_diagnostic_only"
+  ],
+  "properties": {
+    "contract_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "target_feature_set_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "current_feature_set_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "channels": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 6,
+      "items": {
+        "$ref": "StyleChannelDistance.schema.json"
+      }
+    },
+    "token_kl_diagnostic_only": {
+      "const": true
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleDistanceReport.schema.json",
+  "title": "StyleDistanceReport",
+  "description": "Code-derived StoryBlock Style Distance Report JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "target_feature_set_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "current_feature_set_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "channels": [
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "primary_distance": 0,
+          "independent_gate_evidence": true,
+          "diagnostics": {
+          }
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "primary_distance": 0,
+          "independent_gate_evidence": true,
+          "diagnostics": {
+          }
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "primary_distance": 0,
+          "independent_gate_evidence": true,
+          "diagnostics": {
+          }
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "primary_distance": 0,
+          "independent_gate_evidence": true,
+          "diagnostics": {
+          }
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "primary_distance": 0,
+          "independent_gate_evidence": true,
+          "diagnostics": {
+          }
+        }
+      ],
+      "token_kl_diagnostic_only": true
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "operation_id": "op_018f0f5e-7b4a-7c00-8000-000000000021",
+  "idempotency_key": "example-update-001",
+  "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+  "base_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000002",
+  "expected_head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "type": "replace_block_range",
+  "payload": {
+    "range": {
+      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000003",
+      "first_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000004",
+      "last_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000004",
+      "expected_blocks": [
+        {
+          "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000004",
+          "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000005"
+        }
+      ],
+      "expected_range_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "expected_previous_block_id": null,
+      "expected_next_block_id": null
+    },
+    "new_blocks": [
+      {
+        "id": "blk_018f0f5e-7b4a-7c00-8000-000000000024",
+        "text": "洛恩悄悄推開了門。",
+        "meta": {}
+      }
+    ]
+  }
+}

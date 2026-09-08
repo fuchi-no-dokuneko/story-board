@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "required": [
+    "job_id",
+    "status",
+    "status_uri"
+  ],
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "pattern": "^job_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "status": {
+      "const": "queued"
+    },
+    "status_uri": {
+      "type": "string",
+      "format": "uri-reference"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/JobAccepted.schema.json",
+  "title": "JobAccepted",
+  "description": "Code-derived StoryBlock Job Accepted JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+  ],
+  "examples": [
+    {
+      "job_id": "job_018f0f5e-7b4a-7c00-8000-000000000001",
+      "status": "queued",
+      "status_uri": "/v1/resource"
+    }
+  ]
+}

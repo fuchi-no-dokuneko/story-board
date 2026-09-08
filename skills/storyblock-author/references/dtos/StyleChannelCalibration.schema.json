@@ -1,0 +1,87 @@
+{
+  "type": "object",
+  "required": [
+    "channel",
+    "channel_version",
+    "primary_metric",
+    "reference_distances",
+    "median",
+    "mad",
+    "q95",
+    "q99"
+  ],
+  "properties": {
+    "channel": {
+      "type": "string",
+      "enum": [
+        "surface",
+        "grammar",
+        "rhythm",
+        "narrative",
+        "lexical",
+        "optional_embedding"
+      ]
+    },
+    "channel_version": {
+      "type": "string"
+    },
+    "primary_metric": {
+      "type": "string",
+      "enum": [
+        "jensen_shannon_distance",
+        "wasserstein_distance",
+        "robust_l1_input",
+        "cosine_distance"
+      ]
+    },
+    "reference_distances": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "median": {
+      "type": "number",
+      "minimum": 0
+    },
+    "mad": {
+      "type": "number",
+      "minimum": 0
+    },
+    "q95": {
+      "type": "number",
+      "minimum": 0
+    },
+    "q99": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleChannelCalibration.schema.json",
+  "title": "StyleChannelCalibration",
+  "description": "Code-derived StoryBlock Style Channel Calibration JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "channel": "surface",
+      "channel_version": "example-1",
+      "primary_metric": "jensen_shannon_distance",
+      "reference_distances": [
+
+      ],
+      "median": 0,
+      "mad": 0,
+      "q95": 0,
+      "q99": 0
+    }
+  ]
+}

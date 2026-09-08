@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "required": [
+    "block_id",
+    "rendered_start",
+    "rendered_end"
+  ],
+  "properties": {
+    "block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "rendered_start": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rendered_end": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/RenderOffset.schema.json",
+  "title": "RenderOffset",
+  "description": "Code-derived StoryBlock Render Offset JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RenderController.java",
+    "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+  ],
+  "examples": [
+    {
+      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "rendered_start": 0,
+      "rendered_end": 0
+    }
+  ]
+}

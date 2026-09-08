@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "required": [
+    "from_block_id",
+    "to_block_id"
+  ],
+  "properties": {
+    "from_block_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "to_block_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/RenderRange.schema.json",
+  "title": "RenderRange",
+  "description": "Code-derived StoryBlock Render Range JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RenderController.java",
+    "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+  ],
+  "examples": [
+    {
+      "from_block_id": "example-1",
+      "to_block_id": "example-1"
+    }
+  ]
+}

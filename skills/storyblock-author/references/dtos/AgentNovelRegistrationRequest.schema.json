@@ -1,0 +1,106 @@
+{
+  "type": "object",
+  "required": [
+    "novel_id",
+    "created_at",
+    "title",
+    "language",
+    "main_characters",
+    "zombie_count",
+    "tnt_cannon_count",
+    "expected_han_characters",
+    "chapters"
+  ],
+  "properties": {
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "language": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32
+    },
+    "main_characters": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80
+      }
+    },
+    "zombie_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tnt_cannon_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "expected_han_characters": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "chapters": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100,
+      "items": {
+        "$ref": "AgentNovelRegistrationChapter.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "x-server-constraints": [
+    "created_at must round-trip through java.time.Instant.toString()",
+    "expected_han_characters must equal the NFC-normalized Java UnicodeScript.HAN count across chapter text",
+    "chapter sentence segmentation must produce canonical blocks of at most 100 grapheme clusters"
+  ],
+  "examples": [
+    {
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "created_at": "2026-08-27T12:00:00Z",
+      "title": "最小故事",
+      "language": "zh-Hant",
+      "main_characters": [
+        "洛恩",
+        "艾莉婭",
+        "塞拉斯",
+        "伊瑟琳",
+        "阿斯塔羅"
+      ],
+      "zombie_count": 0,
+      "tnt_cannon_count": 0,
+      "expected_han_characters": 4,
+      "chapters": [
+        {
+          "title": "第一章",
+          "text": "春風到了。"
+        }
+      ]
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/AgentNovelRegistrationRequest.schema.json",
+  "title": "AgentNovelRegistrationRequest",
+  "description": "Code-derived StoryBlock Agent Novel Registration Request JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+    "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+  ]
+}

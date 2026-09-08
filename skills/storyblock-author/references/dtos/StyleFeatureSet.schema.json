@@ -1,0 +1,112 @@
+{
+  "type": "object",
+  "required": [
+    "source_hash",
+    "contract",
+    "channels"
+  ],
+  "properties": {
+    "source_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "contract": {
+      "$ref": "StyleFeatureContract.schema.json"
+    },
+    "channels": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 6,
+      "items": {
+        "$ref": "StyleFeatureVector.schema.json"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleFeatureSet.schema.json",
+  "title": "StyleFeatureSet",
+  "description": "Code-derived StoryBlock Style Feature Set JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "source_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "contract": {
+        "analyzer_version": "example-1",
+        "feature_schema_version": "example-1",
+        "tokenizer_id": "example-1",
+        "vocabulary_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "normalizer_version": "example-1",
+        "additive_smoothing_alpha": 1,
+        "top_k": 10
+      },
+      "channels": [
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "distribution": {
+          },
+          "measurements": {
+          },
+          "embedding": [
+
+          ]
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "distribution": {
+          },
+          "measurements": {
+          },
+          "embedding": [
+
+          ]
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "distribution": {
+          },
+          "measurements": {
+          },
+          "embedding": [
+
+          ]
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "distribution": {
+          },
+          "measurements": {
+          },
+          "embedding": [
+
+          ]
+        },
+        {
+          "channel": "surface",
+          "channel_version": "example-1",
+          "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "distribution": {
+          },
+          "measurements": {
+          },
+          "embedding": [
+
+          ]
+        }
+      ]
+    }
+  ]
+}

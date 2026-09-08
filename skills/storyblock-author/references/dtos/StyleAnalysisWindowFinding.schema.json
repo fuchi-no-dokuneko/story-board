@@ -1,0 +1,81 @@
+{
+  "type": "object",
+  "required": [
+    "block_ids",
+    "can_trigger_rewrite",
+    "confidence",
+    "decision_state",
+    "ordinal",
+    "payload",
+    "window_id"
+  ],
+  "properties": {
+    "block_ids": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      }
+    },
+    "can_trigger_rewrite": {
+      "type": "boolean"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "calibrated",
+        "low_confidence"
+      ]
+    },
+    "decision_state": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "warning",
+        "rewrite_candidate",
+        "topic_shift_only",
+        "low_confidence"
+      ]
+    },
+    "ordinal": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 999
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "window_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnalysisWindowFinding.schema.json",
+  "title": "StyleAnalysisWindowFinding",
+  "description": "Code-derived StoryBlock Style Analysis Window Finding JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "block_ids": [
+        "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+      ],
+      "can_trigger_rewrite": true,
+      "confidence": "calibrated",
+      "decision_state": "normal",
+      "ordinal": 0,
+      "payload": {
+      },
+      "window_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

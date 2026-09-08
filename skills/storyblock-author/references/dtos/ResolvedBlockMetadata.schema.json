@@ -1,0 +1,64 @@
+{
+  "type": "object",
+  "required": [
+    "block_id",
+    "before",
+    "events",
+    "after"
+  ],
+  "properties": {
+    "block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "before": {
+      "$ref": "ResolvedMetadataState.schema.json"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "after": {
+      "$ref": "ResolvedMetadataState.schema.json"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/ResolvedBlockMetadata.schema.json",
+  "title": "ResolvedBlockMetadata",
+  "description": "Code-derived StoryBlock Resolved Block Metadata JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RenderController.java",
+    "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+  ],
+  "examples": [
+    {
+      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "before": {
+        "time": "example-1",
+        "location": "example-1",
+        "weather": "example-1",
+        "pov": "example-1",
+        "present_character_ids": [
+
+        ]
+      },
+      "events": [
+
+      ],
+      "after": {
+        "time": "example-1",
+        "location": "example-1",
+        "weather": "example-1",
+        "pov": "example-1",
+        "present_character_ids": [
+
+        ]
+      }
+    }
+  ]
+}

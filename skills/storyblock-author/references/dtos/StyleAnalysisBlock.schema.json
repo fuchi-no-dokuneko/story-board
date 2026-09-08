@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "required": [
+    "block",
+    "intentional_style_shift_reason",
+    "narrative_mode",
+    "pov",
+    "scene_id",
+    "speaker_id",
+    "stratum_kind"
+  ],
+  "properties": {
+    "block": {
+      "$ref": "StyleAnalysisNarrativeBlock.schema.json"
+    },
+    "intentional_style_shift_reason": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 500
+    },
+    "narrative_mode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "pov": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "scene_id": {
+      "type": "string",
+      "pattern": "^scn_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "speaker_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[A-Za-z0-9._:@-]{1,128}$"
+    },
+    "stratum_kind": {
+      "type": "string",
+      "enum": [
+        "narration",
+        "dialogue"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnalysisBlock.schema.json",
+  "title": "StyleAnalysisBlock",
+  "description": "Code-derived StoryBlock Style Analysis Block JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "block": {
+        "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+        "extensions": {
+        },
+        "id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+        "metadata": {
+        },
+        "order_key": "0123456789abcdef0123456789abcdef",
+        "text": "春風到了。"
+      },
+      "intentional_style_shift_reason": "example-1",
+      "narrative_mode": "example-1",
+      "pov": "example-1",
+      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+      "speaker_id": "example-1",
+      "stratum_kind": "narration"
+    }
+  ]
+}

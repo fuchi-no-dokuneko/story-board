@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "required": [
+    "names"
+  ],
+  "properties": {
+    "names": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/ActuatorMetricsListResponse.schema.json",
+  "title": "ActuatorMetricsListResponse",
+  "description": "Code-derived StoryBlock Actuator Metrics List Response JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+    "apps/api/src/main/resources/application.properties"
+  ],
+  "examples": [
+    {
+      "names": [
+
+      ]
+    }
+  ]
+}

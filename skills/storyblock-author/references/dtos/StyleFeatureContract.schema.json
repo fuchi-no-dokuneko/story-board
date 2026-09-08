@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "required": [
+    "analyzer_version",
+    "feature_schema_version",
+    "tokenizer_id",
+    "vocabulary_hash",
+    "normalizer_version",
+    "additive_smoothing_alpha",
+    "top_k"
+  ],
+  "properties": {
+    "analyzer_version": {
+      "type": "string"
+    },
+    "feature_schema_version": {
+      "type": "string"
+    },
+    "tokenizer_id": {
+      "type": "string"
+    },
+    "vocabulary_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "normalizer_version": {
+      "type": "string"
+    },
+    "additive_smoothing_alpha": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1
+    },
+    "top_k": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 10000
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleFeatureContract.schema.json",
+  "title": "StyleFeatureContract",
+  "description": "Code-derived StoryBlock Style Feature Contract JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "analyzer_version": "example-1",
+      "feature_schema_version": "example-1",
+      "tokenizer_id": "example-1",
+      "vocabulary_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "normalizer_version": "example-1",
+      "additive_smoothing_alpha": 1,
+      "top_k": 10
+    }
+  ]
+}

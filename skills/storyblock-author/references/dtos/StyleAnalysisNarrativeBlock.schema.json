@@ -1,0 +1,60 @@
+{
+  "type": "object",
+  "required": [
+    "block_version_id",
+    "extensions",
+    "id",
+    "metadata",
+    "order_key",
+    "text"
+  ],
+  "properties": {
+    "block_version_id": {
+      "type": "string",
+      "pattern": "^blv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "order_key": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnalysisNarrativeBlock.schema.json",
+  "title": "StyleAnalysisNarrativeBlock",
+  "description": "Code-derived StoryBlock Style Analysis Narrative Block JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+      "extensions": {
+      },
+      "id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "metadata": {
+      },
+      "order_key": "0123456789abcdef0123456789abcdef",
+      "text": "春風到了。"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "required": [
+    "block_id",
+    "block_version_id",
+    "text",
+    "local_meta"
+  ],
+  "properties": {
+    "block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "block_version_id": {
+      "type": "string",
+      "pattern": "^blv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "text": {
+      "type": "string"
+    },
+    "local_meta": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/RenderedBlock.schema.json",
+  "title": "RenderedBlock",
+  "description": "Code-derived StoryBlock Rendered Block JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RenderController.java",
+    "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+  ],
+  "examples": [
+    {
+      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+      "text": "春風到了。",
+      "local_meta": {
+      }
+    }
+  ]
+}

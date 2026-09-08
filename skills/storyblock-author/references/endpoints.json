@@ -1,0 +1,3166 @@
+{
+  "generatedAt": "2026-08-27T16:43:15Z",
+  "sourceRepository": "fuchi-no-dokuneko/story-board",
+  "apiVersion": "v1",
+  "scope": "Programmatic StoryBlock v1 endpoints plus exposed Actuator health and metrics; static browser assets are intentionally excluded.",
+  "global": {
+    "transport": "HTTPS terminated by the StoryBlock process with a locally generated self-signed CA=false leaf",
+    "requestIdHeader": "X-Request-Id",
+    "rateLimitPerAuthenticatedIdentityPerMinute": 600,
+    "maximumMutationBodyBytes": 2097152,
+    "mutationHeaders": [
+      "If-Match",
+      "Idempotency-Key"
+    ],
+    "problemDto": "ApiProblem"
+  },
+  "endpoints": [
+    {
+      "id": "health.read",
+      "method": "GET",
+      "path": "/actuator/health",
+      "summary": "Read aggregate operational health",
+      "auth": "public",
+      "scopes": [
+
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "contentType": "application/vnd.spring-boot.actuator.v3+json",
+          "dto": "ActuatorHealthResponse"
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/application.properties"
+      ]
+    },
+    {
+      "id": "health.components.read",
+      "method": "GET",
+      "path": "/actuator/health/{component}",
+      "summary": "Read one authorized health component",
+      "auth": "operator-owner",
+      "scopes": [
+
+      ],
+      "roles": [
+        "operator"
+      ],
+      "pathParameters": [
+        {
+          "name": "component",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "artifactStorage",
+              "backup",
+              "migration",
+              "sqlite",
+              "wal",
+              "workerQueue"
+            ]
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer owner token unless trusted-LAN mode authenticates the reachable client as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "contentType": "application/vnd.spring-boot.actuator.v3+json",
+          "dto": "ActuatorHealthResponse"
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+      ]
+    },
+    {
+      "id": "metrics.list",
+      "method": "GET",
+      "path": "/actuator/metrics",
+      "summary": "List exposed Micrometer metric names",
+      "auth": "operator-owner",
+      "scopes": [
+
+      ],
+      "roles": [
+        "operator"
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer owner token unless trusted-LAN mode authenticates the reachable client as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "contentType": "application/vnd.spring-boot.actuator.v3+json",
+          "dto": "ActuatorMetricsListResponse"
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/application.properties",
+        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+      ]
+    },
+    {
+      "id": "metrics.read",
+      "method": "GET",
+      "path": "/actuator/metrics/{metricName}",
+      "summary": "Read one exposed Micrometer metric",
+      "auth": "operator-owner",
+      "scopes": [
+
+      ],
+      "roles": [
+        "operator"
+      ],
+      "pathParameters": [
+        {
+          "name": "metricName",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "tag",
+          "required": false,
+          "description": "Optional repeated tag=name:value statistic filter.",
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer owner token unless trusted-LAN mode authenticates the reachable client as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "contentType": "application/vnd.spring-boot.actuator.v3+json",
+          "dto": "ActuatorMetricResponse"
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/application.properties"
+      ]
+    },
+    {
+      "id": "access-keys.revoke",
+      "method": "DELETE",
+      "path": "/v1/access-keys/{keyId}",
+      "summary": "Revoke a scoped bearer credential",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:admin"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "keyId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^key_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Key is revoked or was already revoked idempotently",
+          "contentType": "application/json",
+          "dto": "RevokeResponse",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "admin.novels.list",
+      "method": "GET",
+      "path": "/v1/admin/novels",
+      "summary": "List persisted novels for the read-only admin library",
+      "auth": "operator-owner",
+      "scopes": [
+
+      ],
+      "roles": [
+        "operator"
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+        {
+          "name": "page",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          }
+        },
+        {
+          "name": "size",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25
+          }
+        },
+        {
+          "name": "q",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "maxLength": 200,
+            "default": ""
+          }
+        }
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Page of current persisted novel heads",
+          "contentType": "application/json",
+          "dto": "AdminNovelCatalog",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "admin.novels.read",
+      "method": "GET",
+      "path": "/v1/admin/novels/{novelId}",
+      "summary": "Read a persisted novel and its current canonical revision",
+      "auth": "operator-owner",
+      "scopes": [
+
+      ],
+      "roles": [
+        "operator"
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Current persisted novel and complete readable revision",
+          "contentType": "application/json",
+          "dto": "AdminNovelDetail",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "agent.novels.register",
+      "method": "POST",
+      "path": "/v1/agent/novels",
+      "summary": "Validate and register a complete agent-authored manuscript",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:admin"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "Wildcard precondition for creation in a collection.",
+          "schema": {
+            "const": "*"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "AgentNovelRegistrationRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Existing idempotent registration result",
+          "contentType": "application/json",
+          "dto": "AgentNovelRegistrationResponse",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "Agent manuscript registered as a canonical novel",
+          "contentType": "application/json",
+          "dto": "AgentNovelRegistrationResponse",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "artifacts.download",
+      "method": "GET",
+      "path": "/v1/artifacts/{artifactId}",
+      "summary": "Download a novel-scoped immutable result artifact",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "artifactId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^art_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Immutable artifact bytes",
+          "contentType": "application/vnd.storyblock.package+json",
+          "contentTypes": [
+            "application/vnd.storyblock.package+json",
+            "application/vnd.storyblock.revision+json",
+            "application/vnd.storyblock.style-trace+json",
+            "application/octet-stream"
+          ],
+          "dto": "ArtifactResponse",
+          "headers": [
+            "Content-Disposition",
+            "ETag",
+            "X-Artifact-Codec"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "imports.create",
+      "method": "POST",
+      "path": "/v1/imports",
+      "summary": "Import a versioned canonical JSON document or package",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:admin"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "Wildcard precondition for creation in a collection.",
+          "schema": {
+            "const": "*"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "ImportRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Existing idempotent import result",
+          "contentType": "application/json",
+          "dto": "NovelHead",
+          "headers": [
+            "ETag"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "Canonical package imported atomically",
+          "contentType": "application/json",
+          "dto": "NovelHead",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "internal.jobs.claim",
+      "method": "POST",
+      "path": "/v1/internal/jobs/claims",
+      "summary": "Claim one available or expired durable worker lease",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "worker:execute"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "Wildcard precondition for creation in a collection.",
+          "schema": {
+            "const": "*"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "WorkerClaimRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Claimed style analysis lease and immutable execution snapshot",
+          "contentType": "application/json",
+          "dto": "WorkerClaimResponse",
+          "headers": [
+            "ETag"
+          ]
+        },
+        {
+          "status": 204,
+          "description": "No queued or expired style analysis job is available",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "internal.jobs.results.submit",
+      "method": "POST",
+      "path": "/v1/internal/jobs/{jobId}/results",
+      "summary": "Submit an idempotent version-bound worker result",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "worker:execute"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "jobId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^job_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "WorkerResultRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Result accepted or returned idempotently",
+          "contentType": "application/json",
+          "dto": "WorkerResultResponse",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "jobs.read",
+      "method": "GET",
+      "path": "/v1/jobs/{jobId}",
+      "summary": "Get durable job status within its novel authorization boundary",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "jobId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^job_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Durable job state",
+          "contentType": "application/json",
+          "dto": "Job",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.create",
+      "method": "POST",
+      "path": "/v1/novels",
+      "summary": "Create a novel from an initial canonical revision",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:admin"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "Wildcard precondition for creation in a collection.",
+          "schema": {
+            "const": "*"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "CreateNovelRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Existing idempotent creation result",
+          "contentType": "application/json",
+          "dto": "NovelHead",
+          "headers": [
+            "ETag"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "Novel created",
+          "contentType": "application/json",
+          "dto": "NovelHead",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.head.read",
+      "method": "GET",
+      "path": "/v1/novels/{novelId}",
+      "summary": "Get current novel head metadata",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Current head metadata",
+          "contentType": "application/json",
+          "dto": "NovelHead",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.access-keys.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/access-keys",
+      "summary": "Issue a scoped per-novel bearer credential",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:admin"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "AccessKeyRequest"
+      },
+      "responses": [
+        {
+          "status": 201,
+          "description": "Credential issued; secret is returned only once",
+          "contentType": "application/json",
+          "dto": "AccessKeyCreated",
+          "headers": [
+            "Cache-Control",
+            "Pragma"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.commits.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/commits",
+      "summary": "Commit one validated operation with atomic head CAS",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:commit"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "CommitRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Existing idempotent commit result",
+          "contentType": "application/json",
+          "dto": "CommitResponse",
+          "headers": [
+            "ETag"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "New immutable revision committed",
+          "contentType": "application/json",
+          "dto": "CommitResponse",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.detector-runs.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/detector-runs",
+      "summary": "Run the deterministic adjacent metadata detector",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:analyze"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "DetectorRunRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Revision-bound detector findings",
+          "contentType": "application/json",
+          "dto": "DetectorRunResponse",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/DetectorController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.edit-previews.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/edit-previews",
+      "summary": "Preview and validate one typed edit operation",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:propose"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "EditPreviewRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Side-effect-free preview",
+          "contentType": "application/json",
+          "dto": "PreviewResponse",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.exports.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/exports",
+      "summary": "Submit a canonical JSON or package export job",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "ExportRequest"
+      },
+      "responses": [
+        {
+          "status": 202,
+          "description": "Durable job accepted",
+          "contentType": "application/json",
+          "dto": "JobAccepted",
+          "headers": [
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.monitor-packets.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/monitor-packets",
+      "summary": "Resolve a bounded read-only packet for one monitor target",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "MonitorPacketRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Bounded render, detector context, and local invariants",
+          "contentType": "application/json",
+          "dto": "MonitorPacket",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.monitor-runs.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/monitor-runs",
+      "summary": "Persist an evidence-bound finding or inert proposed operation",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "monitor:submit"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "MonitorSubmissionRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Existing idempotent monitor submission",
+          "contentType": "application/json",
+          "dto": "MonitorSubmissionResponse",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "Immutable monitor output created",
+          "contentType": "application/json",
+          "dto": "MonitorSubmissionResponse",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.monitor-runs.read",
+      "method": "GET",
+      "path": "/v1/novels/{novelId}/monitor-runs/{runId}",
+      "summary": "Get an immutable monitor output with derived stale state",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        {
+          "name": "runId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^mrun_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Monitor output and current invalidation state",
+          "contentType": "application/json",
+          "dto": "MonitorRunStatus",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.renders.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/renders",
+      "summary": "Render a revision range with resolved metadata",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "RenderRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Deterministic render packet",
+          "contentType": "application/json",
+          "dto": "RenderPacket",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.revisions.read",
+      "method": "GET",
+      "path": "/v1/novels/{novelId}/revisions/{revisionId}",
+      "summary": "Get an immutable canonical revision",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        {
+          "name": "revisionId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Canonical revision",
+          "contentType": "application/json",
+          "dto": "CanonicalRevision",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.style-analyses.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/style-analyses",
+      "summary": "Submit a durable style analysis job",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "style:analyze"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "StyleAnalysisRequest"
+      },
+      "responses": [
+        {
+          "status": 202,
+          "description": "Durable style analysis job accepted or replayed idempotently",
+          "contentType": "application/json",
+          "dto": "StyleAnalysisAccepted",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.undo-previews.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/undo-previews",
+      "summary": "Preview restoration of historical canonical content",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:propose"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "UndoPreviewRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Restore operation preview",
+          "contentType": "application/json",
+          "dto": "PreviewResponse",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "openapi.read",
+      "method": "GET",
+      "path": "/v1/openapi.yaml",
+      "summary": "Read the bundled StoryBlock v1 OpenAPI document",
+      "auth": "public",
+      "scopes": [
+
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "contentType": "application/yaml",
+          "dto": "OpenApiDocument"
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java",
+        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+      ]
+    },
+    {
+      "id": "rewrite-proposals.create",
+      "method": "POST",
+      "path": "/v1/rewrite-proposals",
+      "summary": "Submit a durable LLM rewrite proposal job",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "rewrite:propose"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "RewriteProposalRequest"
+      },
+      "responses": [
+        {
+          "status": 202,
+          "description": "Durable job accepted",
+          "contentType": "application/json",
+          "dto": "RewriteProposalAccepted",
+          "headers": [
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "rewrite-proposals.read",
+      "method": "GET",
+      "path": "/v1/rewrite-proposals/{proposalId}",
+      "summary": "Get an immutable rewrite proposal and its validation results",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "proposalId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^prp_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Rewrite proposal",
+          "contentType": "application/json",
+          "dto": "RewriteProposalResponse",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ],
+      "authorizationNotes": "Requires novel:read, but the controller/filter code does not bind proposalId back to the credential novel.",
+      "openQuestion": "Whether cross-novel rewrite proposal reads are intentionally visible to any novel:read credential."
+    },
+    {
+      "id": "style-analyses.read",
+      "method": "GET",
+      "path": "/v1/style-analyses/{analysisId}",
+      "summary": "Get durable style analysis state and result metadata",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "analysisId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^ana_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Analysis state and canonical result metadata",
+          "contentType": "application/json",
+          "dto": "StyleAnalysisView",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "style-analyses.windows.list",
+      "method": "GET",
+      "path": "/v1/style-analyses/{analysisId}/windows",
+      "summary": "Page canonical window findings for a completed style analysis",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "analysisId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^ana_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "cursor",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          }
+        },
+        {
+          "name": "limit",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50
+          }
+        }
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "One stable cursor page of operational window findings",
+          "contentType": "application/json",
+          "dto": "StyleAnalysisWindowPage",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "style-profiles.create",
+      "method": "POST",
+      "path": "/v1/style-profiles",
+      "summary": "Create an immutable novel-scoped style profile",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "style:admin"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "Wildcard precondition for creation in a collection.",
+          "schema": {
+            "const": "*"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "StyleProfileRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Idempotent replay of the style profile creation",
+          "contentType": "application/json",
+          "dto": "StyleProfile",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "Style profile created",
+          "contentType": "application/json",
+          "dto": "StyleProfile",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "style-profiles.read",
+      "method": "GET",
+      "path": "/v1/style-profiles/{profileId}",
+      "summary": "Get an immutable style profile within its novel boundary",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "profileId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^spf_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Immutable style profile",
+          "contentType": "application/json",
+          "dto": "StyleProfile",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "style-profiles.versions.create",
+      "method": "POST",
+      "path": "/v1/style-profiles/{profileId}/versions",
+      "summary": "Create an immutable DRAFT profile baseline version",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "style:admin"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "profileId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^spf_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "StyleProfileVersionContent"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Idempotent replay of profile version creation",
+          "contentType": "application/json",
+          "dto": "StyleProfileVersionView",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "Immutable DRAFT profile version created",
+          "contentType": "application/json",
+          "dto": "StyleProfileVersionView",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "style-profiles.versions.read",
+      "method": "GET",
+      "path": "/v1/style-profiles/{profileId}/versions/{versionId}",
+      "summary": "Get an immutable profile version and append-only lifecycle",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "profileId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^spf_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        {
+          "name": "versionId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^spv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Style profile version lifecycle view",
+          "contentType": "application/json",
+          "dto": "StyleProfileVersionView",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "style-profiles.versions.transition",
+      "method": "POST",
+      "path": "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+      "summary": "Append an explicit audited profile lifecycle transition",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "style:admin"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "profileId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^spf_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        {
+          "name": "versionId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^spv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",
+          "schema": {
+            "type": "string",
+            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
+          }
+        },
+        {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "StyleProfileTransitionRequest"
+      },
+      "responses": [
+        {
+          "status": 200,
+          "description": "Updated append-only lifecycle view",
+          "contentType": "application/json",
+          "dto": "StyleProfileVersionView",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    }
+  ]
+}

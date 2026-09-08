@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "required": [
+
+  ],
+  "properties": {
+    "time": {
+    },
+    "location": {
+    },
+    "weather": {
+    },
+    "present_character_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/SceneSeed.schema.json",
+  "title": "SceneSeed",
+  "description": "Code-derived StoryBlock Scene Seed JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
+    "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+  ],
+  "examples": [
+    {
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "type": "object",
+  "required": [
+    "block_id",
+    "block_version_id",
+    "editable",
+    "text",
+    "text_hash"
+  ],
+  "properties": {
+    "block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "block_version_id": {
+      "type": "string",
+      "pattern": "^blv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "editable": {
+      "type": "boolean"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "x-storyblock-max-graphemes": 100
+    },
+    "text_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/RewriteSourceBlock.schema.json",
+  "title": "RewriteSourceBlock",
+  "description": "Code-derived StoryBlock Rewrite Source Block JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+    "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+    "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+  ],
+  "examples": [
+    {
+      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+      "editable": true,
+      "text": "春風到了。",
+      "text_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

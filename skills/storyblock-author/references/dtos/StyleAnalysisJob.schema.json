@@ -1,0 +1,36 @@
+{
+  "allOf": [
+    {
+      "$ref": "StyleAnalysisJobFields.schema.json"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleAnalysisJob.schema.json",
+  "title": "StyleAnalysisJob",
+  "description": "Code-derived StoryBlock Style Analysis Job JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "attempt": 0,
+      "created_at": "2026-08-27T12:00:00Z",
+      "failure_code": "example-1",
+      "job_id": "job_018f0f5e-7b4a-7c00-8000-000000000001",
+      "kind": "style-analysis",
+      "max_attempts": 1,
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "result_artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000001",
+      "result_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "retention_until": "2026-08-27T12:00:00Z",
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "status": "queued",
+      "updated_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

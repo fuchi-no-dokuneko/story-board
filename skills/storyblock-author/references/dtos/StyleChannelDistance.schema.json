@@ -1,0 +1,69 @@
+{
+  "type": "object",
+  "required": [
+    "channel",
+    "channel_version",
+    "primary_metric",
+    "primary_distance",
+    "independent_gate_evidence",
+    "diagnostics"
+  ],
+  "properties": {
+    "channel": {
+      "type": "string",
+      "enum": [
+        "surface",
+        "grammar",
+        "rhythm",
+        "narrative",
+        "lexical",
+        "optional_embedding"
+      ]
+    },
+    "channel_version": {
+      "type": "string"
+    },
+    "primary_metric": {
+      "type": "string",
+      "enum": [
+        "jensen_shannon_distance",
+        "wasserstein_distance",
+        "robust_l1_input",
+        "cosine_distance"
+      ]
+    },
+    "primary_distance": {
+      "type": "number",
+      "minimum": 0
+    },
+    "independent_gate_evidence": {
+      "type": "boolean"
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/StyleChannelDistance.schema.json",
+  "title": "StyleChannelDistance",
+  "description": "Code-derived StoryBlock Style Channel Distance JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "channel": "surface",
+      "channel_version": "example-1",
+      "primary_metric": "jensen_shannon_distance",
+      "primary_distance": 0,
+      "independent_gate_evidence": true,
+      "diagnostics": {
+      }
+    }
+  ]
+}
