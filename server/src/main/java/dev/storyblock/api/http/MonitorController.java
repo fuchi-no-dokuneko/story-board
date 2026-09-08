@@ -1,19 +1,11 @@
 package dev.storyblock.api.http;
 
 import dev.storyblock.application.MonitorService;
-import dev.storyblock.domain.Ids;
-import dev.storyblock.monitor.MonitorOutput;
-import dev.storyblock.monitor.MonitorPacket;
-import dev.storyblock.monitor.MonitorRunStatus;
-import dev.storyblock.monitor.MonitorSubmissionResult;
-import dev.storyblock.security.AuditContext;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
-import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,16 +19,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1")
 public final class MonitorController {
-    private static final Set<String> PACKET_FIELDS = Set.of(
+    static final Set<String> PACKET_FIELDS = Set.of(
             "revision_id", "revision_hash", "target_block_id", "neighbor_count"
     );
-    private static final Set<String> SUBMISSION_FIELDS = Set.of(
+    static final Set<String> SUBMISSION_FIELDS = Set.of(
             "revision_id", "revision_hash", "target_block_id", "neighbor_count",
             "rule_version", "affected_block_ids", "output"
     );
 
-    private final MonitorService monitors;
-    private final Clock clock;
+    final MonitorService monitors;
+    final Clock clock;
 
     public MonitorController(MonitorService monitors, Clock clock) {
         this.monitors = java.util.Objects.requireNonNull(monitors, "monitors");
@@ -50,28 +42,7 @@ public final class MonitorController {
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch,
             Authentication authentication
     ) {
-        Ids.NovelId requestedNovel = new Ids.NovelId(novelId);
-        AccessPrincipalSupport.requireNovel(authentication, requestedNovel);
-        Map<String, Object> request = StrictJsonRequest.parseObject(
-                requestBytes, "monitor packet request"
-        );
-        StrictJsonRequest.requireKeys(
-                request, PACKET_FIELDS, "monitor packet request"
-        );
-        String expectedHash = MonitorControllerMatchedRevisionHash.matchedRevisionHash(
-                request, ifMatch, "monitor packet request"
-        );
-        MonitorPacket packet = monitors.packet(
-                requestedNovel,
-                MonitorControllerRevisionId.revisionId(request, "monitor packet request"),
-                expectedHash,
-                MonitorControllerBlockId.blockId(request, "target_block_id", "monitor packet request"),
-                MonitorControllerExactInt.exactInt(request.get("neighbor_count"), "monitor packet request.neighbor_count")
-        );
-        return ResponseEntity.ok()
-                .header(HttpHeaders.ETAG, MonitorControllerQuote.quote(packet.revisionHash()))
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(packet.canonicalValue());
+        return MonitorControllerPacketAction.packet(this, novelId, requestBytes, ifMatch, authentication);
     }
 
     @PostMapping("/novels/{novelId}/monitor-runs")
@@ -83,47 +54,7 @@ public final class MonitorController {
             Authentication authentication,
             HttpServletRequest httpRequest
     ) {
-        Ids.NovelId requestedNovel = new Ids.NovelId(novelId);
-        AccessPrincipalSupport.requireNovel(authentication, requestedNovel);
-        Map<String, Object> request = StrictJsonRequest.parseObject(
-                requestBytes, "monitor submission"
-        );
-        StrictJsonRequest.requireKeys(
-                request, SUBMISSION_FIELDS, "monitor submission"
-        );
-        String expectedHash = MonitorControllerMatchedRevisionHash.matchedRevisionHash(
-                request, ifMatch, "monitor submission"
-        );
-        Instant submittedAt = clock.instant();
-        AuditContext auditContext = AccessPrincipalSupport.auditContext(
-                authentication, httpRequest, submittedAt
-        );
-        MonitorSubmissionResult result = monitors.submit(
-                requestedNovel,
-                MonitorControllerRevisionId.revisionId(request, "monitor submission"),
-                expectedHash,
-                MonitorControllerBlockId.blockId(request, "target_block_id", "monitor submission"),
-                MonitorControllerExactInt.exactInt(request.get("neighbor_count"), "monitor submission.neighbor_count"),
-                StrictJsonRequest.string(request, "rule_version", "monitor submission"),
-                StrictJsonRequest.uniqueStrings(
-                        request, "affected_block_ids", "monitor submission"
-                ).stream().map(Ids.BlockId::new).toList(),
-                MonitorOutput.fromCanonical(StrictJsonRequest.object(
-                        request.get("output"), "monitor submission.output"
-                )),
-                idempotencyKey,
-                auditContext
-        );
-        HttpStatus status = result.idempotentReplay() ? HttpStatus.OK : HttpStatus.CREATED;
-        return ResponseEntity.status(status)
-                .header(HttpHeaders.ETAG, MonitorControllerQuote.quote(result.status().run().revisionHash()))
-                .header(
-                        HttpHeaders.LOCATION,
-                        "/v1/novels/" + novelId + "/monitor-runs/"
-                                + result.status().run().runId().value()
-                )
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(result.canonicalValue());
+        return MonitorControllerSubmitAction.submit(this, novelId, requestBytes, ifMatch, idempotencyKey, authentication, httpRequest);
     }
 
     @GetMapping("/novels/{novelId}/monitor-runs/{runId}")
@@ -132,15 +63,7 @@ public final class MonitorController {
             @PathVariable String runId,
             Authentication authentication
     ) {
-        Ids.NovelId requestedNovel = new Ids.NovelId(novelId);
-        AccessPrincipalSupport.requireNovel(authentication, requestedNovel);
-        MonitorRunStatus status = monitors.getStatus(
-                requestedNovel, new Ids.MonitorRunId(runId)
-        );
-        return ResponseEntity.ok()
-                .header(HttpHeaders.ETAG, MonitorControllerQuote.quote(status.run().revisionHash()))
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .body(status.canonicalValue());
+        return MonitorControllerStatusAction.status(this, novelId, runId, authentication);
     }
 
 }

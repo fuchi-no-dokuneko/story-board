@@ -1,6 +1,6 @@
 package dev.storyblock.contracts;
 
-import static dev.storyblock.contracts.CanonicalNovelPackage.SHA_256;
+import static dev.storyblock.contracts.CanonicalPackageFields.SHA_256;
 
 final class CanonicalNovelPackageRequireHash {
     static void requireHash(String value, String field) {

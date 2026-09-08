@@ -1,6 +1,5 @@
 package dev.storyblock.renderer;
 
-import dev.storyblock.domain.CanonicalValues;
 import dev.storyblock.domain.DerivedSceneBoundary;
 import dev.storyblock.domain.Ids;
 import java.util.LinkedHashMap;
@@ -46,27 +45,10 @@ public record RenderPacket(
     }
 
     public Map<String, Object> canonicalValue() {
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("novel_id", novelId.value());
-        value.put("revision_id", revisionId.value());
-        value.put("revision_hash", revisionHash);
-        value.put("renderer_version", rendererVersion);
-        value.put("range", canonicalRange());
-        value.put("rendered_text", renderedText);
-        value.put("blocks", blocks.stream().map(RenderPacketCanonicalBlock::canonicalBlock).toList());
-        value.put(
-                "resolved_meta",
-                resolvedMetadata.stream().map(RenderPacketCanonicalMetadata::canonicalMetadata).toList()
-        );
-        value.put("offset_map", offsetMap.stream().map(RenderPacketCanonicalOffset::canonicalOffset).toList());
-        value.put(
-                "scene_boundaries",
-                sceneBoundaries.stream().map(RenderPacketCanonicalBoundary::canonicalBoundary).toList()
-        );
-        return CanonicalValues.freezeMap(value, "render_packet");
+        return RenderPacketCanonicalValueAction.canonicalValue(this);
     }
 
-    private Map<String, Object> canonicalRange() {
+    Map<String, Object> canonicalRange() {
         Map<String, Object> value = new LinkedHashMap<>();
         value.put(
                 "from_block_id",

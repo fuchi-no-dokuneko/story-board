@@ -1,8 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.CanonicalValues;
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +10,7 @@ public record StyleAnalysisSummary(
         int calibratedWindowCount,
         Map<StyleDecisionState, Integer> decisionCounts
 ) {
-    private static final Set<String> FIELDS = Set.of(
+    static final Set<String> FIELDS = Set.of(
             "analyzed_block_count", "operational_window_count",
             "calibrated_window_count", "decision_counts"
     );
@@ -50,50 +48,10 @@ public record StyleAnalysisSummary(
     }
 
     public static StyleAnalysisSummary fromCanonical(Map<String, Object> value) {
-        StyleCanonical.requireKeys(value, FIELDS, "style_analysis_summary");
-        Map<String, Object> counts = StyleCanonical.object(
-                value.get("decision_counts"), "style_analysis_summary.decision_counts"
-        );
-        EnumMap<StyleDecisionState, Integer> parsed = new EnumMap<>(
-                StyleDecisionState.class
-        );
-        counts.forEach((name, raw) -> {
-            if (!(raw instanceof Number)) {
-                throw new IllegalArgumentException(
-                        "Style analysis decision count must be an integer"
-                );
-            }
-            parsed.put(
-                    StyleDecisionState.fromCanonicalName(name),
-                    StyleCanonical.integer(
-                            Map.of("count", raw), "count", "style_analysis_summary"
-                    )
-            );
-        });
-        return new StyleAnalysisSummary(
-                StyleCanonical.integer(
-                        value, "analyzed_block_count", "style_analysis_summary"
-                ),
-                StyleCanonical.integer(
-                        value, "operational_window_count", "style_analysis_summary"
-                ),
-                StyleCanonical.integer(
-                        value, "calibrated_window_count", "style_analysis_summary"
-                ),
-                parsed
-        );
+        return StyleAnalysisSummaryFromCanonicalFactory.fromCanonical(value);
     }
 
     public Map<String, Object> canonicalValue() {
-        Map<String, Object> counts = new LinkedHashMap<>();
-        for (StyleDecisionState state : StyleDecisionState.values()) {
-            counts.put(state.canonicalName(), decisionCounts.get(state));
-        }
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("analyzed_block_count", analyzedBlockCount);
-        value.put("calibrated_window_count", calibratedWindowCount);
-        value.put("decision_counts", counts);
-        value.put("operational_window_count", operationalWindowCount);
-        return CanonicalValues.freezeMap(value, "style_analysis_summary");
+        return StyleAnalysisSummaryCanonicalValueAction.canonicalValue(this);
     }
 }

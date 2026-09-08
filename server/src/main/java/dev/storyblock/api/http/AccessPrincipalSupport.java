@@ -9,11 +9,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 final class AccessPrincipalSupport {
-    private AccessPrincipalSupport() {
+    AccessPrincipalSupport() {
     }
 
     static Optional<AccessPrincipal> principal(Authentication authentication) {
@@ -38,26 +37,7 @@ final class AccessPrincipalSupport {
             Set<AccessScope> requestedScopes,
             Instant requestedExpiry
     ) {
-        principal(authentication).ifPresent(principal -> {
-            if (!principal.owner() && !principal.scopes().containsAll(requestedScopes)) {
-                throw ApiFailureException.of(
-                        HttpStatus.FORBIDDEN,
-                        "SCOPE_DELEGATION_DENIED",
-                        "Scope delegation denied",
-                        "scope-delegation-denied",
-                        "A credential may delegate only scopes it already holds."
-                );
-            }
-            if (!principal.owner() && requestedExpiry.isAfter(principal.expiresAt())) {
-                throw ApiFailureException.of(
-                        HttpStatus.FORBIDDEN,
-                        "EXPIRY_DELEGATION_DENIED",
-                        "Expiry delegation denied",
-                        "expiry-delegation-denied",
-                        "A delegated credential cannot outlive its issuer."
-                );
-            }
-        });
+        AccessPrincipalSupportRequireDelegableAccessFactory.requireDelegableAccess(authentication, requestedScopes, requestedExpiry);
     }
 
     static AuditContext auditContext(
@@ -65,22 +45,6 @@ final class AccessPrincipalSupport {
             HttpServletRequest request,
             Instant occurredAt
     ) {
-        Optional<AccessPrincipal> principal = principal(authentication);
-        if (principal.isPresent()) {
-            AccessPrincipal value = principal.get();
-            return new AuditContext(
-                    ApiRequestMetadata.requestId(request),
-                    value.actorId(),
-                    value.keyId(),
-                    occurredAt
-            );
-        }
-        String actor = authentication == null ? "authenticated" : authentication.getName();
-        if (actor == null || !actor.matches("[A-Za-z0-9._:@-]{1,128}")) {
-            actor = "authenticated";
-        }
-        return new AuditContext(
-                ApiRequestMetadata.requestId(request), actor, null, occurredAt
-        );
+        return AccessPrincipalSupportAuditContextFactory.auditContext(authentication, request, occurredAt);
     }
 }

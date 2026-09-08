@@ -68,38 +68,7 @@ public record AuditEvent(
             String operationHash,
             String contentHash
     ) {
-        Ids.AuditEventId eventId = Ids.AuditEventId.create();
-        String eventHash = AuditEventCalculateHash.calculateHash(
-                eventId,
-                context.occurredAt(),
-                context.requestId(),
-                context.actorId(),
-                context.actorKeyId(),
-                novelId,
-                action,
-                subjectId,
-                operationId,
-                revisionId,
-                result,
-                operationHash,
-                contentHash
-        );
-        return new AuditEvent(
-                eventId,
-                context.occurredAt(),
-                context.requestId(),
-                context.actorId(),
-                context.actorKeyId(),
-                novelId,
-                action,
-                subjectId,
-                operationId,
-                revisionId,
-                result,
-                operationHash,
-                contentHash,
-                eventHash
-        );
+        return AuditEventCreateFactory.create(context, novelId, action, subjectId, operationId, revisionId, result, operationHash, contentHash);
     }
 
 }

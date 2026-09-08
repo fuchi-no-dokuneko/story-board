@@ -29,3 +29,9 @@ Current status: SQL 操作與私有純函式已拆出；完整 Maven verify 通�
 Issues: 仍有大型資料型別、控制器、測試及文件需要拆分。
 affect scope: 全部 Java 模組；既有 API、黃金資料、併發、崩潰回復測試保留。
 ---
+---01:12---介面相容驗證
+category: refactor
+Current status: 型別命名空間、儲存介面、例外處理與服務邏輯已拆分；完整測試再度通過。
+Issues: 尚須完成其餘大檔、部署收尾、瀏覽器驗收及三語文件。
+affect scope: 識別碼、封裝、SQLite、HTTP；新增所有既有例外對應的檢查。
+---

@@ -1,9 +1,7 @@
 package dev.storyblock.style;
 
 import dev.storyblock.contracts.CanonicalJson;
-import dev.storyblock.domain.CanonicalValues;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +17,7 @@ public record StyleCalibrationProfile(
         List<StyleStratumCalibration> strata
 ) {
     static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
-    private static final Set<String> FIELDS = Set.of(
+    static final Set<String> FIELDS = Set.of(
             "calibration_schema_version", "target_corpus_hash", "contract_hash",
             "window_configuration_hash", "strata"
     );
@@ -50,24 +48,7 @@ public record StyleCalibrationProfile(
     }
 
     public static StyleCalibrationProfile fromCanonical(Map<String, Object> value) {
-        StyleCanonical.requireKeys(value, FIELDS, "style_calibration_profile");
-        return new StyleCalibrationProfile(
-                StyleCanonical.string(
-                        value, "calibration_schema_version", "style_calibration_profile"
-                ),
-                StyleCanonical.string(
-                        value, "target_corpus_hash", "style_calibration_profile"
-                ),
-                StyleCanonical.string(
-                        value, "contract_hash", "style_calibration_profile"
-                ),
-                StyleCanonical.string(
-                        value, "window_configuration_hash", "style_calibration_profile"
-                ),
-                StyleCanonical.objects(
-                        value.get("strata"), "style_calibration_profile.strata"
-                ).stream().map(StyleStratumCalibration::fromCanonical).toList()
-        );
+        return StyleCalibrationProfileFromCanonicalFactory.fromCanonical(value);
     }
 
     public Optional<StyleStratumCalibration> find(StyleStratum stratum) {
@@ -87,14 +68,7 @@ public record StyleCalibrationProfile(
     }
 
     public Map<String, Object> canonicalValue() {
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("calibration_schema_version", calibrationSchemaVersion);
-        value.put("contract_hash", contractHash);
-        value.put("strata", strata.stream()
-                .map(StyleStratumCalibration::canonicalValue).toList());
-        value.put("target_corpus_hash", targetCorpusHash);
-        value.put("window_configuration_hash", windowConfigurationHash);
-        return CanonicalValues.freezeMap(value, "style_calibration_profile");
+        return StyleCalibrationProfileCanonicalValueAction.canonicalValue(this);
     }
 
 }

@@ -1,6 +1,6 @@
 package dev.storyblock.contracts;
 
-import static dev.storyblock.contracts.CanonicalNovelPackage.TOKEN;
+import static dev.storyblock.contracts.CanonicalPackageFields.TOKEN;
 
 final class CanonicalNovelPackageRequireToken {
     static String requireToken(String value, String field) {

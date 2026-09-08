@@ -1,8 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.CanonicalValues;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -72,12 +70,6 @@ public record StyleWindowScore(
     }
 
     public Map<String, Object> canonicalValue() {
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("channels", channels.stream()
-                .map(StyleCalibratedChannelScore::canonicalValue).toList());
-        value.put("distance_report", distanceReport.canonicalValue());
-        value.put("profile_selection", profileSelection.canonicalValue());
-        value.put("window", window.canonicalValue());
-        return CanonicalValues.freezeMap(value, "style_window_score");
+        return StyleWindowScoreCanonicalValueAction.canonicalValue(this);
     }
 }

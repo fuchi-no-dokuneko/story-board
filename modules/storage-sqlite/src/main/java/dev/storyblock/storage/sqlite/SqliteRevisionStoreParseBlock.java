@@ -16,8 +16,8 @@ final class SqliteRevisionStoreParseBlock {
                 new Ids.BlockVersionId(SqliteRevisionStoreRequiredString.requiredString(value, "block_version_id")),
                 new OrderKey(SqliteRevisionStoreRequiredString.requiredString(value, "order_key")),
                 SqliteRevisionStoreRequiredString.requiredString(value, "text"),
-                new BlockMetadata(SqliteRevisionStore.requiredMap(value, "meta")),
-                value.containsKey("extensions") ? SqliteRevisionStore.requiredMap(value, "extensions") : Map.of()
+                new BlockMetadata(SqliteTombstoneObject.requiredMap(value, "meta")),
+                value.containsKey("extensions") ? SqliteTombstoneObject.requiredMap(value, "extensions") : Map.of()
         );
     }
 }

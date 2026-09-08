@@ -8,14 +8,14 @@ import org.sqlite.SQLiteErrorCode;
 import org.sqlite.SQLiteException;
 
 public final class SqliteMetrics {
-    private final LongAdder connectionVerifications = new LongAdder();
-    private final LongAdder readTransactions = new LongAdder();
-    private final LongAdder writeAttempts = new LongAdder();
-    private final LongAdder writeCommits = new LongAdder();
-    private final LongAdder sqliteBusyTotal = new LongAdder();
-    private final LongAdder writerWaitNanos = new LongAdder();
-    private final LongAccumulator maxTransactionNanos = new LongAccumulator(Long::max, 0L);
-    private final AtomicLong lastCheckpointMillis = new AtomicLong();
+    final LongAdder connectionVerifications = new LongAdder();
+    final LongAdder readTransactions = new LongAdder();
+    final LongAdder writeAttempts = new LongAdder();
+    final LongAdder writeCommits = new LongAdder();
+    final LongAdder sqliteBusyTotal = new LongAdder();
+    final LongAdder writerWaitNanos = new LongAdder();
+    final LongAccumulator maxTransactionNanos = new LongAccumulator(Long::max, 0L);
+    final AtomicLong lastCheckpointMillis = new AtomicLong();
 
     void recordConnectionVerification() {
         connectionVerifications.increment();
@@ -47,16 +47,7 @@ public final class SqliteMetrics {
     }
 
     public Snapshot snapshot() {
-        return new Snapshot(
-                connectionVerifications.sum(),
-                readTransactions.sum(),
-                writeAttempts.sum(),
-                writeCommits.sum(),
-                sqliteBusyTotal.sum(),
-                SqliteMetricsNanosToMillis.nanosToMillis(writerWaitNanos.sum()),
-                SqliteMetricsNanosToMillis.nanosToMillis(maxTransactionNanos.get()),
-                lastCheckpointMillis.get()
-        );
+        return SqliteMetricsSnapshotAction.snapshot(this);
     }
 
     public static boolean isBusy(Throwable failure) {

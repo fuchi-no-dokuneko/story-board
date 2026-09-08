@@ -3,7 +3,7 @@ package dev.storyblock.contracts;
 import dev.storyblock.domain.Ids;
 import java.util.Map;
 import static dev.storyblock.contracts.CanonicalNovelPackage.Manifest;
-import static dev.storyblock.contracts.CanonicalNovelPackage.MANIFEST_FIELDS;
+import static dev.storyblock.contracts.CanonicalPackageFields.MANIFEST_FIELDS;
 
 final class CanonicalNovelPackageParseManifest {
     static Manifest parseManifest(Map<String, Object> value) {

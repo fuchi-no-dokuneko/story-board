@@ -1,8 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.CanonicalValues;
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,9 +15,9 @@ public record StyleFeatureVector(
         Map<String, BigDecimal> measurements,
         List<BigDecimal> embedding
 ) {
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
     static final Pattern KEY = Pattern.compile("[^\\p{Cc}]{1,256}");
-    private static final Set<String> FIELDS = Set.of(
+    static final Set<String> FIELDS = Set.of(
             "channel", "channel_version", "contract_hash", "distribution",
             "measurements", "embedding"
     );
@@ -52,28 +50,11 @@ public record StyleFeatureVector(
     }
 
     public static StyleFeatureVector fromCanonical(Map<String, Object> value) {
-        StyleCanonical.requireKeys(value, FIELDS, "style_feature_vector");
-        return new StyleFeatureVector(
-                StyleFeatureChannel.fromCanonicalName(StyleCanonical.string(
-                        value, "channel", "style_feature_vector"
-                )),
-                StyleCanonical.string(value, "channel_version", "style_feature_vector"),
-                StyleCanonical.string(value, "contract_hash", "style_feature_vector"),
-                StyleCanonical.decimals(value.get("distribution"), "style_feature_vector.distribution"),
-                StyleCanonical.decimals(value.get("measurements"), "style_feature_vector.measurements"),
-                StyleCanonical.decimalList(value.get("embedding"), "style_feature_vector.embedding")
-        );
+        return StyleFeatureVectorFromCanonicalFactory.fromCanonical(value);
     }
 
     public Map<String, Object> canonicalValue() {
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("channel", channel.canonicalName());
-        value.put("channel_version", channelVersion);
-        value.put("contract_hash", contractHash);
-        value.put("distribution", distribution);
-        value.put("measurements", measurements);
-        value.put("embedding", embedding);
-        return CanonicalValues.freezeMap(value, "style_feature_vector");
+        return StyleFeatureVectorCanonicalValueAction.canonicalValue(this);
     }
 
 }

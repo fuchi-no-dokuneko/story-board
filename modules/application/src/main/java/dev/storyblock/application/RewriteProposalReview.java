@@ -53,22 +53,6 @@ public record RewriteProposalReview(
     }
 
     public Map<String, Object> contractFields() {
-        Map<String, Object> value = new java.util.LinkedHashMap<>();
-        value.put("after_style_score", afterStyleScore);
-        value.put("before_style_score", beforeStyleScore);
-        value.put("candidate_created_at", candidateCreatedAt == null
-                ? null : candidateCreatedAt.toString());
-        value.put("candidate_revision_id", candidateRevisionId == null
-                ? null : candidateRevisionId.value());
-        value.put("committable_without_approval", committableWithoutApproval());
-        value.put("expires_at", expiresAt.toString());
-        value.put("preview", preview == null ? null : preview.contractFields());
-        value.put("proposal_hash", proposalHash);
-        value.put("proposal_id", proposalId.value());
-        value.put("risk_assessment", riskAssessment == null
-                ? null : riskAssessment.canonicalValue());
-        value.put("stale_reasons", staleReasons);
-        value.put("state", state.canonicalName());
-        return java.util.Collections.unmodifiableMap(value);
+        return RewriteProposalReviewContractFieldsAction.contractFields(this);
     }
 }

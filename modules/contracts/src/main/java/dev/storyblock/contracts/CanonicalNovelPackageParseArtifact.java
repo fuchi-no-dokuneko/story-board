@@ -3,7 +3,7 @@ package dev.storyblock.contracts;
 import dev.storyblock.domain.Ids;
 import java.util.Base64;
 import java.util.Map;
-import static dev.storyblock.contracts.CanonicalNovelPackage.ARTIFACT_FIELDS;
+import static dev.storyblock.contracts.CanonicalPackageFields.ARTIFACT_FIELDS;
 import static dev.storyblock.contracts.CanonicalNovelPackage.ArtifactEntry;
 
 final class CanonicalNovelPackageParseArtifact {

@@ -16,10 +16,10 @@ record StyleWorkerSettings(
         Duration pollInterval,
         boolean runOnce
 ) {
-    private static final Pattern WORKER_ID = Pattern.compile(
+    static final Pattern WORKER_ID = Pattern.compile(
             "[A-Za-z0-9._:@-]{1,128}"
     );
-    private static final Pattern TOKEN = Pattern.compile(
+    static final Pattern TOKEN = Pattern.compile(
             "nv_key_[0-9a-f-]{36}\\.[A-Za-z0-9_-]{43}"
     );
 
@@ -49,28 +49,7 @@ record StyleWorkerSettings(
     }
 
     static StyleWorkerSettings from(Environment environment) {
-        Objects.requireNonNull(environment, "environment");
-        return new StyleWorkerSettings(
-                URI.create(StyleWorkerSettingsRequired.required(environment, "storyblock.worker.api-base-url")),
-                StyleWorkerSettingsRequired.required(environment, "storyblock.worker.token"),
-                new Ids.NovelId(StyleWorkerSettingsRequired.required(
-                        environment, "storyblock.worker.novel-id"
-                )),
-                environment.getProperty(
-                        "storyblock.worker.id", "style-worker"
-                ),
-                Duration.ofSeconds(environment.getProperty(
-                        "storyblock.worker.lease-seconds", Long.class, 300L
-                )),
-                environment.getProperty(
-                        "storyblock.worker.poll-interval",
-                        Duration.class,
-                        Duration.ofSeconds(5)
-                ),
-                environment.getProperty(
-                        "storyblock.worker.run-once", Boolean.class, false
-                )
-        );
+        return StyleWorkerSettingsFromFactory.from(environment);
     }
 
     URI endpoint(String relativePath) {

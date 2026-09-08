@@ -1,9 +1,6 @@
 package dev.storyblock.api.http;
 
 import dev.storyblock.application.DetectorService;
-import dev.storyblock.detector.DetectorRun;
-import dev.storyblock.domain.Ids;
-import dev.storyblock.renderer.RenderRange;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpHeaders;
@@ -23,8 +20,8 @@ public final class DetectorController {
             "revision_id", "revision_hash", "from_block_id", "to_block_id"
     );
 
-    private final DetectorService detectors;
-    private final StoryBlockTelemetry telemetry;
+    final DetectorService detectors;
+    final StoryBlockTelemetry telemetry;
 
     public DetectorController(
             DetectorService detectors,
@@ -41,38 +38,7 @@ public final class DetectorController {
             @RequestHeader(HttpHeaders.IF_MATCH) String ifMatch,
             Authentication authentication
     ) {
-        Ids.NovelId requestedNovel = new Ids.NovelId(novelId);
-        AccessPrincipalSupport.requireNovel(authentication, requestedNovel);
-        Map<String, Object> request = StrictJsonRequest.parseObject(
-                requestBytes, "detector request"
-        );
-        DetectorControllerRequireRequestFields.requireRequestFields(request);
-
-        String requestHash = StrictJsonRequest.string(
-                request, "revision_hash", "detector request"
-        );
-        String expectedHash = StrictJsonRequest.unquoteEtag(ifMatch);
-        if (!requestHash.equals(expectedHash)) {
-            throw new IllegalArgumentException(
-                    "detector request.revision_hash must match If-Match"
-            );
-        }
-        RenderRange range = new RenderRange(
-                DetectorControllerOptionalBlockId.optionalBlockId(request.get("from_block_id"), "from_block_id"),
-                DetectorControllerOptionalBlockId.optionalBlockId(request.get("to_block_id"), "to_block_id")
-        );
-        DetectorRun run = detectors.detect(
-                requestedNovel,
-                new Ids.RevisionId(StrictJsonRequest.string(
-                        request, "revision_id", "detector request"
-                )),
-                expectedHash,
-                range
-        );
-        telemetry.recordDetectorFindings(run.findings());
-        return ResponseEntity.ok()
-                .header(HttpHeaders.ETAG, '"' + run.revisionHash() + '"')
-                .body(run.canonicalValue());
+        return DetectorControllerDetectAction.detect(this, novelId, requestBytes, ifMatch, authentication);
     }
 
 }

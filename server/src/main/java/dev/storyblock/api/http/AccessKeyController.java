@@ -3,18 +3,10 @@ package dev.storyblock.api.http;
 import dev.storyblock.application.CanonicalTransferService;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.security.AccessKeyService;
-import dev.storyblock.security.AccessScope;
-import dev.storyblock.security.IssueAccessKeyCommand;
-import dev.storyblock.security.IssuedAccessKey;
-import dev.storyblock.security.StoredAccessKey;
 import dev.storyblock.storage.RevisionRef;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.URI;
 import java.time.Clock;
-import java.time.Instant;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -29,9 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1")
 public final class AccessKeyController {
-    private final AccessKeyService accessKeys;
-    private final CanonicalTransferService transfers;
-    private final Clock clock;
+    final AccessKeyService accessKeys;
+    final CanonicalTransferService transfers;
+    final Clock clock;
 
     public AccessKeyController(
             AccessKeyService accessKeys,
@@ -52,49 +44,7 @@ public final class AccessKeyController {
             Authentication authentication,
             HttpServletRequest servletRequest
     ) {
-        Ids.NovelId requestedNovel = new Ids.NovelId(novelId);
-        AccessPrincipalSupport.requireNovel(authentication, requestedNovel);
-        requireCurrentHead(requestedNovel, ifMatch);
-        Map<String, Object> request = StrictJsonRequest.parseObject(
-                requestBytes, "access-key request"
-        );
-        StrictJsonRequest.requireKeys(
-                request, Set.of("actor_id", "scopes", "expires_at"),
-                "access-key request"
-        );
-        Set<AccessScope> scopes = new LinkedHashSet<>();
-        for (String scope : StrictJsonRequest.uniqueStrings(
-                request, "scopes", "access-key request"
-        )) {
-            scopes.add(AccessScope.fromCanonicalName(scope));
-        }
-        Instant expiresAt = StrictJsonRequest.instant(
-                request, "expires_at", "access-key request"
-        );
-        AccessPrincipalSupport.requireDelegableAccess(
-                authentication, scopes, expiresAt
-        );
-        Instant now = Instant.now(clock);
-        IssuedAccessKey issued = accessKeys.issue(new IssueAccessKeyCommand(
-                requestedNovel,
-                StrictJsonRequest.string(request, "actor_id", "access-key request"),
-                scopes,
-                expiresAt,
-                idempotencyKey,
-                AccessPrincipalSupport.auditContext(authentication, servletRequest, now)
-        ));
-        StoredAccessKey key = issued.key();
-        return ResponseEntity.created(URI.create("/v1/access-keys/" + key.keyId().value()))
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
-                .header(HttpHeaders.PRAGMA, "no-cache")
-                .body(Map.of(
-                        "key_id", key.keyId().value(),
-                        "novel_id", key.novelId().value(),
-                        "actor_id", key.actorId(),
-                        "scopes", AccessScope.canonicalNames(key.scopes()),
-                        "expires_at", key.expiresAt().toString(),
-                        "secret", issued.bearerToken()
-                ));
+        return AccessKeyControllerIssueAction.issue(this, novelId, requestBytes, ifMatch, idempotencyKey, authentication, servletRequest);
     }
 
     @DeleteMapping("/access-keys/{keyId}")
@@ -104,23 +54,10 @@ public final class AccessKeyController {
             Authentication authentication,
             HttpServletRequest servletRequest
     ) {
-        Ids.AccessKeyId requestedKeyId = new Ids.AccessKeyId(keyId);
-        StoredAccessKey key = accessKeys.requireKey(requestedKeyId);
-        AccessPrincipalSupport.requireNovel(authentication, key.novelId());
-        requireCurrentHead(key.novelId(), ifMatch);
-        Instant now = Instant.now(clock);
-        accessKeys.revoke(
-                requestedKeyId,
-                key.novelId(),
-                AccessPrincipalSupport.auditContext(authentication, servletRequest, now)
-        );
-        return ResponseEntity.ok(Map.of(
-                "key_id", requestedKeyId.value(),
-                "revoked", true
-        ));
+        return AccessKeyControllerRevokeAction.revoke(this, keyId, ifMatch, authentication, servletRequest);
     }
 
-    private void requireCurrentHead(Ids.NovelId novelId, String ifMatch) {
+    void requireCurrentHead(Ids.NovelId novelId, String ifMatch) {
         RevisionRef actual = transfers.getHead(novelId);
         String expectedHash = StrictJsonRequest.unquoteEtag(ifMatch);
         if (!actual.contentHash().equals(expectedHash)) {

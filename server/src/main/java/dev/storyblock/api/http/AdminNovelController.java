@@ -2,9 +2,7 @@ package dev.storyblock.api.http;
 
 import dev.storyblock.application.NovelCatalogEntry;
 import dev.storyblock.application.NovelCatalogService;
-import dev.storyblock.domain.Ids;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public final class AdminNovelController {
     public static final String SCHEMA_VERSION = "admin-novel-reader-1.0.0";
 
-    private final NovelCatalogService catalog;
+    final NovelCatalogService catalog;
 
     public AdminNovelController(NovelCatalogService catalog) {
         this.catalog = java.util.Objects.requireNonNull(catalog, "catalog");
@@ -30,40 +28,12 @@ public final class AdminNovelController {
             @RequestParam(defaultValue = "25") int size,
             @RequestParam(defaultValue = "") String q
     ) {
-        if (page < 0) {
-            throw new IllegalArgumentException("page cannot be negative");
-        }
-        if (size < 1 || size > 100) {
-            throw new IllegalArgumentException("size must be between 1 and 100");
-        }
-        if (q.codePointCount(0, q.length()) > 200) {
-            throw new IllegalArgumentException("q cannot exceed 200 Unicode characters");
-        }
-        List<NovelCatalogEntry> matching = catalog.list(q);
-        int from = Math.min(Math.multiplyExact(page, size), matching.size());
-        int to = Math.min(from + size, matching.size());
-        int totalPages = matching.isEmpty() ? 0 : (matching.size() + size - 1) / size;
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("items", matching.subList(from, to).stream()
-                .map(AdminNovelController::entry)
-                .toList());
-        response.put("page", page);
-        response.put("schema_version", SCHEMA_VERSION);
-        response.put("size", size);
-        response.put("total", matching.size());
-        response.put("total_pages", totalPages);
-        return ResponseEntity.ok(response);
+        return AdminNovelControllerListAction.list(this, page, size, q);
     }
 
     @GetMapping("/{novelId}")
     ResponseEntity<Map<String, Object>> read(@PathVariable String novelId) {
-        Ids.NovelId id = new Ids.NovelId(novelId);
-        NovelCatalogEntry novel = catalog.get(id);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("novel", entry(novel));
-        response.put("revision", catalog.revision(id).envelope());
-        response.put("schema_version", SCHEMA_VERSION);
-        return ResponseEntity.ok().eTag(novel.headHash()).body(response);
+        return AdminNovelControllerReadAction.read(this, novelId);
     }
 
     static Map<String, Object> entry(NovelCatalogEntry value) {
