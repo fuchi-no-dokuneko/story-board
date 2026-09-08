@@ -1,0 +1,62 @@
+# Immutable Style Profiles And Feature Channels
+
+ADR-304 implements the governed baseline and deterministic feature boundary for
+style analysis. ADR-305 adds the rolling-window, calibration, and anomaly policy
+documented in
+[`rolling-windows-and-calibration.md`](rolling-windows-and-calibration.md).
+
+## Governance Model
+
+A `StyleProfile` has an immutable ID, name, provenance statement, and scope. A
+scope is always bound to one novel and may narrow analysis to the novel, a
+series subject, or a character subject. API handlers authorize against the
+stored novel before returning or mutating a profile.
+
+Each `StyleProfileVersion` is immutable and stores:
+
+- a monotonically allocated version number;
+- the exact profile scope;
+- corpus IDs, content hashes, source kind, provenance, license, and ownership;
+- the analyzer, feature schema, tokenizer, vocabulary, and normalizer contract;
+- versioned feature vectors for every required channel;
+- operational, micro, stride, and non-overlap window configuration;
+- a reserved canonical calibration-statistics object;
+- the authenticated creator and creation time.
+
+At least one corpus source hash must equal the feature set's source hash. This
+prevents a feature payload from being detached from all declared provenance.
+
+## Lifecycle And Approval
+
+Every new version begins in `DRAFT`. Lifecycle changes are append-only events
+and must follow exactly:
+
+```text
+DRAFT -> CALIBRATING -> READY -> DEPRECATED
+```
+
+The client cannot supply `created_by` or `approved_by`. Both identities and
+timestamps come from the authenticated audit context. A version can gate a
+rewrite only while its current state is `READY` and its READY event supplies the
+approval actor and time. Rewrite gating additionally requires at least one
+stratum with 30 calibration windows; READY versions with only low-confidence
+calibration remain reproducible but cannot gate a rewrite.
+
+Promoting a new version to `READY` deprecates the prior READY version in the
+same SQLite transaction. Generated or mixed corpus additionally requires
+`confirm_generated_corpus_promotion=true` on the READY transition. A failed or
+unconfirmed promotion does not append an event. Deprecated versions remain
+readable for reproduction but cannot gate new rewrites.
+
+Profiles, versions, lifecycle events, and idempotency records have SQLite
+update/delete rejection triggers. Mutations use per-novel idempotency keys and
+strong profile/status ETags. A stale ETag returns `412`; an illegal lifecycle
+step or missing generated-corpus acknowledgement returns `409`.
+
+## Feature Contract
+
+The deterministic analyzer accepts 1 to 1,000 immutable narrative blocks and
+emits these versioned channels:
+
+| Channel | Features | Primary distance |
+|---|---|---|

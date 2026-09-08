@@ -1,0 +1,19 @@
+| ADR-316 | `a0516ef` | crash, concurrency, rate-limit, and security suites |
+| ADR-317 | `031e54a` | `docs/evaluations/ADR-317.md` |
+| ADR-318 | `37b423f` | `docs/evaluations/ADR-318.md` |
+| ADR-319 | `9500677` | product-policy verifier and ADR 0008 |
+| ADR-320 | `2fb19f9` | `docs/evaluations/ADR-320.md` and trigger gate |
+
+## Reproduction
+
+```bash
+timeout 60s ./mvnw -q test
+scripts/run-adr317-evaluation.sh
+scripts/run-slo-qualification.sh
+scripts/verify-product-policy.sh
+scripts/verify-postgresql-gate.sh
+```
+
+The ADR-317 and ADR-318 scripts retain detailed machine-readable reports under
+ignored `artifacts/`. Threshold failures are written to those reports and
+produce nonzero command exits.

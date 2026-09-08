@@ -1,21 +1,9 @@
-# ADR 0004: Scoped Opaque Authorization
+# Optional scoped access
 
-- Status: Accepted
-- Date: 2026-08-21
-- Owner: StoryBlock local implementation
+EN: The default installation trusts every reachable client. Existing scoped opaque-key endpoints remain available for explicitly configured scoped access. Keys bind a novel, actor, scopes, and expiry; logs and audits exclude secret material.
 
-## Decision
+繁體中文：預設安裝信任所有可連線客戶端。既有不透明密鑰端點保留，供明確設定範圍授權時使用。密鑰綁定作品、使用者、範圍及期限；日誌與稽核不記錄秘密。
 
-Machine access uses one-time opaque secrets bound server-side to exactly one
-novel, actor, expiry, and scope set. Only an HMAC-SHA-256 digest made with a
-separately mounted server pepper is persisted. Authorization derives novel
-scope from the authenticated key and rejects conflicting URL or body identities.
+简体中文：默认安装信任所有可连接客户端。既有不透明密钥端点保留，供明确设置范围授权时使用。密钥绑定作品、用户、范围及期限；日志与审计不记录秘密。
 
-Workers receive minimum-purpose credentials. Rewrite and monitor workers never
-receive commit credentials or direct database access.
-
-## Consequences
-
-Secrets are transport-injected and redacted from logs, errors, metrics, prompts,
-and audit payloads. Human multi-user deployment requires a later OIDC/session
-identity layer rather than sharing machine keys.
+[Detailed notes / 詳細筆記 / 详细笔记](0004-scoped-opaque-authorization.notes.txt)

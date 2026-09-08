@@ -1,24 +1,9 @@
-# ADR 0002: Canonical JSON and Hashing
+# Canonical JSON
 
-- Status: Accepted
-- Date: 2026-08-21
-- Owner: StoryBlock local implementation
+EN: Canonical UTF-8 JSON orders object keys deterministically. Existing content hashes exclude derived data and their own envelope field. This refactor preserves every existing canonical byte fixture and schema field.
 
-## Decision
+繁體中文：標準 UTF-8 JSON 使用確定性的鍵順序。既有內容雜湊不包含衍生資料及封裝中的雜湊欄位。本次重構保留全部既有標準位元組範例與綱要欄位。
 
-Canonical interchange uses UTF-8 JSON with lexicographically ordered object
-keys, deterministic scalar formatting, strict unknown-field handling within a
-major schema version, and SHA-256 identifiers prefixed with `sha256:`. Content
-hash input is the canonical content projection: it excludes the envelope's own
-`content_hash` and all derived render, cache, detector, monitor, and analysis
-data. The final envelope is serialized only after that hash is computed.
+简体中文：标准 UTF-8 JSON 使用确定性的键顺序。既有内容哈希不包含派生数据及封装中的哈希字段。本次重构保留全部既有标准字节示例与纲要字段。
 
-Schema, normalizer, renderer, validator, and analyzer versions are explicit.
-Canonical golden bytes and hashes are treated as compatibility fixtures.
-
-## Consequences
-
-JSON maps must not rely on insertion order. Floating-point values that affect a
-canonical hash require an explicit normalized representation or fixed decimal
-contract. A new field cannot enter the hash projection without a schema-version
-and golden-fixture change.
+[Detailed notes / 詳細筆記 / 详细笔记](0002-canonical-json-and-hashing.notes.txt)

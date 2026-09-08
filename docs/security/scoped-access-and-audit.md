@@ -1,50 +1,9 @@
-# Scoped Access And Redacted Audit
+# Access and audit
 
-StoryBlock authenticates machine requests with opaque bearer credentials bound
-to one novel, one actor, an explicit scope set, and an expiry. Credential
-secrets are returned only by the successful issuance response. SQLite stores a
-32-byte HMAC-SHA-256 digest, never the bearer token or its secret component.
+EN: Reachable clients are trusted by default and need no secret or manual approval. Explicit scoped mode keeps the existing opaque-key API, expiry, revocation, delegation, and novel isolation. The installation generates its own local server pepper; redacted audits remain separate from prose and secrets.
 
-## Runtime Configuration
+繁體中文：預設信任可連線客戶端，不需密鑰或人工核准。明確選用範圍模式時，保留不透明密鑰 API、期限、撤銷、委派及作品隔離。安裝自行產生本機伺服器秘密；遮蔽後稽核不包含內文或秘密。
 
-Set `storyblock.security.pepper` (environment variable
-`STORYBLOCK_SECURITY_PEPPER`) to independently generated secret material of at
-least 32 bytes. The service refuses to start without it. The pepper must be
-mounted separately from the SQLite database and rotated through an explicit key
-replacement procedure because changing it invalidates every issued credential.
+简体中文：默认信任可连接客户端，不需密钥或人工批准。明确选用范围模式时，保留不透明密钥 API、期限、撤销、委派及作品隔离。安装自行生成本机服务器秘密；脱敏审计不包含正文或秘密。
 
-An optional `storyblock.security.owner-token` (environment variable
-`STORYBLOCK_SECURITY_OWNER_TOKEN`) of at least 32 characters enables bootstrap
-administration. It is compared by SHA-256 digest in constant time and is never
-persisted. Omit it after issuing normal administration credentials when
-bootstrap access is no longer required.
-
-`storyblock.security.hide-cross-novel` defaults to `true`, returning the same
-404 contract for missing and out-of-bound objects. Setting it to `false` returns
-a typed 403 for trusted deployments where existence disclosure is acceptable.
-
-## Authorization Rules
-
-- Every stored key belongs to exactly one novel.
-- Route scopes and object ownership are both enforced.
-- Non-owner credentials may delegate only scopes they already hold, and the
-  delegated key cannot outlive its issuer.
-- Job, artifact, and key identifiers are resolved to their owning novel before
-  controller access.
-- URL and body novel identifiers must agree with each other and with the key.
-- Expired and revoked credentials return the same generic 401 response as an
-  invalid secret.
-- `last_used_at` writes are throttled to one update per five-minute interval.
-
-## Audit Boundary
-
-Audit rows contain only typed identifiers, action/result enums, timestamps, and
-canonical SHA-256 hashes. They have no columns for request bodies, prose,
-prompts, corpora, model output, bearer tokens, or credential digests. Commit
-rows and their audit row are written in one SQLite transaction, including the
-head compare-and-swap.
-
-Access keys cannot be deleted and audit rows cannot be modified. Audit deletion
-is intentionally permitted so an operator can apply a retention period that is
-independent of immutable narrative history. Retention jobs must delete only
-`audit_events`; they must never mutate access keys, operations, or revisions.
+[Detailed notes / 詳細筆記 / 详细笔记](scoped-access-and-audit.notes.txt)

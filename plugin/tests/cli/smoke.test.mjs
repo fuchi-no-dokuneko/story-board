@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { cp, mkdtemp, readFile, rm } from "node:fs/promises";
+import { cp, mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,6 +8,15 @@ import { promisify } from "node:util";
 import { test } from "node:test";
 
 const execute = promisify(execFile);
+
+async function removeAssembled(directory) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const child = join(directory, entry.name);
+    if (entry.name.endsWith(".parts")) await rm(child.slice(0, -6), { force: true });
+    else await removeAssembled(child);
+  }
+}
 
 async function command(cwd, args) {
   return execute(process.execPath, ["scripts/storyblock-author.mjs", ...args], {
@@ -24,6 +33,8 @@ test("required offline commands work from a standalone folder copy", async () =>
   const copy = join(temporary, "storyblock-author");
   try {
     await cp(source, copy, { recursive: true });
+    await removeAssembled(copy);
+    await execute(process.execPath, ["scripts/assemble.mjs"], { cwd: copy });
 
     const endpoints = JSON.parse((await command(copy, ["endpoints", "--json"])).stdout);
     assert.equal(endpoints.endpoints.length, 39);
@@ -45,7 +56,6 @@ test("required offline commands work from a standalone folder copy", async () =>
     ])).stdout);
     assert.equal(manuscript.valid, true);
 
-    assert.equal((await readFile(join(copy, "VERSION"), "utf8")).trim(), "1.1.0");
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }

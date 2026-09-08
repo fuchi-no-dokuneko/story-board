@@ -1,60 +1,24 @@
-# StoryBlock error model
+# Errors / 錯誤 / 错误
 
-StoryBlock returns `application/problem+json` for API and filter failures. The stable base object is:
+EN: Use `--json` for machine-readable diagnostics. HTTP problems retain status, type, title, code, detail, request ID, and available validation issues. Retry mutations only with the exact original payload and idempotency key. A stale head requires a fresh read and preview.
 
-```json
-{
-  "type": "https://storyblock.example/problems/resource-not-found",
-  "title": "Resource not found",
-  "status": 404,
-  "code": "RESOURCE_NOT_FOUND",
-  "detail": "The requested resource does not exist.",
-  "instance": "/v1/novels/nov_...",
-  "request_id": "req_..."
-}
-```
+繁體中文：使用 `--json` 取得機器可讀診斷。HTTP 問題保留狀態、類型、標題、代碼、詳情、請求 ID 及可用驗證問題。變更重試只能使用原始內容與冪等鍵；版本頭過期時重新讀取及預覽。
 
-`type`, `title`, `status`, `code`, `detail`, `instance`, and `request_id` are always constructed by `ApiProblemFactory`. Domain-specific extension fields are inserted before `request_id`. Known extensions include current revision/ETag, stored and attempted hashes, candidate hash, validation `violations`/`warnings`, and policy-specific fields. Inspect the complete `problem` object in `--json` output; the CLI also lifts common fields and `violations` into `validation_issues`.
+简体中文：使用 `--json` 获取机器可读诊断。HTTP 问题保留状态、类型、标题、代码、详情、请求 ID 及可用验证问题。变更重试只能使用原始内容与幂等键；版本头过期时重新读取及预览。
 
-The response header `X-Request-Id` is always set. A caller may supply a 1–128 character value matching `[A-Za-z0-9._:-]+`; unsafe or absent values are replaced. Preserve it when correlating server logs.
+| Exit / 結束碼 / 退出码 | Meaning / 意義 / 含义 |
+| --- | --- |
+| 0 | Success / 成功 / 成功 |
+| 1 | Unexpected local failure / 非預期本機錯誤 / 非预期本机错误 |
+| 2 | Command usage / 命令用法 / 命令用法 |
+| 3 | Validation or verification / 驗證失敗 / 验证失败 |
+| 4 | HTTP 401 or 403 / 授權失敗 / 授权失败 |
+| 5 | Other HTTP error / 其他 HTTP 錯誤 / 其他 HTTP 错误 |
+| 6 | Network or TLS / 網路或 TLS / 网络或 TLS |
+| 7 | Unknown endpoint or DTO / 未知端點或 DTO / 未知端点或 DTO |
 
-## Status semantics
+EN: Common statuses: 409 changed retry content; 410 expired artifact; 412 stale head; 413 oversized body; 422 rejected edit; 428 missing mutation headers; 429 rate limit. Preserve `If-Match` and `Idempotency-Key`. Scoped cross-novel reads normally return 404.
 
-- `400`: malformed JSON, duplicate JSON members, invalid identifiers/parameters, invalid `If-Match`, invalid idempotency key, or bean validation failure. Correct locally; do not retry unchanged.
-- `401`: credential missing or invalid/expired/revoked. Exit 4.
-- `403`: authenticated principal lacks a scope/role, or cross-novel hiding is disabled and access is denied. Exit 4.
-- `404`: missing resource; by default this also hides cross-novel access.
-- `409`: idempotency/content/resource/lifecycle conflict. A reused idempotency key must retain its exact original content.
-- `410`: expired style artifact.
-- `412`: revision, analysis snapshot/lease, or style status precondition conflict. Refresh the relevant current resource before building a new operation.
-- `413`: mutation body exceeds 2,097,152 bytes.
-- `422`: deterministic validation rejected an edit; inspect `violations`, `warnings`, and `candidate_hash`.
-- `428`: required `Idempotency-Key` or `If-Match` is missing.
-- `429`: authenticated identity exceeded the configured limit (600 requests/minute by default). The filter emits `Retry-After: 60`.
-- `500`: unexpected server failure.
-- `503`: a storage or other required subsystem is temporarily unavailable.
+繁體中文：常見狀態：409 重試內容變更、410 產物過期、412 版本頭過期、413 內容過大、422 編輯拒絕、428 缺少變更標頭、429 速率限制。保留 `If-Match` 與 `Idempotency-Key`；範圍模式跨作品讀取通常回傳 404。
 
-All non-401/403 API responses exit 5, including retryable ones. Network and timeout failures exit 6.
-
-## Mutation preconditions
-
-Every `/v1` POST/PUT/PATCH/DELETE request is filtered before its controller:
-
-- `Idempotency-Key` is required, must be nonblank, and is limited to 200 characters.
-- `If-Match` is required.
-- Collection creation routes accept only `*`: `/v1/novels`, `/v1/agent/novels`, `/v1/imports`, `/v1/style-profiles`, and `/v1/internal/jobs/claims`.
-- Other mutations require exactly one quoted strong ETag: `"sha256:<64 lowercase hex>"`. Weak, unquoted, multiple, or wildcard values are rejected.
-
-The body cap applies even when a controller does not use a JSON DTO.
-
-## Strict JSON
-
-The local parser and server both reject duplicate object keys. The local schema validator reports JSON-pointer-like paths. It implements the schema features used by this package plus StoryBlock checks for canonical timestamps, Han counts, normalized nonblank registration values, and range endpoint guards.
-
-## Retry guidance
-
-Safe reads may be retried after transient network/5xx/429 failures. Honor `Retry-After` when present.
-
-For a mutation, retain the exact canonical JSON value, `Idempotency-Key`, resource IDs, candidate timestamp, and precondition. If the response was lost, retry those same values. Never “repair” an uncertain request by reusing its key with a changed body. A confirmed 412 or semantic 422 requires a newly constructed operation, not a blind retry.
-
-If the server returns non-JSON error content, the CLI synthesizes `UNPARSEABLE_ERROR_RESPONSE`, preserves the HTTP status/body text, and still exits 4 or 5 as appropriate.
+简体中文：常见状态：409 重试内容变更、410 产物过期、412 版本头过期、413 内容过大、422 编辑拒绝、428 缺少变更标头、429 速率限制。保留 `If-Match` 与 `Idempotency-Key`；范围模式跨作品读取通常返回 404。

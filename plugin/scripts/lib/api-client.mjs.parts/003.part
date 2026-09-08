@@ -1,3 +1,7 @@
+    if (response.status < 200 || response.status >= 300) {
+      throw new ApiResponseError(response.status, normalized, rawBody);
+    }
+    return {
       status: response.status,
       headers: normalized,
       data: responseData(rawBody, normalized, responseType),

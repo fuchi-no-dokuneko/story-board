@@ -1,0 +1,3 @@
+injected transaction stage, interval checkpoints plus trailing replay, full replay
+of every novel, compressed checkpoint equality, tombstone restore, and append-only
+triggers. `EditOperationCanonicalMapperTest` round-trips all ten operation types.

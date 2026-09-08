@@ -1,31 +1,9 @@
-# PostgreSQL migration trigger
+# Database choice
 
-Status: DEFERRED
+EN: SQLite remains the supported store. A PostgreSQL migration needs a separately approved, measured requirement. This refactor adds no database engine, migration, table, column, or schema change.
 
-PostgreSQL is intentionally not implemented in v1. ADR-320 permits work to
-begin only after measured evidence shows one of these conditions:
+繁體中文：SQLite 仍為支援的資料庫。遷移 PostgreSQL 需要另外核准且有量測依據的需求。本次重構不新增資料庫引擎、遷移、資料表、欄位或綱要變更。
 
-- sustained SQLite writer-lock pressure violates the two-commit-per-second SLO;
-- more than one API writer host is required;
-- database-enforced row-level security becomes mandatory;
-- HA, PITR, or distributed job claiming becomes an approved requirement.
+简体中文：SQLite 仍为支持的数据库。迁移 PostgreSQL 需要另外批准且有测量依据的需求。本次重构不新增数据库引擎、迁移、数据表、字段或纲要变更。
 
-The 2026-08-23 qualification recorded 44.424 commits per second with 100 of 100
-rows durable, no uncontrolled busy failures, and passing crash tests at all
-eight commit boundaries. One API writer host remains the approved topology;
-database RLS, HA/PITR, and distributed job claiming are not approved
-requirements. Therefore no trigger is currently recorded and implementation
-must remain absent.
-
-When a trigger is approved, its evidence, owner, and date must first replace the
-`not_triggered` state in `postgresql-trigger.json`. Migration then proceeds
-offline through canonical export/import: stop writers, export every novel,
-import into the PostgreSQL adapter, run the shared `RevisionStore` contract
-suite, replay every revision, compare every head and render hash, and only then
-move traffic. Optional RLS, distributed job claiming, HA, and PITR are added
-only when named by the approved trigger. Dual writes remain prohibited.
-
-The post-migration contract and head-hash acceptance criterion is conditional:
-it becomes executable only after a trigger is approved and an adapter exists.
-Until then, `scripts/verify-postgresql-gate.sh` proves the required outcome is
-deferment without PostgreSQL production dependencies.
+[Detailed notes / 詳細筆記 / 详细笔记](postgresql-trigger.notes.txt)

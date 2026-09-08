@@ -1,0 +1,46 @@
+[`../detection/adjacent-metadata-detector.md`](../detection/adjacent-metadata-detector.md).
+
+`POST /v1/novels/{novelId}/monitor-packets` requires `novel:read` and returns
+only the target, one or two neighbors on each side, resolved metadata, local
+invariants, and in-window detector findings. `POST
+/v1/novels/{novelId}/monitor-runs` requires `monitor:submit` and persists only
+an evidence-bound finding or inert proposed operation. `GET
+/v1/novels/{novelId}/monitor-runs/{monitorRunId}` requires `novel:read` and
+derives stale state without rebasing. See
+[`../monitoring/monitor-submission.md`](../monitoring/monitor-submission.md).
+
+`POST /v1/style-profiles` creates an immutable novel-scoped profile. `POST
+/v1/style-profiles/{profileId}/versions` creates an immutable `DRAFT` baseline;
+it does not approve it. The transition resource enforces
+`DRAFT -> CALIBRATING -> READY -> DEPRECATED`, records the authenticated actor,
+and requires an explicit acknowledgement before generated or mixed corpus can
+be promoted to `READY`. Profile and version GETs enforce the stored novel
+boundary. See
+[`../style/style-profiles-and-features.md`](../style/style-profiles-and-features.md).
+The version payload carries a self-validating calibration profile when one is
+available. Window, calibrated score, and anomaly decision schemas are defined
+for the durable analysis API; their deterministic semantics are in
+[`../style/rolling-windows-and-calibration.md`](../style/rolling-windows-and-calibration.md).
+
+`POST /v1/novels/{novelId}/style-analyses` snapshots 1 to 1,000 immutable blocks
+and returns the job and analysis URIs with a status ETag. Internal workers claim
+one novel-scoped lease at a time and must submit the returned fencing ETag,
+attempt, snapshot hash, profile hash, analyzer hash, and window hash. Expired
+leases are reclaimable; duplicate canonical completion is idempotent. Summary
+metadata and paged decisions remain in SQLite while detailed score traces are
+gzip content-addressed artifacts with enforced expiry. See
+[`../style/durable-analysis-jobs.md`](../style/durable-analysis-jobs.md).
+
+The proposal-only LLM process and its model gateway contract are implemented
+independently of the public rewrite route. `POST /v1/rewrite-proposals` and its
+status resource remain fail-closed scaffolds until ADR-308 and ADR-309 install
+eligibility gates, validation, persistence, re-scoring, and stale policy. The
+worker itself has no API or commit credential; see
+[`../rewrite/sandboxed-llm-worker.md`](../rewrite/sandboxed-llm-worker.md).
+
+The status policy is exactly `200`, `201`, `202`, `400`, `401`, `403`, `404`,
+`409`, `410`, `412`, `413`, `422`, `428`, `429`, and `503`.
+
+## Verification
+
+Run the API contract and all prerequisite module tests offline after the

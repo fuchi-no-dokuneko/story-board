@@ -29,6 +29,7 @@
     "references",
     "examples",
     "tests",
-    "install-local.sh"
+    "install-local.sh",
+    "config"
   ]
 }

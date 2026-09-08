@@ -1,100 +1,23 @@
-# StoryBlock Author 1.1.0
+# StoryBlock Author
 
-A standalone, zero-runtime-dependency Node.js skill for discovering and operating the complete StoryBlock HTTPS API. It bundles a code-verified 39-endpoint manifest, 140 DTO schemas, offline validation, high-level authoring commands, first-class image blocks, deterministic PDF output, generic endpoint calls, examples, and tests.
+EN: This standalone Node CLI bundles all 39 programmatic routes and 140 DTO schemas, with no runtime package dependencies. Run its local installer before first use. Online commands use IPv4 HTTPS and accept the local self-signed certificate; offline discovery and validation need no server.
 
-## Requirements
+繁體中文：此獨立 Node CLI 包含全部三十九個程式化路由與一百四十個 DTO 綱要，沒有執行期套件依賴。首次使用前執行本機安裝器。線上命令使用 IPv4 HTTPS 並接受本機自簽憑證；離線查詢與驗證不需伺服器。
 
-- Node.js 20 or newer.
-- A reachable StoryBlock HTTPS API for online commands.
-- A bearer credential for protected routes, unless the server runs in trusted-LAN mode.
-
-No package installation is needed:
+简体中文：此独立 Node CLI 包含全部三十九个程序化路由与一百四十个 DTO 纲要，没有运行期软件包依赖。首次使用前执行本机安装器。在线命令使用 IPv4 HTTPS 并接受本机自签证书；离线查询与验证不需服务器。
 
 ```bash
-node scripts/storyblock-author.mjs --help
-node scripts/storyblock-author.mjs endpoints --json
-node scripts/storyblock-author.mjs validate \
-  --dto AgentNovelRegistrationRequest --file examples/minimal-novel.json
-```
-
-The folder can be copied by itself. Every runtime import and reference resolves within this directory, and `package.json` declares no dependencies.
-
-## Connection model
-
-The default API is `https://127.0.0.1:8443`. StoryBlock terminates HTTPS itself with a locally generated self-signed leaf; the client accepts that certificate and rejects plain HTTP and IPv6 URLs. Keep the API on loopback. For remote access, forward it privately:
-
-```bash
-ssh -N -L 8443:127.0.0.1:8443 operator@private-host
-```
-
-The client never asks for or installs TLS material. Configure it with:
-
-```bash
-export STORYBLOCK_BASE_URL=https://127.0.0.1:8443
-export STORYBLOCK_ACCESS_KEY='credential-issued-by-storyblock'
-export STORYBLOCK_TIMEOUT_MS=15000
-export STORYBLOCK_USER_AGENT='my-authoring-agent/1.0'
-```
-
-Avoid command-line credentials when process arguments may be observable. Public `health` and OpenAPI routes need no credential. Admin catalog routes require the owner/operator identity; ordinary novel reads require `novel:read`.
-
-## Submit content
-
-For a complete manuscript:
-
-```bash
+./install-local.sh
+node scripts/storyblock-author.mjs endpoints
 node scripts/storyblock-author.mjs register --source manuscript.json --json
 node scripts/storyblock-author.mjs verify --source manuscript.json --json
-```
-
-For an existing novel, preview then commit an unchanged operation:
-
-```bash
-node scripts/storyblock-author.mjs preview-edit \
-  --novel-id nov_UUIDV7 --file edit-request.json --json
-node scripts/storyblock-author.mjs commit \
-  --novel-id nov_UUIDV7 --file edit-request.json --json
-```
-
-Upload a PNG/JPEG reference, use the returned `block_image` in an editable block, and render the committed revision as PDF:
-
-```bash
-node scripts/storyblock-author.mjs upload-image \
-  --novel-id nov_UUIDV7 --file character.png --alt-text 'Character reference.' --json
-node scripts/storyblock-author.mjs render-pdf \
-  --novel-id nov_UUIDV7 --file examples/pdf-render-request.json --output novel.pdf --json
-```
-
-See [SKILL.md](SKILL.md) for agent instructions and [references/workflows.md](references/workflows.md) for complete workflows.
-
-## Discovery and generic calls
-
-```bash
-node scripts/storyblock-author.mjs endpoints
-node scripts/storyblock-author.mjs describe rewrite-proposals.create --json
-node scripts/storyblock-author.mjs dtos
-node scripts/storyblock-author.mjs validate --dto RewriteProposalRequest --file request.json
-node scripts/storyblock-author.mjs call rewrite-proposals.create \
-  --params params.json --body request.json --json
-```
-
-`references/endpoints.json` is the stable endpoint manifest. Each `references/dtos/*.schema.json` file uses JSON Schema draft 2020-12 and includes source provenance, confidence, and a validated example.
-
-## Development
-
-```bash
 npm test
-npm run smoke
-npm run docs:check
 ```
 
-Tests use Node's built-in test runner and injected transports; no live server is required. `npm run docs` regenerates the two human-readable catalogs only from bundled machine-readable files.
+EN: The default origin is `https://127.0.0.1:8443`. Override it with `STORYBLOCK_BASE_URL` or `--base-url`. Credentials are optional for the default trusted server. The whole folder can be copied independently; run its installer after copying. Outputs refuse overwriting unless `--force` is explicit.
 
-## Security notes
+繁體中文：預設來源為 `https://127.0.0.1:8443`，可用 `STORYBLOCK_BASE_URL` 或 `--base-url` 覆寫。預設信任模式不需密鑰。整個目錄可獨立複製，複製後執行安裝器。除非明確指定 `--force`，輸出不覆寫既有檔案。
 
-- Self-signed certificate verification is deliberately disabled for this private StoryBlock client. Do not use it for unrelated services.
-- Credentials are sent only as bearer authorization to the configured HTTPS origin and are never printed.
-- Artifact output uses mode `0600` and refuses replacement unless `--force` is explicit.
-- The generic client rejects HTTP, URL credentials, and IPv6 targets.
+简体中文：默认来源为 `https://127.0.0.1:8443`，可用 `STORYBLOCK_BASE_URL` 或 `--base-url` 覆盖。默认信任模式不需密钥。整个目录可独立复制，复制后执行安装器。除非明确指定 `--force`，输出不覆盖既有文件。
 
-Open questions are never silently filled in. Search the catalogs for `OPEN QUESTION` before automating an uncertain response shape.
+[Skill / 技能 / 技能](SKILL.md) · [Workflows / 流程 / 流程](references/workflows.md)

@@ -1,27 +1,9 @@
-# ADR 0009: Application-terminated self-signed TLS
+# Application HTTPS
 
-- Status: Accepted
-- Date: 2026-08-26
+EN: The API terminates HTTPS and generates a local self-signed CA=false server leaf. No certificate upload, external issuer, ACME, or reverse proxy is used. Deployment defaults to IPv4 loopback with a private tunnel for remote use. All keys and runtime data stay in this repository.
 
-## Decision
+繁體中文：API 內部終止 HTTPS，並產生本機 CA=false 自簽伺服器憑證。不使用憑證上傳、外部簽發者、ACME 或反向代理。部署預設 IPv4 loopback，遠端使用私有通道。密鑰與執行資料均留在儲存庫。
 
-StoryBlock terminates inbound HTTPS in the API process with an automatically
-generated self-signed server leaf. The leaf is explicitly not a certificate
-authority. Its private key remains in repository-local state or a private
-container volume. Operators are never required to upload a certificate or key.
+简体中文：API 内部终止 HTTPS，并生成本机 CA=false 自签服务器证书。不使用证书上传、外部签发者、ACME 或反向代理。部署默认 IPv4 loopback，远程使用私有通道。密钥与运行数据均留在仓库。
 
-The default deployment binds to loopback and is reached remotely through a
-private tunnel. No reverse proxy, ACME client, public certificate issuer, or
-external certificate-distribution dependency belongs in the deployment.
-
-Workers that call the API receive only an exported public trust store. They do
-not mount or read the server keystore.
-
-## Consequences
-
-- Browsers and generic clients show a trust warning unless configured for the
-  generated public leaf.
-- Hostname or IP changes regenerate the leaf and invalidate prior trust.
-- Internet-facing deployment is unsupported.
-- Build, runtime state, secrets, and TLS files may stay entirely inside the
-  repository-local `.local/storyblock/` directory.
+[Detailed notes / 詳細筆記 / 详细笔记](0009-application-self-signed-tls.notes.txt)

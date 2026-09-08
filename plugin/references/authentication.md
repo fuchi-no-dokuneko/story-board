@@ -1,57 +1,18 @@
-# StoryBlock authentication and authorization
+# Connection / 連線 / 连接
 
-## Credential transport
+EN: The default installation trusts every device that can reach its listening port. No client secret or manual client approval is required. Transport always uses IPv4 HTTPS and accepts the server's locally generated self-signed certificate. Never supply or upload TLS key material. Keep deployment on loopback and use a private tunnel remotely.
 
-Protected endpoints accept exactly the HTTP bearer scheme:
+繁體中文：預設安裝信任所有能連到監聽連接埠的裝置，不需客戶端秘密或人工核准。傳輸一律使用 IPv4 HTTPS，接受伺服器本機自簽憑證。不提供或上傳 TLS 私鑰材料。部署保持 loopback，遠端使用私有通道。
 
-```text
-Authorization: Bearer <credential>
+简体中文：默认安装信任所有能连到监听端口的设备，不需客户端秘密或人工批准。传输一律使用 IPv4 HTTPS，接受服务器本机自签证书。不提供或上传 TLS 私钥材料。部署保持 loopback，远程使用私有通道。
+
+```bash
+ssh -4 -N -L 8443:127.0.0.1:8443 operator@private-host
+STORYBLOCK_BASE_URL=https://127.0.0.1:8443 node scripts/storyblock-author.mjs health
 ```
 
-Set `STORYBLOCK_ACCESS_KEY` or pass `--access-key`. The CLI does not inspect repository secret files, log the credential, place it in output, or request TLS key material. Prefer the environment variable because command arguments may be visible to other processes.
+EN: Existing bearer-key endpoints remain compatible with explicitly enabled scoped mode. An optional `STORYBLOCK_ACCESS_KEY` is kept out of logs and output. Scoped keys bind one novel, actor, expiry, and permissions. Rewrite-proposal reads now enforce the stored novel boundary. `STORYBLOCK_TIMEOUT_MS` and `STORYBLOCK_USER_AGENT` override client startup defaults.
 
-Two bearer credential classes exist:
+繁體中文：既有 bearer 密鑰端點與明確啟用的範圍模式保持相容。選填 `STORYBLOCK_ACCESS_KEY` 不進入日誌或輸出。範圍密鑰綁定單一作品、使用者、期限及權限；改寫提案讀取也檢查已儲存作品邊界。`STORYBLOCK_TIMEOUT_MS` 與 `STORYBLOCK_USER_AGENT` 可覆寫客戶端啟動預設值。
 
-- The server owner token has every scope and the `operator` role. The server configures it; it must contain at least 32 characters. Obtain it through the server's private operator process, not through this skill.
-- A scoped novel key has the one-time secret form `nv_key_<UUIDv7>.<43-character-base64url-secret>`. An existing owner or `novel:admin` principal creates one with `POST /v1/novels/{novelId}/access-keys`. Store the returned secret when issued because StoryBlock does not expose it again. Revoke it with `DELETE /v1/access-keys/{keyId}`.
-
-No credential may be hardcoded in examples or committed files.
-
-## Public and trusted-LAN behavior
-
-`GET /v1/openapi.yaml` and aggregate `GET /actuator/health` are public. Static browser assets are outside this skill's endpoint catalog.
-
-When the server explicitly enables trusted-LAN mode, every request that can reach the listening port is authenticated as the owner. There is no client secret exchange and no manual client approval. Network reachability is therefore the entire trust boundary. Keep the default loopback bind and use a private tunnel for remote clients.
-
-## Scopes and roles
-
-The code-defined scopes are:
-
-- `novel:read`: novel heads/revisions, renders, exports, jobs/artifacts, monitor packets, and other protected GET reads.
-- `novel:analyze`: detector runs.
-- `novel:propose`: edit and undo previews.
-- `novel:commit`: commits.
-- `novel:admin`: novel creation/import/agent registration and access-key issue/revoke.
-- `style:analyze`: start style analyses.
-- `style:admin`: create/version/transition style profiles.
-- `rewrite:propose`: reserve rewrite proposals.
-- `monitor:submit`: submit monitor output.
-- `worker:execute`: claim internal jobs and submit worker results.
-
-The owner also has the `operator` role, required for `/v1/admin/**`, component health, and metrics. Scopes are endpoint-specific; they do not imply one another in the authorization configuration.
-
-Consult each entry in `endpoints.json` for the exact scope/role. A missing/invalid/expired/revoked bearer token returns 401. A valid principal without the required authority returns 403.
-
-## Novel isolation
-
-Scoped access keys are bound to one novel. The boundary filter resolves novel ownership from path IDs and from associated jobs, artifacts, analyses, and access keys. Cross-novel access is hidden as 404 by default; a server configuration can instead expose it as 403. Do not use the difference for resource discovery.
-
-OPEN QUESTION: `GET /v1/rewrite-proposals/{proposalId}` requires `novel:read`, but current controller and boundary-filter code do not resolve `proposalId` back to the credential's novel. It appears possible for any novel-scoped read credential to fetch a known proposal ID. This skill documents the code as observed and does not endorse relying on that behavior.
-
-## Audit behavior
-
-Credential issue/revoke, imports/registrations, commits, exports, style changes, monitor submissions, and rewrite reservation paths construct audit context from the authenticated actor, request ID, remote address where applicable, and occurrence time. Audit records are persisted internally; no public audit-list endpoint was discovered. Do not expect audit details in successful response DTOs.
-
-## Connection security
-
-StoryBlock terminates inbound HTTPS in its own process with a locally generated self-signed server leaf (`CA=false`). This client intentionally sets certificate verification off for StoryBlock connections. It still requires `https://`, rejects URL-embedded credentials, and forces IPv4. Keep the server loopback-only and use a private SSH tunnel rather than adding ACME, a reverse proxy, certificate upload, or a public bind.
+简体中文：既有 bearer 密钥端点与明确启用的范围模式保持兼容。选填 `STORYBLOCK_ACCESS_KEY` 不进入日志或输出。范围密钥绑定单一作品、用户、期限及权限；改写提案读取也检查已保存作品边界。`STORYBLOCK_TIMEOUT_MS` 与 `STORYBLOCK_USER_AGENT` 可覆盖客户端启动默认值。

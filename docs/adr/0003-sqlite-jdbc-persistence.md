@@ -1,23 +1,9 @@
-# ADR 0003: SQLite JDBC Persistence
+# SQLite persistence
 
-- Status: Accepted
-- Date: 2026-08-21
-- Owner: StoryBlock local implementation
+EN: SQLite remains the local canonical store. Connections use WAL, FULL synchronization, foreign keys, a bounded busy timeout, and explicit read-only transactions. Flyway migrations and checkpoint/replay semantics remain unchanged.
 
-## Decision
+繁體中文：SQLite 仍為本機正式資料庫。連線使用 WAL、FULL 同步、外鍵、有界忙碌逾時及明確唯讀交易。Flyway 遷移與檢查點重播語意均保持不變。
 
-The first production adapter uses Xerial SQLite JDBC with Spring JDBC and
-explicit SQL. Every connection enables WAL, `synchronous=FULL`, foreign keys,
-a 5-second busy timeout, and explicit read-only transactions. The API is the
-single database writer; expensive analysis occurs outside database transactions.
-The pool starts at four physical connections and validates the required pragmas
-when each connection is created. Loadable SQLite extensions remain disabled.
+简体中文：SQLite 仍为本机正式数据库。连接使用 WAL、FULL 同步、外键、有界忙碌超时及明确只读事务。Flyway 迁移与检查点重放语义均保持不变。
 
-Flyway owns migrations. Checkpoints are verified replay caches rather than an
-independent canonical source.
-
-## Consequences
-
-JPA and network-mounted SQLite files are excluded. PostgreSQL work begins only
-after a measured migration trigger is documented. Returning a connection to the
-pool must clear read-only state before it can be used for a write transaction.
+[Detailed notes / 詳細筆記 / 详细笔记](0003-sqlite-jdbc-persistence.notes.txt)

@@ -1,0 +1,15 @@
+dependencies have been bootstrapped:
+
+```bash
+./mvnw -o -pl server -am test
+```
+
+The tests parse every local OpenAPI reference, compare all 34 required routes,
+exercise each remaining scaffold Spring mapping with its required scope, verify
+all status-policy entries, and cover real bearer authentication, object-level
+novel isolation, problem details, request IDs, ETags, idempotency, wildcard
+restrictions, body limits, raw image upload, image-block commit, deterministic
+text and PDF rendering, commits, complete detector
+and monitor runs, the style profile promotion lifecycle, and an
+import/export/job/artifact round trip. They also complete an exact 1,000-block
+style job through create, claim, fenced result, paging, and gzip download.

@@ -1,0 +1,68 @@
+# Sandboxed LLM Rewrite Worker
+
+ADR-307 defines a one-shot process that turns one bounded immutable input into
+one text-only proposal. It cannot read the StoryBlock database, call an edit or
+commit service, claim a broader tenant credential, or publish a canonical
+revision.
+
+## Capability Boundary
+
+The process has three capabilities:
+
+1. read one canonical `rewrite-input-1.0.0` object from standard input;
+2. make one `POST` to the configured model gateway;
+3. write one canonical `rewrite-proposal-1.0.0` object to standard output.
+
+The worker module depends only on Spring Boot, canonical JSON, the core domain,
+and `storyblock-rewrite`. Maven Enforcer rejects application, monitor, security,
+storage API, and SQLite dependencies, and an ArchUnit rule rejects source-level
+references to those packages or JDBC. The worker therefore has neither a
+StoryBlock API credential nor a commit-capable class on its runtime classpath.
+The trusted orchestration layer owns durable job claim and result persistence;
+it passes only the immutable snapshot through this narrow process boundary.
+
+## Bounded Input
+
+The input binds a generated proposal ID to the exact analysis, novel, revision,
+profile version, analyzer contract, window configuration, and finding hashes.
+Each source block carries its block ID, block-version ID, exact text hash, text,
+and an `editable` flag.
+
+- At most 64 contiguous blocks are editable.
+- At most two read-only context blocks may appear on either side.
+- Every block must satisfy the canonical 100-grapheme block invariant.
+- Findings and block identities must be unique.
+- Typed constraints cap changed blocks and total output graphemes.
+- One to 16 bounded style directives may be supplied.
+
+The full object produces `input_hash`. The model sees only that hash, source
+blocks, editability, and typed constraints. Novel, revision, profile, proposal,
+and finding identities are not included in the model-visible payload.
+
+## Model Protocol
+
+The configured endpoint is a small provider adapter, not an unrestricted agent
+tool endpoint. The request is canonical JSON with this fixed shape:
+
+```text
+protocol_version, model, instructions, input, response_schema, tools
+```
+
+`tools` is always an empty array. Fixed instructions label source text and style
+directives as untrusted data, limit changes to editable blocks, and prohibit
+external actions. The embedded response schema allows exactly:
+
+```json
+{
+  "model": "configured-model-id",
+  "output": {
+    "input_hash": "sha256:...",
+    "replacements": [
+      {"block_id": "blk_...", "text": "Complete replacement sentence."}
+    ]
+  },
+  "protocol_version": "rewrite-model-1.0.0"
+}
+```
+
+Unknown fields, prose wrappers, tool calls, a different model or input hash,
