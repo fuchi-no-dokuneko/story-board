@@ -1,0 +1,69 @@
+    tnt_cannon_count: extensions["tnt-cannon-count"] === source.tnt_cannon_count,
+    agent_registration: extensions["agent-write-registered"] === true,
+  };
+  return {
+    command: "verify",
+    ok: Object.values(checks).every(Boolean),
+    novel_id: source.novel_id,
+    head_revision_id: persisted.head.head_revision_id,
+    checks,
+    failed_checks: Object.entries(checks).filter(([, value]) => !value).map(([name]) => name),
+    source: { han_character_count: expected.count, han_text_sha256: expected.hash },
+    persisted: { han_character_count: actual.count, han_text_sha256: actual.hash },
+  };
+}
+
+class VerificationError extends Error {
+  constructor(report) {
+    super(`Persistence verification failed: ${report.failed_checks.join(", ")}`);
+    this.name = "VerificationError";
+    this.exitCode = EXIT_CODES.VALIDATION;
+    this.report = report;
+  }
+}
+
+function caseInsensitiveHeader(headers, name) {
+  const found = Object.entries(headers).find(([candidate]) => candidate.toLowerCase() === name.toLowerCase());
+  return found?.[1];
+}
+
+function endpointAccept(endpoint) {
+  const contentTypes = [...endpoint.responses, ...endpoint.errors]
+    .map((response) => response.contentType)
+    .filter((contentType, index, values) => contentType !== undefined && values.indexOf(contentType) === index);
+  return contentTypes.length === 0 ? "application/json, application/problem+json" : contentTypes.join(", ");
+}
+
+function imageMediaType(content) {
+  if (content.length >= 8
+      && content.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) {
+    return "image/png";
+  }
+  if (content.length >= 3 && content[0] === 0xff && content[1] === 0xd8 && content[2] === 0xff) {
+    return "image/jpeg";
+  }
+  throw new UsageError("upload-image accepts only PNG or JPEG bytes");
+}
+
+async function writePrivateOutput(path, content, force) {
+  try {
+    await writeFile(path, content, { flag: force ? "w" : "wx", mode: 0o600 });
+    await chmod(path, 0o600);
+  } catch (error) {
+    if (error.code === "EEXIST") {
+      throw new UsageError(`Refusing to overwrite ${path}; pass --force to replace it`);
+    }
+    throw error;
+  }
+}
+
+async function validateCallParameters(endpoint, params) {
+  for (const [groupName, descriptors] of [["path", endpoint.pathParameters], ["query", endpoint.queryParameters]]) {
+    const group = params[groupName] ?? {};
+    for (const descriptor of descriptors) {
+      if (group[descriptor.name] === undefined) continue;
+      const values = Array.isArray(group[descriptor.name]) && descriptor.schema.type !== "array"
+        ? group[descriptor.name]
+        : [group[descriptor.name]];
+      for (const value of values) {
+        const result = await validateInline(value, descriptor.schema);

@@ -1,0 +1,60 @@
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
+    private Map<String, Object> issueAsOwner(
+            CanonicalRevision revision,
+            String idempotencyKey,
+            List<String> scopes
+    ) throws Exception {
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "actor_id", "security-test-actor",
+                "scopes", scopes,
+                "expires_at", "2099-01-01T00:00:00Z"
+        ));
+        MvcResult result = mvc.perform(post(
+                        "/v1/novels/{novelId}/access-keys", novelId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"))
+                .andExpect(header().string(HttpHeaders.PRAGMA, "no-cache"))
+                .andExpect(jsonPath("$.secret").isString())
+                .andReturn();
+        return object(result);
+    }
+
+    private Map<String, Object> startExport(
+            CanonicalRevision revision,
+            String token,
+            String idempotencyKey
+    ) throws Exception {
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "format", CanonicalExportFormat.PACKAGE.canonicalName()
+        ));
+        MvcResult result = mvc.perform(post(
+                        "/v1/novels/{novelId}/exports", novelId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isAccepted())
+                .andReturn();
+        return object(result);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> object(MvcResult result) {
+        return CanonicalJson.parse(

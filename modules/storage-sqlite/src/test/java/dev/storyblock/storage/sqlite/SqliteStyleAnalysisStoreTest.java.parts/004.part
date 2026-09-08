@@ -1,0 +1,81 @@
+            Instant claimedAt
+    ) {
+        Duration duration = Duration.ofSeconds(30);
+        return store.claimStyleAnalysis(new StyleAnalysisClaimCommand(
+                novelId,
+                owner,
+                duration,
+                key,
+                StyleAnalysisClaimCommand.hash(novelId, owner, duration),
+                claimedAt
+        )).orElseThrow();
+    }
+
+    private static StyleAnalysisCompletionCommand completion(
+            dev.storyblock.style.StyleAnalysisLease lease,
+            String idempotencyKey,
+            Instant completedAt,
+            String traceMarker
+    ) {
+        StyleAnalysisSummary summary = new StyleAnalysisSummary(
+                lease.snapshot().blocks().size(),
+                0,
+                0,
+                Map.of(StyleDecisionState.NORMAL, 0)
+        );
+        StyleAnalysisTrace trace = StyleAnalysisTrace.create(
+                lease.analysisId(),
+                Map.of(
+                        "marker", traceMarker,
+                        "token_trace", List.of("trace-value".repeat(10_000))
+                ),
+                completedAt,
+                lease.retentionUntil()
+        );
+        return new StyleAnalysisCompletionCommand(
+                lease.jobId(),
+                lease.leaseOwner(),
+                lease.attempt(),
+                lease.claimedStatusHash(),
+                lease.snapshot().snapshotHash(),
+                lease.snapshot().profileVersionHash(),
+                lease.snapshot().analyzerContractHash(),
+                lease.snapshot().windowConfigurationHash(),
+                summary,
+                List.of(),
+                trace,
+                idempotencyKey,
+                completedAt
+        );
+    }
+
+    private static AuditContext audit(int seconds, String request) {
+        return new AuditContext(
+                "req_analysis_" + request,
+                "analysis-owner",
+                null,
+                NOW.plusSeconds(seconds)
+        );
+    }
+
+    private static long count(SqliteDatabase database, String table) throws Exception {
+        return countWhere(database, table, "1 = 1");
+    }
+
+    private static long countWhere(
+            SqliteDatabase database,
+            String table,
+            String predicate
+    ) throws Exception {
+        if (!List.of(
+                "analysis_jobs",
+                "analysis_claim_receipts",
+                "analysis_runs",
+                "analysis_window_findings",
+                "analysis_artifacts",
+                "artifacts"
+        ).contains(table)) {
+            throw new IllegalArgumentException("Unexpected analysis table " + table);
+        }
+        return database.readOnly(connection -> {
+            try (var statement = connection.createStatement();

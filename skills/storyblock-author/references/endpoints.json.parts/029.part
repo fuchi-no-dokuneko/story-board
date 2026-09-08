@@ -1,0 +1,83 @@
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ],
+      "authorizationNotes": "Requires novel:read, but the controller/filter code does not bind proposalId back to the credential novel.",
+      "openQuestion": "Whether cross-novel rewrite proposal reads are intentionally visible to any novel:read credential."
+    },
+    {
+      "id": "style-analyses.read",
+      "method": "GET",
+      "path": "/v1/style-analyses/{analysisId}",
+      "summary": "Get durable style analysis state and result metadata",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "analysisId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^ana_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Analysis state and canonical result metadata",
+          "contentType": "application/json",
+          "dto": "StyleAnalysisView",
+          "headers": [
+            "ETag"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "style-analyses.windows.list",

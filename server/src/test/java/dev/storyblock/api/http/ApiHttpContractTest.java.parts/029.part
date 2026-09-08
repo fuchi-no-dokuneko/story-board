@@ -1,0 +1,53 @@
+        mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
+                        .param("limit", "not-an-integer")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+
+        Map<String, Object> result = objectField(object(analysis), "result");
+        String artifactId = stringField(result, "trace_artifact_id");
+        int uncompressedBytes = ((Number) result.get(
+                "trace_uncompressed_bytes"
+        )).intValue();
+        MvcResult artifact = mvc.perform(get("/v1/artifacts/{artifactId}", artifactId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        CanonicalTransferController.ARTIFACT_CODEC_HEADER, "gzip"
+                ))
+                .andReturn();
+        byte[] compressed = artifact.getResponse().getContentAsByteArray();
+        assertTrue(compressed.length < uncompressedBytes);
+        assertEquals(0x1f, compressed[0] & 0xff);
+        assertEquals(0x8b, compressed[1] & 0xff);
+    }
+
+    private ReadyStyleProfile createReadyStyleProfile(
+            CanonicalRevision revision,
+            String token,
+            String keyPrefix
+    ) throws Exception {
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        StyleProfileScope scope = new StyleProfileScope(
+                new Ids.NovelId(novelId), StyleScopeKind.NOVEL, null
+        );
+        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                keyPrefix + "-profile")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "name", "Durable analysis baseline",
+                                "scope", scope.canonicalValue(),
+                                "provenance", "Generated HTTP durability fixture"
+                        ))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String profileId = stringField(object(profileResult), "profile_id");
+
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                NarrativeCanonicalMapper.fromCanonical(revision).liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())

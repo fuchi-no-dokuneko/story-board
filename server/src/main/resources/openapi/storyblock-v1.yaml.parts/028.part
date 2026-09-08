@@ -1,0 +1,99 @@
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+        diff:
+          type: object
+        scores:
+          type: object
+        validator_result:
+          type: object
+        status:
+          type: string
+          enum: [pending, ready, stale, expired, rejected]
+      additionalProperties: false
+    StyleProfileRequest:
+      type: object
+      required: [name, scope, provenance]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        scope:
+          $ref: "#/components/schemas/StyleProfileScope"
+        provenance:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      additionalProperties: false
+    StyleProfileScope:
+      type: object
+      required: [novel_id, kind, subject_id]
+      properties:
+        novel_id:
+          type: string
+          pattern: '^nov_[0-9a-f-]{36}$'
+        kind:
+          type: string
+          enum: [novel, series, character]
+        subject_id:
+          type: [string, "null"]
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+      additionalProperties: false
+    StyleProfile:
+      type: object
+      required: [profile_id, name, scope, provenance, created_by, created_at]
+      properties:
+        profile_id:
+          type: string
+          pattern: '^spf_[0-9a-f-]{36}$'
+        name:
+          type: string
+        scope:
+          $ref: "#/components/schemas/StyleProfileScope"
+        provenance:
+          type: string
+        created_by:
+          type: string
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    StyleCorpusSource:
+      type: object
+      required: [source_id, content_hash, kind, provenance, license, ownership]
+      properties:
+        source_id:
+          type: string
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        kind:
+          type: string
+          enum: [owner, licensed, public_domain, generated, mixed]
+        provenance:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        license:
+          type: string
+          minLength: 1
+          maxLength: 500
+        ownership:
+          type: string
+          minLength: 1
+          maxLength: 500
+      additionalProperties: false
+    StyleFeatureContract:
+      type: object
+      required: [analyzer_version, feature_schema_version, tokenizer_id, vocabulary_hash, normalizer_version, additive_smoothing_alpha, top_k]
+      properties:
+        analyzer_version:
+          type: string
+        feature_schema_version:
+          type: string
+        tokenizer_id:
+          type: string

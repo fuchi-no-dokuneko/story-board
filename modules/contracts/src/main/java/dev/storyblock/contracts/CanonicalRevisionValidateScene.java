@@ -5,10 +5,10 @@ import dev.storyblock.domain.StableIds;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import static dev.storyblock.contracts.CanonicalRevision.INITIAL_META_FIELDS;
-import static dev.storyblock.contracts.CanonicalRevision.SCENE_REQUIRED;
-import static dev.storyblock.contracts.CanonicalRevision.TRANSITION_MODES;
-import static dev.storyblock.contracts.CanonicalRevision.SCENE_OPTIONAL;
+import static dev.storyblock.contracts.CanonicalRevisionFields.INITIAL_META_FIELDS;
+import static dev.storyblock.contracts.CanonicalRevisionFields.SCENE_REQUIRED;
+import static dev.storyblock.contracts.CanonicalRevisionFields.TRANSITION_MODES;
+import static dev.storyblock.contracts.CanonicalRevisionFields.SCENE_OPTIONAL;
 
 final class CanonicalRevisionValidateScene {
     static void validateScene(

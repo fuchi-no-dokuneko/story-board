@@ -1,0 +1,36 @@
+              ],
+              "median": 0,
+              "mad": 0,
+              "q95": 0,
+              "q99": 0
+            },
+            {
+              "channel": "surface",
+              "channel_version": "example-1",
+              "primary_metric": "jensen_shannon_distance",
+              "reference_distances": [
+
+              ],
+              "median": 0,
+              "mad": 0,
+              "q95": 0,
+              "q99": 0
+            },
+            {
+              "channel": "surface",
+              "channel_version": "example-1",
+              "primary_metric": "jensen_shannon_distance",
+              "reference_distances": [
+
+              ],
+              "median": 0,
+              "mad": 0,
+              "q95": 0,
+              "q99": 0
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

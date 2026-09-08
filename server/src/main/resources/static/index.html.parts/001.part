@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; object-src 'none'">
+  <title>StoryBlock Library</title>
+  <link rel="stylesheet" href="/styles.css?v=operator-auth-1">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">SB</span>
+      <div>
+        <h1>StoryBlock</h1>
+        <p>Novel library</p>
+      </div>
+    </div>
+    <div class="header-state">
+      <span class="readonly-badge">Read only</span>
+      <span class="service-status"><span id="status-dot"></span><span id="status-text">Checking service</span></span>
+    </div>
+  </header>
+
+  <nav class="view-tabs" aria-label="Application views">
+    <button class="tab-button active" id="library-tab" type="button" aria-controls="library-view" aria-selected="true">Library</button>
+    <button class="tab-button" id="console-tab" type="button" aria-controls="console-view" aria-selected="false">API console</button>
+  </nav>
+
+  <section class="operator-bar" aria-labelledby="operator-access-title">
+    <form id="operator-form" class="operator-form" autocomplete="off">
+      <div class="operator-copy">
+        <strong id="operator-access-title">Operator access</strong>
+        <span id="operator-token-help">Paste the owner token. It stays only in this page's memory and is sent only to this server.</span>
+      </div>
+      <div class="operator-controls">
+        <label class="sr-only" for="operator-token">Owner bearer token</label>
+        <input id="operator-token" type="password" autocomplete="off" autocapitalize="none" spellcheck="false"
+               aria-describedby="operator-token-help" placeholder="Owner token">
+        <button id="operator-connect" type="submit">Use token</button>
+        <button id="operator-clear" type="button" disabled>Clear</button>
+      </div>
+      <output id="operator-status" class="operator-status" data-state="idle" role="status" aria-live="polite">
+        Owner token required outside trusted-LAN mode
+      </output>
+    </form>
+  </section>
+
+  <main>
+    <section id="library-view" class="view active" aria-labelledby="library-heading">
+      <div class="library-toolbar">
+        <div>
+          <h2 id="library-heading">All novels</h2>
+          <p id="catalog-total" class="muted">Loading catalog...</p>
+        </div>
+        <div class="search-controls" role="search">
+          <label class="sr-only" for="catalog-search">Search novels</label>

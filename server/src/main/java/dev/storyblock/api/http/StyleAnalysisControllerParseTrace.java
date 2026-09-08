@@ -5,7 +5,7 @@ import dev.storyblock.style.StyleAnalysisTrace;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
-import static dev.storyblock.api.http.StyleAnalysisController.COMPRESSED_TRACE_FIELDS;
+import static dev.storyblock.api.http.StyleAnalysisFields.COMPRESSED_TRACE_FIELDS;
 
 final class StyleAnalysisControllerParseTrace {
     static StyleAnalysisTrace parseTrace(

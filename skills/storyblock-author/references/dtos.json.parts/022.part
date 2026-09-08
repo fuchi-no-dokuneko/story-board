@@ -1,0 +1,62 @@
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisWindowPage",
+      "file": "dtos/StyleAnalysisWindowPage.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Window Page JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnomalyDecision",
+      "file": "dtos/StyleAnomalyDecision.schema.json",
+      "description": "Code-derived StoryBlock Style Anomaly Decision JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleCalibratedChannelScore",
+      "file": "dtos/StyleCalibratedChannelScore.schema.json",
+      "description": "Code-derived StoryBlock Style Calibrated Channel Score JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleCalibrationProfile",
+      "file": "dtos/StyleCalibrationProfile.schema.json",
+      "description": "Code-derived StoryBlock Style Calibration Profile JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleChannelCalibration",
+      "file": "dtos/StyleChannelCalibration.schema.json",
+      "description": "Code-derived StoryBlock Style Channel Calibration JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleChannelDistance",

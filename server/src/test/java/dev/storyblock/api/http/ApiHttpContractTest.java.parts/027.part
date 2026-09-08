@@ -1,0 +1,53 @@
+        var persistedJob = store.getStyleAnalysisJob(new Ids.JobId(jobId));
+        StyleAnalysisExecution execution = new StyleAnalysisExecutor().execute(
+                persistedJob.snapshot()
+        );
+        assertTrue(execution.windows().size() > 1);
+        Instant completedAt = Instant.now();
+        Map<String, Object> resultBody = new LinkedHashMap<>();
+        resultBody.put("lease_owner", "style-worker-http");
+        resultBody.put("attempt", 1);
+        resultBody.put("snapshot_hash", persistedJob.snapshot().snapshotHash());
+        resultBody.put(
+                "profile_version_hash", persistedJob.snapshot().profileVersionHash()
+        );
+        resultBody.put(
+                "analyzer_contract_hash", persistedJob.snapshot().analyzerContractHash()
+        );
+        resultBody.put(
+                "window_configuration_hash",
+                persistedJob.snapshot().windowConfigurationHash()
+        );
+        resultBody.put("summary", execution.summary().canonicalValue());
+        resultBody.put("windows", execution.windows().stream()
+                .map(value -> value.canonicalValue()).toList());
+        StyleAnalysisTrace submittedTrace = StyleAnalysisTrace.create(
+                persistedJob.analysisId(),
+                execution.tracePayload(),
+                completedAt,
+                persistedJob.retentionUntil()
+        );
+        resultBody.put("trace", Map.of(
+                "codec", StyleAnalysisTrace.CODEC,
+                "content_base64", Base64.getEncoder().encodeToString(
+                        submittedTrace.compressedContent()
+                ),
+                "content_hash", submittedTrace.contentHash(),
+                "uncompressed_bytes", submittedTrace.uncompressedBytes()
+        ));
+        resultBody.put("completed_at", completedAt.toString());
+        byte[] canonicalResult = CanonicalJson.bytes(resultBody);
+        String claimedEtag = claimed.getResponse().getHeader(HttpHeaders.ETAG);
+
+        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-result")
+                        .header(HttpHeaders.IF_MATCH, claimedEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(canonicalResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("succeeded"))
+                .andExpect(jsonPath("$.idempotent_replay").value(false));
+        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))

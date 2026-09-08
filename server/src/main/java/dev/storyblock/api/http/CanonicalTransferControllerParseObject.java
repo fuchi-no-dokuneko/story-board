@@ -9,7 +9,7 @@ final class CanonicalTransferControllerParseObject {
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> parsed = CanonicalJson.mapper().readValue(value, Map.class);
-            return CanonicalTransferController.object(parsed, path);
+            return CanonicalRequestObject.object(parsed, path);
         } catch (CanonicalPackageException failure) {
             throw failure;
         } catch (RuntimeException failure) {

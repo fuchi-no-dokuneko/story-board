@@ -1,0 +1,50 @@
+                    BlockMetadata.empty(),
+                    Map.of()
+            ));
+        }
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "Golden",
+                TransitionMode.OPENING,
+                SceneSeed.empty(),
+                blocks,
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId, OrderKey.initial(), "Chapter", List.of(scene), Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(Ids.NovelId.create(), List.of(chapter), Map.of())
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<GoldenCase> loadCases() throws IOException {
+        try (InputStream input = DeterministicValidatorGoldenTest.class
+                .getResourceAsStream("/golden/validator-cases.json")) {
+            assertFalse(input == null, "Missing validator golden cases");
+            List<Map<String, Object>> values = CanonicalJson.mapper().readValue(input, List.class);
+            return values.stream()
+                    .map(value -> new GoldenCase(
+                            (String) value.get("name"),
+                            ValidationCode.valueOf((String) value.get("code")),
+                            (String) value.get("scenario"),
+                            (Boolean) value.get("expected_violation")
+                    ))
+                    .toList();
+        }
+    }
+
+    private record GoldenCase(
+            String name,
+            ValidationCode code,
+            String scenario,
+            boolean expectedViolation
+    ) {
+    }
+}

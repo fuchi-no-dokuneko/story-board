@@ -1,0 +1,27 @@
+BEFORE DELETE ON analysis_claim_receipts BEGIN
+    SELECT RAISE(ABORT, 'analysis claim receipts are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS analysis_runs_no_update
+BEFORE UPDATE ON analysis_runs BEGIN
+    SELECT RAISE(ABORT, 'analysis results are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS analysis_runs_no_delete
+BEFORE DELETE ON analysis_runs BEGIN
+    SELECT RAISE(ABORT, 'analysis results are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS analysis_windows_no_update
+BEFORE UPDATE ON analysis_window_findings BEGIN
+    SELECT RAISE(ABORT, 'analysis window findings are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS analysis_windows_no_delete
+BEFORE DELETE ON analysis_window_findings BEGIN
+    SELECT RAISE(ABORT, 'analysis window findings are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS analysis_artifacts_no_update
+BEFORE UPDATE ON analysis_artifacts BEGIN
+    SELECT RAISE(ABORT, 'analysis artifact metadata is immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS analysis_artifacts_no_delete
+BEFORE DELETE ON analysis_artifacts BEGIN
+    SELECT RAISE(ABORT, 'analysis artifact metadata is immutable');
+END;

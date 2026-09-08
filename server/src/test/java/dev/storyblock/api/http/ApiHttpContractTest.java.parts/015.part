@@ -1,0 +1,50 @@
+                .andExpect(status().isPreconditionFailed())
+                .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
+                .andExpect(jsonPath("$.current_revision_id").value(revisionId))
+                .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
+    }
+
+    @Test
+    void monitorPacketsAndSubmissionsUseSeparateLeastPrivilegeScopes() throws Exception {
+        CanonicalRevision revision = detectorRevision();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        String blockId = firstBlockId(revision);
+        importAsOwner(revision, "monitor-import");
+        byte[] packetBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", revision.contentHash(),
+                "target_block_id", blockId,
+                "neighbor_count", 1
+        ));
+
+        mvc.perform(post("/v1/novels/{novelId}/monitor-packets", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "packet-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(packetBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        mvc.perform(post("/v1/novels/{novelId}/monitor-packets", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "packet-read")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(packetBody))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ))
+                .andExpect(jsonPath("$.target_block_id").value(blockId))
+                .andExpect(jsonPath("$.render_packet.blocks.length()").value(2))
+                .andExpect(jsonPath("$.local_invariants.window_blocks.length()").value(2))
+                .andExpect(jsonPath("$.allowed_tools[0]").value("submit_finding"))
+                .andExpect(jsonPath("$.allowed_tools[1]")
+                        .value("submit_proposed_operation"));
+
+        String quote = "The";
+        byte[] submissionBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", revision.contentHash(),

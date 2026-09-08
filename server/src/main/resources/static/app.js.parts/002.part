@@ -1,0 +1,61 @@
+  const libraryActive = view === 'library';
+  elements['library-tab'].classList.toggle('active', libraryActive);
+  elements['console-tab'].classList.toggle('active', !libraryActive);
+  elements['library-tab'].setAttribute('aria-selected', String(libraryActive));
+  elements['console-tab'].setAttribute('aria-selected', String(!libraryActive));
+  show(elements['library-view'], libraryActive);
+  show(elements['console-view'], !libraryActive);
+}
+
+function catalogItem(novel) {
+  const item = document.createElement('li');
+  const button = document.createElement('button');
+  const title = document.createElement('strong');
+  const summary = document.createElement('span');
+  const id = document.createElement('span');
+  button.type = 'button';
+  button.className = 'novel-item';
+  button.classList.toggle('selected', novel.novel_id === state.selectedNovelId);
+  button.dataset.novelId = novel.novel_id;
+  button.setAttribute('aria-pressed', String(novel.novel_id === state.selectedNovelId));
+  title.textContent = text(novel.title, 'Untitled novel');
+  summary.textContent = `${text(novel.language, 'Unknown language')} / ${number(novel.chapter_count)} chapters / ${number(novel.han_character_count)} Han`;
+  id.className = 'catalog-id';
+  id.textContent = novel.novel_id;
+  button.append(title, summary, id);
+  button.addEventListener('click', () => selectNovel(novel.novel_id));
+  item.append(button);
+  return item;
+}
+
+function updatePagination(payload) {
+  state.totalPages = payload.total_pages;
+  const displayedPage = payload.total_pages === 0 ? 0 : payload.page + 1;
+  elements['page-label'].textContent = `Page ${displayedPage} of ${payload.total_pages}`;
+  elements['page-previous'].disabled = payload.page <= 0;
+  elements['page-next'].disabled = payload.page + 1 >= payload.total_pages;
+}
+
+async function loadCatalog({ preserveSelection = true } = {}) {
+  const requestId = ++state.catalogRequestId;
+  show(elements['catalog-loading'], true);
+  show(elements['catalog-empty'], false);
+  elements['catalog-empty'].textContent = 'No novels found.';
+  elements['novel-list'].replaceChildren();
+  try {
+    const params = new URLSearchParams({
+      page: String(state.page),
+      size: String(state.size),
+      q: state.query,
+    });
+    const payload = await fetchJson(`/v1/admin/novels?${params}`);
+    if (requestId !== state.catalogRequestId) return false;
+    show(elements['catalog-loading'], false);
+    elements['catalog-total'].textContent = `${number(payload.total)} persisted novel${payload.total === 1 ? '' : 's'}`;
+    updatePagination(payload);
+    setOperatorStatus(
+      'active',
+      state.operatorToken ? 'Owner token active' : 'Trusted-LAN access active',
+    );
+    elements['operator-clear'].disabled = !state.operatorToken;
+    if (payload.items.length === 0) {

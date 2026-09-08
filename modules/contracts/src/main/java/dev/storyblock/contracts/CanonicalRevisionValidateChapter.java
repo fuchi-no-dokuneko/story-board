@@ -4,8 +4,8 @@ import dev.storyblock.domain.OrderKey;
 import dev.storyblock.domain.StableIds;
 import java.util.List;
 import java.util.Map;
-import static dev.storyblock.contracts.CanonicalRevision.CHAPTER_REQUIRED;
-import static dev.storyblock.contracts.CanonicalRevision.CHAPTER_OPTIONAL;
+import static dev.storyblock.contracts.CanonicalRevisionFields.CHAPTER_REQUIRED;
+import static dev.storyblock.contracts.CanonicalRevisionFields.CHAPTER_OPTIONAL;
 
 final class CanonicalRevisionValidateChapter {
     static void validateChapter(Map<String, Object> chapter, int chapterIndex) {

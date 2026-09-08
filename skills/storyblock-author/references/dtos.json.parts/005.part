@@ -1,0 +1,51 @@
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "CanonicalPackage",
+      "file": "dtos/CanonicalPackage.schema.json",
+      "description": "Code-derived StoryBlock Canonical Package JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "CanonicalPackageArtifact",
+      "file": "dtos/CanonicalPackageArtifact.schema.json",
+      "description": "Code-derived StoryBlock Canonical Package Artifact JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "CanonicalPackageManifest",
+      "file": "dtos/CanonicalPackageManifest.schema.json",
+      "description": "Code-derived StoryBlock Canonical Package Manifest JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "CanonicalPackageOperation",
+      "file": "dtos/CanonicalPackageOperation.schema.json",
+      "description": "Code-derived StoryBlock Canonical Package Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",

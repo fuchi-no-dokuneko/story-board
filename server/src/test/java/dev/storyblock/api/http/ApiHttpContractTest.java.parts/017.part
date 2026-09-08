@@ -1,0 +1,62 @@
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.monitor_run_id").value(runId))
+                .andExpect(jsonPath("$.state").value("current"))
+                .andExpect(jsonPath("$.rebase_allowed").value(false));
+    }
+
+    @Test
+    void realBearerCredentialsEnforceScopesNovelBoundariesAndRevocation()
+            throws Exception {
+        CanonicalRevision first = genesis();
+        CanonicalRevision second = genesis();
+        String firstNovel = stringField(first.canonicalContent(), "novel_id");
+        String secondNovel = stringField(second.canonicalContent(), "novel_id");
+        String secondRevision = stringField(second.canonicalContent(), "revision_id");
+        importAsOwner(first, "security-import-first");
+        importAsOwner(second, "security-import-second");
+
+        Map<String, Object> key = issueAsOwner(
+                first,
+                "security-issue-first",
+                List.of(
+                        "novel:read",
+                        "novel:analyze",
+                        "novel:admin",
+                        "novel:commit",
+                        "style:analyze",
+                        "rewrite:propose"
+                )
+        );
+        String bearer = stringField(key, "secret");
+        String keyId = stringField(key, "key_id");
+
+        mvc.perform(get("/v1/admin/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        byte[] crossNovelRegistration = CanonicalJson.bytes(Map.of(
+                "chapters", List.of(),
+                "created_at", "2026-08-21T12:00:00Z",
+                "expected_han_characters", 0,
+                "language", "zh-Hant",
+                "main_characters", List.of(),
+                "novel_id", secondNovel,
+                "title", "Cross novel attempt",
+                "tnt_cannon_count", 0,
+                "zombie_count", 0
+        ));
+        mvc.perform(post("/v1/agent/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(
+                                MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "cross-agent-registration"
+                        )
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(crossNovelRegistration))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        byte[] escalationBody = CanonicalJson.bytes(Map.of(

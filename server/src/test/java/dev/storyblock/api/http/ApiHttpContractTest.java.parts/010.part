@@ -1,0 +1,49 @@
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "image-pdf-import");
+        byte[] png = imagePng();
+
+        MockHttpServletRequestBuilder upload = post(
+                "/v1/novels/{novelId}/images", novelId
+        )
+                .with(userWithScope("novel:commit"))
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-upload-http")
+                .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                .contentType(MediaType.IMAGE_PNG)
+                .content(png);
+        MvcResult uploaded = mvc.perform(upload)
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.media_type").value("image/png"))
+                .andExpect(jsonPath("$.width_px").value(120))
+                .andExpect(jsonPath("$.height_px").value(80))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        Map<String, Object> uploadBody = object(uploaded);
+        String artifactId = stringField(uploadBody, "artifact_id");
+
+        mvc.perform(upload)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.artifact_id").value(artifactId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+        mvc.perform(post("/v1/novels/{novelId}/images", novelId)
+                        .with(userWithScope("novel:commit"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-too-large")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .content(new byte[ImageUploadService.MAX_IMAGE_BYTES + 1]))
+                .andExpect(status().isContentTooLarge())
+                .andExpect(jsonPath("$.code").value("REQUEST_TOO_LARGE"))
+                .andExpect(jsonPath("$.limit_bytes")
+                        .value(ImageUploadService.MAX_IMAGE_BYTES));
+        MvcResult downloaded = mvc.perform(get("/v1/artifacts/{artifactId}", artifactId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_PNG))
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION, containsString(".png")
+                ))
+                .andReturn();
+        assertArrayEquals(png, downloaded.getResponse().getContentAsByteArray());
+
+        Map<String, Object> image = new LinkedHashMap<>();
+        for (String field : List.of(

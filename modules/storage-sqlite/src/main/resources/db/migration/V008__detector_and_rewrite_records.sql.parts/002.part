@@ -1,0 +1,22 @@
+  OR NEW.revision_hash <> OLD.revision_hash
+  OR NEW.profile_version_id <> OLD.profile_version_id
+  OR NEW.candidate_hash <> OLD.candidate_hash
+  OR NEW.proposal_json <> OLD.proposal_json
+  OR NEW.created_at <> OLD.created_at
+  OR NEW.expires_at <> OLD.expires_at
+BEGIN
+    SELECT RAISE(ABORT, 'rewrite proposal identity is immutable');
+END;
+CREATE TRIGGER rewrite_proposals_state_guard
+BEFORE UPDATE OF state ON rewrite_proposals
+WHEN NOT (
+    OLD.state = 'proposed'
+    AND NEW.state IN ('stale', 'accepted', 'rejected')
+)
+BEGIN
+    SELECT RAISE(ABORT, 'invalid rewrite proposal state transition');
+END;
+CREATE TRIGGER rewrite_proposals_no_delete
+BEFORE DELETE ON rewrite_proposals BEGIN
+    SELECT RAISE(ABORT, 'rewrite proposals cannot be deleted');
+END;

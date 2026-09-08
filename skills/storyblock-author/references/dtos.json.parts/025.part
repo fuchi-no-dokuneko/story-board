@@ -1,0 +1,62 @@
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleProfileTransitionRequest",
+      "file": "dtos/StyleProfileTransitionRequest.schema.json",
+      "description": "Code-derived StoryBlock Style Profile Transition Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleProfileVersion",
+      "file": "dtos/StyleProfileVersion.schema.json",
+      "description": "Code-derived StoryBlock Style Profile Version JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleProfileVersionContent",
+      "file": "dtos/StyleProfileVersionContent.schema.json",
+      "description": "Code-derived StoryBlock Style Profile Version Content JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleProfileVersionView",
+      "file": "dtos/StyleProfileVersionView.schema.json",
+      "description": "Code-derived StoryBlock Style Profile Version View JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleStratum",
+      "file": "dtos/StyleStratum.schema.json",
+      "description": "Code-derived StoryBlock Style Stratum JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleStratumCalibration",

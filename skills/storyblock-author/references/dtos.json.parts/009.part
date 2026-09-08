@@ -1,0 +1,56 @@
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "ExportRequest",
+      "file": "dtos/ExportRequest.schema.json",
+      "description": "Code-derived StoryBlock Export Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "ExtendBlockOperation",
+      "file": "dtos/ExtendBlockOperation.schema.json",
+      "description": "Code-derived StoryBlock Extend Block Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "ExtendBlockPayload",
+      "file": "dtos/ExtendBlockPayload.schema.json",
+      "description": "Code-derived StoryBlock Extend Block Payload JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "ImportRequest",
+      "file": "dtos/ImportRequest.schema.json",
+      "description": "Code-derived StoryBlock Import Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {

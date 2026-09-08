@@ -1,8 +1,5 @@
 package dev.storyblock.domain;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Pattern;
 
 public sealed interface EditOperation extends BlockInsertionOperations, BlockRangeOperations, BlockStructureOperations, SceneMovementOperations, SceneStateOperations permits
     EditOperation.InsertBlocks,

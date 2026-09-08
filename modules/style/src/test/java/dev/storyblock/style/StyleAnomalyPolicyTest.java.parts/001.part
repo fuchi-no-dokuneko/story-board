@@ -1,0 +1,70 @@
+package dev.storyblock.style;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.domain.Ids;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+
+class StyleAnomalyPolicyTest {
+    private static final String CONTRACT_HASH = CanonicalJson.hash("feature-contract");
+
+    private final StyleWindowScorer scorer = new StyleWindowScorer();
+    private final StyleAnomalyPolicy policy = new StyleAnomalyPolicy();
+
+    @Test
+    void twoSustainedQ99ChannelsCanCreateRewriteCandidate() {
+        StyleCalibrationProfile profile = calibratedProfile(30);
+        StyleWindowScore operational = score(
+                window(StyleWindowKind.OPERATIONAL, null), highReport(), profile
+        );
+        List<StyleWindowScore> sustained = List.of(
+                score(window(StyleWindowKind.NON_OVERLAP, null), highReport(), profile),
+                score(window(StyleWindowKind.NON_OVERLAP, null), highReport(), profile)
+        );
+
+        StyleAnomalyDecision decision = policy.evaluate(
+                operational, sustained, List.of()
+        );
+
+        assertEquals(StyleDecisionState.REWRITE_CANDIDATE, decision.state());
+        assertTrue(decision.canTriggerRewrite());
+        assertEquals(2, decision.sustainingWindowIds().size());
+        assertEquals(
+                List.of(StyleFeatureChannel.SURFACE, StyleFeatureChannel.GRAMMAR),
+                decision.independentQ99Channels()
+        );
+        assertEquals(
+                decision,
+                StyleAnomalyDecision.fromCanonical(decision.canonicalValue())
+        );
+    }
+
+    @Test
+    void topicOnlyLowConfidenceAndMicroOnlySignalsNeverTriggerRewrite() {
+        StyleCalibrationProfile calibrated = calibratedProfile(30);
+        StyleWindow operationalWindow = window(StyleWindowKind.OPERATIONAL, null);
+        StyleAnomalyDecision topic = policy.evaluate(
+                score(operationalWindow, topicOnlyReport(), calibrated),
+                List.of(),
+                List.of()
+        );
+        assertEquals(StyleDecisionState.TOPIC_SHIFT_ONLY, topic.state());
+        assertFalse(topic.canTriggerRewrite());
+
+        StyleAnomalyDecision low = policy.evaluate(
+                score(operationalWindow, highReport(), calibratedProfile(29)),
+                List.of(),
+                List.of()
+        );
+        assertEquals(StyleDecisionState.LOW_CONFIDENCE, low.state());

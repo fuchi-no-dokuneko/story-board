@@ -1,0 +1,52 @@
+            assertTrue(channel.q95().compareTo(channel.q99()) <= 0);
+        });
+        assertEquals(
+                first,
+                StyleCalibrationProfile.fromCanonical(first.canonicalValue())
+        );
+    }
+
+    @Test
+    void insufficientSpeakerCorpusFallsBackToCalibratedGlobalDialogue() {
+        StyleCalibrationProfile profile = profile(List.of(
+                stratum(StyleStratum.dialogue("speaker_a"), 10),
+                stratum(StyleStratum.dialogue(), 30)
+        ));
+
+        StyleProfileSelection selection = new StyleStratumSelector().select(
+                StyleStratum.dialogue("speaker_a"), profile
+        );
+
+        assertEquals(StyleSelectionReason.SPEAKER_FALLBACK, selection.reason());
+        assertEquals(StyleStratum.dialogue(), selection.selectedStratum());
+        assertEquals(StyleCalibrationConfidence.CALIBRATED, selection.confidence());
+    }
+
+    static StyleCalibrationProfile profile(List<StyleStratumCalibration> strata) {
+        return new StyleCalibrationProfile(
+                StyleModule.CALIBRATION_SCHEMA_VERSION,
+                CanonicalJson.hash("target-corpus"),
+                CanonicalJson.hash("feature-contract"),
+                StyleWindowConfiguration.defaults().configurationHash(),
+                strata
+        );
+    }
+
+    static StyleStratumCalibration stratum(StyleStratum stratum, int count) {
+        List<BigDecimal> distances = new ArrayList<>();
+        if (count > 1) {
+            for (int index = 0; index < count; index++) {
+                distances.add(new BigDecimal("0.1"));
+            }
+        }
+        return new StyleStratumCalibration(
+                stratum,
+                count,
+                StyleFeatureChannel.requiredChannels().stream()
+                        .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                        .map(channel -> StyleChannelCalibration.fromDistances(
+                                channel, distances
+                        )).toList()
+        );
+    }
+}

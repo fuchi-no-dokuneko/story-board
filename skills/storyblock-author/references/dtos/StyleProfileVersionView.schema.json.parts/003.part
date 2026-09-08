@@ -1,0 +1,15 @@
+          "reason": "example-1",
+          "generated_promotion_confirmed": true,
+          "request_id": "example-1",
+          "actor_id": "example-1",
+          "actor_key_id": "key_018f0f5e-7b4a-7c00-8000-000000000001",
+          "occurred_at": "2026-08-27T12:00:00Z"
+        }
+      ],
+      "state": "draft",
+      "approved_by": "example-1",
+      "approved_at": "2026-08-27T12:00:00Z",
+      "can_gate_rewrites": true
+    }
+  ]
+}

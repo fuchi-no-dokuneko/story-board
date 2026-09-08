@@ -1,0 +1,84 @@
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/edit-previews:
+    post:
+      operationId: previewEdit
+      summary: Preview and validate one typed edit operation
+      x-required-scopes: ["novel:propose"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EditPreviewRequest"
+      responses:
+        "200":
+          description: Side-effect-free preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/commits:
+    post:
+      operationId: commitEdit
+      summary: Commit one validated operation with atomic head CAS
+      x-required-scopes: ["novel:commit"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommitRequest"
+      responses:
+        "200":
+          description: Existing idempotent commit result
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommitResponse"
+        "201":
+          description: New immutable revision committed
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommitResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/undo-previews:
+    post:
+      operationId: previewUndo
+      summary: Preview restoration of historical canonical content
+      x-required-scopes: ["novel:propose"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UndoPreviewRequest"
+      responses:
+        "200":
+          description: Restore operation preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewResponse"
+        default:

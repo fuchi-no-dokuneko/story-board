@@ -13,7 +13,7 @@ final class CanonicalRevisionParseEnvelopeFactory {
         Map<String, Object> envelope = CanonicalJson.mapper().readValue(json, Map.class);
         envelope = new TreeMap<>(envelope);
         Object declaredHash = envelope.remove("content_hash");
-        if (!(declaredHash instanceof String hash) || !CanonicalRevision.SHA_256.matcher(hash).matches()) {
+        if (!(declaredHash instanceof String hash) || !CanonicalRevisionFields.SHA_256.matcher(hash).matches()) {
             throw new IllegalArgumentException("Canonical envelope has no valid content_hash");
         }
 

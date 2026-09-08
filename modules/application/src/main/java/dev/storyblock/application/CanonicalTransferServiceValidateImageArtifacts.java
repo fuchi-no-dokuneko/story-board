@@ -15,33 +15,7 @@ final class CanonicalTransferServiceValidateImageArtifacts {
       revisionSequence.put(manifests.get(index).id(), index);
     }
 
-    Map<Ids.ArtifactId, VerifiedImageArtifact> images = new HashMap<>();
-    for (CanonicalNovelPackage.ArtifactEntry artifact : document.artifacts()) {
-      if (!"narrative-image".equals(artifact.kind())) {
-        continue;
-      }
-      if (!"identity".equals(artifact.codec())
-          || artifact.content().length == 0
-          || artifact.content().length > ImageUploadService.MAX_IMAGE_BYTES) {
-        throw new CanonicalPackageException(
-            "Narrative image artifact has an invalid codec or byte size"
-        );
-      }
-      final ImageUploadService.ImageInfo decoded;
-      try {
-        decoded = ImageUploadService.inspect(artifact.content());
-      } catch (IllegalArgumentException failure) {
-        throw new CanonicalPackageException(
-            "Narrative image artifact cannot be decoded safely", failure
-        );
-      }
-      if (!decoded.mediaType().equals(artifact.mediaType())) {
-        throw new CanonicalPackageException(
-            "Narrative image artifact media type does not match its bytes"
-        );
-      }
-      images.put(artifact.artifactId(), new VerifiedImageArtifact(artifact, decoded));
-    }
+    Map<Ids.ArtifactId, VerifiedImageArtifact> images = PortableImageInspection.inspect(document);
 
     for (int revisionIndex = 0; revisionIndex < manifests.size(); revisionIndex++) {
       RevisionManifest revision = manifests.get(revisionIndex);

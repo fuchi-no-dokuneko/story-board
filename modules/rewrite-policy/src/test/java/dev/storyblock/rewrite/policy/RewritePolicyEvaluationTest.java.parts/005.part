@@ -1,0 +1,34 @@
+            Ids.StyleProfileVersionId versionId,
+            int sequence,
+            StyleProfileState from,
+            StyleProfileState to,
+            String requestId,
+            Instant at
+    ) {
+        AuditContext audit = AuditContext.system(requestId, at);
+        return new StyleLifecycleEvent(
+                Ids.StyleLifecycleEventId.create(),
+                profileId,
+                versionId,
+                sequence,
+                from,
+                to,
+                "ADR-317 evaluation transition",
+                false,
+                audit,
+                at
+        );
+    }
+
+    private static NarrativeBlock block(String text, BlockMetadata metadata) {
+        return NarrativeBlock.create(
+                Ids.BlockId.create(), OrderKey.initial(), text, metadata, Map.of()
+        );
+    }
+
+    private record ReadyProfile(
+            StyleProfileVersionView view,
+            StyleCorpusSource source
+    ) {
+    }
+}

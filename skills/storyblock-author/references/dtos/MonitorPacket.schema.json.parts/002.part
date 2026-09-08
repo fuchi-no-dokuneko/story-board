@@ -1,0 +1,49 @@
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "renderer_version": "example-1",
+        "range": {
+          "from_block_id": "example-1",
+          "to_block_id": "example-1"
+        },
+        "rendered_text": "example-1",
+        "blocks": [
+
+        ],
+        "resolved_meta": [
+
+        ],
+        "offset_map": [
+
+        ],
+        "scene_boundaries": [
+
+        ]
+      },
+      "detector_findings": [
+
+      ],
+      "local_invariants": {
+        "affected_ids_must_be_within_window": true,
+        "evidence_required": true,
+        "max_block_graphemes": 100,
+        "max_direct_speakers": 1,
+        "max_sentences": 2,
+        "min_sentences": 1,
+        "target_block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+        "target_scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+        "window_blocks": [
+          {
+            "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+            "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+            "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      },
+      "allowed_tools": [
+        "submit_finding",
+        "submit_proposed_operation"
+      ]
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 set -euo pipefail
 repo_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "$repo_dir/scripts/build-environment.sh"
+python3 "$repo_dir/scripts/assemble-sources.py"
 maven=$MAVEN_USER_HOME/apache-maven-3.9.11/bin/mvn
 if [[ ! -x $maven ]]; then
   "$repo_dir/install-local-build.sh"

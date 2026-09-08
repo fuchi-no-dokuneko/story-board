@@ -1,0 +1,57 @@
+                    genesis.novel().id(),
+                    new AuditContext(
+                            "req_revoke_retry", "owner", null, NOW.plusSeconds(121)
+                    )
+            ));
+            assertThrows(
+                    AccessAuthenticationException.class,
+                    () -> accessKeys.authenticate(active.bearerToken(), NOW.plusSeconds(122))
+            );
+
+            var events = store.listAuditEvents(genesis.novel().id());
+            assertEquals(4, events.size());
+            assertEquals(2, events.stream()
+                    .filter(event -> event.action() == AuditAction.ACCESS_KEY_ISSUE)
+                    .count());
+            assertEquals(AuditResult.SUCCEEDED, events.get(2).result());
+            assertEquals(AuditResult.IDEMPOTENT, events.get(3).result());
+            assertNotEquals(events.get(2).eventHash(), events.get(3).eventHash());
+        }
+
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {
+            assertEquals(Set.of(
+                    "event_id", "occurred_at", "request_id", "actor_id",
+                    "actor_key_id", "novel_id", "action", "subject_id",
+                    "operation_id", "revision_id", "result", "operation_hash",
+                    "content_hash", "event_hash"
+            ), columns(database, "audit_events"));
+            assertEquals(Set.of(
+                    "key_id", "novel_id", "secret_digest", "scopes_json",
+                    "actor_id", "created_at", "expires_at", "revoked_at",
+                    "last_used_at", "issue_idempotency_key", "issue_request_hash"
+            ), columns(database, "access_keys"));
+
+            SQLException immutableAudit = assertThrows(SQLException.class, () ->
+                    database.write(connection -> {
+                        connection.createStatement().executeUpdate(
+                                "UPDATE audit_events SET result = 'rejected'"
+                        );
+                        return null;
+                    })
+            );
+            assertTrue(immutableAudit.getMessage().contains("append-only"));
+
+            SQLException retainedKey = assertThrows(SQLException.class, () ->
+                    database.write(connection -> {
+                        try (var statement = connection.prepareStatement(
+                                "DELETE FROM access_keys WHERE key_id = ?"
+                        )) {
+                            statement.setString(1, activeKeyId.value());
+                            statement.executeUpdate();
+                        }
+                        return null;
+                    })
+            );
+            assertTrue(retainedKey.getMessage().contains("retained for audit"));
+
+            database.write(connection -> {

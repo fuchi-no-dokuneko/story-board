@@ -2,7 +2,6 @@ package dev.storyblock.api.http;
 
 import dev.storyblock.application.CanonicalTransferService;
 import dev.storyblock.application.StyleAnalysisService;
-import dev.storyblock.contracts.CanonicalPackageException;
 import dev.storyblock.security.AccessKeyStore;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
@@ -68,17 +67,5 @@ public final class CanonicalTransferController {
     return CanonicalTransferControllerGetArtifactAction.getArtifact(this, artifactId);
   }
 
-  @SuppressWarnings("unchecked")
-  static Map<String, Object> object(Object value, String path) {
-    if (!(value instanceof Map<?, ?> map)) {
-      throw new CanonicalPackageException(path + " must be an object");
-    }
-    for (Object key : map.keySet()) {
-      if (!(key instanceof String)) {
-        throw new CanonicalPackageException(path + " contains a non-string key");
-      }
-    }
-    return (Map<String, Object>) map;
-  }
 
 }

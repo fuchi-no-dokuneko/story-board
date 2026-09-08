@@ -1,0 +1,63 @@
+            assertNotEquals(genesis.id(), restored.id());
+            assertNotEquals(deleted.id(), restored.id());
+            assertEquals(deleted.id(), restored.parentId());
+            assertEquals(genesis.novel(), restored.novel());
+            assertEquals(genesis.selectedBlockVersions(), restored.selectedBlockVersions());
+            assertEquals(4, store.revisionCount(genesis.novel().id()));
+            assertEquals(3, store.operationCount(genesis.novel().id()));
+            assertEquals(1, store.listTombstones(genesis.novel().id()).size());
+            ReplayResult checkpointReplay = new ReplayService(store).materialize(
+                    genesis.novel().id(), restored.id()
+            );
+            assertEquals(2, checkpointReplay.startingSequence());
+            assertEquals(1, checkpointReplay.replayedOperations());
+            assertEquals(restoration.revision().contentHash(), checkpointReplay.contentHash());
+            assertEquals(
+                    restoration.revision().contentHash(),
+                    new ReplayService(store).materializeFull(
+                            genesis.novel().id(), restored.id()
+                    ).contentHash()
+            );
+        }
+
+        assertAppendOnly(path, "operations");
+        assertAppendOnly(path, "revisions");
+        assertEquals(3, count(path, "operations"));
+        assertEquals(4, count(path, "revisions"));
+    }
+
+    private static void commitReplacement(
+            SqliteRevisionStore store,
+            CommitService commits,
+            Ids.NovelId novelId,
+            String key,
+            String text,
+            int minute
+    ) {
+        var head = store.getHead(novelId);
+        RevisionManifest base = store.getRevision(novelId, head.revisionId()).manifest();
+        commits.commit(
+                RevisionStoreTestFixture.replace(base, key, text),
+                Ids.RevisionId.create(),
+                Instant.parse("2026-08-21T12:0" + minute + ":00Z")
+        );
+    }
+
+    private static long count(Path path, String table) throws Exception {
+        if (!List.of(
+                "revisions", "operations", "checkpoints", "head_block_projection",
+                "audit_events"
+        ).contains(table)) {
+            throw new IllegalArgumentException("Unexpected test table " + table);
+        }
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {
+            return database.readOnly(connection -> {
+                try (var statement = connection.createStatement();
+                     var result = statement.executeQuery("SELECT COUNT(*) FROM " + table)) {
+                    result.next();
+                    return result.getLong(1);
+                }
+            });
+        }
+    }
+

@@ -1,0 +1,71 @@
+const assert = require("node:assert/strict");
+const { Given, Then, When } = require("@cucumber/cucumber");
+const runtime = require("../../runtime.cjs");
+
+Given("I begin a recorded demo", async function () {
+  await runtime.beginRecording(this);
+});
+
+Then("I finish the recorded demo", async function () {
+  await runtime.finishRecording(this);
+});
+
+When("I narrate in {string} for at least {int} seconds:", async function (language, seconds, text) {
+  await runtime.narrate(language, seconds, text);
+});
+
+When("I wait for {int} seconds", async function (seconds) {
+  await runtime.sleep(seconds * 1000);
+});
+
+Given("I open the web application at path {string}", async function (pathname) {
+  await runtime.openWeb(this, pathname);
+});
+
+Given("the next page load reports degraded API health", async function () {
+  await runtime.mockInitialHealth(this, "degraded");
+});
+
+Given("the next page load cannot reach API health", async function () {
+  await runtime.mockInitialHealth(this, "unavailable");
+});
+
+Given("I sign in to System Monitor with configured UAT credentials", async function () {
+  const username = process.env.SYSTEM_MONITOR_UAT_USERNAME;
+  const password = process.env.SYSTEM_MONITOR_UAT_PASSWORD;
+  assert.ok(username && password, "SYSTEM_MONITOR_UAT_USERNAME and SYSTEM_MONITOR_UAT_PASSWORD are required");
+  await runtime.openWeb(this, "/login");
+  await runtime.replaceCss(this, '.login-container input[type="text"]', username);
+  await runtime.replaceCss(this, '.login-container input[type="password"]', password);
+  await runtime.clickCss(this, '.login-container button[type="submit"]');
+  await runtime.waitPath(this, "/daily-monitor");
+});
+
+Then("the web page title contains {string}", async function (expected) {
+  assert.ok((await (await runtime.ensureBrowser(this)).getTitle()).includes(expected));
+});
+
+Then("the web path eventually ends with {string}", async function (suffix) {
+  await runtime.waitPath(this, suffix);
+});
+
+Then("CSS {string} is visible", async function (selector) {
+  await runtime.cssElement(this, selector);
+});
+
+Then("CSS {string} has text {string}", async function (selector, expected) {
+  assert.equal(await (await runtime.cssElement(this, selector)).getText(), expected);
+});
+
+Then("CSS {string} contains text {string}", async function (selector, expected) {
+  assert.ok((await (await runtime.cssElement(this, selector)).getText()).includes(expected));
+});
+
+Then("CSS {string} eventually contains text {string}", async function (selector, expected) {
+  await runtime.waitCssText(this, selector, expected, true);
+});
+
+Then("CSS {string} eventually excludes text {string}", async function (selector, expected) {
+  await runtime.waitCssText(this, selector, expected, false);
+});
+

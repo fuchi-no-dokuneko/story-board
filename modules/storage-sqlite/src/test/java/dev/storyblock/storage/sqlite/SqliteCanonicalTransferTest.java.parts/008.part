@@ -1,0 +1,21 @@
+    private static long count(Path path, String table) throws Exception {
+        if (!IMPORT_TABLES.contains(table)) {
+            throw new IllegalArgumentException("Unexpected test table " + table);
+        }
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {
+            return database.readOnly(connection -> {
+                try (var statement = connection.createStatement();
+                     var result = statement.executeQuery("SELECT COUNT(*) FROM " + table)) {
+                    result.next();
+                    return result.getLong(1);
+                }
+            });
+        }
+    }
+
+    private static final class InjectedImportFailure extends RuntimeException {
+        private InjectedImportFailure(ImportStage stage) {
+            super(stage.name());
+        }
+    }
+}

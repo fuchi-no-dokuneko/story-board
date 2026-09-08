@@ -1,0 +1,48 @@
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-create")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.status").value("queued"))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        Map<String, Object> requestView = object(requested);
+        String jobId = stringField(requestView, "job_id");
+        String analysisId = stringField(requestView, "analysis_id");
+
+        mvc.perform(post("/v1/novels/{novelId}/style-analyses", novelId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-create")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.job_id").value(jobId))
+                .andExpect(jsonPath("$.analysis_id").value(analysisId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        byte[] claimBody = CanonicalJson.bytes(Map.of(
+                "novel_id", novelId,
+                "lease_owner", "style-worker-http",
+                "lease_seconds", 300
+        ));
+        MvcResult claimed = mvc.perform(post("/v1/internal/jobs/claims")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-claim")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(claimBody))
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(jsonPath("$.job_id").value(jobId))
+                .andExpect(jsonPath("$.analysis_id").value(analysisId))
+                .andExpect(jsonPath("$.attempt").value(1))
+                .andExpect(jsonPath("$.snapshot.blocks.length()").value(1000))
+                .andReturn();
+

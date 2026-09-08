@@ -1,0 +1,73 @@
+  if (command.startsWith("-")) throw new UsageError("The command must be the first argument");
+  const options = new Map();
+  const positionals = [];
+  for (let index = 1; index < argv.length; index += 1) {
+    const token = argv[index];
+    if (token === "-h") {
+      options.set("help", true);
+      continue;
+    }
+    if (!token.startsWith("--")) {
+      positionals.push(token);
+      continue;
+    }
+    const equals = token.indexOf("=");
+    const name = token.slice(2, equals < 0 ? undefined : equals);
+    if (!/^[a-z][a-z0-9-]*$/u.test(name)) throw new UsageError(`Invalid option: ${token}`);
+    if (options.has(name)) throw new UsageError(`Option may appear only once: --${name}`);
+    if (BOOLEAN_OPTIONS.has(name)) {
+      if (equals >= 0) throw new UsageError(`--${name} does not accept a value`);
+      options.set(name, true);
+      continue;
+    }
+    const value = equals >= 0 ? token.slice(equals + 1) : argv[++index];
+    if (value === undefined || (equals < 0 && value.startsWith("--"))) throw new UsageError(`--${name} requires a value`);
+    options.set(name, value);
+  }
+  return { command, options, positionals };
+}
+
+function assertOptions(parsed, commandOptions = []) {
+  const allowed = new Set([...GLOBAL_OPTIONS, ...commandOptions]);
+  for (const name of parsed.options.keys()) {
+    if (!allowed.has(name)) throw new UsageError(`Unknown option for ${parsed.command}: --${name}`);
+  }
+}
+
+function requiredOption(parsed, name) {
+  const value = parsed.options.get(name);
+  if (typeof value !== "string" || value === "") throw new UsageError(`${parsed.command} requires --${name}`);
+  return value;
+}
+
+function integerOption(parsed, name, fallback, minimum, maximum) {
+  const raw = parsed.options.get(name);
+  if (raw === undefined) return fallback;
+  if (!/^-?\d+$/u.test(raw)) throw new UsageError(`--${name} must be an integer`);
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) {
+    throw new UsageError(`--${name} must be between ${minimum} and ${maximum}`);
+  }
+  return value;
+}
+
+function expectPositionals(parsed, count, label = "argument") {
+  if (parsed.positionals.length !== count) {
+    throw new UsageError(`${parsed.command} requires ${count} positional ${label}${count === 1 ? "" : "s"}`);
+  }
+}
+
+function clientFor(parsed, overrides = {}) {
+  return new StoryBlockClient({
+    baseUrl: parsed.options.get("base-url") ?? process.env.STORYBLOCK_BASE_URL,
+    accessKey: parsed.options.get("access-key") ?? process.env.STORYBLOCK_ACCESS_KEY,
+    timeoutMs: parsed.options.get("timeout-ms") ?? process.env.STORYBLOCK_TIMEOUT_MS,
+    userAgent: parsed.options.get("user-agent") ?? process.env.STORYBLOCK_USER_AGENT,
+    ...overrides,
+  });
+}
+
+function quoted(hash) {
+  return `"${hash}"`;
+}
+

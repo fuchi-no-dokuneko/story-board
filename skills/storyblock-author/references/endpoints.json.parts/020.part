@@ -1,0 +1,96 @@
+          "contentType": "application/json",
+          "dto": "MonitorSubmissionResponse",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        },
+        {
+          "status": 201,
+          "description": "Immutable monitor output created",
+          "contentType": "application/json",
+          "dto": "MonitorSubmissionResponse",
+          "headers": [
+            "ETag",
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.monitor-runs.read",
+      "method": "GET",
+      "path": "/v1/novels/{novelId}/monitor-runs/{runId}",
+      "summary": "Get an immutable monitor output with derived stale state",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        },
+        {
+          "name": "runId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^mrun_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Monitor output and current invalidation state",
+          "contentType": "application/json",
+          "dto": "MonitorRunStatus",
+          "headers": [
+            "ETag"
+          ]
+        }

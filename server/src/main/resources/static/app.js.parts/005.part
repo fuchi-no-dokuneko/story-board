@@ -1,0 +1,80 @@
+    show(elements['reader-loading'], false);
+    show(elements['reader-empty'], true);
+    elements['reader-empty'].querySelector('h2').textContent = 'Unable to read novel';
+    elements['reader-empty'].querySelector('p').textContent = error.message;
+  }
+}
+
+async function applyOperatorToken(event) {
+  event.preventDefault();
+  const token = elements['operator-token'].value.trim();
+  if (!token) {
+    setOperatorStatus('error', 'Paste the owner token first');
+    elements['operator-token'].focus();
+    return;
+  }
+  try {
+    authorizationHeaders(token);
+  } catch (error) {
+    setOperatorStatus('error', error.message);
+    return;
+  }
+  state.operatorToken = token;
+  state.authRevision += 1;
+  elements['operator-token'].value = '';
+  elements['operator-clear'].disabled = false;
+  setOperatorStatus('checking', 'Checking operator token…');
+  state.page = 0;
+  await loadCatalog({ preserveSelection: false });
+}
+
+async function clearOperatorToken() {
+  state.operatorToken = '';
+  state.authRevision += 1;
+  elements['operator-token'].value = '';
+  elements['operator-clear'].disabled = true;
+  setOperatorStatus('checking', 'Operator token cleared; checking trusted-LAN access…');
+  elements['novel-list'].replaceChildren();
+  elements['catalog-total'].textContent = 'Checking access';
+  clearReader();
+  state.page = 0;
+  await loadCatalog({ preserveSelection: false });
+}
+
+async function sendConsoleRequest() {
+  elements.response.textContent = 'Loading...';
+  elements['response-status'].textContent = '';
+  try {
+    const target = resolveSameOriginUrl(elements.path.value, location.origin);
+    const headers = {
+      Accept: 'application/json, application/yaml, text/plain',
+      ...authorizationHeaders(state.operatorToken),
+    };
+    const options = { method: elements.method.value, headers };
+    const result = await fetch(target, options);
+    const responseText = await result.text();
+    elements['response-status'].textContent = `${result.status} ${result.statusText}`;
+    try {
+      elements.response.textContent = JSON.stringify(JSON.parse(responseText), null, 2);
+    } catch {
+      elements.response.textContent = responseText || '(empty response)';
+    }
+  } catch (error) {
+    elements['response-status'].textContent = error.code
+      ? 'Request blocked'
+      : 'Network error';
+    elements.response.textContent = error.message;
+  }
+}
+
+let searchTimer;
+elements['catalog-search'].addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    state.query = elements['catalog-search'].value.trim();
+    state.page = 0;
+    loadCatalog({ preserveSelection: false });
+  }, 220);
+});
+elements['catalog-refresh'].addEventListener('click', () => loadCatalog());
+elements['page-previous'].addEventListener('click', () => {

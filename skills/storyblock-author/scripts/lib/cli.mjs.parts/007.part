@@ -1,0 +1,50 @@
+      assertOptions(parsed, ["novel-id"]);
+      expectPositionals(parsed, 0);
+      const value = await fetchNovel(clientFor(parsed, context.clientOverrides), requiredOption(parsed, "novel-id"));
+      return { value };
+    }
+    case "register": {
+      assertOptions(parsed, ["idempotency-key", "source"]);
+      expectPositionals(parsed, 0);
+      const sourcePath = requiredOption(parsed, "source");
+      const manuscript = await readJsonFile(sourcePath);
+      await validateDto("AgentNovelRegistrationRequest", manuscript);
+      const analysis = manuscriptAnalysis(manuscript);
+      const idempotencyKey = parsed.options.get("idempotency-key") ?? deriveIdempotencyKey("register", manuscript);
+      if (idempotencyKey.length < 1 || idempotencyKey.length > 200) throw new UsageError("--idempotency-key must contain 1 to 200 characters");
+      const response = await clientFor(parsed, context.clientOverrides).request({
+        method: "POST",
+        pathname: "/v1/agent/novels",
+        headers: { "If-Match": "*", "Idempotency-Key": idempotencyKey },
+        body: manuscript,
+      });
+      return { value: {
+        command: "register",
+        idempotency_key: idempotencyKey,
+        payload_sha256: sha256(stableStringify(manuscript)),
+        source: { novel_id: manuscript.novel_id, created_at: manuscript.created_at, han_character_count: analysis.count, han_text_sha256: analysis.hash },
+        http: responseReport(response),
+      } };
+    }
+    case "verify": {
+      assertOptions(parsed, ["novel-id", "source"]);
+      expectPositionals(parsed, 0);
+      const manuscript = await readJsonFile(requiredOption(parsed, "source"));
+      await validateDto("AgentNovelRegistrationRequest", manuscript);
+      const novelId = parsed.options.get("novel-id") ?? manuscript.novel_id;
+      if (novelId !== manuscript.novel_id) throw new UsageError("--novel-id must equal source novel_id");
+      const persisted = await fetchNovel(clientFor(parsed, context.clientOverrides), novelId);
+      const report = verificationReport(manuscript, persisted);
+      if (!report.ok) throw new VerificationError(report);
+      return { value: report };
+    }
+    case "preview-edit":
+    case "commit": {
+      assertOptions(parsed, ["file", "novel-id"]);
+      expectPositionals(parsed, 0);
+      const novelId = requiredOption(parsed, "novel-id");
+      requireTypedId(novelId, "nov", "novel_id");
+      const body = await readJsonFile(requiredOption(parsed, "file"));
+      const dto = parsed.command === "commit" ? "CommitRequest" : "EditPreviewRequest";
+      await validateDto(dto, body);
+      if (body.operation.novel_id !== novelId) throw new PayloadValidationError(dto, [{ path: "#/operation/novel_id", message: "must equal --novel-id" }]);

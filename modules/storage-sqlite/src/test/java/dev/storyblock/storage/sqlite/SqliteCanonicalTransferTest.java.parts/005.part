@@ -1,0 +1,67 @@
+                temporaryDirectory.resolve("job-source.db")
+        );
+        Path targetPath = temporaryDirectory.resolve("job-target.db");
+        try (SqliteRevisionStore target = SqliteRevisionStore.open(targetPath)) {
+            CanonicalTransferService transfers = new CanonicalTransferService(target);
+            transfers.importDocument(
+                    CanonicalExportFormat.PACKAGE,
+                    document.bytes(),
+                    "job-import",
+                    IMPORTED_AT
+            );
+            var head = target.getHead(document.manifest().novelId());
+            var first = transfers.requestExport(
+                    document.manifest().novelId(),
+                    head.revisionId(),
+                    head.contentHash(),
+                    CanonicalExportFormat.PACKAGE,
+                    "job-one",
+                    Instant.parse("2026-08-21T14:00:00Z")
+            );
+            Ids.ArtifactId rolledBackArtifactId = Ids.ArtifactId.create();
+            byte[] content = document.bytes();
+            StoredArtifact artifact = new StoredArtifact(
+                    rolledBackArtifactId,
+                    document.manifest().novelId(),
+                    head.revisionId(),
+                    "canonical-package",
+                    "application/vnd.storyblock.package+json",
+                    "identity",
+                    CanonicalJson.hashBytes(content),
+                    content,
+                    Instant.parse("2026-08-21T14:01:00Z"),
+                    false
+            );
+            ExportJobRequest duplicateJob = new ExportJobRequest(
+                    first.job().jobId(),
+                    document.manifest().novelId(),
+                    head,
+                    CanonicalExportFormat.PACKAGE,
+                    "job-two",
+                    CanonicalJson.hash(Map.of("request", "job-two")),
+                    artifact,
+                    artifact.createdAt()
+            );
+
+            assertThrows(
+                    dev.storyblock.storage.StorageException.class,
+                    () -> target.createCompletedExport(duplicateJob)
+            );
+            assertThrows(
+                    MissingArtifactException.class,
+                    () -> target.getArtifact(rolledBackArtifactId)
+            );
+            assertArrayEquals(
+                    content,
+                    target.getArtifact(first.job().resultArtifactId()).content()
+            );
+        }
+    }
+
+    @Test
+    void generatedExportMayExceedOnePortableArtifactLimit() {
+        byte[] content = new byte[CanonicalNovelPackage.MAX_ARTIFACT_BYTES + 1];
+        String hash = CanonicalJson.hashBytes(content);
+
+        StoredArtifact generated = new StoredArtifact(
+                Ids.ArtifactId.create(),

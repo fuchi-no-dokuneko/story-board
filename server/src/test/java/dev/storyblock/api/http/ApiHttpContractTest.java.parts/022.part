@@ -1,0 +1,56 @@
+            assertEquals("security-test-actor", event.actorId());
+            assertEquals(keyId, event.actorKeyId().value());
+            assertEquals(operationId, event.operationId().value());
+            assertEquals(committedRevision, event.revisionId().value());
+            assertTrue(event.operationHash().startsWith("sha256:"));
+            assertTrue(event.contentHash().startsWith("sha256:"));
+        });
+    }
+
+    @Test
+    void styleProfileHttpLifecycleUsesScopedAuthEtagsAndExplicitPromotion()
+            throws Exception {
+        CanonicalRevision revision = genesis();
+        importAsOwner(revision, "style-http-import");
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String token = stringField(issueAsOwner(
+                revision,
+                "style-http-key",
+                List.of("novel:read", "style:admin")
+        ), "secret");
+        StyleProfileScope scope = new StyleProfileScope(
+                new Ids.NovelId(novelId), StyleScopeKind.NOVEL, null
+        );
+        byte[] profileBody = CanonicalJson.bytes(Map.of(
+                "name", "HTTP style baseline",
+                "scope", scope.canonicalValue(),
+                "provenance", "Generated fixture requiring explicit approval"
+        ));
+
+        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-profile")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(profileBody))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.scope.novel_id").value(novelId))
+                .andReturn();
+        Map<String, Object> profile = object(profileResult);
+        String profileId = stringField(profile, "profile_id");
+        String profileEtag = profileResult.getResponse().getHeader(HttpHeaders.ETAG);
+
+        var manifest = NarrativeCanonicalMapper.fromCanonical(revision);
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                manifest.liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
+        List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
+                30, new BigDecimal("0.1")
+        );

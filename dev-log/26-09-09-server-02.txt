@@ -1,0 +1,8 @@
+---01:37---部署與來源分段
+category: refactor
+Current status: 完成；完整 Java 測試通過。
+Issues: 容器曾要求人工密鑰且資料離開儲存庫；已修正。
+Apporch chosen: 容器使用專案掛載，自動初始化；大型契約與既有測試於安裝時組合。
+Assumption made to chose this approch: 指南明訂安裝產生檔案不受三千位元組限制。
+affect scope: 容器、工作程式、來源組合；HTTP 與資料庫契約不變。
+---

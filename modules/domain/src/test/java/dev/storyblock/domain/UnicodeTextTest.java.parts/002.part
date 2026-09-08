@@ -1,0 +1,12 @@
+                () -> UnicodeText.validateBlock("  ")
+        );
+        InvalidBlockTextException tooLong = assertThrows(
+                InvalidBlockTextException.class,
+                () -> UnicodeText.validateBlock("字".repeat(100) + "。")
+        );
+
+        assertEquals(List.of(BlockTextViolation.EMPTY), empty.violations());
+        assertTrue(tooLong.violations().contains(BlockTextViolation.TOO_LONG));
+        assertEquals(101, tooLong.analysis().graphemeCount());
+    }
+}

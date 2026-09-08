@@ -1,0 +1,81 @@
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/detector-runs:
+    post:
+      operationId: runAdjacentDetector
+      summary: Run the deterministic adjacent metadata detector
+      x-required-scopes: ["novel:analyze"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DetectorRunRequest"
+      responses:
+        "200":
+          description: Revision-bound detector findings
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetectorRunResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/monitor-packets:
+    post:
+      operationId: createMonitorPacket
+      summary: Resolve a bounded read-only packet for one monitor target
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitorPacketRequest"
+      responses:
+        "200":
+          description: Bounded render, detector context, and local invariants
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitorPacket"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/monitor-runs:
+    post:
+      operationId: submitMonitorOutput
+      summary: Persist an evidence-bound finding or inert proposed operation
+      x-required-scopes: ["monitor:submit"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MonitorSubmissionRequest"
+      responses:
+        "200":
+          description: Existing idempotent monitor submission
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:

@@ -39,6 +39,7 @@ public class StyleWorkerApplication {
 
     static void run(StyleWorkerSettings settings) throws Exception {
         HttpClient http = HttpClient.newBuilder()
+                .sslContext(LocalSelfSignedTls.context())
                 .connectTimeout(Duration.ofSeconds(10))
                 .followRedirects(HttpClient.Redirect.NEVER)
                 .build();

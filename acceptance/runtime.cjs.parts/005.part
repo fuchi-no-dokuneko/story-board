@@ -1,0 +1,35 @@
+async function closeWorld(world) {
+  await finishRecording(world);
+  if (world.driver) {
+    await world.driver.quit();
+    world.driver = null;
+  }
+}
+
+module.exports = {
+  beginRecording,
+  captureScenario,
+  chooseValue,
+  clickCss,
+  closeWorld,
+  cssElement,
+  deselectAllMonitorKeys,
+  ensureBrowser,
+  finishRecording,
+  mockInitialHealth,
+  narrate,
+  openWeb,
+  rememberResourceCount,
+  replaceCss,
+  selectOnlyCheckboxByLabel,
+  setBlockedUrls,
+  setNetworkOffline,
+  setViewport,
+  sleep,
+  timeoutMs,
+  waitCssCount,
+  waitCssText,
+  waitJavaScript,
+  waitPath,
+  waitResourceCountIncrease,
+};

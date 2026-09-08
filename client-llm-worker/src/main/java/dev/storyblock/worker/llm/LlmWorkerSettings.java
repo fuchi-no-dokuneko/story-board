@@ -18,7 +18,7 @@ record LlmWorkerSettings(
 
     LlmWorkerSettings {
         modelEndpoint = LlmWorkerSettingsRequireModelEndpoint.requireModelEndpoint(modelEndpoint);
-        if (modelToken == null || modelToken.length() < 16
+        if (modelToken == null || (!modelToken.isEmpty() && modelToken.length() < 16)
                 || modelToken.length() > 4096
                 || modelToken.chars().anyMatch(Character::isWhitespace)
                 || modelToken.chars().anyMatch(Character::isISOControl)) {

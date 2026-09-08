@@ -1,0 +1,94 @@
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Page of current persisted novel heads",
+          "contentType": "application/json",
+          "dto": "AdminNovelCatalog",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "admin.novels.read",
+      "method": "GET",
+      "path": "/v1/admin/novels/{novelId}",
+      "summary": "Read a persisted novel and its current canonical revision",
+      "auth": "operator-owner",
+      "scopes": [
+
+      ],
+      "roles": [
+        "operator"
+      ],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,

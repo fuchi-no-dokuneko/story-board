@@ -15,10 +15,9 @@ final class HttpLlmModelTransportInvokeAction {
           "Model request contains a transport credential"
       );
     }
-    HttpRequest request = HttpRequest.newBuilder(self.settings.modelEndpoint())
+    HttpRequest request = OptionalAuthorization.request(self.settings.modelEndpoint(), self.settings.modelToken())
         .timeout(self.settings.requestTimeout())
         .header("Accept", "application/json")
-        .header("Authorization", "Bearer " + self.settings.modelToken())
         .header("Content-Type", "application/json")
         .POST(HttpRequest.BodyPublishers.ofByteArray(canonicalRequest))
         .build();

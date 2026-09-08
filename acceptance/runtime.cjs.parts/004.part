@@ -1,0 +1,83 @@
+      if (box.checked) box.click();
+    }
+  `);
+}
+
+async function rememberResourceCount(world, fragment, name) {
+  const driver = await ensureBrowser(world);
+  const count = await driver.executeScript(
+    "return performance.getEntriesByType('resource').filter((entry) => entry.name.includes(arguments[0])).length;",
+    fragment,
+  );
+  world.memory.set(name, count);
+}
+
+async function waitResourceCountIncrease(world, fragment, name) {
+  if (!world.memory.has(name)) throw new Error(`No remembered value named ${name}`);
+  const before = world.memory.get(name);
+  const driver = await ensureBrowser(world);
+  await driver.wait(async () => {
+    const count = await driver.executeScript(
+      "return performance.getEntriesByType('resource').filter((entry) => entry.name.includes(arguments[0])).length;",
+      fragment,
+    );
+    return count > before;
+  }, timeoutMs(), `Resource count did not increase for ${fragment}`);
+}
+
+function runExternalCommand(variable, extraEnvironment = {}) {
+  const executable = process.env[variable];
+  if (!executable) return false;
+  const result = spawnSync(executable, [], {
+    env: { ...process.env, ...extraEnvironment },
+    encoding: "utf8",
+    stdio: "inherit",
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`${variable} exited with status ${result.status}`);
+  return true;
+}
+
+async function beginRecording(world) {
+  runExternalCommand("DEMO_RECORD_START_COMMAND", {
+    DEMO_SUITE: process.env.ACCEPTANCE_SUITE,
+    DEMO_REPOSITORY: config.repository,
+  });
+  world.demoRecording = true;
+}
+
+async function finishRecording(world) {
+  if (!world.demoRecording) return;
+  runExternalCommand("DEMO_RECORD_STOP_COMMAND", {
+    DEMO_SUITE: process.env.ACCEPTANCE_SUITE,
+    DEMO_REPOSITORY: config.repository,
+  });
+  world.demoRecording = false;
+}
+
+async function narrate(language, minimumSeconds, text) {
+  const started = Date.now();
+  const invoked = runExternalCommand("DEMO_TTS_COMMAND", {
+    DEMO_TTS_LANGUAGE: language,
+    DEMO_TTS_TEXT: text,
+    DEMO_TTS_MIN_SECONDS: String(minimumSeconds),
+  });
+  if (!invoked) process.stdout.write(`NARRATION [${language}, >=${minimumSeconds}s]: ${text}\n`);
+  const remaining = minimumSeconds * 1000 - (Date.now() - started);
+  if (remaining > 0) await sleep(remaining);
+}
+
+async function captureScenario(world, scenarioName) {
+  if (!world.driver || !process.env.ACCEPTANCE_REPORT_DIR) return;
+  mkdirSync(process.env.ACCEPTANCE_REPORT_DIR, { recursive: true });
+  try {
+    writeFileSync(
+      path.join(process.env.ACCEPTANCE_REPORT_DIR, `${slug(scenarioName)}.png`),
+      await world.driver.takeScreenshot(),
+      "base64",
+    );
+  } catch (error) {
+    process.stderr.write(`Could not capture screenshot: ${error.message}\n`);
+  }
+}
+

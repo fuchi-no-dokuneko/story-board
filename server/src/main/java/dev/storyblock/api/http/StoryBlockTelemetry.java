@@ -42,31 +42,7 @@ public final class StoryBlockTelemetry {
     this.backupManifestDirectory = backupDirectory.isBlank()
         ? null : Path.of(backupDirectory).toAbsolutePath().normalize();
 
-    gauge("commit_wait_ms", SqliteOperationalSnapshot::commitWaitMillis);
-    gauge("commit_transaction_ms", SqliteOperationalSnapshot::commitTransactionMillis);
-    gauge("sqlite_busy_total", SqliteOperationalSnapshot::sqliteBusyTotal);
-    gauge("wal_bytes", SqliteOperationalSnapshot::walBytes);
-    gauge("checkpoint_ms", SqliteOperationalSnapshot::checkpointMillis);
-    gauge("queue_depth", SqliteOperationalSnapshot::queueDepth);
-    gauge("oldest_job_age", SqliteOperationalSnapshot::oldestJobAgeSeconds);
-    gauge("analysis_duration_ms", SqliteOperationalSnapshot::analysisDurationMillis);
-    gauge("rewrite_duration_ms", SqliteOperationalSnapshot::rewriteDurationMillis);
-    gauge("stale_proposal_total", SqliteOperationalSnapshot::staleProposalTotal);
-    gauge("artifact_bytes", SqliteOperationalSnapshot::artifactBytes);
-    Gauge.builder("backup_age_seconds", this, StoryBlockTelemetry::backupAgeSeconds)
-        .description("Age of the newest encrypted backup manifest")
-        .baseUnit("seconds")
-        .register(registry);
-    for (FindingCode code : FindingCode.values()) {
-      detectorCounters.put(code, Counter.builder("detector_findings_total")
-          .tag("code", code.name())
-          .register(registry));
-    }
-    for (String reason : List.of("missing", "invalid", "scope", "novel")) {
-      denialCounters.put(reason, Counter.builder("auth_denied_total")
-          .tag("reason", reason)
-          .register(registry));
-    }
+    TelemetryMeters.register(this);
   }
 
   void recordDetectorFindings(List<DetectorFinding> findings) {

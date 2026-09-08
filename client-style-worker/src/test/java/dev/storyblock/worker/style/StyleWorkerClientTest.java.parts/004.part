@@ -1,0 +1,59 @@
+                lease.claimedStatusHash(),
+                (String) body.get("snapshot_hash"),
+                (String) body.get("profile_version_hash"),
+                (String) body.get("analyzer_contract_hash"),
+                (String) body.get("window_configuration_hash"),
+                StyleAnalysisSummary.fromCanonical(map(body.get("summary"))),
+                windows.stream().map(StyleAnalysisWindowFinding::fromCanonical).toList(),
+                trace,
+                "style-result-" + lease.jobId().value() + "-" + lease.attempt(),
+                completedAt
+        );
+    }
+
+    private static StyleAnalysisLease lease() {
+        Ids.NovelId novelId = Ids.NovelId.create();
+        Ids.SceneId sceneId = Ids.SceneId.create();
+        List<NarrativeBlock> narrativeBlocks = new ArrayList<>();
+        List<StyleAnalysisBlock> analysisBlocks = new ArrayList<>();
+        for (int index = 0; index < 60; index++) {
+            NarrativeBlock block = NarrativeBlock.create(
+                    Ids.BlockId.create(),
+                    OrderKey.rebalanced(index, 60),
+                    "Measured narrative sentence %02d repeats a stable cadence."
+                            .formatted(index),
+                    BlockMetadata.empty(),
+                    Map.of()
+            );
+            narrativeBlocks.add(block);
+            analysisBlocks.add(new StyleAnalysisBlock(
+                    sceneId,
+                    block,
+                    StyleStratumKind.NARRATION,
+                    null,
+                    "unknown",
+                    "narration",
+                    null
+            ));
+        }
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                narrativeBlocks,
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
+        List<BigDecimal> distances = java.util.Collections.nCopies(
+                30, new BigDecimal("0.1")
+        );
+        StyleCalibrationProfile calibration = new StyleCalibrationProfile(
+                StyleModule.CALIBRATION_SCHEMA_VERSION,
+                features.sourceHash(),
+                features.contract().contractHash(),
+                windows.configurationHash(),
+                List.of(new StyleStratumCalibration(
+                        StyleStratum.narration(),
+                        30,
+                        StyleFeatureChannel.requiredChannels().stream()
+                                .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                                .map(channel -> StyleChannelCalibration.fromDistances(

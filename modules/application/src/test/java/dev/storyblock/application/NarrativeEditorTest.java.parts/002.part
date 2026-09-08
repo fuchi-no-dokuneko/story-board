@@ -1,0 +1,62 @@
+                        context(base, "replace"), replaceRange, List.of(replacement)
+                ),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );
+        assertEquals(2, firstScene(afterReplace).blocks().size());
+        assertEquals(replacement.id(), firstScene(afterReplace).blocks().getFirst().id());
+
+        BlockRangeGuard deleteRange = BlockRangeGuard.capture(
+                firstScene,
+                firstScene.blocks().get(1).id(),
+                firstScene.blocks().getLast().id()
+        );
+        RevisionManifest afterDelete = editor.apply(
+                base,
+                new EditOperation.DeleteBlockRange(context(base, "delete"), deleteRange),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );
+        assertEquals(1, firstScene(afterDelete).blocks().size());
+    }
+
+    @Test
+    void splitMergeAndExtendEnforceTextSemanticsAndVersioning() {
+        RevisionManifest base = fixture();
+        NarrativeScene scene = firstScene(base);
+        NarrativeEditor editor = editorWithoutRestores();
+        NarrativeBlock twoSentences = scene.blocks().get(1);
+        int splitAnchor = dev.storyblock.domain.UnicodeText.graphemeCount("第二句。");
+        BlockRangeGuard splitRange = BlockRangeGuard.capture(scene, twoSentences.id(), twoSentences.id());
+        RevisionManifest split = editor.apply(
+                base,
+                new EditOperation.SplitBlock(
+                        context(base, "split"),
+                        splitRange,
+                        splitAnchor,
+                        List.of(
+                                new BlockDraft(
+                                        twoSentences.id(), "第二句。", twoSentences.metadata(), Map.of()
+                                ),
+                                BlockDraft.create("第三句。", BlockMetadata.empty())
+                        )
+                ),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );
+        assertEquals(4, firstScene(split).blocks().size());
+        assertNotEquals(twoSentences.versionId(), firstScene(split).blocks().get(1).versionId());
+
+        BlockRangeGuard mergeRange = BlockRangeGuard.capture(
+                scene, scene.blocks().getFirst().id(), scene.blocks().get(1).id()
+        );
+        RevisionManifest merged = editor.apply(
+                base,
+                new EditOperation.MergeBlocks(
+                        context(base, "merge"),
+                        mergeRange,
+                        BlockDraft.create("第一句。第二句。", BlockMetadata.empty())
+                ),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );

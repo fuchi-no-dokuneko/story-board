@@ -1,0 +1,58 @@
+    const heading = document.createElement('h3');
+    section.id = sectionId;
+    section.className = 'chapter-section';
+    heading.textContent = title;
+    section.append(heading);
+    chapterBlocks(chapter).forEach((block) => {
+      const paragraph = document.createElement('p');
+      paragraph.className = 'story-block';
+      paragraph.textContent = text(block.text, '');
+      section.append(paragraph);
+    });
+    elements['chapter-content'].append(section);
+  });
+}
+
+function renderNovel(payload) {
+  const novel = payload.novel;
+  const revision = payload.revision;
+  elements['reader-language'].textContent = text(novel.language, 'Unknown language');
+  elements['reader-title'].textContent = text(novel.title, 'Untitled novel');
+  elements['reader-id'].textContent = novel.novel_id;
+  elements['reader-registration'].textContent = novel.agent_write_registered ? 'Agent write registered' : 'Imported revision';
+  elements['reader-registration'].classList.toggle('registered', novel.agent_write_registered);
+  elements['stat-han'].textContent = number(novel.han_character_count);
+  elements['stat-chapters'].textContent = number(novel.chapter_count);
+  elements['stat-scenes'].textContent = number(novel.scene_count);
+  elements['stat-blocks'].textContent = number(novel.block_count);
+  elements['stat-zombies'].textContent = number(novel.zombie_count);
+  elements['stat-cannons'].textContent = number(novel.tnt_cannon_count);
+  elements['meta-revision'].textContent = novel.head_revision_id;
+  elements['meta-updated'].textContent = novel.updated_at;
+  elements['meta-hash'].textContent = novel.head_hash;
+  elements['meta-han-hash'].textContent = novel.han_text_sha256;
+  renderCharacters(novel.main_characters);
+  renderChapters(revision.chapters);
+}
+
+async function selectNovel(novelId) {
+  const authRevision = state.authRevision;
+  state.selectedNovelId = novelId;
+  document.querySelectorAll('.novel-item').forEach((button) => {
+    const selected = button.dataset.novelId === novelId;
+    button.classList.toggle('selected', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+  show(elements['reader-empty'], false);
+  show(elements['reader-loading'], true);
+  show(elements['reader-content'], false);
+  try {
+    const payload = await fetchJson(`/v1/admin/novels/${encodeURIComponent(novelId)}`);
+    if (state.selectedNovelId !== novelId || authRevision !== state.authRevision) return;
+    renderNovel(payload);
+    show(elements['reader-loading'], false);
+    show(elements['reader-content'], true);
+    history.replaceState(null, '', `#${encodeURIComponent(novelId)}`);
+  } catch (error) {
+    if (state.selectedNovelId !== novelId || authRevision !== state.authRevision) return;
+    reportAuthenticationError(error);

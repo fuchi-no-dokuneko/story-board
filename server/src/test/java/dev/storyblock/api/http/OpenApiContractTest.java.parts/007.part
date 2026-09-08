@@ -1,0 +1,60 @@
+                "POV_CHANGED_WITHOUT_BOUNDARY",
+                "META_TEXT_MISMATCH",
+                "INTENTIONAL_SCENE_RESET"
+        ), strings(map(properties.get("code")).get("enum")));
+        assertEquals(
+                Set.of("error", "warning", "info"),
+                strings(map(properties.get("severity")).get("enum"))
+        );
+        assertEquals(Boolean.TRUE, map(properties.get("affected_block_ids"))
+                .get("uniqueItems"));
+        assertEquals(Boolean.TRUE, map(properties.get("affected_scene_ids"))
+                .get("uniqueItems"));
+        assertEquals(3, map(properties.get("context_block_ids")).get("maxItems"));
+        assertEquals(
+                "#/components/schemas/DetectorFinding",
+                map(map(map(response.get("properties")).get("findings")).get("items"))
+                        .get("$ref")
+        );
+    }
+
+    @Test
+    void monitorContractIsBoundedEvidenceOnlyAndNeverRebases() {
+        assertEquals(
+                List.of("novel:read"),
+                list(operation("POST /novels/{novelId}/monitor-packets")
+                        .get("x-required-scopes"))
+        );
+        assertEquals(
+                List.of("monitor:submit"),
+                list(operation("POST /novels/{novelId}/monitor-runs")
+                        .get("x-required-scopes"))
+        );
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        Map<String, Object> invariants = map(schemas.get("MonitorLocalInvariants"));
+        Map<String, Object> window = map(map(invariants.get("properties")).get("window_blocks"));
+        assertEquals(5, window.get("maxItems"));
+
+        Map<String, Object> packet = map(schemas.get("MonitorPacket"));
+        Map<String, Object> tools = map(map(packet.get("properties")).get("allowed_tools"));
+        List<?> toolSlots = list(tools.get("prefixItems"));
+        assertEquals("submit_finding", map(toolSlots.get(0)).get("const"));
+        assertEquals("submit_proposed_operation", map(toolSlots.get(1)).get("const"));
+
+        Map<String, Object> status = map(schemas.get("MonitorRunStatus"));
+        assertEquals(
+                Boolean.FALSE,
+                map(map(status.get("properties")).get("rebase_allowed")).get("const")
+        );
+        assertTrue(schemas.containsKey("MonitorEvidence"));
+        assertTrue(schemas.containsKey("MonitorFindingOutput"));
+        assertTrue(schemas.containsKey("MonitorProposedOperationOutput"));
+    }
+
+    @Test
+    void styleContractMakesPromotionExplicitAndKlDiagnosticOnly() {
+        assertEquals(
+                List.of("style:admin"),
+                list(operation("POST /style-profiles/{profileId}/versions/{versionId}/transitions")
+                        .get("x-required-scopes"))
+        );

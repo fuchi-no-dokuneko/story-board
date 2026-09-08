@@ -1,0 +1,46 @@
+          parent_revision_id: revisionId,
+          revision_id: revisionId,
+          schema_version: "1.0.0",
+        })),
+      },
+      {
+        status: 200,
+        headers: {
+          "content-type": "application/pdf",
+          "x-pdf-page-count": "7",
+          "x-pdf-image-count": "5",
+          "x-pdf-renderer-version": "storyblock-pdf-1",
+        },
+        body: pdfBytes,
+      },
+    ];
+    const stdout = [];
+    const exitCode = await runCli([
+      "render-pdf", "--novel-id", novelId, "--file", requestPath,
+      "--output", outputPath, "--json",
+    ], {
+      stdout: (value) => stdout.push(value),
+      stderr: () => {},
+      clientOverrides: {
+        transport: async (request) => {
+          requests.push(request);
+          return responses.shift();
+        },
+      },
+    });
+
+    assert.equal(exitCode, EXIT_CODES.SUCCESS);
+    assert.equal(requests[1].url.pathname, `/v1/novels/${novelId}/pdf-renders`);
+    assert.equal(requests[1].headers.Accept, "application/pdf, application/problem+json");
+    assert.deepEqual(JSON.parse(requests[1].body.toString("utf8")), { revision_id: revisionId });
+    assert.deepEqual(await readFile(outputPath), pdfBytes);
+    assert.equal((await stat(outputPath)).mode & 0o777, 0o600);
+    const report = JSON.parse(stdout.join(""));
+    assert.equal(report.bytes, pdfBytes.length);
+    assert.equal(report.pages, 7);
+    assert.equal(report.images, 5);
+    assert.equal(report.renderer_version, "storyblock-pdf-1");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});

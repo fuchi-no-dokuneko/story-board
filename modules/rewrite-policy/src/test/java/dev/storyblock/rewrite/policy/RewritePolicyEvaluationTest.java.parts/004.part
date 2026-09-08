@@ -1,0 +1,62 @@
+        List<BigDecimal> distances = Collections.nCopies(30, new BigDecimal("0.1"));
+        StyleCalibrationProfile calibration = new StyleCalibrationProfile(
+                StyleModule.CALIBRATION_SCHEMA_VERSION,
+                features.sourceHash(),
+                features.contract().contractHash(),
+                windows.configurationHash(),
+                List.of(new StyleStratumCalibration(
+                        StyleStratum.narration(),
+                        30,
+                        StyleFeatureChannel.requiredChannels().stream()
+                                .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                                .map(channel -> StyleChannelCalibration.fromDistances(
+                                        channel, distances
+                                )).toList()
+                ))
+        );
+        StyleCorpusSource corpusSource = new StyleCorpusSource(
+                "owner-evaluation-corpus",
+                features.sourceHash(),
+                StyleCorpusSourceKind.OWNER,
+                "ADR-317 evaluation fixture",
+                "test-only",
+                "test-owner"
+        );
+        Ids.StyleProfileId profileId = Ids.StyleProfileId.create();
+        Ids.StyleProfileVersionId versionId = Ids.StyleProfileVersionId.create();
+        StyleProfileVersion version = new StyleProfileVersion(
+                versionId,
+                profileId,
+                1,
+                new StyleProfileVersionContent(
+                        new StyleProfileScope(
+                                Ids.NovelId.create(), StyleScopeKind.NOVEL, null
+                        ),
+                        List.of(corpusSource),
+                        features,
+                        windows,
+                        calibration.canonicalValue()
+                ),
+                "evaluation-owner",
+                NOW
+        );
+        List<StyleLifecycleEvent> events = new ArrayList<>();
+        events.add(StyleLifecycleEvent.initial(
+                Ids.StyleLifecycleEventId.create(), profileId, versionId,
+                AuditContext.system("evaluation-draft", NOW)
+        ));
+        events.add(event(
+                profileId, versionId, 2,
+                StyleProfileState.DRAFT, StyleProfileState.CALIBRATING,
+                "evaluation-calibrating", NOW.plusSeconds(1)
+        ));
+        events.add(event(
+                profileId, versionId, 3,
+                StyleProfileState.CALIBRATING, StyleProfileState.READY,
+                "evaluation-ready", NOW.plusSeconds(2)
+        ));
+        return new ReadyProfile(StyleProfileVersionView.of(version, events), corpusSource);
+    }
+
+    private static StyleLifecycleEvent event(
+            Ids.StyleProfileId profileId,

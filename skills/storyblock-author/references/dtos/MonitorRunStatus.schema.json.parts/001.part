@@ -1,0 +1,121 @@
+{
+  "type": "object",
+  "required": [
+    "monitor_run_id",
+    "output_id",
+    "output_kind",
+    "novel_id",
+    "revision_id",
+    "revision_hash",
+    "target_block_id",
+    "neighbor_count",
+    "monitor_version",
+    "rule_version",
+    "affected_blocks",
+    "output",
+    "request_hash",
+    "submitted_at",
+    "state",
+    "stale_reasons",
+    "rebase_allowed"
+  ],
+  "properties": {
+    "monitor_run_id": {
+      "type": "string",
+      "pattern": "^mrun_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "output_id": {
+      "type": "string",
+      "pattern": "^(mis|mpr)_[0-9a-f-]{36}$"
+    },
+    "output_kind": {
+      "type": "string",
+      "enum": [
+        "finding",
+        "proposed_operation"
+      ]
+    },
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revision_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "target_block_id": {
+      "type": "string",
+      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "neighbor_count": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2
+    },
+    "monitor_version": {
+      "type": "string"
+    },
+    "rule_version": {
+      "type": "string"
+    },
+    "affected_blocks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "MonitorBlockFingerprint.schema.json"
+      }
+    },
+    "output": {
+      "oneOf": [
+        {
+          "$ref": "MonitorFindingOutput.schema.json"
+        },
+        {
+          "$ref": "MonitorProposedOperationOutput.schema.json"
+        }
+      ]
+    },
+    "request_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "current",
+        "stale"
+      ]
+    },
+    "stale_reasons": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "head_changed",
+          "affected_block_changed",
+          "affected_block_missing",
+          "rule_version_changed"
+        ]
+      }
+    },
+    "rebase_allowed": {
+      "const": false
+    },
+    "idempotent_replay": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",

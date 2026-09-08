@@ -1,0 +1,59 @@
+      "description": "Code-derived StoryBlock Delete Block Range Payload JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "DetectorFinding",
+      "file": "dtos/DetectorFinding.schema.json",
+      "description": "Code-derived StoryBlock Detector Finding JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/DetectorController.java",
+        "modules/detector/src/main/java/dev/storyblock/detector/DetectorRun.java",
+        "modules/detector/src/main/java/dev/storyblock/detector/DetectorFinding.java"
+      ]
+    },
+    {
+      "name": "DetectorRunRequest",
+      "file": "dtos/DetectorRunRequest.schema.json",
+      "description": "Code-derived StoryBlock Detector Run Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/DetectorController.java",
+        "modules/detector/src/main/java/dev/storyblock/detector/DetectorRun.java",
+        "modules/detector/src/main/java/dev/storyblock/detector/DetectorFinding.java"
+      ]
+    },
+    {
+      "name": "DetectorRunResponse",
+      "file": "dtos/DetectorRunResponse.schema.json",
+      "description": "Code-derived StoryBlock Detector Run Response JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/DetectorController.java",
+        "modules/detector/src/main/java/dev/storyblock/detector/DetectorRun.java",
+        "modules/detector/src/main/java/dev/storyblock/detector/DetectorFinding.java"
+      ]
+    },
+    {
+      "name": "EditPreviewRequest",
+      "file": "dtos/EditPreviewRequest.schema.json",
+      "description": "Code-derived StoryBlock Edit Preview Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "ExportJob",
+      "file": "dtos/ExportJob.schema.json",
+      "description": "Code-derived StoryBlock Export Job JSON contract.",
+      "confidence": "confirmed-from-code",

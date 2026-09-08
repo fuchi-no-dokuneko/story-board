@@ -4,22 +4,25 @@ COPY . .
 RUN ./mvnw --batch-mode -DskipTests package
 
 FROM eclipse-temurin:21-jre AS runtime
-RUN command -v keytool >/dev/null \
-    && useradd --create-home --uid 10001 storyblock
-WORKDIR /app
-COPY --chmod=500 scripts/container-entrypoint.sh /app/container-entrypoint.sh
-COPY --chmod=500 scripts/generate-self-signed-tls.sh /app/generate-self-signed-tls.sh
-RUN mkdir -p /app/data /app/tls/private /app/tls/public \
-    && chown -R storyblock:storyblock /app
+WORKDIR /workspace
+RUN useradd --no-create-home --uid 10001 storyblock \
+    && mkdir -p /workspace/.local \
+    && chown -R storyblock:storyblock /workspace
+COPY --chmod=555 scripts/container-entrypoint.sh /workspace/entrypoint.sh
 USER storyblock
-ENTRYPOINT ["/app/container-entrypoint.sh"]
+ENV JAVA_TOOL_OPTIONS="-Djava.net.preferIPv4Stack=true -Djava.io.tmpdir=/workspace/.local/tmp -Dstoryblock.root=/workspace"
+ENTRYPOINT ["/workspace/entrypoint.sh"]
 
 FROM runtime AS api
-COPY --from=build --chown=storyblock:storyblock /workspace/server/target/storyblock-api-*.jar /app/application.jar
+COPY --from=build /workspace/server/target/storyblock-api-*.jar /workspace/application.jar
+COPY server/config /workspace/server/config
+ENV STORYBLOCK_CONTAINER_APP=api
 EXPOSE 8443
 
 FROM runtime AS style-worker
-COPY --from=build --chown=storyblock:storyblock /workspace/client-style-worker/target/storyblock-style-worker-*.jar /app/application.jar
+COPY --from=build /workspace/client-style-worker/target/storyblock-style-worker-*.jar /workspace/application.jar
+ENV STORYBLOCK_CONTAINER_APP=style-worker
 
 FROM runtime AS llm-worker
-COPY --from=build --chown=storyblock:storyblock /workspace/client-llm-worker/target/storyblock-llm-worker-*.jar /app/application.jar
+COPY --from=build /workspace/client-llm-worker/target/storyblock-llm-worker-*.jar /workspace/application.jar
+ENV STORYBLOCK_CONTAINER_APP=llm-worker

@@ -1,0 +1,56 @@
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "CorrectBlockMetaOperation",
+      "file": "dtos/CorrectBlockMetaOperation.schema.json",
+      "description": "Code-derived StoryBlock Correct Block Meta Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "CorrectBlockMetaPayload",
+      "file": "dtos/CorrectBlockMetaPayload.schema.json",
+      "description": "Code-derived StoryBlock Correct Block Meta Payload JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "CreateNovelRequest",
+      "file": "dtos/CreateNovelRequest.schema.json",
+      "description": "Code-derived StoryBlock Create Novel Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "DeleteBlockRangeOperation",
+      "file": "dtos/DeleteBlockRangeOperation.schema.json",
+      "description": "Code-derived StoryBlock Delete Block Range Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "DeleteBlockRangePayload",
+      "file": "dtos/DeleteBlockRangePayload.schema.json",

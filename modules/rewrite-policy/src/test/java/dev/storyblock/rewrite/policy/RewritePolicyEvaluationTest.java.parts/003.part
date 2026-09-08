@@ -1,0 +1,63 @@
+                        "long_ngram_graphemes", RewriteNearCopyChecker.NGRAM_GRAPHEMES,
+                        "matched", true
+                ),
+                "preservation", Map.of(
+                        "changed_detected", List.of("name", "number", "negation"),
+                        "preserved", List.of("name", "number", "negation", "speaker")
+                ),
+                "schema_version", "adr-317-rewrite-evaluation-1"
+        );
+        Path output = Path.of("target/evaluations/rewrite-policy.json");
+        Files.createDirectories(output.getParent());
+        Files.write(output, CanonicalJson.bytes(report));
+    }
+
+    private static Map<ProtectedFactKind, Integer> counts(
+            RewriteProtectedFactSnapshot snapshot
+    ) {
+        Map<ProtectedFactKind, Integer> result = new EnumMap<>(ProtectedFactKind.class);
+        snapshot.facts().forEach(fact -> result.merge(
+                fact.kind(), fact.count(), Integer::sum
+        ));
+        return result;
+    }
+
+    private static RewriteTextProposal proposal(
+            NarrativeBlock source,
+            String proposedText,
+            StyleProfileVersionView profile
+    ) {
+        RewriteSourceBlock inputBlock = RewriteSourceBlock.create(
+                source.id(), source.versionId(), source.text(), true
+        );
+        RewriteWorkerInput input = new RewriteWorkerInput(
+                Ids.ProposalId.create(),
+                Ids.StyleAnalysisId.create(),
+                Ids.NovelId.create(),
+                Ids.RevisionId.create(),
+                CanonicalJson.hash("evaluation-revision"),
+                profile.profileVersion().versionId(),
+                profile.profileVersion().versionHash(),
+                CanonicalJson.hash("evaluation-analyzer"),
+                CanonicalJson.hash("evaluation-windows"),
+                List.of(CanonicalJson.hash("evaluation-finding")),
+                List.of(inputBlock),
+                new RewriteConstraints(1, 100, List.of("Reduce style drift."))
+        );
+        return new RewriteTextProposal(
+                input,
+                "evaluation-model",
+                CanonicalJson.hash("evaluation-response"),
+                List.of(RewriteCandidateBlock.create(inputBlock, proposedText)),
+                NOW
+        );
+    }
+
+    private static ReadyProfile readyProfile(NarrativeBlock reference) {
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                List.of(reference),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();

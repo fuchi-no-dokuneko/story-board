@@ -1,0 +1,59 @@
+            database.write(connection -> {
+                try (var statement = connection.prepareStatement(
+                        "UPDATE novels SET head_hash = ? WHERE novel_id = ?"
+                )) {
+                    statement.setString(1, "sha256:invalid");
+                    statement.setString(2, genesis.novel().id().value());
+                    statement.executeUpdate();
+                }
+                return null;
+            });
+        }
+
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            ReplayVerificationReport report = new ReplayService(store).verifyAllHeads();
+
+            assertFalse(report.valid());
+            assertEquals(1, report.novels().size());
+            assertEquals(genesis.novel().id(), report.novels().getFirst().novelId());
+            assertNull(report.novels().getFirst().headRevisionId());
+            assertTrue(report.novels().getFirst().detail().contains("content hash"));
+        }
+    }
+
+    @Test
+    void restoreCreatesANewRevisionAndNeverDeletesHistory() throws Exception {
+        Path path = temporaryDirectory.resolve("restore.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(
+                path, new CheckpointPolicy(2, Long.MAX_VALUE)
+        )) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            CommitService commits = new CommitService(store);
+            CommitResult replacement = commits.commit(
+                    RevisionStoreTestFixture.replace(genesis, "before-delete", "第二句。"),
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:01:00Z")
+            );
+            RevisionManifest revised = store.getRevision(
+                    genesis.novel().id(), replacement.revision().revisionId()
+            ).manifest();
+            CommitResult deletion = commits.commit(
+                    RevisionStoreTestFixture.delete(revised, "delete"),
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:02:00Z")
+            );
+            RevisionManifest deleted = store.getRevision(
+                    genesis.novel().id(), deletion.revision().revisionId()
+            ).manifest();
+            assertTrue(deleted.liveBlocks().isEmpty());
+
+            CommitResult restoration = commits.commit(
+                    RevisionStoreTestFixture.restore(deleted, genesis, "restore"),
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:03:00Z")
+            );
+            RevisionManifest restored = store.getRevision(
+                    genesis.novel().id(), restoration.revision().revisionId()
+            ).manifest();
+

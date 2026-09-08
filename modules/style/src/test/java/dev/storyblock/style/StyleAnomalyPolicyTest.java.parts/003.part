@@ -1,0 +1,60 @@
+                new EvaluationCase("train-normal", "train", false,
+                        normalReport(), List.of(), null),
+                new EvaluationCase("train-topic", "train", false,
+                        topicOnlyReport(), List.of(), null),
+                new EvaluationCase("calibration-drift", "calibration", true,
+                        highReport(), List.of(highReport(), highReport()), null),
+                new EvaluationCase("calibration-intentional", "calibration", false,
+                        highReport(), List.of(highReport(), highReport()),
+                        "Intentional dream sequence")
+        );
+        int truePositive = 0;
+        int trueNegative = 0;
+        int falsePositive = 0;
+        int falseNegative = 0;
+        Map<String, Integer> channelContributions = new LinkedHashMap<>();
+        List<Map<String, Object>> cases = new ArrayList<>();
+
+        for (EvaluationCase value : corpus) {
+            StyleWindowScore operational = score(
+                    window(StyleWindowKind.OPERATIONAL, value.shiftReason()),
+                    value.operational(),
+                    profile
+            );
+            List<StyleWindowScore> sustained = value.sustained().stream()
+                    .map(report -> score(window(
+                            StyleWindowKind.NON_OVERLAP, value.shiftReason()
+                    ), report, profile))
+                    .toList();
+            StyleAnomalyDecision decision = policy.evaluate(
+                    operational, sustained, List.of()
+            );
+            boolean actual = decision.canTriggerRewrite();
+            if (value.expected() && actual) {
+                truePositive++;
+            } else if (!value.expected() && !actual) {
+                trueNegative++;
+            } else if (actual) {
+                falsePositive++;
+            } else {
+                falseNegative++;
+            }
+            decision.independentQ99Channels().forEach(channel ->
+                    channelContributions.merge(channel.canonicalName(), 1, Integer::sum)
+            );
+            cases.add(Map.of(
+                    "actual_rewrite_candidate", actual,
+                    "expected_rewrite_candidate", value.expected(),
+                    "id", value.id(),
+                    "label", value.shiftReason() == null
+                            ? "unwanted_or_normal" : "intentional_shift",
+                    "split", value.split(),
+                    "state", decision.state().canonicalName()
+            ));
+        }
+
+        StyleWindowScore before = score(
+                window(StyleWindowKind.OPERATIONAL, null), highReport(), profile
+        );
+        StyleWindowScore after = score(
+                window(StyleWindowKind.OPERATIONAL, null), normalReport(), profile

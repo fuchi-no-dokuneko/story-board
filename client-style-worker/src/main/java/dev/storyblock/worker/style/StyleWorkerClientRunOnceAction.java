@@ -17,11 +17,10 @@ final class StyleWorkerClientRunOnceAction {
         "lease_owner", self.settings.workerId(),
         "lease_seconds", self.settings.leaseDuration().toSeconds()
     ));
-    HttpResponse<byte[]> claim = self.send(HttpRequest.newBuilder(
-            self.settings.endpoint("v1/internal/jobs/claims")
+    HttpResponse<byte[]> claim = self.send(OptionalAuthorization.request(
+            self.settings.endpoint("v1/internal/jobs/claims"), self.settings.bearerToken()
         )
         .timeout(StyleWorkerClient.REQUEST_TIMEOUT)
-        .header("Authorization", "Bearer " + self.settings.bearerToken())
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
         .header("Idempotency-Key", claimKey)
@@ -89,11 +88,10 @@ final class StyleWorkerClientRunOnceAction {
           "Style job result exceeds the API request limit"
       );
     }
-    HttpResponse<byte[]> result = self.send(HttpRequest.newBuilder(self.settings.endpoint(
+    HttpResponse<byte[]> result = self.send(OptionalAuthorization.request(self.settings.endpoint(
             "v1/internal/jobs/" + lease.jobId().value() + "/results"
-        ))
+        ), self.settings.bearerToken())
         .timeout(StyleWorkerClient.REQUEST_TIMEOUT)
-        .header("Authorization", "Bearer " + self.settings.bearerToken())
         .header("Content-Type", "application/json")
         .header("Accept", "application/json")
         .header("Idempotency-Key", resultKey)

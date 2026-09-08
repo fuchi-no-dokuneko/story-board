@@ -1,0 +1,59 @@
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "StyleAnalysisAccepted",
+      "file": "dtos/StyleAnalysisAccepted.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Accepted JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisBlock",
+      "file": "dtos/StyleAnalysisBlock.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Block JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisJob",
+      "file": "dtos/StyleAnalysisJob.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Job JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisJobFields",
+      "file": "dtos/StyleAnalysisJobFields.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Job Fields JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisNarrativeBlock",
+      "file": "dtos/StyleAnalysisNarrativeBlock.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Narrative Block JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",

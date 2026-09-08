@@ -1,0 +1,17 @@
+        hiddenImage.put("payload", hiddenPayload);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> EditOperationCanonicalMapper.fromCanonical(hiddenImage)
+        );
+    }
+
+    private static EditContext context(
+            Ids.NovelId novelId,
+            Ids.RevisionId baseId,
+            String key
+    ) {
+        return new EditContext(
+                Ids.OperationId.create(), key, novelId, baseId, HASH_A
+        );
+    }
+}

@@ -1,0 +1,15 @@
+      "operational_window_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "independent_q99_channels": [
+
+      ],
+      "sustaining_window_ids": [
+
+      ],
+      "localized_micro_window_ids": [
+
+      ],
+      "intentional_shift_adjusted": true,
+      "can_trigger_rewrite": true
+    }
+  ]
+}

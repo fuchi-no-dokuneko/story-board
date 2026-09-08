@@ -1,0 +1,50 @@
+                    genesis, "fault-" + stage, "第二句。"
+            );
+            CommitRequest request = RevisionStoreTestFixture.request(
+                    genesis,
+                    operation,
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:01:00Z")
+            );
+            try (SqliteRevisionStore store = SqliteRevisionStore.open(
+                    path,
+                    new CheckpointPolicy(1, 1),
+                    current -> {
+                        if (current == stage) {
+                            throw new InjectedFailure(stage);
+                        }
+                    }
+            )) {
+                store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+                assertThrows(InjectedFailure.class, () -> store.commitCas(request), stage.name());
+                assertEquals(1, store.revisionCount(genesis.novel().id()), stage.name());
+                assertEquals(0, store.operationCount(genesis.novel().id()), stage.name());
+                assertTrue(store.listTombstones(genesis.novel().id()).isEmpty(), stage.name());
+                assertEquals(genesis.id(), store.getHead(genesis.novel().id()).revisionId());
+            }
+            assertEquals(1, count(path, "revisions"), stage.name());
+            assertEquals(0, count(path, "operations"), stage.name());
+            assertEquals(1, count(path, "checkpoints"), stage.name());
+            assertEquals(1, count(path, "head_block_projection"), stage.name());
+            assertEquals(0, count(path, "audit_events"), stage.name());
+        }
+    }
+
+    @Test
+    void checkpointPlusReplayAndFullReplayReproduceEveryHead() throws Exception {
+        Path path = temporaryDirectory.resolve("replay.db");
+        RevisionManifest firstNovel = RevisionStoreTestFixture.genesis();
+        RevisionManifest secondNovel = RevisionStoreTestFixture.genesis();
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(
+                path, new CheckpointPolicy(2, Long.MAX_VALUE)
+        )) {
+            store.createNovel(firstNovel, RevisionStoreTestFixture.hash(firstNovel));
+            store.createNovel(secondNovel, RevisionStoreTestFixture.hash(secondNovel));
+            CommitService commits = new CommitService(store);
+            commitReplacement(store, commits, firstNovel.novel().id(), "one", "第二句。", 1);
+            commitReplacement(store, commits, firstNovel.novel().id(), "two", "第三句。", 2);
+            commitReplacement(store, commits, firstNovel.novel().id(), "three", "第四句。", 3);
+
+            var head = store.getHead(firstNovel.novel().id());
+            StoredCheckpoint checkpoint = store.loadCheckpoint(
+                    firstNovel.novel().id(), head.sequence()

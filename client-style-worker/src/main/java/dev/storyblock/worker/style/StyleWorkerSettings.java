@@ -25,7 +25,7 @@ record StyleWorkerSettings(
 
     StyleWorkerSettings {
         apiBaseUri = StyleWorkerSettingsNormalizeApiBase.normalizeApiBase(apiBaseUri);
-        if (bearerToken == null || !TOKEN.matcher(bearerToken).matches()) {
+        if (bearerToken == null || (!bearerToken.isEmpty() && !TOKEN.matcher(bearerToken).matches())) {
             throw new IllegalArgumentException("Style worker bearer token is invalid");
         }
         Objects.requireNonNull(novelId, "novelId");

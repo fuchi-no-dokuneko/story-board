@@ -1,0 +1,2 @@
+    SELECT RAISE(ABORT, 'style mutation records are append-only');
+END;

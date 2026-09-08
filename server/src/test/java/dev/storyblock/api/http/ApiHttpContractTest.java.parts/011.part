@@ -1,0 +1,52 @@
+                "artifact_id", "content_hash", "media_type", "width_px", "height_px"
+        )) {
+            image.put(field, uploadBody.get(field));
+        }
+        image.put("alt_text", "A blue signal on a plain white background.");
+        Map<String, Object> wrongDimensions = new LinkedHashMap<>(image);
+        wrongDimensions.put(
+                "width_px", ((Number) wrongDimensions.get("width_px")).intValue() + 1
+        );
+        String mismatchKey = "image-dimension-mismatch";
+        Map<String, Object> mismatchOperation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", mismatchKey,
+                "novel_id", novelId,
+                "base_revision_id", revisionId,
+                "expected_head_hash", revision.contentHash(),
+                "type", "insert_blocks",
+                "payload", Map.of(
+                        "insertion_point", Map.of(
+                                "scene_id", firstSceneId(revision),
+                                "position", "end"
+                        ),
+                        "blocks", List.of(Map.of(
+                                "id", Ids.BlockId.create().value(),
+                                "text", "The mismatched blue signal appears on white.",
+                                "meta", Map.of(),
+                                "image", wrongDimensions
+                        ))
+                )
+        );
+        mvc.perform(post("/v1/novels/{novelId}/commits", novelId)
+                        .with(userWithScope("novel:commit"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, mismatchKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "operation", mismatchOperation,
+                                "candidate_revision_id", Ids.RevisionId.create().value(),
+                                "candidate_created_at", "2026-08-29T00:00:00Z"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+        String resultRevisionId = Ids.RevisionId.create().value();
+        Map<String, Object> operation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", "image-block-http",
+                "novel_id", novelId,
+                "base_revision_id", revisionId,
+                "expected_head_hash", revision.contentHash(),
+                "type", "insert_blocks",
+                "payload", Map.of(
+                        "insertion_point", Map.of(

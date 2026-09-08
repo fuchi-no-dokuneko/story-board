@@ -1,0 +1,60 @@
+                        SELECT key_id, novel_id, secret_digest, scopes_json, actor_id,
+                               issue_idempotency_key, issue_request_hash
+                        FROM access_keys WHERE key_id = ?
+                        """)) {
+                    statement.setString(1, keyId.value());
+                    try (var result = statement.executeQuery()) {
+                        assertTrue(result.next());
+                        assertEquals(32, result.getBytes("secret_digest").length);
+                        String persistedText = result.getString("key_id")
+                                + result.getString("novel_id")
+                                + result.getString("scopes_json")
+                                + result.getString("actor_id")
+                                + result.getString("issue_idempotency_key")
+                                + result.getString("issue_request_hash");
+                        assertFalse(persistedText.contains(bearerToken));
+                        assertFalse(persistedText.contains(encodedSecret));
+                    }
+                }
+                return null;
+            });
+        }
+    }
+
+    @Test
+    void expiredAndRevokedKeysFailClosedAndAuditRetentionIsIndependent() throws Exception {
+        Path path = temporaryDirectory.resolve("lifecycle.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        Ids.AccessKeyId activeKeyId;
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            AccessKeyService accessKeys = service(store);
+            var expiring = accessKeys.issue(command(
+                    genesis,
+                    "issue-expiring",
+                    Set.of(AccessScope.NOVEL_READ),
+                    NOW.plusSeconds(60)
+            ));
+            assertThrows(
+                    AccessAuthenticationException.class,
+                    () -> accessKeys.authenticate(
+                            expiring.bearerToken(), NOW.plusSeconds(60)
+                    )
+            );
+
+            var active = accessKeys.issue(command(
+                    genesis,
+                    "issue-revoked",
+                    Set.of(AccessScope.NOVEL_ADMIN),
+                    NOW.plusSeconds(3600)
+            ));
+            activeKeyId = active.key().keyId();
+            assertTrue(accessKeys.revoke(
+                    activeKeyId,
+                    genesis.novel().id(),
+                    new AuditContext(
+                            "req_revoke_first", "owner", null, NOW.plusSeconds(120)
+                    )
+            ));
+            assertFalse(accessKeys.revoke(
+                    activeKeyId,

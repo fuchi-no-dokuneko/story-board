@@ -1,0 +1,76 @@
+            "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+            "speaker_id": "example-1",
+            "stratum_kind": "narration"
+          }
+        ],
+        "masking_lexicon": {
+          "names": [
+
+          ],
+          "places": [
+
+          ]
+        },
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "profile_version": {
+          "version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
+          "profile_id": "spf_018f0f5e-7b4a-7c00-8000-000000000001",
+          "version": 1,
+          "content": {
+            "scope": {
+              "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+              "kind": "novel",
+              "subject_id": "example-1"
+            },
+            "corpus_sources": [
+              {
+                "source_id": "example-1",
+                "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "kind": "owner",
+                "provenance": "example-1",
+                "license": "example-1",
+                "ownership": "example-1"
+              }
+            ],
+            "feature_set": {
+              "source_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "contract": {
+                "analyzer_version": "example-1",
+                "feature_schema_version": "example-1",
+                "tokenizer_id": "example-1",
+                "vocabulary_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "normalizer_version": "example-1",
+                "additive_smoothing_alpha": 1,
+                "top_k": 10
+              },
+              "channels": [
+                {
+                  "channel": "surface",
+                  "channel_version": "example-1",
+                  "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "distribution": {
+                  },
+                  "measurements": {
+                  },
+                  "embedding": [
+
+                  ]
+                },
+                {
+                  "channel": "surface",
+                  "channel_version": "example-1",
+                  "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "distribution": {
+                  },
+                  "measurements": {
+                  },
+                  "embedding": [
+
+                  ]
+                },
+                {
+                  "channel": "surface",
+                  "channel_version": "example-1",
+                  "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "distribution": {
+                  },

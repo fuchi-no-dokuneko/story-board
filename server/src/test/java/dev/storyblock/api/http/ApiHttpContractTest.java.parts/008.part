@@ -1,0 +1,50 @@
+                .andExpect(jsonPath("$.revision_id").value(revisionId))
+                .andExpect(jsonPath("$.status").value("succeeded"))
+                .andExpect(jsonPath("$.attempt").value(1))
+                .andReturn();
+        Map<String, Object> job = object(jobResult);
+        String artifactId = stringField(job, "result_artifact_id");
+        assertEquals("/v1/artifacts/" + artifactId, stringField(job, "result_uri"));
+
+        MvcResult artifactResult = mvc.perform(get("/v1/artifacts/{artifactId}", artifactId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(
+                        "application/vnd.storyblock.package+json"
+                ))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"))
+                .andExpect(header().string(
+                        CanonicalTransferController.ARTIFACT_CODEC_HEADER, "identity"
+                ))
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION, containsString("attachment")
+                ))
+                .andReturn();
+        byte[] artifactBytes = artifactResult.getResponse().getContentAsByteArray();
+        CanonicalNovelPackage exported = CanonicalNovelPackage.parse(artifactBytes);
+        assertEquals(revision.contentHash(), exported.manifest().headHash());
+        assertEquals(
+                quotedEtag(CanonicalJson.hashBytes(artifactBytes)),
+                artifactResult.getResponse().getHeader(HttpHeaders.ETAG)
+        );
+    }
+
+    @Test
+    void rendersStoredRevisionAsARepeatableCanonicalPacket() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "render-import");
+        byte[] body = CanonicalJson.bytes(Map.of("revision_id", revisionId));
+
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("style:admin"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult first = mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))

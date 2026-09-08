@@ -15,7 +15,9 @@
     "test": "node --test tests/unit/*.test.mjs tests/contract/*.test.mjs tests/cli/*.test.mjs",
     "smoke": "node --test tests/cli/*.test.mjs",
     "docs": "node scripts/generate-docs.mjs",
-    "docs:check": "node --test tests/unit/docs.test.mjs"
+    "docs:check": "node --test tests/unit/docs.test.mjs",
+    "pretest": "node scripts/assemble.mjs",
+    "prepare": "node scripts/assemble.mjs"
   },
   "files": [
     "SKILL.md",
@@ -26,6 +28,7 @@
     "scripts",
     "references",
     "examples",
-    "tests"
+    "tests",
+    "install-local.sh"
   ]
 }

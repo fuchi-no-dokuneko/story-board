@@ -1,0 +1,53 @@
+                        .content(mismatchBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        Map<String, Object> otherExport = startExport(
+                second, OWNER_TOKEN, "security-export-second"
+        );
+        String otherJobId = stringField(otherExport, "job_id");
+        MvcResult otherJobResult = mvc.perform(get("/v1/jobs/{jobId}", otherJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN)))
+                .andExpect(status().isOk())
+                .andReturn();
+        String otherArtifactId = stringField(
+                object(otherJobResult), "result_artifact_id"
+        );
+        mvc.perform(get("/v1/jobs/{jobId}", otherJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isNotFound());
+        mvc.perform(get("/v1/artifacts/{artifactId}", otherArtifactId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(delete("/v1/access-keys/{keyId}", keyId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "security-revoke")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.revoked").value(true));
+        mvc.perform(get("/v1/jobs/{jobId}", ownJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_BEARER_CREDENTIAL"));
+
+    }
+
+    @Test
+    void realBearerCommitAndReplayWriteCompleteAuditEvents() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "commit-audit-import");
+        Map<String, Object> key = issueAsOwner(
+                revision, "commit-audit-issue", List.of("novel:commit")
+        );
+        String token = stringField(key, "secret");
+        String keyId = stringField(key, "key_id");
+        String operationId = Ids.OperationId.create().value();
+        String idempotencyKey = "http-commit-audit";
+        Map<String, Object> operation = Map.of(
+                "operation_id", operationId,
+                "idempotency_key", idempotencyKey,
+                "novel_id", novelId,
+                "base_revision_id", revisionId,

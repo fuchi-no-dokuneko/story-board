@@ -1,0 +1,74 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const test = require('node:test');
+const vm = require('node:vm');
+
+const staticDirectory = path.resolve(__dirname, '../../main/resources/static');
+const auth = require(path.join(staticDirectory, 'auth.js'));
+const appSource = fs.readFileSync(path.join(staticDirectory, 'app.js'), 'utf8');
+const htmlSource = fs.readFileSync(path.join(staticDirectory, 'index.html'), 'utf8');
+
+test('the page exposes every referenced control exactly once and loads auth first', () => {
+  const htmlIds = [...htmlSource.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]);
+  assert.equal(new Set(htmlIds).size, htmlIds.length, 'HTML IDs must be unique');
+
+  const elementBlock = appSource.match(
+    /const elements = Object\.fromEntries\(\[([\s\S]*?)\]\.map/,
+  );
+  assert.ok(elementBlock, 'Could not find the application element registry');
+  const referencedIds = [...elementBlock[1].matchAll(/'([^']+)'/g)].map((match) => match[1]);
+  for (const id of referencedIds) {
+    assert.ok(htmlIds.includes(id), `Missing HTML element #${id}`);
+  }
+
+  assert.match(
+    htmlSource,
+    /<input id="operator-token" type="password" autocomplete="off"/,
+  );
+  assert.match(htmlSource, /connect-src 'self'/);
+  assert.ok(
+    htmlSource.indexOf('src="/auth.js?') < htmlSource.indexOf('src="/app.js?'),
+    'auth.js must execute before app.js',
+  );
+});
+
+test('builds bearer headers without persisting or exposing the token', () => {
+  assert.deepEqual(auth.authorizationHeaders('  operator-secret  '), {
+    Authorization: 'Bearer operator-secret',
+  });
+  assert.deepEqual(auth.authorizationHeaders(''), {});
+  assert.throws(
+    () => auth.authorizationHeaders('secret\nInjected: value'),
+    (error) => error.code === 'INVALID_BEARER_TOKEN',
+  );
+  assert.doesNotMatch(appSource, /\b(?:localStorage|sessionStorage)\b/);
+});
+
+test('allows only URLs on the current StoryBlock origin', () => {
+  const origin = 'https://192.168.10.20:8443';
+  assert.equal(
+    auth.resolveSameOriginUrl('/v1/admin/novels?page=1', origin),
+    'https://192.168.10.20:8443/v1/admin/novels?page=1',
+  );
+  assert.equal(
+    auth.resolveSameOriginUrl('https://192.168.10.20:8443/actuator/health', origin),
+    'https://192.168.10.20:8443/actuator/health',
+  );
+  for (const target of [
+    'https://attacker.example/collect',
+    '//attacker.example/collect',
+    'https://192.168.10.20:8443@attacker.example/collect',
+    'javascript:alert(1)',
+  ]) {
+    assert.throws(
+      () => auth.resolveSameOriginUrl(target, origin),
+      (error) => error.code === 'CROSS_ORIGIN_REQUEST',
+      target,
+    );
+  }
+});
+
+function fakeElement(id = '') {
+  const listeners = new Map();
+  const children = [];

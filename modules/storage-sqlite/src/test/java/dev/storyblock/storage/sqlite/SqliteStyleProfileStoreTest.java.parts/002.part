@@ -1,0 +1,59 @@
+                    "Owner-provided corpus",
+                    "create-profile",
+                    audit(1, "replay-profile")
+            );
+            assertFalse(created.idempotentReplay());
+            assertTrue(replay.idempotentReplay());
+            assertEquals(created.profile(), replay.profile());
+            assertThrows(IdempotencyConflictException.class, () ->
+                    service.createProfile(
+                            "Different baseline",
+                            scope,
+                            "Owner-provided corpus",
+                            "create-profile",
+                            audit(2, "profile-conflict")
+                    )
+            );
+
+            var generated = service.createVersion(
+                    created.profile().profileId(),
+                    content(genesis, scope, StyleCorpusSourceKind.GENERATED),
+                    created.profile().resourceHash(),
+                    "create-generated-version",
+                    audit(3, "create-generated-version")
+            );
+            assertEquals(StyleProfileState.DRAFT, generated.view().state());
+            assertFalse(generated.view().canGateRewrites());
+            assertThrows(StyleLifecycleConflictException.class, () ->
+                    service.requireRewriteGate(
+                            created.profile().profileId(),
+                            generated.view().profileVersion().versionId()
+                    )
+            );
+
+            var calibrating = service.transition(
+                    created.profile().profileId(),
+                    generated.view().profileVersion().versionId(),
+                    StyleProfileState.CALIBRATING,
+                    "Calibration corpus reviewed",
+                    false,
+                    generated.view().statusHash(),
+                    "calibrate-generated-version",
+                    audit(4, "calibrate-generated-version")
+            );
+            assertThrows(StyleLifecycleConflictException.class, () ->
+                    service.transition(
+                            created.profile().profileId(),
+                            generated.view().profileVersion().versionId(),
+                            StyleProfileState.READY,
+                            "Promote generated baseline",
+                            false,
+                            calibrating.view().statusHash(),
+                            "promote-generated-version",
+                            audit(5, "promote-generated-without-confirmation")
+                    )
+            );
+            var readyGenerated = service.transition(
+                    created.profile().profileId(),
+                    generated.view().profileVersion().versionId(),
+                    StyleProfileState.READY,

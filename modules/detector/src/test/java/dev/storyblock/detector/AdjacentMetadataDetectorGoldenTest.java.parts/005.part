@@ -1,0 +1,91 @@
+                Map.of("weather", after, "present_character_ids", List.of()),
+                "After weather."
+        );
+        return revision(chapterId, List.of(first, second));
+    }
+
+    private static NarrativeScene scene(
+            Ids.ChapterId chapterId,
+            int index,
+            TransitionMode mode,
+            List<String> characters,
+            String text
+    ) {
+        return sceneWithSeed(
+                chapterId,
+                index,
+                mode,
+                Map.of("present_character_ids", characters),
+                text
+        );
+    }
+
+    private static NarrativeScene sceneWithSeed(
+            Ids.ChapterId chapterId,
+            int index,
+            TransitionMode mode,
+            Map<String, Object> seed,
+            String text
+    ) {
+        return new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.rebalanced(index, 2),
+                "Scene " + index,
+                mode,
+                new SceneSeed(seed),
+                List.of(block(0, 1, text, BlockMetadata.empty())),
+                Map.of()
+        );
+    }
+
+    private static NarrativeBlock block(
+            int index,
+            int total,
+            String text,
+            BlockMetadata metadata
+    ) {
+        return NarrativeBlock.create(
+                Ids.BlockId.create(),
+                OrderKey.rebalanced(index, total),
+                text,
+                metadata,
+                Map.of()
+        );
+    }
+
+    private static RevisionManifest revision(
+            Ids.ChapterId chapterId,
+            List<NarrativeScene> scenes
+    ) {
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId,
+                OrderKey.initial(),
+                "Detector chapter",
+                scenes,
+                Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(Ids.NovelId.create(), List.of(chapter), Map.of())
+        );
+    }
+
+    private static Map<String, Object> explicit(Object value) {
+        return Map.of("mode", "explicit", "value", value);
+    }
+
+    private static boolean has(DetectorRun run, FindingCode code) {
+        return run.findings().stream().anyMatch(finding -> finding.code() == code);
+    }
+
+    private static DetectorFinding finding(DetectorRun run, FindingCode code) {
+        return run.findings().stream()
+                .filter(candidate -> candidate.code() == code)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private static List<GoldenCase> goldenCases() throws IOException {

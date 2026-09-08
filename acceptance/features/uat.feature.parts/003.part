@@ -1,0 +1,12 @@
+    And I click CSS ".quick-requests button[data-path='/actuator/health']"
+    Then CSS "#response-status" eventually contains text "200"
+    And CSS "#response" eventually contains text "\"status\": \"UP\""
+
+  Scenario: Keep the reader usable on a narrow mobile viewport
+    Given I open the web application at path "/"
+    Then CSS "#reader-content" is visible
+    When I resize the browser to 390 by 844
+    Then CSS ".catalog-pane" is visible
+    And CSS ".reader-pane" is visible
+    And JavaScript expression "document.documentElement.scrollWidth <= document.documentElement.clientWidth" returns true
+    And JavaScript expression "Array.from(document.querySelectorAll('.novel-stats dd')).every((item) => item.getBoundingClientRect().width > 0)" returns true

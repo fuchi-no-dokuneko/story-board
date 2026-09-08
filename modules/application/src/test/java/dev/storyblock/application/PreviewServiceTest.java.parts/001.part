@@ -1,0 +1,61 @@
+package dev.storyblock.application;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.contracts.NarrativeCanonicalMapper;
+import dev.storyblock.domain.BlockDraft;
+import dev.storyblock.domain.BlockMetadata;
+import dev.storyblock.domain.BlockRangeGuard;
+import dev.storyblock.domain.BlockVersionRef;
+import dev.storyblock.domain.EditContext;
+import dev.storyblock.domain.EditOperation;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeChapter;
+import dev.storyblock.domain.NarrativeNovel;
+import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.OrderKey;
+import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.domain.SceneSeed;
+import dev.storyblock.domain.TransitionMode;
+import dev.storyblock.validator.ValidationCode;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.Test;
+
+class PreviewServiceTest {
+    private static final Instant CANDIDATE_TIME = Instant.parse("2026-08-21T12:01:00Z");
+
+    @Test
+    void previewReturnsEveryFieldNormalizesExtendAndDoesNotMutateHeadOrBase() {
+        RevisionManifest base = revision();
+        byte[] baseBytes = NarrativeCanonicalMapper.toCanonical(base).canonicalBytes();
+        Map<Ids.BlockId, Ids.BlockVersionId> baseSelections = base.selectedBlockVersions();
+        AtomicReference<Ids.RevisionId> head = new AtomicReference<>(base.id());
+        PreviewService service = new PreviewService(id -> {
+            throw new IllegalArgumentException("Restore is not used in this preview");
+        });
+        NarrativeBlock original = base.liveBlocks().getFirst();
+        EditOperation operation = new EditOperation.ExtendBlock(
+                context(base, "preview-extend"),
+                BlockRangeGuard.capture(firstScene(base), original.id(), original.id()),
+                EditOperation.ExtensionPosition.AFTER,
+                new BlockDraft(
+                        original.id(),
+                        original.text() + "補充一句。",
+                        original.metadata(),
+                        original.extensions()
+                )
+        );
+        Ids.RevisionId candidateId = Ids.RevisionId.create();
+
+        PreviewResponse first = service.preview(base, operation, candidateId, CANDIDATE_TIME);

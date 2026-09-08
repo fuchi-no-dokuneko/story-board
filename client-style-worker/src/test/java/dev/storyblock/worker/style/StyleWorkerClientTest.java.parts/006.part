@@ -1,0 +1,12 @@
+        return (Map<String, Object>) value;
+    }
+
+    private static String quote(String value) {
+        return '"' + value + '"';
+    }
+
+    @FunctionalInterface
+    private interface ExchangeAction {
+        void run() throws Exception;
+    }
+}

@@ -1,0 +1,57 @@
+      "description": "Code-derived StoryBlock Monitor Run Status JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorSubmissionRequest",
+      "file": "dtos/MonitorSubmissionRequest.schema.json",
+      "description": "Code-derived StoryBlock Monitor Submission Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorSubmissionResponse",
+      "file": "dtos/MonitorSubmissionResponse.schema.json",
+      "description": "Code-derived StoryBlock Monitor Submission Response JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MoveBlockRangeOperation",
+      "file": "dtos/MoveBlockRangeOperation.schema.json",
+      "description": "Code-derived StoryBlock Move Block Range Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "MoveBlockRangePayload",
+      "file": "dtos/MoveBlockRangePayload.schema.json",
+      "description": "Code-derived StoryBlock Move Block Range Payload JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "NovelHead",
+      "file": "dtos/NovelHead.schema.json",

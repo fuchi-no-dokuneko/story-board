@@ -1,0 +1,17 @@
+                    "narrative-image",
+                    "image/png",
+                    "identity",
+                    CanonicalJson.hashBytes(changed),
+                    changed,
+                    Instant.parse("2026-08-29T00:01:00Z"),
+                    true
+            );
+            assertThrows(
+                    IdempotencyConflictException.class,
+                    () -> store.putPortableArtifact(
+                            new PortableArtifactPutRequest(head, key, conflicting)
+                    )
+            );
+        }
+    }
+}

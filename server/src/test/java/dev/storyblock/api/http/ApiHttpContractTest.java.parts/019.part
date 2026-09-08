@@ -1,0 +1,50 @@
+                        .value("The requested resource does not exist."));
+
+        mvc.perform(post("/v1/novels/{novelId}/style-analyses", secondNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "cross-analysis")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(second.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        byte[] rewriteBody = CanonicalJson.bytes(Map.of(
+                "analysis_id", Ids.StyleAnalysisId.create().value(),
+                "novel_id", secondNovel,
+                "revision_id", secondRevision,
+                "revision_hash", second.contentHash(),
+                "finding_ids", List.of("finding_test")
+        ));
+        mvc.perform(post("/v1/rewrite-proposals")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "cross-rewrite")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(second.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(rewriteBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        String mismatchKey = "cross-body-commit";
+        Map<String, Object> mismatchedOperation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", mismatchKey,
+                "novel_id", secondNovel,
+                "base_revision_id", secondRevision,
+                "expected_head_hash", second.contentHash(),
+                "type", "restore_revision_content",
+                "payload", Map.of(
+                        "restore_revision_id", secondRevision,
+                        "expected_restore_hash", second.contentHash()
+                )
+        );
+        byte[] mismatchBody = CanonicalJson.bytes(Map.of(
+                "operation", mismatchedOperation,
+                "candidate_revision_id", Ids.RevisionId.create().value(),
+                "candidate_created_at", "2026-08-21T12:10:00Z"
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/commits", firstNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, mismatchKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)

@@ -1,0 +1,19 @@
+        "analyzed_block_count": 1,
+        "calibrated_window_count": 0,
+        "decision_counts": {
+        },
+        "operational_window_count": 0
+      },
+      "windows": [
+
+      ],
+      "trace": {
+        "codec": "gzip",
+        "content_base64": "e30=",
+        "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "uncompressed_bytes": 2
+      },
+      "completed_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

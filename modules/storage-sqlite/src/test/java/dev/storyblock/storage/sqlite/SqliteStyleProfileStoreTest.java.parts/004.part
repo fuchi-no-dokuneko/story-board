@@ -1,0 +1,59 @@
+                            ownerVersion.view().profileVersion().versionId(),
+                            StyleProfileState.DEPRECATED,
+                            "Stale attempt",
+                            false,
+                            ownerCalibrating.view().statusHash(),
+                            "stale-transition",
+                            audit(10, "stale-transition")
+                    )
+            );
+        }
+
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {
+            assertEquals(1, count(database, "style_profiles"));
+            assertEquals(2, count(database, "style_profile_versions"));
+            assertEquals(7, count(database, "style_profile_lifecycle_events"));
+            SQLException profileUpdate = assertThrows(SQLException.class, () ->
+                    database.write(connection -> {
+                        connection.createStatement().executeUpdate(
+                                "UPDATE style_profiles SET created_by = 'tampered'"
+                        );
+                        return null;
+                    })
+            );
+            assertTrue(profileUpdate.getMessage().contains("immutable"));
+            SQLException eventDelete = assertThrows(SQLException.class, () ->
+                    database.write(connection -> {
+                        connection.createStatement().executeUpdate(
+                                "DELETE FROM style_profile_lifecycle_events"
+                        );
+                        return null;
+                    })
+            );
+            assertTrue(eventDelete.getMessage().contains("append-only"));
+        }
+    }
+
+    static StyleProfileVersionContent content(
+            RevisionManifest revision,
+            StyleProfileScope scope,
+            StyleCorpusSourceKind kind
+    ) {
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        StyleFeatureSet features = new StyleFeatureAnalyzer().extract(
+                revision.liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
+        List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
+                30, new BigDecimal("0.1")
+        );
+        StyleCalibrationProfile calibration = new StyleCalibrationProfile(
+                dev.storyblock.style.StyleModule.CALIBRATION_SCHEMA_VERSION,
+                features.sourceHash(),
+                features.contract().contractHash(),
+                windows.configurationHash(),
+                List.of(new StyleStratumCalibration(
+                        StyleStratum.narration(),
+                        30,

@@ -1,0 +1,70 @@
+    void canonicalCandidateWithMetadataErrorStillReturnsDiffAndRenderPacket() {
+        RevisionManifest base = revision();
+        NarrativeBlock original = base.liveBlocks().getFirst();
+        EditOperation operation = new EditOperation.CorrectBlockMeta(
+                context(base, "absent-speaker"),
+                firstScene(base).id(),
+                BlockVersionRef.from(original),
+                new BlockMetadata(Map.of(
+                        "speech", Map.of("direct_speaker_id", "char_absent")
+                ))
+        );
+
+        PreviewResponse preview = service().preview(
+                base, operation, Ids.RevisionId.create(), CANDIDATE_TIME
+        );
+
+        assertFalse(preview.committable());
+        assertTrue(preview.violations().stream()
+                .anyMatch(issue -> issue.code() == ValidationCode.SPEAKER_NOT_PRESENT));
+        assertNotNull(preview.renderPacket());
+        assertEquals(1, preview.diff().blockChanges().stream()
+                .filter(change -> change.type() == BlockChange.Type.MODIFIED)
+                .count());
+    }
+
+    @Test
+    void staleHeadReturnsRevisionConflictWithoutApplyingTheOperation() {
+        RevisionManifest base = revision();
+        NarrativeBlock original = base.liveBlocks().getFirst();
+        EditContext stale = new EditContext(
+                Ids.OperationId.create(),
+                "stale-preview",
+                base.novel().id(),
+                base.id(),
+                "sha256:" + "0".repeat(64)
+        );
+        EditOperation operation = new EditOperation.DeleteBlockRange(
+                stale,
+                BlockRangeGuard.capture(firstScene(base), original.id(), original.id())
+        );
+
+        PreviewResponse preview = service().preview(
+                base, operation, Ids.RevisionId.create(), CANDIDATE_TIME
+        );
+
+        assertFalse(preview.committable());
+        assertEquals(ValidationCode.REVISION_CONFLICT, preview.violations().getFirst().code());
+        assertNull(preview.renderPacket());
+        assertEquals(1, base.liveBlocks().size());
+    }
+
+    private static PreviewService service() {
+        return new PreviewService(id -> {
+            throw new IllegalArgumentException("No restore revision " + id.value());
+        });
+    }
+
+    private static EditContext context(RevisionManifest base, String key) {
+        return new EditContext(
+                Ids.OperationId.create(),
+                key,
+                base.novel().id(),
+                base.id(),
+                NarrativeCanonicalMapper.toCanonical(base).contentHash()
+        );
+    }
+
+    private static RevisionManifest revision() {
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        NarrativeBlock block = NarrativeBlock.create(

@@ -4,7 +4,7 @@ import dev.storyblock.domain.BlockMetadata;
 import dev.storyblock.domain.Ids;
 import java.util.List;
 import java.util.Map;
-import static dev.storyblock.validator.DeterministicValidator.OBSERVATION_FIELDS;
+import static dev.storyblock.validator.ValidationVocabulary.OBSERVATION_FIELDS;
 
 final class DeterministicValidatorValidateUnknownHandling {
     static void validateUnknownHandling(

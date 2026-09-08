@@ -1,0 +1,95 @@
+      properties:
+        block_id:
+          type: string
+        block_version_id:
+          type: string
+        text:
+          type: string
+        local_meta:
+          type: object
+          additionalProperties: true
+        image:
+          $ref: "#/components/schemas/BlockImage"
+      additionalProperties: false
+    ResolvedBlockMetadata:
+      type: object
+      required: [block_id, before, events, after]
+      properties:
+        block_id:
+          type: string
+        before:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+        events:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        after:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+      additionalProperties: false
+    ResolvedMetadataState:
+      type: object
+      required: [time, location, weather, pov, present_character_ids]
+      properties:
+        time: {}
+        location: {}
+        weather: {}
+        pov: {}
+        present_character_ids:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+    RenderOffset:
+      type: object
+      required: [block_id, rendered_start, rendered_end]
+      properties:
+        block_id:
+          type: string
+        rendered_start:
+          type: integer
+          minimum: 0
+        rendered_end:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    ResolvedSceneBoundary:
+      type: object
+      required: [scene_id, state_in, state_out]
+      properties:
+        scene_id:
+          type: string
+        state_in:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+        state_out:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+      additionalProperties: false
+    OperationEnvelope:
+      type: object
+      required: [operation_id, idempotency_key, novel_id, base_revision_id, expected_head_hash, type, payload]
+      properties:
+        operation_id:
+          type: string
+        idempotency_key:
+          type: string
+          minLength: 1
+          maxLength: 200
+        novel_id:
+          type: string
+        base_revision_id:
+          type: string
+        expected_head_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        type:
+          type: string
+          enum: [insert_blocks, replace_block_range, delete_block_range, split_block, merge_blocks, extend_block, move_block_range, correct_block_meta, set_scene_initial_meta, restore_revision_content]
+        payload:
+          type: object
+          additionalProperties: true
+      additionalProperties: false
+    EditPreviewRequest:
+      type: object
+      required: [operation, candidate_revision_id, candidate_created_at]
+      properties:
+        operation:

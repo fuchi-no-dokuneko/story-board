@@ -1,0 +1,63 @@
+        StyleFeatureSet current = analyzer.extract(
+                List.of(block(
+                        "她喊道：「快走！」",
+                        Map.of("speech", Map.of("speaker_id", "char_a"))
+                )),
+                lexicon,
+                contract,
+                List.of(BigDecimal.ZERO, BigDecimal.ONE)
+        );
+
+        StyleDistanceReport report = analyzer.compare(target, current);
+
+        assertTrue(report.tokenKlDiagnosticOnly());
+        assertTrue(report.hasIndependentPrimaryEvidence());
+        assertEquals(StyleFeatureChannel.values().length, report.channels().size());
+        assertTrue(report.channels().stream().allMatch(distance ->
+                !distance.primaryMetric().canonicalName().contains("kl")
+        ));
+        StyleChannelDistance surface = report.channels().stream()
+                .filter(distance -> distance.channel() == StyleFeatureChannel.SURFACE)
+                .findFirst().orElseThrow();
+        assertEquals(Boolean.TRUE, surface.diagnostics().get("token_kl_diagnostic_only"));
+        assertTrue(surface.diagnostics().containsKey("kl_current_target"));
+        assertTrue(surface.diagnostics().containsKey("kl_target_current"));
+        assertNotEquals(BigDecimal.ZERO, report.channels().stream()
+                .filter(distance -> distance.channel()
+                        == StyleFeatureChannel.OPTIONAL_EMBEDDING)
+                .findFirst().orElseThrow().primaryDistance());
+    }
+
+    @Test
+    void apostrophesAndExplicitNoSpeechRemainNarration() {
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        StyleFeatureContract contract = StyleFeatureContract.defaults(
+                lexicon.vocabularyHash()
+        );
+
+        StyleFeatureSet features = analyzer.extract(
+                List.of(block(
+                        "It's quiet and nobody's speaking.",
+                        Map.of("speech", Map.of("type", "none"))
+                )),
+                lexicon,
+                contract
+        );
+
+        Map<String, BigDecimal> narrative = features.require(
+                StyleFeatureChannel.NARRATIVE
+        ).distribution();
+        assertTrue(narrative.containsKey("mode:description"));
+        assertFalse(narrative.containsKey("mode:dialogue"));
+    }
+
+    private static NarrativeBlock block(String text, Map<String, Object> metadata) {
+        return NarrativeBlock.create(
+                Ids.BlockId.create(),
+                OrderKey.initial(),
+                text,
+                new BlockMetadata(metadata),
+                Map.of()
+        );
+    }
+}

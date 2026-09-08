@@ -14,7 +14,7 @@ final class StyleAnalysisControllerClaimAction {
         Map<String, Object> request = StrictJsonRequest.parseObject(
                 requestBytes, "style job claim"
         );
-        StrictJsonRequest.requireKeys(request, StyleAnalysisController.CLAIM_FIELDS, "style job claim");
+        StrictJsonRequest.requireKeys(request, StyleAnalysisFields.CLAIM_FIELDS, "style job claim");
         Ids.NovelId novelId = new Ids.NovelId(StrictJsonRequest.string(
                 request, "novel_id", "style job claim"
         ));

@@ -25,23 +25,24 @@ class DeploymentTopologyTest {
         String styleWorker = section(
                 compose, "\n  style-worker:", "\n  llm-worker:"
         );
-        String llmWorker = section(compose, "\n  llm-worker:", "\nsecrets:");
+        String llmWorker = section(compose, "\n  llm-worker:", "\nnetworks:");
 
-        assertTrue(api.contains("storyblock-data:/app/data"));
-        assertFalse(styleWorker.contains("storyblock-data"));
-        assertFalse(llmWorker.contains("storyblock-data"));
+        assertTrue(api.contains("./.local/container/api:/workspace/.local"));
+        assertFalse(styleWorker.contains("container/api"));
+        assertFalse(llmWorker.contains("container/api"));
+        assertTrue(api.contains("127.0.0.1"));
         assertTrue(api.contains("8443}:8443"));
-        assertTrue(api.contains("STORYBLOCK_SELF_SIGNED_TLS_ENABLED: \"true\""));
-        assertTrue(api.contains("storyblock-tls-private:/app/tls/private"));
-        assertTrue(api.contains("storyblock-tls-public:/app/tls/public"));
+        assertTrue(api.contains("STORYBLOCK_TRUSTED_LAN_ENABLED: \"true\""));
         assertFalse(compose.contains("\n  proxy:"));
         assertTrue(compose.contains("internal:\n    internal: true"));
-        assertTrue(compose.contains("/run/secrets/owner-token"));
-        assertTrue(compose.contains("/run/secrets/server-pepper"));
+        assertFalse(compose.contains("/run/secrets"));
         assertFalse(compose.contains("STORYBLOCK_SECURITY_OWNER_TOKEN: ${"));
         assertTrue(dockerfile.contains("USER storyblock"));
         assertTrue(dockerfile.contains("EXPOSE 8443"));
-        assertTrue(entrypoint.contains("generate-self-signed-tls.sh"));
+        assertTrue(entrypoint.contains("exec java -jar"));
+        String tls = Files.readString(ROOT.resolve(
+                "server/src/main/java/dev/storyblock/api/runtime/LocalServerTls.java"));
+        assertTrue(tls.contains("LocalTlsMaterial"));
         assertTrue(tlsGenerator.contains("BC=ca:false"));
         assertTrue(tlsGenerator.contains("EKU=serverAuth"));
     }

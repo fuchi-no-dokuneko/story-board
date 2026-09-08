@@ -5,9 +5,9 @@ import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
-import static dev.storyblock.contracts.CanonicalRevision.ROOT_OPTIONAL;
+import static dev.storyblock.contracts.CanonicalRevisionFields.ROOT_OPTIONAL;
 import static dev.storyblock.contracts.CanonicalRevision.SCHEMA_VERSION;
-import static dev.storyblock.contracts.CanonicalRevision.ROOT_REQUIRED;
+import static dev.storyblock.contracts.CanonicalRevisionFields.ROOT_REQUIRED;
 
 final class CanonicalRevisionValidateDocument {
     static void validateDocument(Map<String, Object> document) {

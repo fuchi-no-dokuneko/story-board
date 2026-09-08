@@ -23,7 +23,7 @@ jobs:
       - name: Verify
         run: >-
           ./mvnw --batch-mode
-          -Dmaven.repo.local="$PWD/.local/storyblock/maven/repository"
+          -Dmaven.repo.local="$PWD/.local-tool/maven/repository"
           verify
           -Dtest='!InitialSloQualificationTest'
           -Dsurefire.failIfNoSpecifiedTests=false

@@ -1,0 +1,62 @@
+            var retry = transfers.importDocument(
+                    CanonicalExportFormat.PACKAGE,
+                    sourceDocument.bytes(),
+                    "import-complete",
+                    IMPORTED_AT.plusSeconds(30)
+            );
+            byte[] exported = transfers.exportPackage(sourceDocument.manifest().novelId());
+
+            assertFalse(imported.idempotentReplay());
+            assertTrue(retry.idempotentReplay());
+            assertEquals(imported.head(), retry.head());
+            assertEquals(sourceDocument.manifest().headHash(), imported.head().contentHash());
+            assertArrayEquals(sourceDocument.bytes(), exported);
+            assertEquals(3, target.revisionCount(imported.novelId()));
+            assertEquals(2, target.operationCount(imported.novelId()));
+            assertEquals(1, target.listTombstones(imported.novelId()).size());
+            assertEquals(
+                    sourceDocument.manifest().headHash(),
+                    new ReplayService(target).materializeFull(
+                            imported.novelId(), imported.head().revisionId()
+                    ).contentHash()
+            );
+        }
+    }
+
+    @Test
+    void everyInjectedImportFailureRollsBackEveryAffectedTable() throws Exception {
+        CanonicalNovelPackage document = packageWithHistoryAndArtifact(
+                temporaryDirectory.resolve("fault-source.db")
+        );
+        for (ImportStage stage : ImportStage.values()) {
+            Path path = temporaryDirectory.resolve("import-fault-" + stage + ".db");
+            try (SqliteRevisionStore store = SqliteRevisionStore.open(
+                    path,
+                    CheckpointPolicy.DEFAULT,
+                    CommitFaultInjector.NONE,
+                    current -> {
+                        if (current == stage) {
+                            throw new InjectedImportFailure(stage);
+                        }
+                    }
+            )) {
+                CanonicalTransferService transfers = new CanonicalTransferService(store);
+                assertThrows(
+                        InjectedImportFailure.class,
+                        () -> transfers.importDocument(
+                                CanonicalExportFormat.PACKAGE,
+                                document.bytes(),
+                                "fault-" + stage,
+                                IMPORTED_AT
+                        ),
+                        stage.name()
+                );
+                assertTrue(store.listNovels().isEmpty(), stage.name());
+            }
+            for (String table : IMPORT_TABLES) {
+                assertEquals(0, count(path, table), stage + " " + table);
+            }
+        }
+    }
+
+    @Test

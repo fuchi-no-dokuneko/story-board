@@ -1,0 +1,96 @@
+          pattern: '^art_[0-9a-f-]{36}$'
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        media_type:
+          type: string
+          enum: [image/png, image/jpeg]
+        width_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        height_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        alt_text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          x-storyblock-max-graphemes: 500
+      additionalProperties: false
+    ImageUploadResponse:
+      type: object
+      required: [schema_version, artifact_id, artifact_uri, content_hash, media_type, width_px, height_px, idempotent_replay]
+      properties:
+        schema_version:
+          const: image-upload-1.0.0
+        artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        artifact_uri:
+          type: string
+          format: uri-reference
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        media_type:
+          type: string
+          enum: [image/png, image/jpeg]
+        width_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        height_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false
+    RenderPacket:
+      type: object
+      required: [novel_id, revision_id, revision_hash, renderer_version, range, rendered_text, blocks, resolved_meta, offset_map, scene_boundaries]
+      properties:
+        novel_id:
+          type: string
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        renderer_version:
+          type: string
+        range:
+          $ref: "#/components/schemas/RenderRange"
+        rendered_text:
+          type: string
+        blocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/RenderedBlock"
+        resolved_meta:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolvedBlockMetadata"
+        offset_map:
+          type: array
+          items:
+            $ref: "#/components/schemas/RenderOffset"
+        scene_boundaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolvedSceneBoundary"
+      additionalProperties: false
+    RenderRange:
+      type: object
+      required: [from_block_id, to_block_id]
+      properties:
+        from_block_id:
+          type: [string, "null"]
+        to_block_id:
+          type: [string, "null"]
+      additionalProperties: false
+    RenderedBlock:
+      type: object
+      required: [block_id, block_version_id, text, local_meta]

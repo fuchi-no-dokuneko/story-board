@@ -24,7 +24,7 @@ final class StyleAnalysisControllerCreateAction {
     StyleAnalysisControllerRequireFields.requireFields(
         request,
         Set.of("revision_id", "profile_id", "profile_version_id"),
-        StyleAnalysisController.CREATE_FIELDS,
+        StyleAnalysisFields.CREATE_FIELDS,
         "style analysis request"
     );
     StyleMaskingLexicon lexicon = request.containsKey("masking_lexicon")

@@ -1,0 +1,59 @@
+                "stale_proposal_total", "detector_findings_total",
+                "artifact_bytes", "backup_age_seconds", "auth_denied_total"
+        )) {
+            assertTrue(metricIndex.contains(name), name);
+        }
+
+        mvc.perform(get("/actuator/health/sqlite"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/actuator/health/sqlite")
+                        .with(user("operator").roles("OPERATOR")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void rejectsMissingAuthenticationWithProblemContract() throws Exception {
+        mvc.perform(get("/v1/novels/nov_test")
+                        .header(ApiRequestMetadata.REQUEST_ID_HEADER, "request-test-401"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(header().string(
+                        ApiRequestMetadata.REQUEST_ID_HEADER,
+                        "request-test-401"
+                ))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"))
+                .andExpect(jsonPath("$.request_id").value("request-test-401"));
+    }
+
+    @Test
+    void keepsTrustedLanRoutesProtectedInTheDefaultProfile() throws Exception {
+        mvc.perform(get("/v1/admin/novels"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(post("/v1/agent/novels")
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "agent-default-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(get("/v1/admin/novels")
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+    }
+
+    @Test
+    void rejectsAnAuthenticatedPrincipalWithoutTheRouteScope() throws Exception {
+        mvc.perform(get("/v1/novels/nov_test")
+                        .with(userWithScope("style:admin")))
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+    }
+
+    @Test

@@ -1,0 +1,40 @@
+        CanonicalRevision revision = CanonicalRevision.of(baseContent());
+        String envelope = new String(revision.envelopeBytes(), StandardCharsets.UTF_8)
+                .replace(revision.contentHash(), "sha256:" + "0".repeat(64));
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> CanonicalRevision.parseEnvelope(envelope.getBytes(StandardCharsets.UTF_8))
+        );
+    }
+
+    private static Map<String, Object> baseContent() {
+        Map<String, Object> chapter = new LinkedHashMap<>();
+        chapter.put("title", "Arrival");
+        chapter.put("scenes", new ArrayList<>());
+        chapter.put("id", "ch_018f0f5e-7b4a-7c00-8000-000000000002");
+        chapter.put("order_key", "55555555555555555555555555555555");
+
+        Map<String, Object> content = new LinkedHashMap<>();
+        content.put("revision_id", "rev_018f0f5e-7b4a-7c00-8000-000000000003");
+        content.put("created_at", "2026-08-20T12:00:00Z");
+        content.put("chapters", new ArrayList<>(List.of(chapter)));
+        content.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
+        content.put("parent_revision_id", null);
+        content.put("novel_id", "nov_018f0f5e-7b4a-7c00-8000-000000000001");
+        return content;
+    }
+
+    private static byte[] readFixture(String name) throws IOException {
+        return readFixtureText(name).getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static String readFixtureText(String name) throws IOException {
+        try (InputStream input = CanonicalRevisionTest.class.getResourceAsStream("/golden/" + name)) {
+            if (input == null) {
+                throw new IOException("Missing golden fixture " + name);
+            }
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8).stripTrailing();
+        }
+    }
+}

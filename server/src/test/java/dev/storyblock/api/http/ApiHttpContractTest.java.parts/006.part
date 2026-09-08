@@ -1,0 +1,49 @@
+        mvc.perform(post("/v1/internal/jobs/claims")
+                        .with(userWithScope("worker:execute"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "claim-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+    }
+
+    @Test
+    void implementedStyleJobRoutesEnforceTheirDedicatedScopes() throws Exception {
+        mvc.perform(post("/v1/novels/nov_test/style-analyses")
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-style")
+                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(post("/v1/internal/jobs/claims")
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-claim")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(post("/v1/internal/jobs/job_test/results")
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-result")
+                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(get("/v1/style-analyses/analysis_test")
+                        .with(userWithScope("style:analyze")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(get("/v1/style-analyses/analysis_test/windows")
+                        .with(userWithScope("style:analyze")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+    }
+
+    @Test
+    void importsAndExportsCanonicalContentThroughDurableHttpResources() throws Exception {
+        CanonicalRevision revision = genesis();

@@ -1,0 +1,15 @@
+          "channel": "surface",
+          "channel_version": "example-1",
+          "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "distribution": {
+          },
+          "measurements": {
+          },
+          "embedding": [
+
+          ]
+        }
+      ]
+    }
+  ]
+}

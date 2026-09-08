@@ -8,7 +8,7 @@ import java.time.Instant;
 
 final class CommitServiceCommitAction {
     static CommitResult commit(CommitService self, EditOperation requestedOperation, Ids.RevisionId candidateRevisionId, Instant committedAt)  {
-        return CommitServiceCommitActionCommitFactory.commit(self, requestedOperation, candidateRevisionId, committedAt);
+        return InternalCommit.commit(self, requestedOperation, candidateRevisionId, committedAt);
     }
 
     static CommitResult commit(CommitService self, EditOperation requestedOperation, Ids.RevisionId candidateRevisionId, Instant committedAt, AuditContext auditContext)  {

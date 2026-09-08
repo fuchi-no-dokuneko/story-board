@@ -1,0 +1,52 @@
+                "target_block_id", blockId,
+                "neighbor_count", 1,
+                "rule_version", "monitor-rules-1.0.0",
+                "affected_block_ids", List.of(blockId),
+                "output", Map.of(
+                        "kind", "finding",
+                        "code", "LOCAL_NOTE",
+                        "severity", "info",
+                        "message", "Review this local passage.",
+                        "evidence", List.of(Map.of(
+                                "block_id", blockId,
+                                "start_grapheme", 0,
+                                "end_grapheme", 3,
+                                "quote", quote,
+                                "quote_hash", EvidenceSpans.quoteHash(quote)
+                        ))
+                )
+        ));
+        MockHttpServletRequestBuilder submit = post(
+                "/v1/novels/{novelId}/monitor-runs", novelId
+        )
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "monitor-submit")
+                .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(submissionBody);
+
+        mvc.perform(post("/v1/novels/{novelId}/monitor-runs", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "submit-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(submissionBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult created = mvc.perform(submit.with(userWithScope("monitor:submit")))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.output_kind").value("finding"))
+                .andExpect(jsonPath("$.state").value("current"))
+                .andExpect(jsonPath("$.stale_reasons.length()").value(0))
+                .andExpect(jsonPath("$.rebase_allowed").value(false))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        String runId = stringField(object(created), "monitor_run_id");
+
+        mvc.perform(submit.with(userWithScope("monitor:submit")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.monitor_run_id").value(runId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        mvc.perform(get("/v1/novels/{novelId}/monitor-runs/{runId}", novelId, runId)

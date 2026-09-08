@@ -11,7 +11,7 @@ final class StyleWorkerSettingsFromFactory {
         Objects.requireNonNull(environment, "environment");
         return new StyleWorkerSettings(
                 URI.create(StyleWorkerSettingsRequired.required(environment, "storyblock.worker.api-base-url")),
-                StyleWorkerSettingsRequired.required(environment, "storyblock.worker.token"),
+                environment.getProperty("storyblock.worker.token", ""),
                 new Ids.NovelId(StyleWorkerSettingsRequired.required(
                         environment, "storyblock.worker.novel-id"
                 )),

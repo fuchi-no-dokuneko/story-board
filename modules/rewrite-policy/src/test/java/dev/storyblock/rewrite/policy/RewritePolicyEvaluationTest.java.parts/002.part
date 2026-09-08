@@ -1,0 +1,52 @@
+        RewriteProtectedFactSnapshot preserved = extractor.snapshot(
+                source,
+                "At dawn, Alice still did not carry 12 keys from Hong Kong.",
+                lexicon
+        );
+        RewriteProtectedFactSnapshot changed = extractor.snapshot(
+                source, "At dawn, the traveler carried keys.", lexicon
+        );
+        Map<ProtectedFactKind, Integer> beforeCounts = counts(before);
+        Map<ProtectedFactKind, Integer> preservedCounts = counts(preserved);
+        Map<ProtectedFactKind, Integer> changedCounts = counts(changed);
+
+        assertEquals(beforeCounts, preservedCounts);
+        assertTrue(beforeCounts.keySet().containsAll(List.of(
+                ProtectedFactKind.NAME,
+                ProtectedFactKind.NUMBER,
+                ProtectedFactKind.NEGATION,
+                ProtectedFactKind.SPEAKER
+        )));
+        assertFalse(changedCounts.containsKey(ProtectedFactKind.NAME));
+        assertFalse(changedCounts.containsKey(ProtectedFactKind.NUMBER));
+        assertFalse(changedCounts.containsKey(ProtectedFactKind.NEGATION));
+        assertTrue(changedCounts.containsKey(ProtectedFactKind.SPEAKER));
+
+        String referenceText =
+                "Moonlight crossed the quiet harbor while every shutter stayed closed.";
+        NarrativeBlock reference = block(referenceText, BlockMetadata.empty());
+        ReadyProfile ready = readyProfile(reference);
+        RewriteTextProposal proposal = proposal(source, referenceText, ready.view());
+        List<RewriteNearCopyFinding> findings = new RewriteNearCopyChecker().check(
+                proposal,
+                ready.view(),
+                List.of(new RewriteReferenceCorpus(ready.source(), List.of(reference)))
+        );
+        assertEquals(1, findings.size());
+        assertEquals(NearCopyDisposition.MANUAL_ONLY,
+                findings.getFirst().disposition());
+        assertTrue(findings.getFirst().matchedNgramCount() > 0);
+
+        Map<String, Object> report = Map.of(
+                "attempt_limits", Map.of(
+                        "analysis_maximum", StyleAnalysisJob.MAX_ATTEMPTS,
+                        "analysis_minimum", StyleAnalysisJob.MIN_ATTEMPTS,
+                        "enforced_by", "StyleAnalysisJob"
+                ),
+                "cooldown", Map.of(
+                        "default_seconds", RewritePolicyModule.DEFAULT_COOLDOWN.toSeconds(),
+                        "maximum_seconds", RewritePolicyModule.MAX_COOLDOWN.toSeconds(),
+                        "minimum_seconds", RewritePolicyModule.MIN_COOLDOWN.toSeconds()
+                ),
+                "near_copy", Map.of(
+                        "disposition", findings.getFirst().disposition().canonicalName(),

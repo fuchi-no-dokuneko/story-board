@@ -1,0 +1,56 @@
+                list(operation("POST /internal/jobs/{jobId}/results")
+                        .get("x-required-scopes"))
+        );
+
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        assertTrue(schemas.containsKey("ImportRequest"));
+        assertTrue(schemas.containsKey("WorkerClaimRequest"));
+        assertTrue(schemas.containsKey("WorkerClaimResponse"));
+        assertTrue(schemas.containsKey("WorkerResultRequest"));
+        assertTrue(schemas.containsKey("WorkerResultResponse"));
+        assertTrue(schemas.containsKey("StyleAnalysisSnapshot"));
+        assertTrue(schemas.containsKey("StyleAnalysisSummary"));
+        assertTrue(schemas.containsKey("StyleAnalysisWindowFinding"));
+        assertTrue(schemas.containsKey("CompressedStyleAnalysisTrace"));
+        assertTrue(schemas.containsKey("CanonicalPackage"));
+        assertTrue(schemas.containsKey("CanonicalPackageManifest"));
+        assertTrue(schemas.containsKey("CanonicalPackageRevision"));
+        assertTrue(schemas.containsKey("CanonicalPackageOperation"));
+        assertTrue(schemas.containsKey("CanonicalPackageArtifact"));
+        assertTrue(schemas.containsKey("BlockImage"));
+        assertTrue(schemas.containsKey("ImageUploadResponse"));
+        assertTrue(schemas.containsKey("PdfRenderRequest"));
+
+        Map<String, Object> claim = map(schemas.get("WorkerClaimRequest"));
+        assertEquals(
+                Set.of("novel_id", "lease_owner", "lease_seconds"),
+                strings(claim.get("required"))
+        );
+        Map<String, Object> result = map(schemas.get("WorkerResultRequest"));
+        assertTrue(strings(result.get("required")).containsAll(Set.of(
+                "snapshot_hash", "profile_version_hash",
+                "analyzer_contract_hash", "window_configuration_hash",
+                "summary", "windows", "trace"
+        )));
+    }
+
+    @Test
+    void accessKeyContractDocumentsOpaqueSecretsAndExactScopes() {
+        Map<String, Object> components = map(document.get("components"));
+        Map<String, Object> schemas = map(components.get("schemas"));
+        Map<String, Object> requestProperties = map(
+                map(schemas.get("AccessKeyRequest")).get("properties")
+        );
+        Map<String, Object> scopeItems = map(
+                map(requestProperties.get("scopes")).get("items")
+        );
+        assertEquals(
+                List.of(
+                        "novel:read", "novel:analyze", "novel:propose",
+                        "novel:commit", "novel:admin", "style:analyze",
+                        "style:admin", "rewrite:propose", "monitor:submit",
+                        "worker:execute"
+                ),
+                list(scopeItems.get("enum"))
+        );
+

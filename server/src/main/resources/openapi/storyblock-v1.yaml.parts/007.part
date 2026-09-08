@@ -1,0 +1,79 @@
+                $ref: "#/components/schemas/MonitorSubmissionResponse"
+        "201":
+          description: Immutable monitor output created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitorSubmissionResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/monitor-runs/{monitorRunId}:
+    get:
+      operationId: getMonitorRun
+      summary: Get an immutable monitor output with derived stale state
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/MonitorRunId"
+      responses:
+        "200":
+          description: Monitor output and current invalidation state
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MonitorRunStatus"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/style-analyses:
+    post:
+      operationId: startStyleAnalysis
+      summary: Submit a durable style analysis job
+      x-required-scopes: ["style:analyze"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StyleAnalysisRequest"
+      responses:
+        "202":
+          description: Durable style analysis job accepted or replayed idempotently
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleAnalysisAccepted"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-analyses/{analysisId}:
+    get:
+      operationId: getStyleAnalysis
+      summary: Get durable style analysis state and result metadata
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/AnalysisId"
+      responses:
+        "200":
+          description: Analysis state and canonical result metadata
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:

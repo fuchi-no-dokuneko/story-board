@@ -18,3 +18,5 @@ data
 *.log
 *.p12
 *.pem
+.local-tool
+**/.local-tool-app

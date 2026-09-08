@@ -10,7 +10,7 @@ final class LlmWorkerSettingsFromFactory {
         Objects.requireNonNull(environment, "environment");
         return new LlmWorkerSettings(
                 URI.create(LlmWorkerSettingsRequired.required(environment, "storyblock.llm-worker.model-endpoint")),
-                LlmWorkerSettingsRequired.required(environment, "storyblock.llm-worker.model-token"),
+                environment.getProperty("storyblock.llm-worker.model-token", ""),
                 LlmWorkerSettingsRequired.required(environment, "storyblock.llm-worker.model-id"),
                 environment.getProperty(
                         "storyblock.llm-worker.connect-timeout",

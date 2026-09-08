@@ -1,0 +1,51 @@
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        byte[] importBody = CanonicalJson.bytes(Map.of(
+                "format", CanonicalExportFormat.REVISION.canonicalName(),
+                "document", revision.envelope()
+        ));
+
+        MockHttpServletRequestBuilder importRequest = post("/v1/imports")
+                .with(userWithScope("novel:admin"))
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "http-import-1")
+                .header(HttpHeaders.IF_MATCH, "*")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(importBody);
+        mvc.perform(importRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.LOCATION, "/v1/novels/" + novelId))
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ))
+                .andExpect(jsonPath("$.novel_id").value(novelId))
+                .andExpect(jsonPath("$.head_revision_id").value(revisionId))
+                .andExpect(jsonPath("$.head_sequence").value(0))
+                .andExpect(jsonPath("$.head_hash").value(revision.contentHash()));
+
+        mvc.perform(importRequest)
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ));
+
+        byte[] exportBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "format", CanonicalExportFormat.PACKAGE.canonicalName()
+        ));
+        MvcResult acceptedResult = mvc.perform(post("/v1/novels/{novelId}/exports", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "http-export-1")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(exportBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.status").value("queued"))
+                .andReturn();
+        Map<String, Object> accepted = object(acceptedResult);
+        String jobId = stringField(accepted, "job_id");
+
+        MvcResult jobResult = mvc.perform(get("/v1/jobs/{jobId}", jobId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.novel_id").value(novelId))

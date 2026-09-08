@@ -1,0 +1,68 @@
+  const element = await driver.wait(until.elementLocated(By.css(selector)), timeoutMs(), `CSS not found: ${selector}`);
+  if (visible) await driver.wait(until.elementIsVisible(element), timeoutMs(), `CSS not visible: ${selector}`);
+  return element;
+}
+
+async function clickCss(world, selector) {
+  const driver = await ensureBrowser(world);
+  const element = await cssElement(world, selector);
+  await driver.executeScript("arguments[0].scrollIntoView({block:'center'});", element);
+  await driver.wait(until.elementIsEnabled(element), timeoutMs());
+  await element.click();
+}
+
+async function replaceCss(world, selector, value) {
+  const driver = await ensureBrowser(world);
+  const element = await cssElement(world, selector);
+  await driver.executeScript(`
+    const element = arguments[0];
+    const value = String(arguments[1]);
+    const prototype = element instanceof HTMLTextAreaElement
+      ? HTMLTextAreaElement.prototype
+      : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(prototype, "value").set;
+    setter.call(element, value);
+    element.dispatchEvent(new Event("input", { bubbles: true }));
+    element.dispatchEvent(new Event("change", { bubbles: true }));
+  `, element, value);
+}
+
+async function chooseValue(world, selector, value) {
+  const select = new Select(await cssElement(world, selector));
+  try {
+    await select.selectByValue(value);
+  } catch {
+    await select.selectByVisibleText(value);
+  }
+}
+
+async function waitCssText(world, selector, expected, contains = true) {
+  const driver = await ensureBrowser(world);
+  await driver.wait(async () => {
+    try {
+      const text = await (await cssElement(world, selector, false)).getText();
+      return contains ? text.includes(expected) : !text.includes(expected);
+    } catch {
+      return !contains;
+    }
+  }, timeoutMs(), `CSS ${selector} did not ${contains ? "contain" : "exclude"} ${expected}`);
+}
+
+async function waitCssCount(world, selector, expected, exact) {
+  const driver = await ensureBrowser(world);
+  await driver.wait(async () => {
+    const count = (await driver.findElements(By.css(selector))).length;
+    return exact ? count === expected : count >= expected;
+  }, timeoutMs(), `Unexpected element count for ${selector}`);
+}
+
+async function waitJavaScript(world, expression) {
+  const driver = await ensureBrowser(world);
+  await driver.wait(async () => Boolean(await driver.executeScript(`return Boolean(${expression});`)), timeoutMs(), `Expression stayed false: ${expression}`);
+}
+
+async function waitPath(world, suffix) {
+  const driver = await ensureBrowser(world);
+  await driver.wait(async () => new URL(await driver.getCurrentUrl()).pathname.endsWith(suffix), timeoutMs(), `Path did not end with ${suffix}`);
+}
+

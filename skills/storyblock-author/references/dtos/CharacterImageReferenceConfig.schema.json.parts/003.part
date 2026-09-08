@@ -1,0 +1,24 @@
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000009", "content_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色三的四分之三參考圖。"}}
+          ]
+        },
+        {
+          "character_id": "character-four",
+          "name": "角色四",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {"label": "initial", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000010", "content_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色四的初始參考圖。"}},
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000011", "content_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色四的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000012", "content_hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色四的四分之三參考圖。"}}
+          ]
+        },
+        {
+          "character_id": "character-five",
+          "name": "角色五",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {"label": "initial", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000013", "content_hash": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色五的初始參考圖。"}},
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000014", "content_hash": "sha256:8888888888888888888888888888888888888888888888888888888888888888", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色五的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000015", "content_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色五的四分之三參考圖。"}}
+          ]
+        }
+      ]

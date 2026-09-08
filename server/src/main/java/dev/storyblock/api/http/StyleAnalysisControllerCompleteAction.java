@@ -13,7 +13,7 @@ final class StyleAnalysisControllerCompleteAction {
     Map<String, Object> request = StrictJsonRequest.parseObject(
         requestBytes, "style job result"
     );
-    StrictJsonRequest.requireKeys(request, StyleAnalysisController.RESULT_FIELDS, "style job result");
+    StrictJsonRequest.requireKeys(request, StyleAnalysisFields.RESULT_FIELDS, "style job result");
     StyleAnalysisJob job = self.analyses.getJob(new Ids.JobId(jobId));
     AccessPrincipalSupport.requireNovel(
         authentication, job.snapshot().novelId()

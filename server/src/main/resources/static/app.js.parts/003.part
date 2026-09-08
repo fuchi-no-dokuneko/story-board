@@ -1,0 +1,75 @@
+      show(elements['catalog-empty'], true);
+      if (!preserveSelection) clearReader();
+      return true;
+    }
+    payload.items.forEach((novel) => elements['novel-list'].append(catalogItem(novel)));
+    if (!preserveSelection || !state.selectedNovelId) {
+      await selectNovel(payload.items[0].novel_id);
+    } else {
+      await selectNovel(state.selectedNovelId);
+    }
+    return true;
+  } catch (error) {
+    if (requestId !== state.catalogRequestId) return false;
+    show(elements['catalog-loading'], false);
+    show(elements['catalog-empty'], true);
+    elements['catalog-empty'].textContent = `Catalog unavailable: ${error.message}`;
+    elements['catalog-total'].textContent = 'Unable to load catalog';
+    updatePagination({ page: 0, total_pages: 0 });
+    clearReader();
+    if (!reportAuthenticationError(error)) {
+      setServiceStatus('down', 'Service unavailable');
+      setOperatorStatus('error', 'Could not load protected library data');
+    }
+    return false;
+  }
+}
+
+function clearReader() {
+  state.selectedNovelId = null;
+  show(elements['reader-empty'], true);
+  show(elements['reader-loading'], false);
+  show(elements['reader-content'], false);
+}
+
+function renderCharacters(characters) {
+  elements['character-list'].replaceChildren();
+  if (!Array.isArray(characters) || characters.length === 0) {
+    const item = document.createElement('li');
+    item.textContent = 'Not recorded';
+    elements['character-list'].append(item);
+    return;
+  }
+  characters.forEach((character) => {
+    const item = document.createElement('li');
+    item.textContent = character;
+    elements['character-list'].append(item);
+  });
+}
+
+function chapterBlocks(chapter) {
+  const scenes = Array.isArray(chapter.scenes) ? chapter.scenes : [];
+  return scenes.flatMap((scene) => Array.isArray(scene.blocks) ? scene.blocks : []);
+}
+
+function renderChapters(chapters) {
+  elements['chapter-nav'].replaceChildren();
+  elements['chapter-content'].replaceChildren();
+  if (!Array.isArray(chapters) || chapters.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'pane-message';
+    empty.textContent = 'This revision has no chapters.';
+    elements['chapter-content'].append(empty);
+    return;
+  }
+  chapters.forEach((chapter, index) => {
+    const sectionId = `chapter-${index + 1}`;
+    const title = text(chapter.title, `Chapter ${index + 1}`);
+    const navButton = document.createElement('button');
+    navButton.type = 'button';
+    navButton.className = 'chapter-link';
+    navButton.textContent = `${index + 1}. ${title}`;
+    navButton.addEventListener('click', () => document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' }));
+    elements['chapter-nav'].append(navButton);
+
+    const section = document.createElement('section');

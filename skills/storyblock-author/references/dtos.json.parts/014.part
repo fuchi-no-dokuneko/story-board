@@ -1,0 +1,56 @@
+      "description": "Code-derived StoryBlock Novel Head JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "OpenApiDocument",
+      "file": "dtos/OpenApiDocument.schema.json",
+      "description": "UTF-8 OpenAPI 3.1 YAML document.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java"
+      ]
+    },
+    {
+      "name": "OperationEnvelope",
+      "file": "dtos/OperationEnvelope.schema.json",
+      "description": "Code-derived StoryBlock Operation Envelope JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "PreviewResponse",
+      "file": "dtos/PreviewResponse.schema.json",
+      "description": "Code-derived StoryBlock Preview Response JSON contract.",
+      "confidence": "open-question",
+      "openQuestion": "Controller returns nested Java records directly; no controller test fixes their exact Jackson field representation. Top-level fields and operation are confirmed.",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "ProvenanceMappingEntry",
+      "file": "dtos/ProvenanceMappingEntry.schema.json",
+      "description": "Code-derived StoryBlock Provenance Mapping Entry JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {

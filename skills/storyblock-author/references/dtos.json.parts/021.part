@@ -1,0 +1,64 @@
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisRequest",
+      "file": "dtos/StyleAnalysisRequest.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisResult",
+      "file": "dtos/StyleAnalysisResult.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Result JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisSnapshot",
+      "file": "dtos/StyleAnalysisSnapshot.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Snapshot JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisSummary",
+      "file": "dtos/StyleAnalysisSummary.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Summary JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisView",
+      "file": "dtos/StyleAnalysisView.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis View JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleAnalysisWindowFinding",
+      "file": "dtos/StyleAnalysisWindowFinding.schema.json",
+      "description": "Code-derived StoryBlock Style Analysis Window Finding JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [

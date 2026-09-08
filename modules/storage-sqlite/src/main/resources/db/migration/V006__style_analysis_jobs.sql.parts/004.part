@@ -1,0 +1,68 @@
+CREATE INDEX IF NOT EXISTS analysis_jobs_claim_idx
+    ON analysis_jobs(status, lease_until, created_at, job_id);
+CREATE INDEX IF NOT EXISTS analysis_jobs_novel_idx
+    ON analysis_jobs(novel_id, created_at, job_id);
+CREATE INDEX IF NOT EXISTS analysis_windows_page_idx
+    ON analysis_window_findings(analysis_id, ordinal);
+CREATE INDEX IF NOT EXISTS analysis_trace_content_idx
+    ON artifacts(novel_id, kind, content_hash)
+    WHERE kind = 'style-analysis-trace';
+
+CREATE TRIGGER IF NOT EXISTS analysis_jobs_identity_immutable
+BEFORE UPDATE ON analysis_jobs
+WHEN NEW.job_id IS NOT OLD.job_id
+  OR NEW.analysis_id IS NOT OLD.analysis_id
+  OR NEW.novel_id IS NOT OLD.novel_id
+  OR NEW.revision_id IS NOT OLD.revision_id
+  OR NEW.revision_hash IS NOT OLD.revision_hash
+  OR NEW.profile_id IS NOT OLD.profile_id
+  OR NEW.profile_version_id IS NOT OLD.profile_version_id
+  OR NEW.profile_version_hash IS NOT OLD.profile_version_hash
+  OR NEW.analyzer_contract_hash IS NOT OLD.analyzer_contract_hash
+  OR NEW.window_configuration_hash IS NOT OLD.window_configuration_hash
+  OR NEW.snapshot_hash IS NOT OLD.snapshot_hash
+  OR NEW.snapshot_json IS NOT OLD.snapshot_json
+  OR NEW.max_attempts IS NOT OLD.max_attempts
+  OR NEW.idempotency_key IS NOT OLD.idempotency_key
+  OR NEW.request_hash IS NOT OLD.request_hash
+  OR NEW.request_id IS NOT OLD.request_id
+  OR NEW.actor_id IS NOT OLD.actor_id
+  OR NEW.actor_key_id IS NOT OLD.actor_key_id
+  OR NEW.retention_until IS NOT OLD.retention_until
+  OR NEW.created_at IS NOT OLD.created_at
+BEGIN
+    SELECT RAISE(ABORT, 'analysis job snapshot and identity are immutable');
+END;
+
+CREATE TRIGGER IF NOT EXISTS analysis_jobs_attempt_monotonic
+BEFORE UPDATE ON analysis_jobs
+WHEN NEW.attempt < OLD.attempt
+  OR julianday(NEW.updated_at) < julianday(OLD.updated_at)
+BEGIN
+    SELECT RAISE(ABORT, 'analysis job attempt and time are monotonic');
+END;
+
+CREATE TRIGGER IF NOT EXISTS analysis_jobs_transition_guard
+BEFORE UPDATE ON analysis_jobs
+WHEN NOT (
+    (OLD.status = 'queued' AND NEW.status = 'running' AND NEW.attempt = 1)
+    OR
+    (OLD.status = 'running' AND NEW.status = 'running'
+        AND NEW.attempt = OLD.attempt + 1)
+    OR
+    (OLD.status = 'running' AND NEW.status IN ('succeeded', 'failed')
+        AND NEW.attempt = OLD.attempt)
+)
+BEGIN
+    SELECT RAISE(ABORT, 'analysis job transition is invalid or terminal');
+END;
+
+CREATE TRIGGER IF NOT EXISTS analysis_jobs_no_delete
+BEFORE DELETE ON analysis_jobs BEGIN
+    SELECT RAISE(ABORT, 'analysis jobs are retained');
+END;
+CREATE TRIGGER IF NOT EXISTS analysis_claim_receipts_no_update
+BEFORE UPDATE ON analysis_claim_receipts BEGIN
+    SELECT RAISE(ABORT, 'analysis claim receipts are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS analysis_claim_receipts_no_delete

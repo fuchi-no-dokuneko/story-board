@@ -1,0 +1,62 @@
+import javax.imageio.ImageIO;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class ApiHttpContractTest {
+    private static final String OWNER_TOKEN =
+            "test-owner-bootstrap-token-material-32-bytes";
+    private static final String VALID_ETAG = "\"sha256:"
+            + "0".repeat(64)
+            + "\"";
+    private static final Path DATABASE_PATH = Path.of(
+            "target", "api-http-contract-" + UUID.randomUUID() + ".db"
+    );
+
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        registry.add("storyblock.database.path", DATABASE_PATH::toString);
+        registry.add("storyblock.security.pepper", () -> "test-pepper-material-32-bytes-minimum");
+        registry.add("storyblock.security.owner-token", () -> OWNER_TOKEN);
+    }
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private SqliteRevisionStore store;
+
+    @Test
+    void servesOpenApiWithoutAuthentication() throws Exception {
+        mvc.perform(get("/v1/openapi.yaml"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith("application/yaml"))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, containsString("no-cache")))
+                .andExpect(content().string(containsString("openapi: 3.1.0")));
+    }
+
+    @Test
+    void operationalMetricsRequireTheOperatorScope() throws Exception {
+        mvc.perform(get("/actuator/metrics"))
+                .andExpect(status().isUnauthorized());
+
+        MvcResult metrics = mvc.perform(get("/actuator/metrics")
+                        .with(user("operator").roles("OPERATOR")))
+                .andExpect(status().isOk())
+                .andReturn();
+        String metricIndex = metrics.getResponse().getContentAsString();
+        for (String name : List.of(
+                "commit_wait_ms", "commit_transaction_ms", "sqlite_busy_total",
+                "wal_bytes", "checkpoint_ms", "queue_depth", "oldest_job_age",
+                "analysis_duration_ms", "rewrite_duration_ms",

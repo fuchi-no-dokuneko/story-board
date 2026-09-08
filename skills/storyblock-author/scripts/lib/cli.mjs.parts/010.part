@@ -1,0 +1,63 @@
+        hash = revision.data.content_hash;
+      }
+      const body = { revision_id: revisionId, format: parsed.options.get("format") ?? "canonical-revision" };
+      await validateDto("ExportRequest", body);
+      const response = await client.request({
+        method: "POST", pathname: `/v1/novels/${encodeURIComponent(novelId)}/exports`,
+        headers: { "If-Match": quoted(hash), "Idempotency-Key": parsed.options.get("idempotency-key") ?? deriveIdempotencyKey("export", { novelId, body }) }, body,
+      });
+      return { value: responseReport(response) };
+    }
+    case "job": {
+      assertOptions(parsed, ["job-id"]);
+      expectPositionals(parsed, 0);
+      const jobId = requiredOption(parsed, "job-id");
+      requireTypedId(jobId, "job", "job_id");
+      const response = await clientFor(parsed, context.clientOverrides).request({ pathname: `/v1/jobs/${encodeURIComponent(jobId)}` });
+      return { value: responseReport(response) };
+    }
+    case "artifact": {
+      assertOptions(parsed, ["artifact-id", "force", "output"]);
+      expectPositionals(parsed, 0);
+      const artifactId = requiredOption(parsed, "artifact-id");
+      requireTypedId(artifactId, "art", "artifact_id");
+      const response = await clientFor(parsed, context.clientOverrides).request({
+        pathname: `/v1/artifacts/${encodeURIComponent(artifactId)}`,
+        headers: { Accept: "application/octet-stream, application/problem+json" },
+        responseType: "buffer",
+      });
+      const output = parsed.options.get("output");
+      if (output !== undefined) {
+        await writePrivateOutput(output, response.data, parsed.options.get("force") === true);
+      }
+      return { value: {
+        status: response.status,
+        headers: response.headers,
+        artifact_id: artifactId,
+        bytes: response.data.length,
+        output: output ?? null,
+        content_base64: output === undefined ? response.data.toString("base64") : undefined,
+      } };
+    }
+    default:
+      throw new UsageError(`Unknown command: ${parsed.command}`);
+  }
+}
+
+function writeValue(io, value, { json = false, kind } = {}) {
+  if (kind === "text") {
+    io.stdout(value.endsWith("\n") ? value : `${value}\n`);
+    return;
+  }
+  io.stdout(`${JSON.stringify(value, null, json ? 0 : 2)}\n`);
+}
+
+function errorValue(error) {
+  if (error instanceof ApiResponseError) return { error: error.name, ...problemReport(error) };
+  if (error instanceof PayloadValidationError) return { error: error.name, message: error.message, dto: error.dto, issues: error.issues };
+  if (error instanceof VerificationError) return error.report;
+  return { error: error.name ?? "Error", message: error.message };
+}
+
+export async function runCli(argv, {
+  stdout = (text) => process.stdout.write(text),

@@ -1,0 +1,62 @@
+    void malformedVersionAndSemanticReplayDriftNeverReachStorage() throws Exception {
+        CanonicalNovelPackage valid = packageWithOneOperation(
+                temporaryDirectory.resolve("invalid-source.db")
+        );
+        byte[] unsupported = new String(valid.bytes(), StandardCharsets.UTF_8)
+                .replace("\"package_version\":\"1.0.0\"", "\"package_version\":\"9.0.0\"")
+                .getBytes(StandardCharsets.UTF_8);
+        CanonicalNovelPackage drifted = packageWithReplayDrift(valid);
+        Path targetPath = temporaryDirectory.resolve("invalid-target.db");
+        try (SqliteRevisionStore target = SqliteRevisionStore.open(targetPath)) {
+            CanonicalTransferService transfers = new CanonicalTransferService(target);
+
+            assertThrows(
+                    CanonicalPackageException.class,
+                    () -> transfers.importDocument(
+                            CanonicalExportFormat.PACKAGE,
+                            unsupported,
+                            "unsupported",
+                            IMPORTED_AT
+                    )
+            );
+            assertThrows(
+                    CanonicalPackageException.class,
+                    () -> transfers.importDocument(
+                            CanonicalExportFormat.PACKAGE,
+                            drifted.bytes(),
+                            "drifted",
+                            IMPORTED_AT
+                    )
+            );
+            assertTrue(target.listNovels().isEmpty());
+        }
+    }
+
+    @Test
+    void importAndExportIdempotencyRejectChangedPayloads() throws Exception {
+        CanonicalNovelPackage first = packageWithOneOperation(
+                temporaryDirectory.resolve("idempotency-source.db")
+        );
+        CanonicalRevision otherGenesis = NarrativeCanonicalMapper.toCanonical(
+                RevisionStoreTestFixture.genesis()
+        );
+        Path targetPath = temporaryDirectory.resolve("idempotency-target.db");
+        try (SqliteRevisionStore target = SqliteRevisionStore.open(targetPath)) {
+            CanonicalTransferService transfers = new CanonicalTransferService(target);
+            var imported = transfers.importDocument(
+                    CanonicalExportFormat.PACKAGE,
+                    first.bytes(),
+                    "same-import-key",
+                    IMPORTED_AT
+            );
+
+            assertThrows(
+                    IdempotencyConflictException.class,
+                    () -> transfers.importDocument(
+                            CanonicalExportFormat.REVISION,
+                            otherGenesis.envelopeBytes(),
+                            "same-import-key",
+                            IMPORTED_AT
+                    )
+            );
+

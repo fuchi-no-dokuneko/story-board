@@ -1,0 +1,100 @@
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "contentType": "application/json",
+        "dto": "RewriteProposalRequest"
+      },
+      "responses": [
+        {
+          "status": 202,
+          "description": "Durable job accepted",
+          "contentType": "application/json",
+          "dto": "RewriteProposalAccepted",
+          "headers": [
+            "Location"
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "rewrite-proposals.read",
+      "method": "GET",
+      "path": "/v1/rewrite-proposals/{proposalId}",
+      "summary": "Get an immutable rewrite proposal and its validation results",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [
+
+      ],
+      "pathParameters": [
+        {
+          "name": "proposalId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^prp_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [
+
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "description": "Rewrite proposal",
+          "contentType": "application/json",
+          "dto": "RewriteProposalResponse",
+          "headers": [
+
+          ]
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],

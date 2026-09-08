@@ -1,0 +1,57 @@
+        String fixtureHash = NarrativeCanonicalMapper.toCanonical(fixture).contentHash();
+        DeterministicRenderer renderer = new DeterministicRenderer();
+        AdjacentMetadataDetector detector = new AdjacentMetadataDetector();
+
+        for (int warmup = 0; warmup < 5; warmup++) {
+            renderer.render(fixture, fixtureHash, RenderRange.all());
+        }
+        long renderP95 = measureP95Micros(30, () ->
+                renderer.render(fixture, fixtureHash, RenderRange.all())
+        );
+
+        for (int warmup = 0; warmup < 3; warmup++) {
+            detector.detect(fixture, fixtureHash, RenderRange.all());
+        }
+        long detectorP95 = measureP95Micros(20, () ->
+                detector.detect(fixture, fixtureHash, RenderRange.all())
+        );
+
+        byte[] firstRender = CanonicalJson.bytes(renderer.render(
+                fixture, fixtureHash, RenderRange.all()
+        ).canonicalValue());
+        boolean deterministic = true;
+        for (int repetition = 0; repetition < 10; repetition++) {
+            byte[] repeated = CanonicalJson.bytes(renderer.render(
+                    fixture, fixtureHash, RenderRange.all()
+            ).canonicalValue());
+            deterministic &= Arrays.equals(firstRender, repeated);
+        }
+
+        long commitTransactionP95;
+        long commitTotalP95;
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(databasePath)) {
+            store.createNovel(fixture, fixtureHash);
+            List<Long> transactionSamples = new ArrayList<>();
+            for (int index = 0; index < 20; index++) {
+                RevisionManifest base = head(store, fixture.novel().id());
+                EditOperation operation = metadataOperation(base, "transaction-" + index);
+                Ids.RevisionId candidateId = Ids.RevisionId.create();
+                Instant at = fixture.createdAt().plusSeconds(index + 1L);
+                RevisionManifest candidate = new NarrativeEditor(revisionId ->
+                        store.getRevision(base.novel().id(), revisionId).manifest()
+                ).apply(base, operation, candidateId, at);
+                String candidateHash = NarrativeCanonicalMapper.toCanonical(
+                        candidate
+                ).contentHash();
+                CommitRequest request = new CommitRequest(
+                        store.getHead(base.novel().id()),
+                        operation,
+                        EditOperationCanonicalMapper.hash(operation),
+                        candidate,
+                        candidateHash
+                );
+                long started = System.nanoTime();
+                store.commitCas(
+                        request,
+                        AuditContext.system("slo-transaction-" + index, at)
+                );

@@ -1,0 +1,52 @@
+                    "nv_key_[0-9a-f-]{36}\\.[A-Za-z0-9_-]{43}"
+            ));
+            assertEquals(genesis.novel().id(), issued.key().novelId());
+            assertEquals(
+                    Set.of(AccessScope.NOVEL_READ, AccessScope.NOVEL_COMMIT),
+                    issued.key().scopes()
+            );
+            assertThrows(SecretAlreadyIssuedException.class, () -> accessKeys.issue(command));
+            assertThrows(
+                    AccessKeyRequestConflictException.class,
+                    () -> accessKeys.issue(command(
+                            genesis,
+                            "issue-primary",
+                            Set.of(AccessScope.NOVEL_READ),
+                            NOW.plusSeconds(3600)
+                    ))
+            );
+
+            StoredAccessKey stored = accessKeys.requireKey(keyId);
+            assertEquals(32, stored.secretDigest().length);
+            byte[] decodedSecret = Base64.getUrlDecoder().decode(encodedSecret);
+            assertArrayEquals(hmac(decodedSecret), stored.secretDigest());
+            assertFalse(Arrays.equals(
+                    MessageDigest.getInstance("SHA-256").digest(decodedSecret),
+                    stored.secretDigest()
+            ));
+            Arrays.fill(decodedSecret, (byte) 0);
+            assertFalse(Arrays.equals(
+                    stored.secretDigest(), encodedSecret.getBytes(StandardCharsets.US_ASCII)
+            ));
+            assertEquals(1, store.listAuditEvents(genesis.novel().id()).size());
+            assertEquals("test-actor", accessKeys.authenticate(bearerToken, NOW).actorId());
+            assertEquals(NOW, accessKeys.requireKey(keyId).lastUsedAt());
+            accessKeys.authenticate(bearerToken, NOW.plusSeconds(299));
+            assertEquals(NOW, accessKeys.requireKey(keyId).lastUsedAt());
+            accessKeys.authenticate(bearerToken, NOW.plusSeconds(300));
+            assertEquals(NOW.plusSeconds(300), accessKeys.requireKey(keyId).lastUsedAt());
+
+            String changedToken = bearerToken.substring(0, bearerToken.length() - 1)
+                    + (bearerToken.endsWith("A") ? "Q" : "A");
+            assertThrows(
+                    AccessAuthenticationException.class,
+                    () -> accessKeys.authenticate(changedToken, NOW)
+            );
+        }
+
+        byte[] databaseBytes = Files.readAllBytes(path);
+        assertFalse(contains(databaseBytes, bearerToken.getBytes(StandardCharsets.US_ASCII)));
+        assertFalse(contains(databaseBytes, encodedSecret.getBytes(StandardCharsets.US_ASCII)));
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {
+            database.readOnly(connection -> {
+                try (var statement = connection.prepareStatement("""

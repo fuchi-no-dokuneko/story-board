@@ -1,0 +1,73 @@
+    const report = JSON.parse(stderr.join(""));
+    assert.equal(report.dto, "agent.novels.register:If-Match");
+    assert.ok(report.issues.some(({ message }) => message.includes("must equal")));
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("artifact force-overwrite restores private permissions and requests binary content", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "storyblock-author-artifact-"));
+  try {
+    const outputPath = join(directory, "artifact.bin");
+    await writeFile(outputPath, "old");
+    await chmod(outputPath, 0o644);
+    let captured;
+    const stdout = [];
+    const exitCode = await runCli([
+      "artifact", "--artifact-id", "art_018f0f5e-7b4a-7c00-8000-000000000001",
+      "--output", outputPath, "--force", "--json",
+    ], {
+      stdout: (value) => stdout.push(value),
+      stderr: () => {},
+      clientOverrides: {
+        transport: async (request) => {
+          captured = request;
+          return {
+            status: 200,
+            headers: { "content-type": "application/octet-stream" },
+            body: Buffer.from("replacement"),
+          };
+        },
+      },
+    });
+
+    assert.equal(exitCode, EXIT_CODES.SUCCESS);
+    assert.equal(captured.headers.Accept, "application/octet-stream, application/problem+json");
+    assert.equal(await readFile(outputPath, "utf8"), "replacement");
+    assert.equal((await stat(outputPath)).mode & 0o777, 0o600);
+    assert.equal(JSON.parse(stdout.join("")).bytes, 11);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("upload-image sends raw bytes and emits a validated image block", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "storyblock-author-image-"));
+  try {
+    const imagePath = join(directory, "reference.png");
+    const imageBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    await writeFile(imagePath, imageBytes);
+    const novelId = "nov_018f0f5e-7b4a-7c00-8000-000000000001";
+    const revisionId = "rev_018f0f5e-7b4a-7c00-8000-000000000001";
+    const hash = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    const requests = [];
+    const responses = [
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: Buffer.from(JSON.stringify({
+          novel_id: novelId,
+          head_revision_id: revisionId,
+          head_sequence: 0,
+          head_hash: hash,
+          schema_version: "example-1",
+        })),
+      },
+      {
+        status: 200,
+        headers: { "content-type": "application/json" },
+        body: Buffer.from(JSON.stringify({
+          chapters: [],
+          content_hash: hash,
+          created_at: "2026-08-27T12:00:00Z",

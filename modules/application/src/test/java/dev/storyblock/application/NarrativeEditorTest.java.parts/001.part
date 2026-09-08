@@ -1,0 +1,65 @@
+package dev.storyblock.application;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import dev.storyblock.contracts.NarrativeCanonicalMapper;
+import dev.storyblock.domain.BlockDraft;
+import dev.storyblock.domain.BlockMetadata;
+import dev.storyblock.domain.BlockRangeGuard;
+import dev.storyblock.domain.BlockSequenceHash;
+import dev.storyblock.domain.BlockVersionRef;
+import dev.storyblock.domain.EditContext;
+import dev.storyblock.domain.EditInvariantException;
+import dev.storyblock.domain.EditOperation;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.InsertionPoint;
+import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeChapter;
+import dev.storyblock.domain.NarrativeNovel;
+import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.OrderKey;
+import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.domain.SceneBoundaryContract;
+import dev.storyblock.domain.SceneSeed;
+import dev.storyblock.domain.TransitionMode;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+
+class NarrativeEditorTest {
+    private static final Instant NEXT_REVISION_TIME = Instant.parse("2026-08-21T12:01:00Z");
+
+    @Test
+    void insertReplaceAndDeleteAreAtomicImmutableRevisions() {
+        RevisionManifest base = fixture();
+        NarrativeScene firstScene = firstScene(base);
+        NarrativeEditor editor = editorWithoutRestores();
+
+        BlockDraft inserted = BlockDraft.create("新增一句。", BlockMetadata.empty());
+        RevisionManifest afterInsert = editor.apply(
+                base,
+                new EditOperation.InsertBlocks(
+                        context(base, "insert"),
+                        InsertionPoint.after(firstScene.id(), firstScene.blocks().getFirst().id()),
+                        List.of(inserted)
+                ),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );
+        assertEquals(4, firstScene(afterInsert).blocks().size());
+        assertEquals(3, firstScene(base).blocks().size());
+        assertEquals(base.id(), afterInsert.parentId());
+
+        BlockRangeGuard replaceRange = BlockRangeGuard.capture(
+                firstScene,
+                firstScene.blocks().getFirst().id(),
+                firstScene.blocks().get(1).id()
+        );
+        BlockDraft replacement = BlockDraft.create("合併成一句。", BlockMetadata.empty());
+        RevisionManifest afterReplace = editor.apply(
+                base,
+                new EditOperation.ReplaceBlockRange(

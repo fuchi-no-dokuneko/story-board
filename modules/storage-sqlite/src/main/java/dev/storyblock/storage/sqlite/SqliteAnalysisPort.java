@@ -1,6 +1,5 @@
 package dev.storyblock.storage.sqlite;
 import dev.storyblock.domain.Ids;
-import dev.storyblock.security.AuditContext;
 import dev.storyblock.style.*;
 import java.time.Instant;
 import java.util.*;

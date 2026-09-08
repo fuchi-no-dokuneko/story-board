@@ -1,0 +1,59 @@
+        return new EditOperation.DeleteBlockRange(
+                context(base, key),
+                BlockRangeGuard.capture(scene(base), current.id(), current.id())
+        );
+    }
+
+    static EditOperation restore(
+            RevisionManifest base,
+            RevisionManifest target,
+            String key
+    ) {
+        return new EditOperation.RestoreRevisionContent(
+                context(base, key),
+                target.id(),
+                NarrativeCanonicalMapper.toCanonical(target).contentHash()
+        );
+    }
+
+    static CommitRequest request(
+            RevisionManifest base,
+            EditOperation operation,
+            Ids.RevisionId candidateId,
+            Instant committedAt
+    ) {
+        RevisionManifest candidate = new NarrativeEditor(revisionId -> {
+            if (base.id().equals(revisionId)) {
+                return base;
+            }
+            throw new IllegalArgumentException("Unknown test revision " + revisionId.value());
+        }).apply(base, operation, candidateId, committedAt);
+        String baseHash = NarrativeCanonicalMapper.toCanonical(base).contentHash();
+        String candidateHash = NarrativeCanonicalMapper.toCanonical(candidate).contentHash();
+        return new CommitRequest(
+                new RevisionRef(base.id(), 0, baseHash),
+                operation,
+                EditOperationCanonicalMapper.hash(operation),
+                candidate,
+                candidateHash
+        );
+    }
+
+    static String hash(RevisionManifest revision) {
+        return NarrativeCanonicalMapper.toCanonical(revision).contentHash();
+    }
+
+    private static EditContext context(RevisionManifest base, String key) {
+        return new EditContext(
+                Ids.OperationId.create(),
+                key,
+                base.novel().id(),
+                base.id(),
+                hash(base)
+        );
+    }
+
+    private static NarrativeScene scene(RevisionManifest revision) {
+        return revision.novel().chapters().getFirst().scenes().getFirst();
+    }
+}

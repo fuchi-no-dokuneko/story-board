@@ -35,6 +35,7 @@ public class LlmWorkerApplication {
         return args -> {
             LlmWorkerSettings settings = LlmWorkerSettings.from(environment);
             HttpClient client = HttpClient.newBuilder()
+                .sslContext(LocalSelfSignedTls.context())
                     .connectTimeout(settings.connectTimeout())
                     .followRedirects(HttpClient.Redirect.NEVER)
                     .proxy(DirectProxySelector.INSTANCE)

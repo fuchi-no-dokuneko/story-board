@@ -1,0 +1,62 @@
+        NarrativeScene scene = base.novel().chapters().getFirst().scenes().getFirst();
+        NarrativeBlock block = scene.blocks().getFirst();
+        BlockMetadata next = block.metadata().fields().isEmpty()
+                ? new BlockMetadata(Map.of("narrative_mode", "action"))
+                : BlockMetadata.empty();
+        String hash = NarrativeCanonicalMapper.toCanonical(base).contentHash();
+        return new EditOperation.CorrectBlockMeta(
+                new EditContext(
+                        Ids.OperationId.create(),
+                        idempotencyKey,
+                        base.novel().id(),
+                        base.id(),
+                        hash
+                ),
+                scene.id(),
+                BlockVersionRef.from(block),
+                next
+        );
+    }
+
+    private static RevisionManifest fixture(int blockCount) {
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        List<NarrativeBlock> blocks = new ArrayList<>();
+        for (int index = 0; index < blockCount; index++) {
+            blocks.add(NarrativeBlock.create(
+                    Ids.BlockId.create(),
+                    OrderKey.rebalanced(index, blockCount),
+                    "Block %04d remains stable.".formatted(index),
+                    BlockMetadata.empty(),
+                    Map.of()
+            ));
+        }
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "SLO scene",
+                TransitionMode.OPENING,
+                SceneSeed.empty(),
+                blocks,
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId,
+                OrderKey.initial(),
+                "SLO chapter",
+                List.of(scene),
+                Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-23T00:00:00Z"),
+                new NarrativeNovel(Ids.NovelId.create(), List.of(chapter), Map.of())
+        );
+    }
+
+    @FunctionalInterface
+    private interface CheckedRunnable {
+        void run() throws Exception;
+    }
+}

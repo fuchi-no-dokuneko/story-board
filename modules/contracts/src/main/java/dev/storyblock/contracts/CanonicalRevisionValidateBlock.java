@@ -5,9 +5,9 @@ import dev.storyblock.domain.StableIds;
 import dev.storyblock.domain.UnicodeText;
 import java.util.Map;
 import java.util.Set;
-import static dev.storyblock.contracts.CanonicalRevision.BLOCK_REQUIRED;
-import static dev.storyblock.contracts.CanonicalRevision.BLOCK_OPTIONAL;
-import static dev.storyblock.contracts.CanonicalRevision.META_FIELDS;
+import static dev.storyblock.contracts.CanonicalRevisionFields.BLOCK_REQUIRED;
+import static dev.storyblock.contracts.CanonicalRevisionFields.BLOCK_OPTIONAL;
+import static dev.storyblock.contracts.CanonicalRevisionFields.META_FIELDS;
 
 final class CanonicalRevisionValidateBlock {
     static void validateBlock(

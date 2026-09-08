@@ -1,0 +1,76 @@
+        "result_hash",
+        "result_revision_id",
+        "sequence"
+      ],
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "operation_hash": {"$ref": "#/$defs/hash"},
+        "operation": {"$ref": "#/$defs/operationEnvelope"},
+        "result_revision_id": {"$ref": "#/$defs/revisionId"},
+        "result_hash": {"$ref": "#/$defs/hash"},
+        "committed_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "artifactEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "codec",
+        "content_base64",
+        "content_hash",
+        "created_at",
+        "kind",
+        "media_type",
+        "revision_id",
+        "size_bytes"
+      ],
+      "properties": {
+        "artifact_id": {"$ref": "#/$defs/artifactId"},
+        "revision_id": {"$ref": "#/$defs/revisionId"},
+        "kind": {"type": "string", "pattern": "^[a-z][a-z0-9.-]{1,63}$"},
+        "media_type": {"type": "string"},
+        "codec": {"type": "string", "pattern": "^[a-z][a-z0-9.-]{1,63}$"},
+        "content_hash": {"$ref": "#/$defs/hash"},
+        "size_bytes": {"type": "integer", "minimum": 0, "maximum": 16777216},
+        "created_at": {"type": "string", "format": "date-time"},
+        "content_base64": {"type": "string", "contentEncoding": "base64"}
+      }
+    },
+    "operationEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_revision_id",
+        "expected_head_hash",
+        "idempotency_key",
+        "novel_id",
+        "operation_id",
+        "payload",
+        "type"
+      ],
+      "properties": {
+        "operation_id": {"$ref": "#/$defs/operationId"},
+        "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 200},
+        "novel_id": {"$ref": "#/$defs/novelId"},
+        "base_revision_id": {"$ref": "#/$defs/revisionId"},
+        "expected_head_hash": {"$ref": "#/$defs/hash"},
+        "type": {
+          "enum": [
+            "correct_block_meta",
+            "delete_block_range",
+            "extend_block",
+            "insert_blocks",
+            "merge_blocks",
+            "move_block_range",
+            "replace_block_range",
+            "restore_revision_content",
+            "set_scene_initial_meta",
+            "split_block"
+          ]
+        },
+        "payload": {"type": "object"}
+      }
+    }
+  }
+}

@@ -1,0 +1,89 @@
+const { authorizationHeaders, resolveSameOriginUrl } = window.StoryBlockAuth;
+
+const state = {
+  page: 0,
+  size: 25,
+  totalPages: 0,
+  query: '',
+  selectedNovelId: null,
+  operatorToken: '',
+  authRevision: 0,
+  catalogRequestId: 0,
+};
+
+const elements = Object.fromEntries([
+  'status-dot', 'status-text', 'library-tab', 'console-tab', 'library-view', 'console-view',
+  'catalog-search', 'catalog-refresh', 'catalog-total', 'catalog-loading', 'catalog-empty',
+  'novel-list', 'page-previous', 'page-next', 'page-label', 'reader-empty', 'reader-loading',
+  'reader-content', 'reader-language', 'reader-title', 'reader-id', 'reader-registration',
+  'stat-han', 'stat-chapters', 'stat-scenes', 'stat-blocks', 'stat-zombies', 'stat-cannons',
+  'character-list', 'chapter-nav', 'chapter-content', 'meta-revision', 'meta-updated',
+  'meta-hash', 'meta-han-hash', 'operator-form', 'operator-token', 'operator-connect',
+  'operator-clear', 'operator-status', 'method', 'path', 'send',
+  'response', 'response-status',
+].map((id) => [id, document.getElementById(id)]));
+
+function text(value, fallback = 'Not recorded') {
+  if (value === null || value === undefined || value === '') return fallback;
+  return String(value);
+}
+
+function number(value) {
+  return Number.isFinite(value) ? new Intl.NumberFormat().format(value) : '0';
+}
+
+function show(element, visible) {
+  element.hidden = !visible;
+}
+
+function setServiceStatus(kind, label) {
+  elements['status-dot'].className = kind;
+  elements['status-text'].textContent = label;
+}
+
+function setOperatorStatus(kind, label) {
+  elements['operator-status'].dataset.state = kind;
+  elements['operator-status'].textContent = label;
+}
+
+function reportAuthenticationError(error) {
+  if (error.status === 401) {
+    setOperatorStatus(
+      'error',
+      state.operatorToken ? 'Token rejected; paste a valid owner token' : 'Owner token required',
+    );
+    return true;
+  }
+  if (error.status === 403) {
+    setOperatorStatus('error', 'Token lacks operator access');
+    return true;
+  }
+  return false;
+}
+
+async function fetchJson(url, options = {}) {
+  const target = resolveSameOriginUrl(url, location.origin);
+  const response = await fetch(target, {
+    ...options,
+    headers: {
+      Accept: 'application/json',
+      ...authorizationHeaders(state.operatorToken),
+      ...(options.headers || {}),
+    },
+  });
+  if (!response.ok) {
+    let message = `${response.status} ${response.statusText}`;
+    try {
+      const problem = await response.json();
+      message = problem.detail || problem.title || message;
+    } catch {
+      // Keep the status text when the response is not JSON.
+    }
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
+  return response.json();
+}
+
+function switchView(view) {

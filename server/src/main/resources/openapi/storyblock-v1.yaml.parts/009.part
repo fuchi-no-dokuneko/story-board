@@ -1,0 +1,80 @@
+              schema:
+                $ref: "#/components/schemas/StyleProfile"
+        "201":
+          description: Style profile created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfile"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-profiles/{profileId}:
+    get:
+      operationId: getStyleProfile
+      summary: Get an immutable style profile within its novel boundary
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/ProfileId"
+      responses:
+        "200":
+          description: Immutable style profile
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfile"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-profiles/{profileId}/versions:
+    post:
+      operationId: createStyleProfileVersion
+      summary: Create an immutable DRAFT profile baseline version
+      x-required-scopes: ["style:admin"]
+      parameters:
+        - $ref: "#/components/parameters/ProfileId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfileVersionContent"
+      responses:
+        "200":
+          description: Idempotent replay of profile version creation
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfileVersionView"
+        "201":
+          description: Immutable DRAFT profile version created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfileVersionView"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-profiles/{profileId}/versions/{versionId}:
+    get:
+      operationId: getStyleProfileVersion
+      summary: Get an immutable profile version and append-only lifecycle
+      x-required-scopes: ["novel:read"]
+      parameters:

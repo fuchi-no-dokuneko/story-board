@@ -1,0 +1,55 @@
+package dev.storyblock.renderer;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.domain.BlockMetadata;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeChapter;
+import dev.storyblock.domain.NarrativeNovel;
+import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.OrderKey;
+import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.domain.SceneSeed;
+import dev.storyblock.domain.TransitionMode;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+
+class DeterministicRendererTest {
+    private static final String HASH = "sha256:" + "a".repeat(64);
+    private static final String MIN_ENTERS_HASH =
+            "sha256:adcdbf673750ae33de22f40f290f55d516d62e5fb7bfd51b0174e1c49375fab8";
+    private static final Ids.NovelId GOLDEN_NOVEL = new Ids.NovelId(id("nov", 1));
+    private static final Ids.ChapterId GOLDEN_CHAPTER = new Ids.ChapterId(id("ch", 2));
+    private static final Ids.SceneId GOLDEN_SCENE_ONE = new Ids.SceneId(id("scn", 3));
+    private static final Ids.SceneId GOLDEN_SCENE_TWO = new Ids.SceneId(id("scn", 4));
+    private static final Ids.BlockId GOLDEN_BLOCK_ONE = new Ids.BlockId(id("blk", 5));
+    private static final Ids.BlockId GOLDEN_BLOCK_TWO = new Ids.BlockId(id("blk", 6));
+    private static final Ids.BlockId GOLDEN_BLOCK_THREE = new Ids.BlockId(id("blk", 7));
+    private static final Ids.BlockVersionId GOLDEN_VERSION_ONE =
+            new Ids.BlockVersionId(id("blv", 8));
+    private static final Ids.BlockVersionId GOLDEN_VERSION_TWO =
+            new Ids.BlockVersionId(id("blv", 9));
+    private static final Ids.BlockVersionId GOLDEN_VERSION_THREE =
+            new Ids.BlockVersionId(id("blv", 10));
+    private static final Ids.RevisionId GOLDEN_REVISION = new Ids.RevisionId(id("rev", 11));
+
+    @Test
+    void identicalInputProducesIdenticalBytesAndResolvedState() {
+        RevisionManifest revision = revision();
+        DeterministicRenderer renderer = new DeterministicRenderer();
+
+        RenderPacket first = renderer.render(revision, HASH, RenderRange.all());
+        RenderPacket second = renderer.render(revision, HASH, RenderRange.all());
+
+        assertEquals(first, second);
+        assertArrayEquals(CanonicalJson.bytes(first), CanonicalJson.bytes(second));
+        assertEquals("乙🙂進入房間。\n他坐下。", first.renderedText());

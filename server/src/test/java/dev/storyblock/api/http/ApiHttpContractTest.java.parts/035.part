@@ -1,0 +1,64 @@
+                result.getResponse().getContentAsByteArray(), Map.class
+        );
+    }
+
+    private static String stringField(Map<String, Object> object, String field) {
+        return (String) object.get(field);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> objectField(
+            Map<String, Object> object,
+            String field
+    ) {
+        return (Map<String, Object>) object.get(field);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String firstBlockId(CanonicalRevision revision) {
+        List<Map<String, Object>> chapters = (List<Map<String, Object>>)
+                revision.canonicalContent().get("chapters");
+        List<Map<String, Object>> scenes = (List<Map<String, Object>>)
+                chapters.getFirst().get("scenes");
+        List<Map<String, Object>> blocks = (List<Map<String, Object>>)
+                scenes.getFirst().get("blocks");
+        return stringField(blocks.getFirst(), "id");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String firstSceneId(CanonicalRevision revision) {
+        List<Map<String, Object>> chapters = (List<Map<String, Object>>)
+                revision.canonicalContent().get("chapters");
+        List<Map<String, Object>> scenes = (List<Map<String, Object>>)
+                chapters.getFirst().get("scenes");
+        return stringField(scenes.getFirst(), "id");
+    }
+
+    private static byte[] imagePng() throws Exception {
+        BufferedImage image = new BufferedImage(120, 80, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, 120, 80);
+        graphics.setColor(new Color(20, 95, 155));
+        graphics.fillOval(35, 10, 50, 60);
+        graphics.dispose();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        assertTrue(ImageIO.write(image, "png", output));
+        return output.toByteArray();
+    }
+
+    private static String quotedEtag(String hash) {
+        return "\"" + hash + "\"";
+    }
+
+    private static String bearer(String token) {
+        return "Bearer " + token;
+    }
+
+    private static org.springframework.test.web.servlet.request.RequestPostProcessor
+            userWithScope(String scope) {
+        return user("contract-test").authorities(
+                new SimpleGrantedAuthority("SCOPE_" + scope)
+        );
+    }
+}

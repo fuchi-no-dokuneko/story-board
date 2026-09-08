@@ -20,7 +20,7 @@ final class CanonicalTransferControllerImportNovelAction {
     CanonicalExportFormat format = CanonicalExportFormat.fromCanonicalName(
         CanonicalTransferControllerString.string(request, "format", "import request")
     );
-    Map<String, Object> documentObject = CanonicalTransferController.object(
+    Map<String, Object> documentObject = CanonicalRequestObject.object(
         request.get("document"), "import request.document"
     );
     Ids.NovelId requestedNovel = CanonicalTransferControllerImportNovelId.importNovelId(format, documentObject);

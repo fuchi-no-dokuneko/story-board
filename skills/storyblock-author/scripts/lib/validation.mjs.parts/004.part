@@ -1,0 +1,45 @@
+    if (schema.minimum !== undefined && value < schema.minimum) issue(`must be at least ${schema.minimum}`);
+    if (schema.maximum !== undefined && value > schema.maximum) issue(`must be at most ${schema.maximum}`);
+    if (schema.exclusiveMinimum !== undefined && value <= schema.exclusiveMinimum) issue(`must be greater than ${schema.exclusiveMinimum}`);
+    if (schema.exclusiveMaximum !== undefined && value >= schema.exclusiveMaximum) issue(`must be less than ${schema.exclusiveMaximum}`);
+  }
+
+  if (Array.isArray(value)) {
+    if (schema.minItems !== undefined && value.length < schema.minItems) issue(`must contain at least ${schema.minItems} items`);
+    if (schema.maxItems !== undefined && value.length > schema.maxItems) issue(`must contain at most ${schema.maxItems} items`);
+    if (schema.uniqueItems) {
+      const encoded = value.map((entry) => stableStringify(entry));
+      if (new Set(encoded).size !== encoded.length) issue("must contain unique items");
+    }
+    const prefixItems = schema.prefixItems ?? [];
+    for (let index = 0; index < prefixItems.length && index < value.length; index += 1) {
+      issues.push(...validateNode(value[index], prefixItems[index], { ...context, path: `${context.path}/${index}` }));
+    }
+    if (schema.items && schema.items !== true) {
+      for (let index = prefixItems.length; index < value.length; index += 1) {
+        issues.push(...validateNode(value[index], schema.items, { ...context, path: `${context.path}/${index}` }));
+      }
+    }
+    if (schema.contains && !value.some((entry, index) => validateNode(entry, schema.contains, { ...context, path: `${context.path}/${index}` }).length === 0)) {
+      issue("must contain an item matching the contains schema");
+    }
+  }
+
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+    for (const required of schema.required ?? []) {
+      if (!Object.hasOwn(value, required)) issue(`is missing required property ${required}`, `${context.path}/${required}`);
+    }
+    const properties = schema.properties ?? {};
+    for (const [name, member] of Object.entries(properties)) {
+      if (Object.hasOwn(value, name)) {
+        issues.push(...validateNode(value[name], member, { ...context, path: `${context.path}/${name}` }));
+      }
+    }
+    if (schema.propertyNames) {
+      for (const name of Object.keys(value)) {
+        issues.push(...validateNode(name, schema.propertyNames, { ...context, path: `${context.path}/${name}` }));
+      }
+    }
+    const known = knownProperties(schema, context.root, context.schemas);
+    const additional = Object.keys(value).filter((name) => !known.has(name));
+    if (schema.additionalProperties === false || schema.unevaluatedProperties === false) {

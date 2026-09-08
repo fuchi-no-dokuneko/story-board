@@ -1,0 +1,45 @@
+if (dryRun) cucumberArgs.push("--dry-run");
+else cucumberArgs.push("--format", `json:${rawReport}`);
+if (tags) cucumberArgs.push("--tags", tags);
+
+const cucumber = spawnSync(process.execPath, cucumberArgs, {
+  cwd: root,
+  env: childEnvironment,
+  stdio: "inherit",
+});
+const cucumberStatus = cucumber.status ?? 1;
+if (dryRun) process.exit(cucumberStatus);
+
+if (!existsSync(rawReport)) writeFileSync(rawReport, "[]\n");
+const report = spawnSync(process.execPath, [
+  path.join(acceptanceDirectory, "report.mjs"),
+  "--input", rawReport,
+  "--output", reportDirectory,
+  "--suite", suite,
+  "--started-at", startedAt,
+], { cwd: root, env: childEnvironment, stdio: "inherit" });
+
+let sonarStatus = 0;
+if (submitSonar) {
+  const token = process.env.SONAR_TOKEN;
+  if (!token) {
+    process.stderr.write("SONAR_TOKEN is required for --sonar.\n");
+    sonarStatus = 2;
+  } else {
+    const scanner = process.env.SONAR_SCANNER_BIN || "sonar-scanner";
+    const reportPath = path.relative(root, path.join(reportDirectory, "sonar-test-execution.xml"));
+    const scan = spawnSync(scanner, [`-Dsonar.testExecutionReportPaths=${reportPath}`], {
+      cwd: root,
+      env: {
+        ...process.env,
+        SONAR_SCANNER_OPTS:
+          `${process.env.SONAR_SCANNER_OPTS || ""} ` +
+          "-Djava.net.preferIPv4Stack=true -Djava.net.preferIPv6Addresses=false",
+      },
+      stdio: "inherit",
+    });
+    sonarStatus = scan.error ? 2 : (scan.status ?? 1);
+  }
+}
+
+process.exit(cucumberStatus || (report.status ?? 1) || sonarStatus);

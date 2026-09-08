@@ -1,0 +1,52 @@
+#!/usr/bin/env node
+
+import { readdir, readFile, writeFile } from "node:fs/promises";
+
+const skillRoot = new URL("../", import.meta.url);
+const references = new URL("references/", skillRoot);
+
+function escapeTable(value) {
+  return String(value ?? "").replaceAll("|", "\\|").replaceAll("\n", " ");
+}
+
+function code(value) {
+  return value === undefined || value === null ? "none" : `\`${value}\``;
+}
+
+function parameterText(parameters) {
+  if (parameters.length === 0) return "none";
+  return parameters.map((entry) => {
+    const required = entry.required ? "required" : "optional";
+    const constraints = Object.entries(entry.schema ?? {})
+      .map(([name, value]) => `${name}=${JSON.stringify(value)}`).join(", ");
+    return `\`${entry.name}\` (${required}${constraints === "" ? "" : `; ${constraints}`})`;
+  }).join("; ");
+}
+
+function schemaFields(schema) {
+  const properties = Object.keys(schema.properties ?? {});
+  if (properties.length === 0) {
+    if (schema.oneOf) return `one of: ${schema.oneOf.map((entry) => code(entry.$ref ?? entry.title ?? "inline schema")).join(", ")}`;
+    if (schema.allOf) return `composition of: ${schema.allOf.map((entry) => code(entry.$ref ?? entry.title ?? "inline schema")).join(", ")}`;
+    return "No named top-level fields.";
+  }
+  const required = new Set(schema.required ?? []);
+  return properties.map((name) => `${code(name)} (${required.has(name) ? "required" : "optional"})`).join(", ");
+}
+
+function schemaConstraints(schema) {
+  const keys = ["type", "const", "enum", "minLength", "maxLength", "minimum", "maximum", "minItems", "maxItems", "uniqueItems", "additionalProperties", "unevaluatedProperties"];
+  const values = keys.filter((key) => Object.hasOwn(schema, key)).map((key) => `${key}=${JSON.stringify(schema[key])}`);
+  if (schema.oneOf) values.push(`oneOf=${schema.oneOf.length}`);
+  if (schema.allOf) values.push(`allOf=${schema.allOf.length}`);
+  if (schema["x-server-constraints"]) values.push(...schema["x-server-constraints"]);
+  return values.length === 0 ? "See the linked schema for nested constraints." : values.join("; ");
+}
+
+async function generateEndpoints() {
+  const manifest = JSON.parse(await readFile(new URL("endpoints.json", references), "utf8"));
+  const lines = [
+    "# StoryBlock endpoint catalog",
+    "",
+    `This catalog contains ${manifest.endpoints.length} code-verified programmatic routes. Static browser assets are excluded. Paths are full deployed paths, including \`/v1\`.`,
+    "",

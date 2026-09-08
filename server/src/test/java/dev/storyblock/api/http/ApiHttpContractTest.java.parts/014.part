@@ -1,0 +1,48 @@
+                .andExpect(jsonPath("$.revision_id").value(revisionId))
+                .andExpect(jsonPath("$.revision_hash").value(revision.contentHash()))
+                .andExpect(jsonPath("$.rule_version").value("detector-1.0.0"))
+                .andExpect(jsonPath("$.findings[0].finding_id").isString())
+                .andExpect(jsonPath("$.findings[0].code")
+                        .value("LOCATION_CHANGED_WITHOUT_TRANSITION"))
+                .andExpect(jsonPath("$.findings[0].severity").value("warning"))
+                .andExpect(jsonPath("$.findings[0].affected_scene_ids.length()")
+                        .value(2))
+                .andExpect(jsonPath("$.findings[0].context_block_ids.length()")
+                        .value(2))
+                .andExpect(jsonPath("$.findings[0].evidence.kind")
+                        .value("scene_boundary"))
+                .andReturn();
+
+        MvcResult second = mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-second")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertArrayEquals(
+                first.getResponse().getContentAsByteArray(),
+                second.getResponse().getContentAsByteArray()
+        );
+
+        String staleHash = "sha256:" + "0".repeat(64);
+        byte[] mismatchedBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", staleHash
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-mismatch")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mismatchedBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+
+        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-stale")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(staleHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mismatchedBody))

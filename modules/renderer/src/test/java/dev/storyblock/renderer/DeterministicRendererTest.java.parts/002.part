@@ -1,0 +1,64 @@
+        assertEquals(List.of("char_a"),
+                first.resolvedMetadata().getFirst().before().get("present_character_ids"));
+        assertEquals(List.of("char_a", "char_b"),
+                first.resolvedMetadata().getFirst().after().get("present_character_ids"));
+        assertEquals("rain", first.resolvedMetadata().getFirst().after().get("weather"));
+        assertEquals(
+                Map.of("mode", "unknown"),
+                first.resolvedMetadata().getLast().after().get("weather")
+        );
+        assertEquals(
+                first.blocks().getFirst().text().codePointCount(0, first.blocks().getFirst().text().length()) + 1,
+                first.offsetMap().getLast().renderedStart()
+        );
+        assertArrayEquals(
+                CanonicalJson.bytes(first.canonicalValue()),
+                CanonicalJson.bytes(second.canonicalValue())
+        );
+    }
+
+    @Test
+    void goldenScenesProduceDocumentedStateTransitions() throws IOException {
+        RenderPacket packet = new DeterministicRenderer().render(
+                goldenRevision(), HASH, RenderRange.all()
+        );
+        Map<String, Object> actual = Map.of(
+                "resolved_meta", packet.canonicalValue().get("resolved_meta"),
+                "scene_boundaries", packet.canonicalValue().get("scene_boundaries")
+        );
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> expected = CanonicalJson.parse(
+                readFixture("renderer-state-machine.json"), Map.class
+        );
+
+        assertArrayEquals(CanonicalJson.bytes(expected), CanonicalJson.bytes(actual));
+        assertEquals(2, packet.sceneBoundaries().size());
+        assertEquals(
+                packet.resolvedMetadata().get(1).after(),
+                packet.sceneBoundaries().getFirst().stateOut()
+        );
+        assertEquals(
+                packet.resolvedMetadata().getLast().after(),
+                packet.sceneBoundaries().getLast().stateOut()
+        );
+    }
+
+    @Test
+    void everyOffsetReconstructsItsUnicodeBlockSpan() {
+        RenderPacket packet = new DeterministicRenderer().render(
+                revision(), HASH, RenderRange.all()
+        );
+
+        for (int index = 0; index < packet.blocks().size(); index++) {
+            RenderedBlock block = packet.blocks().get(index);
+            OffsetMapEntry offset = packet.offsetMap().get(index);
+            int utf16Start = packet.renderedText().offsetByCodePoints(0, offset.renderedStart());
+            int utf16End = packet.renderedText().offsetByCodePoints(0, offset.renderedEnd());
+
+            assertEquals(block.blockId(), offset.blockId());
+            assertEquals(block.text(), packet.renderedText().substring(utf16Start, utf16End));
+        }
+    }
+
+    @Test

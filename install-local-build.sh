@@ -3,6 +3,7 @@ set -euo pipefail
 umask 077
 repo_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "$repo_dir/scripts/build-environment.sh"
+python3 "$repo_dir/scripts/assemble-sources.py"
 for tool in java javac keytool curl unzip python3; do
   command -v "$tool" >/dev/null || { echo "Missing build tool: $tool" >&2; exit 1; }
 done

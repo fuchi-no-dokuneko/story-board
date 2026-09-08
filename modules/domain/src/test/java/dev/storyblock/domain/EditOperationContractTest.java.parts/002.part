@@ -1,0 +1,42 @@
+        EditOperation.SplitBlock split = new EditOperation.SplitBlock(
+                context(), splitRange, UnicodeText.graphemeCount("第一句。"), splitResults
+        );
+        assertEquals(
+                splitResults.stream().map(BlockDraft::id).toList(),
+                split.provenanceMapping().sourceToResults().get(BlockVersionRef.from(first))
+        );
+
+        List<BlockVersionRef> mergeSources = List.of(
+                BlockVersionRef.from(first), BlockVersionRef.from(second)
+        );
+        BlockRangeGuard mergeRange = new BlockRangeGuard(
+                sceneId,
+                mergeSources,
+                null,
+                null,
+                BlockSequenceHash.ofReferences(mergeSources)
+        );
+        BlockDraft mergeResult = BlockDraft.create("合併內容。", BlockMetadata.empty());
+        EditOperation.MergeBlocks merge = new EditOperation.MergeBlocks(
+                context(), mergeRange, mergeResult
+        );
+        assertEquals(
+                Set.of(BlockVersionRef.from(first), BlockVersionRef.from(second)),
+                merge.provenanceMapping().sourceToResults().keySet()
+        );
+        assertEquals(
+                Set.of(List.of(mergeResult.id())),
+                Set.copyOf(merge.provenanceMapping().sourceToResults().values())
+        );
+    }
+
+    private static EditContext context() {
+        return new EditContext(
+                Ids.OperationId.create(),
+                "test",
+                Ids.NovelId.create(),
+                Ids.RevisionId.create(),
+                "sha256:" + "a".repeat(64)
+        );
+    }
+}

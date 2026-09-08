@@ -1,0 +1,68 @@
+package dev.storyblock.rewrite;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.domain.Ids;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+
+class RewriteContractTest {
+    @Test
+    void inputAndProposalRoundTripWithExactImmutableBindings() {
+        RewriteWorkerInput input = input();
+        RewriteWorkerInput restored = RewriteWorkerInput.fromCanonical(
+                object(CanonicalJson.bytes(input.canonicalValue()))
+        );
+        assertEquals(input, restored);
+        assertEquals(input.inputHash(), restored.inputHash());
+
+        RewriteTextProposal proposal = new RewriteTextProposal(
+                input,
+                "fixture-model-v1",
+                CanonicalJson.hash("model-response"),
+                List.of(RewriteCandidateBlock.create(
+                        input.blocks().get(1), "The measured rain eased into silence."
+                )),
+                Instant.parse("2026-08-22T02:00:00Z")
+        );
+        RewriteTextProposal restoredProposal = RewriteTextProposal.fromCanonical(
+                object(CanonicalJson.bytes(proposal.canonicalValue()))
+        );
+        assertEquals(proposal, restoredProposal);
+        assertEquals(proposal.proposalHash(), restoredProposal.proposalHash());
+    }
+
+    @Test
+    void editableRangeMustBeContiguousAndHaveAtMostTwoContextBlocksPerSide() {
+        RewriteWorkerInput valid = input();
+        List<RewriteSourceBlock> interrupted = List.of(
+                block("First target sentence.", true),
+                block("Read-only sentence.", false),
+                block("Second target sentence.", true)
+        );
+        assertThrows(IllegalArgumentException.class, () -> withBlocks(
+                valid, interrupted, new RewriteConstraints(
+                        1, 100, List.of("Use a steadier rhythm.")
+                )
+        ));
+
+        List<RewriteSourceBlock> excessiveContext = new ArrayList<>();
+        excessiveContext.add(block("First context sentence.", false));
+        excessiveContext.add(block("Second context sentence.", false));
+        excessiveContext.add(block("Third context sentence.", false));
+        excessiveContext.add(block("Target sentence.", true));
+        assertThrows(IllegalArgumentException.class, () -> withBlocks(
+                valid, excessiveContext, new RewriteConstraints(
+                        1, 100, List.of("Use a steadier rhythm.")
+                )
+        ));
+    }
+
+    @Test
+    void strictCanonicalReadersRejectUnknownFieldsAndMutatedBindings() {

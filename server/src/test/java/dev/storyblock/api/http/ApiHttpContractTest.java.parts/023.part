@@ -1,0 +1,54 @@
+        StyleCalibrationProfile calibration = new StyleCalibrationProfile(
+                dev.storyblock.style.StyleModule.CALIBRATION_SCHEMA_VERSION,
+                features.sourceHash(),
+                features.contract().contractHash(),
+                windows.configurationHash(),
+                List.of(new StyleStratumCalibration(
+                        StyleStratum.narration(),
+                        30,
+                        StyleFeatureChannel.requiredChannels().stream()
+                                .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                                .map(channel -> StyleChannelCalibration.fromDistances(
+                                        channel, referenceDistances
+                                )).toList()
+                ))
+        );
+        StyleProfileVersionContent versionContent = new StyleProfileVersionContent(
+                scope,
+                List.of(new StyleCorpusSource(
+                        "generated-http-corpus",
+                        features.sourceHash(),
+                        StyleCorpusSourceKind.GENERATED,
+                        "HTTP integration fixture",
+                        "test-only",
+                        "test-owner"
+                )),
+                features,
+                windows,
+                calibration.canonicalValue()
+        );
+        MvcResult versionResult = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions", profileId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-version")
+                        .header(HttpHeaders.IF_MATCH, profileEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(versionContent.canonicalValue())))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(jsonPath("$.state").value("draft"))
+                .andExpect(jsonPath("$.can_gate_rewrites").value(false))
+                .andReturn();
+        Map<String, Object> versionView = object(versionResult);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> storedVersion = (Map<String, Object>)
+                versionView.get("profile_version");
+        String versionId = stringField(storedVersion, "version_id");
+
+        MvcResult calibrating = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))

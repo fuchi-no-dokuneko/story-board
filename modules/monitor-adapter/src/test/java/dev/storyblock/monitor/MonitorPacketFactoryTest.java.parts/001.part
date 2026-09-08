@@ -1,0 +1,68 @@
+package dev.storyblock.monitor;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.contracts.NarrativeCanonicalMapper;
+import dev.storyblock.domain.BlockMetadata;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeChapter;
+import dev.storyblock.domain.NarrativeNovel;
+import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.OrderKey;
+import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.domain.SceneSeed;
+import dev.storyblock.domain.TransitionMode;
+import dev.storyblock.validator.EvidenceSpans;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+
+class MonitorPacketFactoryTest {
+    private static final String HASH = "sha256:" + "a".repeat(64);
+
+    @Test
+    void packetContainsOnlyTargetAndTwoNeighborsOnEachSide() {
+        RevisionManifest revision = revision(7);
+        List<NarrativeBlock> blocks = revision.liveBlocks();
+
+        MonitorPacket packet = new MonitorPacketFactory().create(
+                revision, HASH, blocks.get(3).id(), 2
+        );
+
+        assertEquals(
+                blocks.subList(1, 6).stream().map(NarrativeBlock::id).toList(),
+                packet.renderPacket().blocks().stream().map(block -> block.blockId()).toList()
+        );
+        assertEquals(5, packet.localInvariants().windowBlocks().size());
+        assertEquals(List.of(
+                MonitorTool.SUBMIT_FINDING,
+                MonitorTool.SUBMIT_PROPOSED_OPERATION
+        ), packet.allowedTools());
+        assertFalse(packet.canonicalValue().containsKey("raw_database"));
+        assertFalse(packet.canonicalValue().containsKey("global_wiki"));
+    }
+
+    @Test
+    void edgePacketIsBoundedAndRepeatedCreationIsByteIdentical() {
+        RevisionManifest revision = revision(7);
+        byte[] revisionBefore = NarrativeCanonicalMapper.toCanonical(revision).canonicalBytes();
+        MonitorPacketFactory factory = new MonitorPacketFactory();
+
+        MonitorPacket first = factory.create(
+                revision, HASH, revision.liveBlocks().getFirst().id(), 2
+        );
+        MonitorPacket second = factory.create(
+                revision, HASH, revision.liveBlocks().getFirst().id(), 2
+        );
+
+        assertEquals(3, first.renderPacket().blocks().size());
+        assertEquals(
+                first.renderPacket().resolvedMetadata().getLast().after(),

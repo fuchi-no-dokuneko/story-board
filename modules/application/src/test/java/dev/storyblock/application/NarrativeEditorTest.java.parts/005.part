@@ -1,0 +1,66 @@
+        BlockRangeGuard valid = BlockRangeGuard.capture(
+                scene, scene.blocks().getFirst().id(), scene.blocks().get(1).id()
+        );
+        BlockRangeGuard staleVersion = new BlockRangeGuard(
+                scene.id(),
+                List.of(
+                        new BlockVersionRef(
+                                valid.expectedBlocks().getFirst().blockId(),
+                                Ids.BlockVersionId.create()
+                        ),
+                        valid.expectedBlocks().get(1)
+                ),
+                valid.expectedPreviousBlockId(),
+                valid.expectedNextBlockId(),
+                valid.expectedRangeHash()
+        );
+
+        EditInvariantException versionFailure = assertThrows(
+                EditInvariantException.class,
+                () -> editorWithoutRestores().apply(
+                        base,
+                        new EditOperation.DeleteBlockRange(context(base, "stale-version"), staleVersion),
+                        Ids.RevisionId.create(),
+                        NEXT_REVISION_TIME
+                )
+        );
+        assertEquals(EditInvariantException.Code.BLOCK_VERSION_CONFLICT, versionFailure.code());
+
+        List<BlockVersionRef> nonAdjacentRefs = List.of(
+                BlockVersionRef.from(scene.blocks().getFirst()),
+                BlockVersionRef.from(scene.blocks().getLast())
+        );
+        BlockRangeGuard nonAdjacent = new BlockRangeGuard(
+                scene.id(),
+                nonAdjacentRefs,
+                null,
+                null,
+                BlockSequenceHash.ofReferences(nonAdjacentRefs)
+        );
+        EditInvariantException adjacencyFailure = assertThrows(
+                EditInvariantException.class,
+                () -> editorWithoutRestores().apply(
+                        base,
+                        new EditOperation.DeleteBlockRange(context(base, "non-adjacent"), nonAdjacent),
+                        Ids.RevisionId.create(),
+                        NEXT_REVISION_TIME
+                )
+        );
+        assertEquals(EditInvariantException.Code.INVALID_BLOCK_ADJACENCY, adjacencyFailure.code());
+
+        EditContext wrongHead = new EditContext(
+                Ids.OperationId.create(),
+                "wrong-head",
+                base.novel().id(),
+                base.id(),
+                "sha256:" + "0".repeat(64)
+        );
+        EditInvariantException headFailure = assertThrows(
+                EditInvariantException.class,
+                () -> editorWithoutRestores().apply(
+                        base,
+                        new EditOperation.DeleteBlockRange(wrongHead, valid),
+                        Ids.RevisionId.create(),
+                        NEXT_REVISION_TIME
+                )
+        );

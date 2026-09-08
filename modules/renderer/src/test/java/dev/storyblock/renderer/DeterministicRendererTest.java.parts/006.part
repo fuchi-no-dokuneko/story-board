@@ -1,0 +1,73 @@
+                                "mode", "explicit", "value", Map.of("id", "alley")
+                        ),
+                        "weather", Map.of("mode", "unknown"),
+                        "present_character_ids", List.of("char_kai")
+                )),
+                List.of(first, second),
+                Map.of()
+        );
+
+        NarrativeBlock third = new NarrativeBlock(
+                GOLDEN_BLOCK_THREE,
+                GOLDEN_VERSION_THREE,
+                OrderKey.initial(),
+                "Rain stops.",
+                new BlockMetadata(Map.of(
+                        "time", Map.of("mode", "inherited"),
+                        "weather", Map.of("mode", "inherited")
+                )),
+                Map.of()
+        );
+        NarrativeScene secondScene = new NarrativeScene(
+                GOLDEN_SCENE_TWO,
+                GOLDEN_CHAPTER,
+                OrderKey.rebalanced(1, 2),
+                "Roof",
+                TransitionMode.CUT,
+                new SceneSeed(Map.of(
+                        "time", Map.of("mode", "inherited"),
+                        "location", Map.of(
+                                "mode", "explicit", "value", Map.of("id", "roof")
+                        ),
+                        "weather", Map.of("mode", "not_applicable"),
+                        "present_character_ids", List.of("char_min")
+                )),
+                List.of(third),
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                GOLDEN_CHAPTER,
+                OrderKey.initial(),
+                "Arrival",
+                List.of(firstScene, secondScene),
+                Map.of()
+        );
+        return new RevisionManifest(
+                GOLDEN_REVISION,
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(GOLDEN_NOVEL, List.of(chapter), Map.of())
+        );
+    }
+
+    private static RevisionManifest withScene(
+            RevisionManifest revision,
+            NarrativeScene scene
+    ) {
+        NarrativeChapter original = revision.novel().chapters().getFirst();
+        NarrativeChapter chapter = new NarrativeChapter(
+                original.id(),
+                original.orderKey(),
+                original.title(),
+                List.of(scene),
+                original.extensions()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                revision.id(),
+                Instant.parse("2026-08-21T12:02:00Z"),
+                new NarrativeNovel(revision.novel().id(), List.of(chapter), revision.novel().extensions())
+        );
+    }
+
+    private static byte[] readFixture(String name) throws IOException {

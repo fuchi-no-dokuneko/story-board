@@ -1,0 +1,64 @@
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleLifecycleEvent",
+      "file": "dtos/StyleLifecycleEvent.schema.json",
+      "description": "Code-derived StoryBlock Style Lifecycle Event JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleMaskingLexicon",
+      "file": "dtos/StyleMaskingLexicon.schema.json",
+      "description": "Code-derived StoryBlock Style Masking Lexicon JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleProfile",
+      "file": "dtos/StyleProfile.schema.json",
+      "description": "Code-derived StoryBlock Style Profile JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleProfileRequest",
+      "file": "dtos/StyleProfileRequest.schema.json",
+      "description": "Code-derived StoryBlock Style Profile Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleProfileScope",
+      "file": "dtos/StyleProfileScope.schema.json",
+      "description": "Code-derived StoryBlock Style Profile Scope JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "modules/style/src/main/java/dev/storyblock/style"
+      ]
+    },
+    {
+      "name": "StyleProfileSelection",
+      "file": "dtos/StyleProfileSelection.schema.json",
+      "description": "Code-derived StoryBlock Style Profile Selection JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [

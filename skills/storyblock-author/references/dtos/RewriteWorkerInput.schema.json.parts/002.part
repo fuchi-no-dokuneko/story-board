@@ -1,0 +1,31 @@
+      "analyzer_contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+          "editable": true,
+          "text": "春風到了。",
+          "text_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "constraints": {
+        "max_changed_blocks": 1,
+        "max_output_graphemes": 1,
+        "style_directives": [
+          "example-1"
+        ]
+      },
+      "finding_ids": [
+        "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "profile_version_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "profile_version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
+      "proposal_id": "prp_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "schema_version": "example-1",
+      "window_configuration_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  ]
+}

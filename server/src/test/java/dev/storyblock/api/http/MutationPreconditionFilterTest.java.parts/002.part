@@ -1,0 +1,14 @@
+            public long getContentLengthLong() {
+                return -1;
+            }
+        };
+        request.setRequestURI("/v1/novels/nov_test/commits");
+        request.addHeader(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1");
+        request.addHeader(HttpHeaders.IF_MATCH, VALID_ETAG);
+        request.setContent(body);
+        request.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        request.setAttribute(ApiRequestMetadata.REQUEST_ID_ATTRIBUTE, "req_filter_test");
+        return request;
+    }
+
+}

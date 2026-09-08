@@ -42,23 +42,7 @@ public record StyleProfileVersionContent(
     calibrationStatistics = CanonicalValues.freezeMap(
         calibrationStatistics, "style_profile_version.calibration_statistics"
     );
-    if (!calibrationStatistics.isEmpty()) {
-      StyleCalibrationProfile calibration = StyleCalibrationProfile.fromCanonical(
-          calibrationStatistics
-      );
-      if (!calibration.targetCorpusHash().equals(featureSet.sourceHash())
-          || !calibration.contractHash().equals(
-              featureSet.contract().contractHash()
-          )
-          || !calibration.windowConfigurationHash().equals(
-              windowConfiguration.configurationHash()
-          )) {
-        throw new IllegalArgumentException(
-            "Style calibration profile does not match immutable version content"
-        );
-      }
-      calibrationStatistics = calibration.canonicalValue();
-    }
+    StyleProfileVersionContentValidation.validate(featureSet, windowConfiguration, calibrationStatistics);
   }
 
   public static StyleProfileVersionContent fromCanonical(Map<String, Object> value) {

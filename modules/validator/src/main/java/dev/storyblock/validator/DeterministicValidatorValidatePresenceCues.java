@@ -3,8 +3,8 @@ package dev.storyblock.validator;
 import dev.storyblock.domain.Ids;
 import java.util.List;
 import java.util.Map;
-import static dev.storyblock.validator.DeterministicValidator.EXIT_CUE;
-import static dev.storyblock.validator.DeterministicValidator.ENTER_CUE;
+import static dev.storyblock.validator.ValidationVocabulary.EXIT_CUE;
+import static dev.storyblock.validator.ValidationVocabulary.ENTER_CUE;
 
 final class DeterministicValidatorValidatePresenceCues {
     static void validatePresenceCues(

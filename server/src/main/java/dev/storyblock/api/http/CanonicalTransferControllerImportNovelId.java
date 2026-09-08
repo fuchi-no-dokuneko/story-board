@@ -12,7 +12,7 @@ final class CanonicalTransferControllerImportNovelId {
         String value = switch (format) {
             case REVISION -> CanonicalTransferControllerString.string(document, "novel_id", "import request.document");
             case PACKAGE -> CanonicalTransferControllerString.string(
-                    CanonicalTransferController.object(document.get("manifest"), "import request.document.manifest"),
+                    CanonicalRequestObject.object(document.get("manifest"), "import request.document.manifest"),
                     "novel_id",
                     "import request.document.manifest"
             );

@@ -1,0 +1,61 @@
+                            Ids.RevisionId.create(),
+                            Instant.parse("2026-08-21T14:01:00Z")
+                    )
+            );
+            assertEquals(409, IdempotencyConflictException.HTTP_STATUS);
+            assertEquals(2, store.revisionCount(genesis.novel().id()));
+            assertEquals(1, store.operationCount(genesis.novel().id()));
+        }
+    }
+
+    @Test
+    void successfulAndIdempotentCommitsWriteRedactedAudits() throws Exception {
+        Path path = temporaryDirectory.resolve("commit-audit.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        Instant issuedAt = Instant.parse("2026-08-21T12:00:00Z");
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            var issued = new AccessKeyService(store, new byte[32]).issue(
+                    new IssueAccessKeyCommand(
+                            genesis.novel().id(),
+                            "audit-actor",
+                            Set.of(AccessScope.NOVEL_COMMIT),
+                            issuedAt.plusSeconds(3600),
+                            "issue-audit-key",
+                            new AuditContext("req_issue_audit", "owner", null, issuedAt)
+                    )
+            );
+            EditOperation operation = RevisionStoreTestFixture.replace(
+                    genesis,
+                    "commit-audit-key",
+                    "Audit prose must remain outside event rows."
+            );
+            CommitService commits = new CommitService(store);
+
+            CommitResult first = commits.commit(
+                    operation,
+                    Ids.RevisionId.create(),
+                    issuedAt.plusSeconds(60),
+                    new AuditContext(
+                            "req_commit_first",
+                            issued.key().actorId(),
+                            issued.key().keyId(),
+                            issuedAt.plusSeconds(60)
+                    )
+            );
+            CommitResult retry = commits.commit(
+                    operation,
+                    Ids.RevisionId.create(),
+                    issuedAt.plusSeconds(120),
+                    new AuditContext(
+                            "req_commit_retry",
+                            issued.key().actorId(),
+                            issued.key().keyId(),
+                            issuedAt.plusSeconds(120)
+                    )
+            );
+
+            List<AuditEvent> commitEvents = store.listAuditEvents(genesis.novel().id())
+                    .stream()
+                    .filter(event -> event.action() == AuditAction.COMMIT)
+                    .toList();

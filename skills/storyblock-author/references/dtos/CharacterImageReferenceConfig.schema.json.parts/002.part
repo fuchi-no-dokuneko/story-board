@@ -1,0 +1,21 @@
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000002", "content_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色一的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000003", "content_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色一的四分之三參考圖。"}}
+          ]
+        },
+        {
+          "character_id": "character-two",
+          "name": "角色二",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {"label": "initial", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000004", "content_hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色二的初始參考圖。"}},
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000005", "content_hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色二的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000006", "content_hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色二的四分之三參考圖。"}}
+          ]
+        },
+        {
+          "character_id": "character-three",
+          "name": "角色三",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {"label": "initial", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000007", "content_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色三的初始參考圖。"}},
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000008", "content_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色三的正面參考圖。"}},

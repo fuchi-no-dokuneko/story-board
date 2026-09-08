@@ -5,7 +5,6 @@ import dev.storyblock.domain.Ids;
 import dev.storyblock.security.AuditContext;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public record StyleAnalysisJob(
@@ -34,37 +33,7 @@ public record StyleAnalysisJob(
   static final Pattern FAILURE = Pattern.compile("[a-z][a-z0-9._-]{1,63}");
 
   public StyleAnalysisJob {
-    Objects.requireNonNull(jobId, "jobId");
-    Objects.requireNonNull(analysisId, "analysisId");
-    Objects.requireNonNull(snapshot, "snapshot");
-    Objects.requireNonNull(status, "status");
-    if (attempt < 0 || maxAttempts < MIN_ATTEMPTS || maxAttempts > MAX_ATTEMPTS
-        || attempt > maxAttempts) {
-      throw new IllegalArgumentException("Style analysis attempt bounds are invalid");
-    }
-    if (idempotencyKey == null || idempotencyKey.isBlank()
-        || idempotencyKey.length() > 200) {
-      throw new IllegalArgumentException("Style analysis idempotency key is invalid");
-    }
-    StyleAnalysisJobRequireHash.requireHash(requestHash, "request");
-    Objects.requireNonNull(auditContext, "auditContext");
-    Objects.requireNonNull(retentionUntil, "retentionUntil");
-    Objects.requireNonNull(createdAt, "createdAt");
-    Objects.requireNonNull(updatedAt, "updatedAt");
-    if (!auditContext.occurredAt().equals(createdAt)
-        || !retentionUntil.isAfter(createdAt) || updatedAt.isBefore(createdAt)) {
-      throw new IllegalArgumentException("Style analysis timestamps are invalid");
-    }
-    StyleAnalysisJobValidateState.validateState(
-        status,
-        leaseOwner,
-        leaseUntil,
-        attempt,
-        resultArtifactId,
-        resultHash,
-        failureCode,
-        updatedAt
-    );
+    StyleAnalysisJobValidation.validate(jobId, analysisId, snapshot, status, leaseOwner, leaseUntil, attempt, maxAttempts, idempotencyKey, requestHash, resultArtifactId, resultHash, failureCode, auditContext, retentionUntil, createdAt, updatedAt);
   }
 
   public static StyleAnalysisJob queued(

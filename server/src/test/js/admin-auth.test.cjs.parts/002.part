@@ -1,0 +1,85 @@
+  const queryChildren = new Map();
+  return {
+    id,
+    hidden: false,
+    value: '',
+    textContent: '',
+    className: '',
+    disabled: false,
+    dataset: {},
+    attributes: new Map(),
+    classList: { toggle() {} },
+    addEventListener(type, listener) { listeners.set(type, listener); },
+    append(...items) { children.push(...items); },
+    replaceChildren(...items) { children.splice(0, children.length, ...items); },
+    setAttribute(name, value) { this.attributes.set(name, String(value)); },
+    querySelector(selector) {
+      if (!queryChildren.has(selector)) queryChildren.set(selector, fakeElement(selector));
+      return queryChildren.get(selector);
+    },
+    focus() { this.focused = true; },
+    listeners,
+    children,
+  };
+}
+
+function jsonResponse(status, body) {
+  return {
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: status === 200 ? 'OK' : 'Unauthorized',
+    async json() { return body; },
+    async text() { return JSON.stringify(body); },
+  };
+}
+
+async function settlePromises() {
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
+}
+
+test('the shared token authenticates library and console requests and can be cleared', async () => {
+  const elements = new Map();
+  const document = {
+    getElementById(id) {
+      if (!elements.has(id)) elements.set(id, fakeElement(id));
+      return elements.get(id);
+    },
+    createElement() { return fakeElement(); },
+    querySelectorAll() { return []; },
+  };
+  const requests = [];
+  const fetch = async (input, options = {}) => {
+    const url = String(input);
+    requests.push({ url, options });
+    if (url === '/actuator/health') return jsonResponse(200, { status: 'UP' });
+    if (url.includes('/v1/admin/novels')) {
+      if (options.headers?.Authorization === 'Bearer valid-operator-token') {
+        if (new URL(url).pathname.endsWith('/nov_test')) {
+          return jsonResponse(200, {
+            novel: {
+              novel_id: 'nov_test',
+              title: 'Authenticated novel',
+              language: 'en',
+              agent_write_registered: true,
+              han_character_count: 0,
+              chapter_count: 0,
+              scene_count: 0,
+              block_count: 0,
+              zombie_count: 0,
+              tnt_cannon_count: 0,
+              head_revision_id: 'rev_test',
+              updated_at: '2026-08-27T00:00:00Z',
+              head_hash: 'sha256:test',
+              han_text_sha256: 'sha256:test',
+              main_characters: [],
+            },
+            revision: { chapters: [] },
+          });
+        }
+        return jsonResponse(200, {
+          page: 0,
+          total_pages: 1,
+          total: 1,
+          items: [{
+            novel_id: 'nov_test',

@@ -1,0 +1,47 @@
+        List<StyleAnalysisBlock> conversation = samples(
+                scene, List.of("speaker_a", "speaker_b", "speaker_a")
+        );
+        StyleWindowConfiguration configuration = StyleWindowConfiguration.defaults();
+
+        StyleWindow specific = new StyleWindowPlanner().plan(
+                oneSpeaker, configuration
+        ).getFirst();
+        StyleWindow global = new StyleWindowPlanner().plan(
+                conversation, configuration
+        ).getFirst();
+
+        assertTrue(specific.requestedStratum().speakerSpecific());
+        assertTrue("speaker_a".equals(specific.requestedStratum().speakerId()));
+        assertFalse(global.requestedStratum().speakerSpecific());
+        assertTrue(global.requestedStratum().equals(StyleStratum.dialogue()));
+    }
+
+    private static List<StyleAnalysisBlock> samples(
+            Ids.SceneId scene,
+            List<String> speakers
+    ) {
+        List<StyleAnalysisBlock> result = new ArrayList<>();
+        for (int index = 0; index < speakers.size(); index++) {
+            result.add(new StyleAnalysisBlock(
+                    scene,
+                    block(index, "他說了一句話。"),
+                    StyleStratumKind.DIALOGUE,
+                    speakers.get(index),
+                    "pov_a",
+                    "dialogue",
+                    null
+            ));
+        }
+        return result;
+    }
+
+    private static NarrativeBlock block(int index, String text) {
+        return NarrativeBlock.create(
+                Ids.BlockId.create(),
+                OrderKey.rebalanced(index, 100),
+                text,
+                BlockMetadata.empty(),
+                Map.of()
+        );
+    }
+}

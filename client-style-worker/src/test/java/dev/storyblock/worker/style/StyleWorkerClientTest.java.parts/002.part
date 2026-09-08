@@ -1,0 +1,53 @@
+        AtomicReference<Map<String, Object>> submittedResult = new AtomicReference<>();
+        AtomicReference<String> claimKey = new AtomicReference<>();
+        AtomicInteger claimRequests = new AtomicInteger();
+        HttpServer server = HttpServer.create(new InetSocketAddress(
+                InetAddress.getByName("127.0.0.1"), 0
+        ), 0);
+        server.createContext("/v1/internal/jobs/claims", exchange -> handle(
+                exchange,
+                handlerFailure,
+                () -> {
+                    assertEquals("POST", exchange.getRequestMethod());
+                    assertEquals(
+                            "Bearer " + TOKEN,
+                            exchange.getRequestHeaders().getFirst("Authorization")
+                    );
+                    assertEquals("*", exchange.getRequestHeaders().getFirst("If-Match"));
+                    Map<String, Object> claim = object(
+                            exchange.getRequestBody().readAllBytes()
+                    );
+                    assertEquals(lease.snapshot().novelId().value(), claim.get("novel_id"));
+                    assertEquals(lease.leaseOwner(), claim.get("lease_owner"));
+                    String currentKey = exchange.getRequestHeaders().getFirst(
+                            "Idempotency-Key"
+                    );
+                    if (claimKey.get() == null) {
+                        claimKey.set(currentKey);
+                    }
+                    assertEquals(claimKey.get(), currentKey);
+                    if (claimRequests.incrementAndGet() == 1) {
+                        respond(exchange, 503, CanonicalJson.bytes(Map.of(
+                                "code", "DEPENDENCY_UNAVAILABLE"
+                        )));
+                        return;
+                    }
+                    exchange.getResponseHeaders().add(
+                            "ETag", quote(lease.claimedStatusHash())
+                    );
+                    respond(exchange, 200, CanonicalJson.bytes(lease.canonicalValue()));
+                }
+        ));
+        server.createContext(
+                "/v1/internal/jobs/" + lease.jobId().value() + "/results",
+                exchange -> handle(exchange, handlerFailure, () -> {
+                    assertEquals(
+                            quote(lease.claimedStatusHash()),
+                            exchange.getRequestHeaders().getFirst("If-Match")
+                    );
+                    Map<String, Object> body = object(
+                            exchange.getRequestBody().readAllBytes()
+                    );
+                    submittedResult.set(body);
+                    StyleAnalysisCompletionCommand completion = completion(lease, body);
+                    respond(exchange, 200, CanonicalJson.bytes(Map.of(

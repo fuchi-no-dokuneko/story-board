@@ -1,0 +1,88 @@
+          pattern: '^rev_[0-9a-f-]{36}$'
+      additionalProperties: false
+    StyleAnalysisBlock:
+      type: object
+      required: [block, intentional_style_shift_reason, narrative_mode, pov, scene_id, speaker_id, stratum_kind]
+      properties:
+        block:
+          $ref: "#/components/schemas/StyleAnalysisNarrativeBlock"
+        intentional_style_shift_reason:
+          type: [string, "null"]
+          maxLength: 500
+        narrative_mode:
+          type: string
+          minLength: 1
+          maxLength: 128
+        pov:
+          type: string
+          minLength: 1
+          maxLength: 128
+        scene_id:
+          type: string
+          pattern: '^scn_[0-9a-f-]{36}$'
+        speaker_id:
+          type: [string, "null"]
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        stratum_kind:
+          type: string
+          enum: [narration, dialogue]
+      additionalProperties: false
+    StyleAnalysisNarrativeBlock:
+      type: object
+      required: [block_version_id, extensions, id, metadata, order_key, text]
+      properties:
+        block_version_id:
+          type: string
+          pattern: '^blv_[0-9a-f-]{36}$'
+        extensions:
+          type: object
+          additionalProperties: true
+        id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        metadata:
+          type: object
+          additionalProperties: true
+        order_key:
+          type: string
+          pattern: '^[0-9a-f]{32}$'
+        text:
+          type: string
+          minLength: 1
+      additionalProperties: false
+    WorkerResultRequest:
+      type: object
+      required: [lease_owner, attempt, snapshot_hash, profile_version_hash, analyzer_contract_hash, window_configuration_hash, summary, windows, trace, completed_at]
+      properties:
+        lease_owner:
+          type: string
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        attempt:
+          type: integer
+          minimum: 1
+          maximum: 20
+        snapshot_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        profile_version_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        analyzer_contract_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        window_configuration_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        summary:
+          $ref: "#/components/schemas/StyleAnalysisSummary"
+        windows:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/StyleAnalysisWindowFinding"
+        trace:
+          oneOf:
+            - $ref: "#/components/schemas/CompressedStyleAnalysisTrace"
+            - type: object
+              not:
+                required: [codec, content_base64, content_hash, uncompressed_bytes]

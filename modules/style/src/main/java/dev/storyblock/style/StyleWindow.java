@@ -31,32 +31,7 @@ public record StyleWindow(
     pov = StyleWindowRequireLabel.requireLabel(pov, "pov");
     narrativeMode = StyleWindowRequireLabel.requireLabel(narrativeMode, "narrativeMode");
     blockIds = List.copyOf(blockIds);
-    if (blockIds.isEmpty() || new HashSet<>(blockIds).size() != blockIds.size()) {
-      throw new IllegalArgumentException("Style window block IDs must be nonempty and unique");
-    }
-    if (graphemeCount < 1) {
-      throw new IllegalArgumentException("Style window grapheme count must be positive");
-    }
-    if (intentionalStyleShiftReason != null
-        && (intentionalStyleShiftReason.isBlank()
-        || intentionalStyleShiftReason.length() > 500)) {
-      throw new IllegalArgumentException("Style window shift reason is invalid");
-    }
-    String calculated = StyleWindowCalculateId.calculateId(
-        kind,
-        segment,
-        requestedStratum,
-        pov,
-        narrativeMode,
-        blockIds,
-        graphemeCount,
-        fullSized,
-        intentionalStyleShiftReason
-    );
-    if (windowId == null || !HASH.matcher(windowId).matches()
-        || !windowId.equals(calculated)) {
-      throw new IllegalArgumentException("Style window ID does not match its content");
-    }
+    StyleWindowValidation.validate(windowId, kind, segment, requestedStratum, pov, narrativeMode, blockIds, graphemeCount, fullSized, intentionalStyleShiftReason);
   }
 
   public static StyleWindow create(

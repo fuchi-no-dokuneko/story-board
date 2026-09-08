@@ -1,0 +1,57 @@
+      "file": "dtos/MergeBlocksOperation.schema.json",
+      "description": "Code-derived StoryBlock Merge Blocks Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "MergeBlocksPayload",
+      "file": "dtos/MergeBlocksPayload.schema.json",
+      "description": "Code-derived StoryBlock Merge Blocks Payload JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "MonitorBlockFingerprint",
+      "file": "dtos/MonitorBlockFingerprint.schema.json",
+      "description": "Code-derived StoryBlock Monitor Block Fingerprint JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorEvidence",
+      "file": "dtos/MonitorEvidence.schema.json",
+      "description": "Code-derived StoryBlock Monitor Evidence JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorEvidenceList",
+      "file": "dtos/MonitorEvidenceList.schema.json",
+      "description": "Code-derived StoryBlock Monitor Evidence List JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorFindingOutput",

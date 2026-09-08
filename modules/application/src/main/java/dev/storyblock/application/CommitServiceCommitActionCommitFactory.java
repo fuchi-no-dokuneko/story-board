@@ -10,19 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 final class CommitServiceCommitActionCommitFactory {
-  static CommitResult commit(CommitService self, EditOperation requestedOperation, Ids.RevisionId candidateRevisionId, Instant committedAt)  {
-    Objects.requireNonNull(requestedOperation, "requestedOperation");
-    return self.commit(
-        requestedOperation,
-        candidateRevisionId,
-        committedAt,
-        AuditContext.system(
-            "req_internal_" + requestedOperation.context().operationId().value(),
-            committedAt
-        )
-    );
-  }
-
   static CommitResult commit(CommitService self, EditOperation requestedOperation, Ids.RevisionId candidateRevisionId, Instant committedAt, AuditContext auditContext)  {
     Objects.requireNonNull(requestedOperation, "requestedOperation");
     Objects.requireNonNull(candidateRevisionId, "candidateRevisionId");

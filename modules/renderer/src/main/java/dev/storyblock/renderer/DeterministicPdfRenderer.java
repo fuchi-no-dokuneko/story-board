@@ -1,29 +1,8 @@
 package dev.storyblock.renderer;
 
 import dev.storyblock.domain.RevisionManifest;
-import dev.storyblock.domain.UnicodeText;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
-import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.stream.ImageOutputStream;
 
 /** Deterministically lays out a revision and packages rasterized A4 pages as PDF. */
 public final class DeterministicPdfRenderer {

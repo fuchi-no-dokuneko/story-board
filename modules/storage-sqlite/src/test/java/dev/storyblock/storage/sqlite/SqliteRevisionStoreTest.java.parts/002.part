@@ -1,0 +1,58 @@
+                            RevisionStoreTestFixture.replace(
+                                    genesis, "stale", "第三句。"
+                            ),
+                            Ids.RevisionId.create(),
+                            Instant.parse("2026-08-21T12:02:00Z")
+                    )
+            );
+
+            assertEquals(412, StaleHeadException.HTTP_STATUS);
+            assertEquals(head, failure.actual());
+            assertEquals(head, store.getHead(genesis.novel().id()));
+            assertEquals(revisions, store.revisionCount(genesis.novel().id()));
+            assertEquals(operations, store.operationCount(genesis.novel().id()));
+        }
+    }
+
+    @Test
+    void identicalRetryReturnsPriorResultAndChangedPayloadConflicts() throws Exception {
+        Path path = temporaryDirectory.resolve("idempotency.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        EditOperation operation = RevisionStoreTestFixture.replace(
+                genesis, "stable-key", "第二句。"
+        );
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            CommitService commits = new CommitService(store);
+            CommitResult first = commits.commit(
+                    operation,
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:01:00Z")
+            );
+            CommitResult retry = commits.commit(
+                    operation,
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T13:01:00Z")
+            );
+
+            assertFalse(first.idempotentReplay());
+            assertTrue(retry.idempotentReplay());
+            assertEquals(first.revision(), retry.revision());
+            assertEquals(first.operationId(), retry.operationId());
+            assertEquals(2, store.revisionCount(genesis.novel().id()));
+            assertEquals(1, store.operationCount(genesis.novel().id()));
+
+            EditOperation changed = new EditOperation.ReplaceBlockRange(
+                    operation.context(),
+                    ((EditOperation.ReplaceBlockRange) operation).range(),
+                    List.of(new dev.storyblock.domain.BlockDraft(
+                            genesis.liveBlocks().getFirst().id(),
+                            "不同內容。",
+                            genesis.liveBlocks().getFirst().metadata(),
+                            genesis.liveBlocks().getFirst().extensions()
+                    ))
+            );
+            assertThrows(
+                    IdempotencyConflictException.class,
+                    () -> commits.commit(
+                            changed,

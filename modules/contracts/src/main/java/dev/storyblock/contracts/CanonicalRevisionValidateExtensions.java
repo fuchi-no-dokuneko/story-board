@@ -1,7 +1,7 @@
 package dev.storyblock.contracts;
 
 import java.util.Map;
-import static dev.storyblock.contracts.CanonicalRevision.EXTENSION_NAME;
+import static dev.storyblock.contracts.CanonicalRevisionFields.EXTENSION_NAME;
 
 final class CanonicalRevisionValidateExtensions {
     static void validateExtensions(Object value, String path) {

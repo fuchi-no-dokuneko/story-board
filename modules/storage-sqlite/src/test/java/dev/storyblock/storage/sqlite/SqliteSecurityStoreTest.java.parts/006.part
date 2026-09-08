@@ -1,0 +1,9 @@
+                if (haystack[offset + index] != needle[index]) {
+                    continue outer;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+}
