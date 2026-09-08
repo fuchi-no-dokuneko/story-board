@@ -1,9 +1,15 @@
+    And I set the browser network offline
+    And I click CSS ".quick-requests button[data-path='/actuator/health']"
+    Then CSS "#response-status" eventually contains text "Network error"
+    When I restore the browser network
     And I click CSS ".quick-requests button[data-path='/actuator/health']"
     Then CSS "#response-status" eventually contains text "200"
     And CSS "#response" eventually contains text "\"status\": \"UP\""
 
   Scenario: Keep the reader usable on a narrow mobile viewport
     Given I open the web application at path "/"
+    When I replace CSS "#catalog-search" with environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+    And I select the registered acceptance novel
     Then CSS "#reader-content" is visible
     When I resize the browser to 390 by 844
     Then CSS ".catalog-pane" is visible

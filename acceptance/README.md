@@ -1,53 +1,15 @@
-# StoryBlock GUI acceptance
+# Browser acceptance / 瀏覽器驗收 / 浏览器验收
 
-Three local Cucumber pipelines cover the read-only novel library:
+[Run workflows / 執行流程 / 执行流程](workflows.md)
 
-- `run-uat.sh` is the daily pass/fail checklist for a human or AI browser agent.
-- `run-demo-en.sh` records the English product introduction.
-- `run-demo-yue.sh` records the Traditional Chinese Cantonese introduction.
+EN: Browser UAT follows installation and backend verification. Use an isolated database and a registered fixture. The dependency-free browser runner communicates with real Chromium over its private debugging pipe; it does not open an HTTP control service. Screenshots and results stay in the repository.
 
-## Prerequisites and execution
+繁體中文：安裝與後端驗證後執行瀏覽器驗收，使用隔離資料庫與已登錄範例。無套件依賴的瀏覽器測試器透過私有除錯管道操作真正 Chromium，不開啟 HTTP 控制服務。截圖與結果留在儲存庫。
 
-The complete UAT requires the trusted-LAN StoryBlock API, its independently
-registered E2E novel, Chromium, and ChromeDriver. A dry run validates all
-Gherkin and step bindings without opening a browser.
+简体中文：安装与后端验证后执行浏览器验收，使用隔离数据库与已登记示例。无软件包依赖的浏览器测试器通过私有调试管道操作真正 Chromium，不开启 HTTP 控制服务。截图与结果留在仓库。
 
-```bash
-sh acceptance/bootstrap.sh
-acceptance/run-uat.sh --dry-run
+EN: The existing Cucumber daily checklist and English/Cantonese demo scripts remain available. Install their fixed dependencies with `./acceptance/install-local.sh`; app-only packages and cache stay in `.local-tool-app`. A dry run checks bindings and is not a successful GUI milestone. Full results belong in the shared monthly milestone log only after a real browser run.
 
-export STORYBLOCK_UAT_NOVEL_ID='nov_<uuidv7>'
-export STORYBLOCK_UAT_NOVEL_TITLE='registered title'
-export STORYBLOCK_UAT_CHARACTER='one main character'
-export STORYBLOCK_UAT_TEXT_MARKER='persisted story excerpt'
-acceptance/run-uat.sh --headless --base-url https://127.0.0.1:8443/
-```
+繁體中文：既有 Cucumber 每日清單及英文／粵語示範腳本仍可使用。以 `./acceptance/install-local.sh` 安裝固定依賴，專用套件與快取留在 `.local-tool-app`。乾跑僅檢查步驟綁定，不算 GUI 成功里程碑。完成真正瀏覽器執行後，才將完整結果記入共用月份里程碑。
 
-Do not point UAT at irreplaceable data. The suite never mutates a novel; the E2E
-authoring agent registers its fixture beforehand through the tracked skill.
-
-Every real run writes `checklist.json`, `sonar-test-execution.xml`, `summary.md`,
-raw Cucumber JSON, and one screenshot per scenario under
-`build/reports/acceptance/<suite>/`. Dry runs are binding checks, not product
-passes. Use `--sonar` only for a completed UAT run; demo reports are recording
-evidence and must not count as acceptance coverage.
-
-## Recording hooks
-
-Set executable wrapper paths in `DEMO_TTS_COMMAND`,
-`DEMO_RECORD_START_COMMAND`, and `DEMO_RECORD_STOP_COMMAND`. The TTS wrapper
-receives `DEMO_TTS_LANGUAGE`, `DEMO_TTS_TEXT`, and `DEMO_TTS_MIN_SECONDS`.
-Without wrappers, narration is printed and still waits for its declared timing.
-
-## Feature coverage matrix
-
-| Visible feature or transition | Daily UAT | English demo | Cantonese demo |
-| --- | --- | --- | --- |
-| Shared memory-only owner-token control | Credential-control scenario | Not recorded | 不錄影 |
-| Online and degraded states | Header-state scenarios | Product opening | 產品開場 |
-| Persisted 10,000-Han story and hashes | Exact reader checks | Main flow | 主要流程 |
-| Five characters and aggregate counts | Exact reader checks | Main flow | 主要流程 |
-| Catalog search and chapter navigation | Search and navigation | Reader flow | 閱讀流程 |
-| GET-only health and OpenAPI diagnostics | Diagnostics | Contract flow | 合約流程 |
-| Browser network failure and recovery | Offline then online | Not recorded | 不錄影 |
-| Responsive narrow reader | Mobile viewport | Not recorded | 不錄影 |
+简体中文：既有 Cucumber 每日清单及英文／粤语示范脚本仍可使用。以 `./acceptance/install-local.sh` 安装固定依赖，专用软件包与缓存留在 `.local-tool-app`。干跑仅检查步骤绑定，不算 GUI 成功里程碑。完成真正浏览器执行后，才将完整结果记入共享月份里程碑。

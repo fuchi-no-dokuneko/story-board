@@ -1,0 +1,23 @@
+---02:35---瀏覽器完整驗收
+milestone-type : success-test
+Time used (min) : 1
+真實 Chromium 以私有除錯管道完成 9 情境、80 步驟；耗時 11.309 秒。
+獨立登錄一萬漢字稿件；桌面、手機、搜尋、章節與診斷介面通過。
+降級健康回應使用瀏覽器模擬，斷線使用網路模擬；其餘連接真實 HTTPS 與 SQLite。
+證據：build/reports/acceptance/uat/checklist.json 與同目錄截圖。
+---
+---02:47---最終安裝瀏覽器驗收
+milestone-type : success-test
+Time used (min) : 1
+最終安裝版以真實 Chromium 通過 9 情境、85 步驟；耗時 11.145 秒。
+書庫包含其他作品時仍能選取指定驗收稿，搜尋與章節導覽通過。
+健康降級及離線網路使用瀏覽器模擬；應用、TLS、資料庫皆為真實執行。
+證據：.local/refactor-evidence/browser-installed-final.log 及 build/reports/acceptance/uat。
+---
+---02:47---驗收依賴安裝完成
+milestone-type : success-dep
+Dep version: @cucumber/cucumber 12.9.0
+Dep release date : 2026-05-15
+固定套件已安裝於 acceptance/.local-tool-app；使用真正 Chromium 的私有管道完成驗收。
+版本發布時間來源：https://registry.npmjs.org/@cucumber%2Fcucumber 的 time 欄位。
+---

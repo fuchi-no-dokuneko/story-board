@@ -16,3 +16,8 @@ Current status: 此電腦沒有 Docker，使用者命名空間探測回報 Opera
 Issues: 未執行管理員安裝腳本，也未變更系統權限；容器僅完成架構與靜態檢查。
 affect scope: 容器實際建置／啟動未驗證，已列入 todo.txt；本機安裝已驗證。
 ---
+---02:45---紀錄時間校正
+category: decision_make
+Current status: 本檔前三筆與里程碑後兩筆的 02:47 為手動誤記；實際寫入時間為 02:42（UTC+8）。
+affect scope: 僅校正紀錄時間；測試結果與既有追加記錄均保留。
+---

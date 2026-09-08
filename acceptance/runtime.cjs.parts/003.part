@@ -1,24 +1,3 @@
-async function setNetworkOffline(world, offline) {
-  const driver = await ensureBrowser(world);
-  if (offline) {
-    await driver.setNetworkConditions({ offline: true, latency: 0, download_throughput: 0, upload_throughput: 0 });
-  } else {
-    await driver.deleteNetworkConditions();
-  }
-}
-
-async function setBlockedUrls(world, urls) {
-  const driver = await ensureBrowser(world);
-  await driver.sendDevToolsCommand("Network.enable", {});
-  await driver.sendDevToolsCommand("Network.setBlockedURLs", { urls });
-}
-
-async function setViewport(world, width, height) {
-  await (await ensureBrowser(world)).manage().window().setRect({ width, height });
-  await sleep(300);
-}
-
-async function mockInitialHealth(world, mode) {
   if (!["degraded", "unavailable"].includes(mode)) throw new Error(`Unknown health mode: ${mode}`);
   const driver = await ensureBrowser(world);
   const source = mode === "degraded"
@@ -66,3 +45,23 @@ async function deselectAllMonitorKeys(world) {
   const driver = await ensureBrowser(world);
   await driver.executeScript(`
     for (const box of document.querySelectorAll('.keys-checkboxes input[type="checkbox"]')) {
+      if (box.checked) box.click();
+    }
+  `);
+}
+
+async function rememberResourceCount(world, fragment, name) {
+  const driver = await ensureBrowser(world);
+  const count = await driver.executeScript(
+    "return performance.getEntriesByType('resource').filter((entry) => entry.name.includes(arguments[0])).length;",
+    fragment,
+  );
+  world.memory.set(name, count);
+}
+
+async function waitResourceCountIncrease(world, fragment, name) {
+  if (!world.memory.has(name)) throw new Error(`No remembered value named ${name}`);
+  const before = world.memory.get(name);
+  const driver = await ensureBrowser(world);
+  await driver.wait(async () => {
+    const count = await driver.executeScript(

@@ -1,22 +1,19 @@
-modules/domain: no mocks; typed identities, Unicode boundaries, block invariants, and edit contracts tested.
-modules/contracts: no mocks; canonical serialization, hashes, packages, revisions, and operation mappings tested.
-modules/application: in-memory fixtures and direct Unicode tests; editing, preview, rendering, replay, commits, and Han code-point digest tested.
-modules/renderer: no mocks; deterministic text, offsets, resolved metadata, presence, and scene boundaries tested.
-modules/validator: no mocks; all stable violation codes and evidence contracts tested from golden cases.
-modules/detector: no mocks; adjacent metadata finding codes, severities, evidence, and scene resets tested.
-modules/style: no mocks; extraction, distances, calibration, windows, anomaly policy, Chinese, and Cantonese tested.
-modules/security: tested through SQLite and HTTP integration; credential hashing, scope, isolation, revocation, and audit tested.
-modules/storage-api: implemented by SQLite contract tests; no independent mocks.
-modules/storage-sqlite: real temporary SQLite files; migrations, WAL, CAS, replay, jobs, artifacts, and rollback tested.
-modules/monitor-adapter: no mocks; immutable packets, output contracts, and proposal separation tested.
-modules/rewrite: fake model transport; proposal parsing, normalization, provenance, and limits tested.
-modules/rewrite-policy: tested through API and SQLite integration; anomaly, preservation, cooldown, and stale gates tested.
-server: real Spring MockMvc and temporary SQLite; routes, auth, trusted-LAN registration, catalog reads, replay, OpenAPI, and isolation tested.
-client-style-worker: fake HTTP client; claims, result submission, retries, limits, and credential redaction tested.
-client-llm-worker: fake model transport; sandbox boundary, response limits, prompt isolation, and output tested.
-client-cli: temporary SQLite; replay, head hashes, render hashes, usage, and failure reporting tested.
-tests/architecture-tests: no mocks; domain dependency and secure deployment topology constraints tested.
-acceptance/runtime.cjs: no mocks; Chromium interaction, IPv4 resolution, recording hooks, screenshots, and browser recovery infrastructure tested by dry binding and GUI UAT.
-acceptance/run.mjs: Cucumber is external; suite selection, dry binding, report orchestration, and optional Sonar scanner invocation tested.
-acceptance/report.mjs: Cucumber JSON fixture is external; checklist, summary, and Sonar generic execution serialization tested by acceptance runs.
-plugin: injected HTTPS transport plus live E2E; endpoint catalog, DTO examples, standalone CLI, problem statuses, authoring, and persistence verification tested.
+ADR-311 coverage inventory / 覆蓋清單
+Java: 182 tests passed; 19 reactor modules. Java：182 項通過，19 個建置模組。
+Domain/contracts: real objects, codecs and property tests; no mocks. 領域／契約：實物、編碼及性質測試，無替身。
+Renderer/validator/detector: real implementations and golden fixtures. 渲染／驗證／偵測：真實實作與黃金範例。
+Monitor/style/rewrite: real planners, analysis, contracts and policy fixtures. 監控／風格／改寫：真實規劃、分析、契約與策略範例。
+Application: editor, preview and canonical package validation; fixed clock where needed. 應用：編輯、預覽及封裝驗證，部分使用固定時鐘。
+Storage API/security: exercised through SQLite and Spring integration. 儲存介面／安全：經 SQLite 與 Spring 整合驗證。
+SQLite: real JDBC databases, concurrent writers and subprocess crash tests; no database mock. SQLite：真實資料庫、併發及程序崩潰，無資料庫替身。
+HTTP: real Spring controllers, advice and SQLite; MockMvc simulates servlet transport. HTTP：真實 Spring 與 SQLite，MockMvc 模擬 Servlet 傳輸。
+Proposal read boundary: real controller and principal; RewriteGateService lookup mocked. 提案讀取界線：真實控制器與身分，服務查詢使用替身。
+Workers: real Java HTTPS clients and local self-signed fixture servers; model/API responses simulated. 工作程式：真實 HTTPS 客戶端，模型／API 回應由本機伺服器模擬。
+CLI: actual command execution, SQLite and qualification fixtures. CLI：實際命令、SQLite 與驗證範例。
+Architecture: module boundaries and deployment/installer source assertions. 架構：模組界線、部署與安裝器來源檢查。
+Plugin: 173 Node tests; validation and standalone assembly real, HTTP transport injected in unit tests. 作者工具：173 項；驗證及獨立組合為真實執行，單元 HTTP 使用替身。
+Browser assets: 4 Node tests with DOM/storage fixtures. 瀏覽器資源：4 項 Node 測試，使用 DOM／儲存範例。
+GUI UAT: 9 scenarios/85 steps, real Chromium/CDP, HTTPS and SQLite; degraded health and offline network simulated. GUI：9 情境／85 步驟，健康降級及斷線為模擬。
+Live authoring/transfer: real HTTPS, image upload, PDF and separate SQLite databases; no mocks. 即時撰寫／轉移：真實 HTTPS、圖片、PDF 與隔離資料庫，無替身。
+Lifecycle/backup: real installed JVM, port conflicts, PID checks, SQLite, encryption and restore. 生命週期／備份：實際 JVM、連接埠、PID、加密與還原。
+Containers: static checks only; Docker absent and user namespace denied. 容器：僅靜態檢查；缺少 Docker，命名空間權限遭拒。

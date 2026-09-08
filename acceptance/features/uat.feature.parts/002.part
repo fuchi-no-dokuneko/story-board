@@ -4,11 +4,14 @@
   Scenario: Search the catalog by a main-character name
     Given I open the web application at path "/"
     When I replace CSS "#catalog-search" with environment variable "STORYBLOCK_UAT_CHARACTER"
-    Then exactly 1 elements match CSS ".novel-item"
-    And CSS ".novel-item" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+    Then at least 1 elements match CSS ".novel-item"
+    When I select the registered acceptance novel
+    Then CSS "#reader-title" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
 
   Scenario: Navigate between persisted chapters
     Given I open the web application at path "/"
+    When I replace CSS "#catalog-search" with environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+    And I select the registered acceptance novel
     Then CSS "#reader-content" is visible
     And JavaScript expression "document.getElementById('reader-empty').offsetParent === null && document.getElementById('reader-loading').offsetParent === null" returns true
     And at least 2 elements match CSS "#chapter-nav .chapter-link"
@@ -39,7 +42,3 @@
     Given I open the web application at path "/"
     Then CSS "#status-text" eventually contains text "Service online"
     When I click CSS "#console-tab"
-    And I set the browser network offline
-    And I click CSS ".quick-requests button[data-path='/actuator/health']"
-    Then CSS "#response-status" eventually contains text "Network error"
-    When I restore the browser network

@@ -25,3 +25,4 @@ EN: Open `https://127.0.0.1:8443/` and accept the local certificate warning. Ins
 - [Author tool / 作者工具 / 作者工具](plugin/README.md)
 - [Tests / 測試 / 测试](docs/operations/integration-security-tests.md)
 - [Coverage / 覆蓋範圍 / 覆盖范围](text-coverage.txt)
+- [Verification / 驗證紀錄 / 验证记录](docs/operations/verification.md)

@@ -7,17 +7,13 @@ writeFileSync(path.join(output, "sonar-test-execution.xml"), xml);
 
 const passedCount = checks.filter((check) => check.passed).length;
 const summary = [
-  `# ${project.repository} ${suite} report`,
+  `# ${project.repository}: ${suite}`,
   "",
-  `- Passed: **${checklist.passed}**`,
-  `- Scenarios: **${passedCount}/${checks.length} passed**`,
-  `- Commit: \`${checklist.commit}\``,
-  `- Started: ${checklist.startedAt}`,
-  `- Finished: ${checklist.finishedAt}`,
+  `EN: ${passedCount}/${checks.length} scenarios passed. Full results: [JSON](checklist.json).`,
   "",
-  "| Scenario | Passed | Duration |",
-  "| --- | --- | ---: |",
-  ...checks.map((check) => `| ${check.name.replaceAll("|", "\\|")} | ${check.passed} | ${check.durationMs} ms |`),
+  `繁體中文：${checks.length} 個情境中 ${passedCount} 個通過。完整結果：[JSON](checklist.json)。`,
+  "",
+  `简体中文：${checks.length} 个场景中 ${passedCount} 个通过。完整结果：[JSON](checklist.json)。`,
   "",
 ].join("\n");
 writeFileSync(path.join(output, "summary.md"), summary);

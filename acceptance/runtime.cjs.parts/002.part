@@ -1,20 +1,3 @@
-  const element = await driver.wait(until.elementLocated(By.css(selector)), timeoutMs(), `CSS not found: ${selector}`);
-  if (visible) await driver.wait(until.elementIsVisible(element), timeoutMs(), `CSS not visible: ${selector}`);
-  return element;
-}
-
-async function clickCss(world, selector) {
-  const driver = await ensureBrowser(world);
-  const element = await cssElement(world, selector);
-  await driver.executeScript("arguments[0].scrollIntoView({block:'center'});", element);
-  await driver.wait(until.elementIsEnabled(element), timeoutMs());
-  await element.click();
-}
-
-async function replaceCss(world, selector, value) {
-  const driver = await ensureBrowser(world);
-  const element = await cssElement(world, selector);
-  await driver.executeScript(`
     const element = arguments[0];
     const value = String(arguments[1]);
     const prototype = element instanceof HTMLTextAreaElement
@@ -66,3 +49,24 @@ async function waitPath(world, suffix) {
   await driver.wait(async () => new URL(await driver.getCurrentUrl()).pathname.endsWith(suffix), timeoutMs(), `Path did not end with ${suffix}`);
 }
 
+async function setNetworkOffline(world, offline) {
+  const driver = await ensureBrowser(world);
+  if (offline) {
+    await driver.setNetworkConditions({ offline: true, latency: 0, download_throughput: 0, upload_throughput: 0 });
+  } else {
+    await driver.deleteNetworkConditions();
+  }
+}
+
+async function setBlockedUrls(world, urls) {
+  const driver = await ensureBrowser(world);
+  await driver.sendDevToolsCommand("Network.enable", {});
+  await driver.sendDevToolsCommand("Network.setBlockedURLs", { urls });
+}
+
+async function setViewport(world, width, height) {
+  await (await ensureBrowser(world)).manage().window().setRect({ width, height });
+  await sleep(300);
+}
+
+async function mockInitialHealth(world, mode) {
