@@ -1,8 +1,6 @@
 package dev.storyblock.api.http;
 
 import dev.storyblock.application.StyleProfileService;
-import dev.storyblock.domain.Ids;
-import dev.storyblock.style.StyleProfile;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.util.Map;
@@ -15,12 +13,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/v1/style-profiles")
 public final class StyleProfileController {
-  static final Set<String> PROFILE_FIELDS = Set.of(
-      "name", "scope", "provenance"
-  );
-  static final Set<String> TRANSITION_FIELDS = Set.of(
-      "target_state", "reason", "confirm_generated_corpus_promotion"
-  );
+  static final Set<String> PROFILE_FIELDS = Set.of("name", "scope", "provenance");
+  static final Set<String> TRANSITION_FIELDS =
+      Set.of("target_state", "reason", "confirm_generated_corpus_promotion");
 
   final StyleProfileService profiles;
   final Clock clock;
@@ -39,19 +34,6 @@ public final class StyleProfileController {
       HttpServletRequest servletRequest
   ) {
     return StyleProfileControllerCreateProfileAction.createProfile(this, requestBytes, ifMatch, idempotencyKey, authentication, servletRequest);
-  }
-
-  @GetMapping("/{profileId}")
-  ResponseEntity<Map<String, Object>> getProfile(
-      @PathVariable String profileId,
-      Authentication authentication
-  ) {
-    StyleProfile profile = profiles.getProfile(new Ids.StyleProfileId(profileId));
-    AccessPrincipalSupport.requireNovel(authentication, profile.scope().novelId());
-    return ResponseEntity.ok()
-        .eTag(profile.resourceHash())
-        .header(HttpHeaders.CACHE_CONTROL, "no-store")
-        .body(profile.canonicalValue());
   }
 
   @PostMapping("/{profileId}/versions")
@@ -87,5 +69,4 @@ public final class StyleProfileController {
   ) {
     return StyleProfileControllerTransitionAction.transition(this, profileId, versionId, requestBytes, ifMatch, idempotencyKey, authentication, servletRequest);
   }
-
 }

@@ -18,7 +18,7 @@ class DeploymentTopologyTest {
                 ROOT.resolve("scripts/container-entrypoint.sh")
         );
         String tlsGenerator = Files.readString(
-                ROOT.resolve("scripts/generate-self-signed-tls.sh")
+                ROOT.resolve("server/src/main/java/dev/storyblock/api/runtime/LocalTlsMaterial.java")
         );
 
         String api = section(compose, "\n  api:", "\n  style-worker:");

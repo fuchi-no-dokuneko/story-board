@@ -10,7 +10,7 @@ public final class EditOperationCanonicalMapper {
     public static Map<String, Object> toCanonical(EditOperation operation) {
         Map<String, Object> envelope = EditOperationCanonicalMapperContext.context(operation.context());
         envelope.put("type", operation.type().canonicalName());
-        envelope.put("payload", EditOperationCanonicalMapperPayload.payload(operation));
+        envelope.put("payload", EditPayload.payload(operation));
         return Map.copyOf(envelope);
     }
 

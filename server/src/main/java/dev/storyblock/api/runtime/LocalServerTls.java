@@ -9,9 +9,9 @@ final class LocalServerTls {
 
     static Ssl prepare() throws Exception {
         Path directory = LocalRuntime.directory("tls/private");
-        Path password = directory.resolve("keystore.password");
-        Path store = directory.resolve("storyblock.p12");
-        try (var channel = FileChannel.open(directory.resolve("generate.lock"),
+        Path password = LocalRuntime.contained(directory.resolve("keystore.password"));
+        Path store = LocalRuntime.contained(directory.resolve("storyblock.p12"));
+        try (var channel = FileChannel.open(LocalRuntime.contained(directory.resolve("generate.lock")),
                 StandardOpenOption.CREATE, StandardOpenOption.WRITE);
              var lock = channel.lock()) {
             LocalTlsMaterial.ensure(directory, password, store);

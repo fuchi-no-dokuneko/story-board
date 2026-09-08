@@ -9,6 +9,6 @@ final class StyleCalibrationEngineCalibrateAction {
     }
 
     static StyleStratumCalibration calibrate(StyleCalibrationEngine self, CalibrationGroup group)  {
-        return StyleCalibrationEngineCalibrateActionCalibrateFactory.calibrate(self, group);
+        return CalibrationStratum.calibrate(self, group);
     }
 }

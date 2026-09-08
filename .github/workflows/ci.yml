@@ -28,7 +28,7 @@ jobs:
           -Dtest='!InitialSloQualificationTest'
           -Dsurefire.failIfNoSpecifiedTests=false
       - name: Verify author skill
-        run: npm --prefix skills/storyblock-author test
+        run: npm --prefix plugin test
       - name: Verify admin UI authentication
         run: node --test server/src/test/js/*.test.cjs
       - name: Smoke-test self-signed HTTPS

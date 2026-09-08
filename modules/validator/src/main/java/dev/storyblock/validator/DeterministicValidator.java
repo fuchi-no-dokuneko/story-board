@@ -21,7 +21,7 @@ public final class DeterministicValidator {
       String actualHeadHash,
       EditOperation operation
   ) {
-    return DeterministicValidatorValidateOperationAction.validateOperation(this, base, actualHeadHash, operation);
+    return OperationValidation.validateOperation(this, base, actualHeadHash, operation);
   }
 
   public ValidationReport validateOperationCandidates(
@@ -29,7 +29,7 @@ public final class DeterministicValidator {
       String baseHash,
       EditOperation operation
   ) {
-    return DeterministicValidatorValidateOperationCandidatesAction.validateOperationCandidates(this, base, baseHash, operation);
+    return OperationCandidateValidation.validateOperationCandidates(this, base, baseHash, operation);
   }
 
   public ValidationReport validateRevision(
@@ -37,7 +37,7 @@ public final class DeterministicValidator {
       RevisionManifest base,
       String candidateHash
   ) {
-    return DeterministicValidatorValidateRevisionAction.validateRevision(this, candidate, base, candidateHash);
+    return RevisionValidation.validateRevision(this, candidate, base, candidateHash);
   }
 
   public BlockValidation validateBlock(
@@ -47,7 +47,7 @@ public final class DeterministicValidator {
       Set<String> presentBefore,
       BlockMetadata baselineMetadata
   ) {
-    return DeterministicValidatorValidateBlockAction.validateBlock(this, blockId, text, metadata, presentBefore, baselineMetadata);
+    return BlockValidationAction.validateBlock(this, blockId, text, metadata, presentBefore, baselineMetadata);
   }
 
   List<Candidate> candidates(
@@ -76,7 +76,7 @@ public final class DeterministicValidator {
       int insertionIndex,
       List<BlockDraft> drafts
   ) {
-    return DeterministicValidatorCandidatesAtAction.candidatesAt(this, base, baseHash, sceneId, insertionIndex, drafts);
+    return InsertionCandidates.candidatesAt(this, base, baseHash, sceneId, insertionIndex, drafts);
   }
 
   Set<String> presenceBefore(
@@ -85,7 +85,7 @@ public final class DeterministicValidator {
       NarrativeScene scene,
       int index
   ) {
-    return DeterministicValidatorPresenceBeforeAction.presenceBefore(this, base, baseHash, scene, index);
+    return PriorPresence.presenceBefore(this, base, baseHash, scene, index);
   }
 
   public record BlockValidation(List<ValidationIssue> issues, Set<String> presentAfter) {

@@ -50,7 +50,7 @@ public final class MutationPreconditionFilter extends OncePerRequestFilter {
       HttpServletResponse response,
       FilterChain filterChain
   ) throws ServletException, IOException {
-    MutationPreconditionFilterDoFilterInternalAction.doFilterInternal(this, request, response, filterChain);
+    MutationPreconditions.doFilterInternal(this, request, response, filterChain);
   }
 
   void reject(

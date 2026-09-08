@@ -4,8 +4,6 @@ import dev.storyblock.application.CanonicalTransferService;
 import dev.storyblock.application.StyleAnalysisService;
 import dev.storyblock.security.AccessKeyService;
 import java.time.Clock;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,92 +30,12 @@ final class ApiSecurityConfigurationApiSecurityFilterChainAction {
         .sessionManagement(session -> session.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS
         ))
-        .authorizeHttpRequests(authorize -> authorize
-            .requestMatchers(
-                "/",
-                "/index.html",
-                "/auth.js",
-                "/app.js",
-                "/styles.css",
-                "/v1/openapi.yaml",
-                "/actuator/health"
-            ).permitAll()
-            .requestMatchers(
-                "/actuator/health/**",
-                "/actuator/metrics",
-                "/actuator/metrics/**"
-            ).hasRole("OPERATOR")
-            .requestMatchers(HttpMethod.GET, "/v1/admin/**")
-            .hasRole("OPERATOR")
-            .requestMatchers(HttpMethod.POST, "/v1/novels", "/v1/imports")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))
-            .requestMatchers(HttpMethod.POST, "/v1/agent/novels")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))
-            .requestMatchers(HttpMethod.POST, "/v1/style-profiles/**")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("style:admin"))
-            .requestMatchers(HttpMethod.POST, "/v1/rewrite-proposals")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("rewrite:propose"))
-            .requestMatchers(HttpMethod.POST, "/v1/internal/jobs/claims")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("worker:execute"))
-            .requestMatchers(HttpMethod.POST, "/v1/internal/jobs/*/results")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("worker:execute"))
-            .requestMatchers(HttpMethod.POST, "/v1/novels/*/commits")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:commit"))
-            .requestMatchers(HttpMethod.POST, "/v1/novels/*/images")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:commit"))
-            .requestMatchers(
-                HttpMethod.POST,
-                "/v1/novels/*/edit-previews",
-                "/v1/novels/*/undo-previews"
-            ).hasAuthority(ApiSecurityConfigurationScope.scope("novel:propose"))
-            .requestMatchers(HttpMethod.POST, "/v1/novels/*/detector-runs")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:analyze"))
-            .requestMatchers(HttpMethod.POST, "/v1/novels/*/monitor-packets")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:read"))
-            .requestMatchers(HttpMethod.POST, "/v1/novels/*/monitor-runs")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("monitor:submit"))
-            .requestMatchers(HttpMethod.POST, "/v1/novels/*/style-analyses")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("style:analyze"))
-            .requestMatchers(HttpMethod.POST, "/v1/novels/*/access-keys")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))
-            .requestMatchers(HttpMethod.DELETE, "/v1/access-keys/*")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))
-            .requestMatchers(HttpMethod.GET, "/v1/**")
-            .hasAuthority(ApiSecurityConfigurationScope.scope("novel:read"))
-            .requestMatchers(
-                HttpMethod.POST,
-                "/v1/novels/*/renders",
-                "/v1/novels/*/pdf-renders",
-                "/v1/novels/*/exports"
-            ).hasAuthority(ApiSecurityConfigurationScope.scope("novel:read"))
-            .anyRequest().denyAll()
-        )
-        .exceptionHandling(exceptions -> exceptions
-            .authenticationEntryPoint((request, response, ignored) ->
-                {
-                  telemetry.recordAuthDenied("missing");
-                  problemWriter.write(request, response, ApiFailureException.of(
-                    HttpStatus.UNAUTHORIZED,
-                    "AUTHENTICATION_REQUIRED",
-                    "Authentication required",
-                    "authentication-required",
-                    "A valid bearer credential is required."
-                  ));
-                }
-            )
-            .accessDeniedHandler((request, response, ignored) ->
-                {
-                  telemetry.recordAuthDenied("scope");
-                  problemWriter.write(request, response, ApiFailureException.of(
-                    HttpStatus.FORBIDDEN,
-                    "SCOPE_REQUIRED",
-                    "Required scope missing",
-                    "scope-required",
-                    "The authenticated principal lacks the required scope."
-                  ));
-                }
-            )
-        )
+        .authorizeHttpRequests(routes -> {
+            ApiReadAndCreationRoutes.configure(routes);
+            ApiMutationRoutes.configure(routes);
+            routes.anyRequest().denyAll();
+        })
+        .exceptionHandling(exceptions -> ApiSecurityFailures.configure(exceptions, telemetry, problemWriter))
         .addFilterAfter(
             new MutationPreconditionFilter(problemWriter),
             AuthorizationFilter.class

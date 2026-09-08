@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/CanonicalPackage.schema.json",
+  "title": "StoryBlock complete canonical novel package",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifacts",
+    "manifest",
+    "operations",
+    "package_version",
+    "revisions"
+  ],
+  "properties": {
+    "package_version": {
+      "const": "1.0.0"
+    },
+    "manifest": {
+      "$ref": "#/$defs/manifest"
+    },
+    "revisions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 100000,
+      "items": {
+        "$ref": "#/$defs/revisionEntry"
+      }
+    },
+    "operations": {
+      "type": "array",
+      "maxItems": 99999,
+      "items": {
+        "$ref": "#/$defs/operationEntry"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/artifactEntry"
+      }
+    }
+  },
+  "$defs": {
+    "novelId": {
+      "type": "string",
+      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "revisionId": {
+      "type": "string",
+      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "operationId": {
+      "type": "string",
+      "pattern": "^op_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "artifactId": {
+      "type": "string",
+      "pattern": "^art_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_count",
+        "head_hash",
+        "head_revision_id",
+        "head_sequence",
+        "novel_id",
+        "operation_count",
+        "revision_count",
+        "schema_version"
+      ],
+      "properties": {
+        "novel_id": {
+          "$ref": "#/$defs/novelId"
+        },
+        "schema_version": {
+          "const": "1.0.0"
+        },
+        "head_revision_id": {
+          "$ref": "#/$defs/revisionId"
+        },
+        "head_sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "head_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "revision_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "operation_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "artifact_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "revisionEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document",
+        "sequence"
+      ],
+      "properties": {

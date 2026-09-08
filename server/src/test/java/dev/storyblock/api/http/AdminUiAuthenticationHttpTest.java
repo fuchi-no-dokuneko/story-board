@@ -56,7 +56,7 @@ class AdminUiAuthenticationHttpTest {
         mvc.perform(get("/index.html"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("id=\"operator-token\"")))
-                .andExpect(content().string(containsString("src=\"/auth.js?")));
+                .andExpect(content().string(containsString("src=\"/auth.js\"")));
 
         mvc.perform(get("/auth.js"))
                 .andExpect(status().isOk())

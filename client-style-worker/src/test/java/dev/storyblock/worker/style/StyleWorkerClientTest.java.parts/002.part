@@ -1,9 +1,7 @@
         AtomicReference<Map<String, Object>> submittedResult = new AtomicReference<>();
         AtomicReference<String> claimKey = new AtomicReference<>();
         AtomicInteger claimRequests = new AtomicInteger();
-        HttpServer server = HttpServer.create(new InetSocketAddress(
-                InetAddress.getByName("127.0.0.1"), 0
-        ), 0);
+        HttpServer server = HttpsTestServer.create();
         server.createContext("/v1/internal/jobs/claims", exchange -> handle(
                 exchange,
                 handlerFailure,
@@ -51,3 +49,4 @@
                     submittedResult.set(body);
                     StyleAnalysisCompletionCommand completion = completion(lease, body);
                     respond(exchange, 200, CanonicalJson.bytes(Map.of(
+                            "analysis_id", lease.analysisId().value(),

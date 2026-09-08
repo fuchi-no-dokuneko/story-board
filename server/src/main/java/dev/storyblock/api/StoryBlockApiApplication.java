@@ -10,6 +10,8 @@ import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoCon
 )
 public class StoryBlockApiApplication {
     public static void main(String[] args) {
-        SpringApplication.run(StoryBlockApiApplication.class, args);
+        SpringApplication application = new SpringApplication(StoryBlockApiApplication.class);
+        application.setDefaultProperties(dev.storyblock.api.runtime.ApiLocalDefaults.prepare());
+        application.run(args);
     }
 }

@@ -67,7 +67,7 @@ public final class StyleAnalysisController {
       @RequestHeader(MutationPreconditionFilter.IDEMPOTENCY_KEY) String idempotencyKey,
       Authentication authentication
   ) {
-    return StyleAnalysisControllerCompleteAction.complete(this, jobId, requestBytes, ifMatch, idempotencyKey, authentication);
+    return StyleAnalysisCompletion.complete(this, jobId, requestBytes, ifMatch, idempotencyKey, authentication);
   }
 
   static Map<String, Object> publicJob(StyleAnalysisJob job) {

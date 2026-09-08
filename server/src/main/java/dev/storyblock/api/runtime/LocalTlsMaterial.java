@@ -32,7 +32,7 @@ final class LocalTlsMaterial {
             } finally { Files.deleteIfExists(pending); }
         }
         Files.setPosixFilePermissions(store, permissions);
-        Path certificate = LocalRuntime.directory("tls/public").resolve("storyblock.crt");
+        Path certificate = LocalRuntime.contained(LocalRuntime.directory("tls/public").resolve("storyblock.crt"));
         keytool("-exportcert", "-rfc", "-alias", "storyblock", "-keystore", store.toString(),
                 "-storepass:file", password.toString(), "-file", certificate.toString());
         Files.setPosixFilePermissions(certificate, permissions);

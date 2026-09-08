@@ -2,3 +2,6 @@
 /report.mjs
 /run.mjs
 /runtime.cjs
+/.local-tool-app/*
+!/.local-tool-app/install-local.sh
+/node_modules

@@ -1,4 +1,3 @@
-                            "analysis_id", lease.analysisId().value(),
                             "idempotent_replay", false,
                             "job_id", lease.jobId().value(),
                             "result_hash", completion.resultHash(),
@@ -10,7 +9,7 @@
 
         try {
             StyleWorkerSettings settings = new StyleWorkerSettings(
-                    URI.create("http://127.0.0.1:" + server.getAddress().getPort()),
+                    URI.create("https://127.0.0.1:" + server.getAddress().getPort()),
                     TOKEN,
                     lease.snapshot().novelId(),
                     lease.leaseOwner(),
@@ -19,7 +18,7 @@
                     true
             );
             StyleWorkerClient client = new StyleWorkerClient(
-                    HttpClient.newHttpClient(),
+                    HttpClient.newBuilder().sslContext(LocalSelfSignedTls.context()).build(),
                     settings,
                     Clock.fixed(NOW, ZoneOffset.UTC),
                     new dev.storyblock.style.StyleAnalysisExecutor(),

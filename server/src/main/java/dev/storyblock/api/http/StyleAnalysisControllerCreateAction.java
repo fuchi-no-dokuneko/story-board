@@ -2,13 +2,10 @@ package dev.storyblock.api.http;
 
 import dev.storyblock.application.StyleAnalysisService;
 import dev.storyblock.domain.Ids;
-import dev.storyblock.style.StyleAnalysisJob;
 import dev.storyblock.style.StyleMaskingLexicon;
 import jakarta.servlet.http.HttpServletRequest;
-import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
@@ -64,18 +61,6 @@ final class StyleAnalysisControllerCreateAction {
             authentication, servletRequest, now
         )
     );
-    StyleAnalysisJob job = result.job();
-    String statusUri = "/v1/jobs/" + job.jobId().value();
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("analysis_id", job.analysisId().value());
-    body.put("analysis_uri", "/v1/style-analyses/" + job.analysisId().value());
-    body.put("idempotent_replay", result.idempotentReplay());
-    body.put("job_id", job.jobId().value());
-    body.put("status", job.status().canonicalName());
-    body.put("status_uri", statusUri);
-    return ResponseEntity.accepted()
-        .location(URI.create(statusUri))
-        .eTag(job.statusHash())
-        .body(body);
+    return StyleAnalysisAccepted.response(result);
   }
 }

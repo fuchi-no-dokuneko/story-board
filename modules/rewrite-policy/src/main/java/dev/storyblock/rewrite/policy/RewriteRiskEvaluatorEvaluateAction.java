@@ -50,15 +50,7 @@ final class RewriteRiskEvaluatorEvaluateAction {
     List<RewriteNearCopyFinding> nearCopyFindings = self.nearCopy.check(
         proposal, currentProfile, corpora
     );
-    boolean blocked = differences.stream().anyMatch(value ->
-        value.disposition() == RewriteFactDisposition.BLOCK)
-        || nearCopyFindings.stream().anyMatch(value ->
-        value.disposition() == NearCopyDisposition.BLOCK);
-    boolean manual = !manualReasons.isEmpty()
-        || differences.stream().anyMatch(value ->
-        value.disposition() == RewriteFactDisposition.MANUAL_ONLY)
-        || nearCopyFindings.stream().anyMatch(value ->
-        value.disposition() == NearCopyDisposition.MANUAL_ONLY);
+    RewriteRiskState state = RewriteRiskClassification.classify(differences, nearCopyFindings, manualReasons);
     return new RewriteRiskAssessment(
         proposal.proposalId(),
         proposal.proposalHash(),
@@ -67,9 +59,7 @@ final class RewriteRiskEvaluatorEvaluateAction {
         differences,
         nearCopyFindings,
         List.copyOf(manualReasons),
-        blocked ? RewriteRiskState.BLOCKED
-            : manual ? RewriteRiskState.MANUAL_ONLY
-            : RewriteRiskState.SAFE
+        state
     );
   }
 }

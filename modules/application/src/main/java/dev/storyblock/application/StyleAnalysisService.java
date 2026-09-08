@@ -9,13 +9,12 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class StyleAnalysisService {
+public final class StyleAnalysisService extends StyleAnalysisQueries {
   public static final Duration DEFAULT_RETENTION = Duration.ofDays(30);
   public static final int DEFAULT_MAX_ATTEMPTS = 3;
 
   final RevisionStore revisions;
   final StyleProfileStore profiles;
-  final StyleAnalysisStore analyses;
   final StyleAnalysisExecutor executor;
 
   public StyleAnalysisService(
@@ -32,9 +31,9 @@ public final class StyleAnalysisService {
       StyleAnalysisStore analyses,
       StyleAnalysisExecutor executor
   ) {
+    super(analyses);
     this.revisions = Objects.requireNonNull(revisions, "revisions");
     this.profiles = Objects.requireNonNull(profiles, "profiles");
-    this.analyses = Objects.requireNonNull(analyses, "analyses");
     this.executor = Objects.requireNonNull(executor, "executor");
   }
 
@@ -53,14 +52,6 @@ public final class StyleAnalysisService {
       AuditContext auditContext
   ) {
     return StyleAnalysisServiceRequestAction.request(this, novelId, revisionId, expectedRevisionHash, profileId, profileVersionId, fromBlockId, toBlockId, lexicon, maxAttempts, retention, idempotencyKey, auditContext);
-  }
-
-  public StyleAnalysisJob getJob(Ids.JobId jobId) {
-    return analyses.getStyleAnalysisJob(jobId);
-  }
-
-  public StyleAnalysisJob getAnalysis(Ids.StyleAnalysisId analysisId) {
-    return analyses.getStyleAnalysis(analysisId);
   }
 
   public Optional<StyleAnalysisLease> claim(
@@ -91,34 +82,6 @@ public final class StyleAnalysisService {
     return StyleAnalysisServiceExecuteAction.execute(this, lease, idempotencyKey, completedAt);
   }
 
-  public StyleAnalysisCompletionResult complete(
-      StyleAnalysisCompletionCommand command
-  ) {
-    return analyses.completeStyleAnalysis(command);
-  }
-
-  public StyleAnalysisJob fail(
-      Ids.JobId jobId,
-      String leaseOwner,
-      int attempt,
-      String expectedStatusHash,
-      String failureCode,
-      Instant failedAt
-  ) {
-    return analyses.failStyleAnalysis(
-        jobId,
-        leaseOwner,
-        attempt,
-        expectedStatusHash,
-        failureCode,
-        failedAt
-    );
-  }
-
-  public Optional<StyleAnalysisResult> result(Ids.StyleAnalysisId analysisId) {
-    return analyses.findStyleAnalysisResult(analysisId);
-  }
-
   public StyleAnalysisWindowPage windows(
       Ids.StyleAnalysisId analysisId,
       String cursor,
@@ -127,12 +90,5 @@ public final class StyleAnalysisService {
     return StyleAnalysisServiceWindowsAction.windows(this, analysisId, cursor, limit);
   }
 
-  public void requireArtifactAvailable(Ids.ArtifactId artifactId, Instant now) {
-    analyses.findStyleArtifactExpiry(artifactId).ifPresent(expiry -> {
-      if (!now.isBefore(expiry)) {
-        throw new ExpiredStyleArtifactException(artifactId);
-      }
-    });
-  }
 
 }

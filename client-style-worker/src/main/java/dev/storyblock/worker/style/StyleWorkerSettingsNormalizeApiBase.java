@@ -7,14 +7,14 @@ final class StyleWorkerSettingsNormalizeApiBase {
     static URI normalizeApiBase(URI value) {
         Objects.requireNonNull(value, "apiBaseUri");
         String scheme = value.getScheme();
-        if (!("http".equals(scheme) || "https".equals(scheme))
+        if (!"https".equals(scheme)
                 || value.getHost() == null
                 || value.getUserInfo() != null
                 || value.getRawQuery() != null
                 || value.getRawFragment() != null
                 || value.getHost().contains(":")) {
             throw new IllegalArgumentException(
-                    "Style worker API base URL must be an IPv4 HTTP(S) origin"
+                    "Style worker API base URL must be an IPv4 HTTPS origin"
             );
         }
         String text = value.toString();

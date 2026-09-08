@@ -30,34 +30,7 @@ final class ReplayServiceReplayRangeAction {
     NarrativeEditor editor = new NarrativeEditor(revisionLookup);
     long expectedSequence = startingSequence + 1;
     for (StoredOperation stored : operations) {
-      if (stored.sequence() != expectedSequence) {
-        throw ReplayServiceFailure.failure(novelId, expectedSequence, "Operation sequence is not contiguous");
-      }
-      EditOperation operation = stored.operation();
-      if (!operation.context().novelId().equals(novelId)
-          || !operation.context().baseRevisionId().equals(current.id())
-          || !operation.context().expectedHeadHash().equals(currentHash)) {
-        throw ReplayServiceFailure.failure(
-            novelId,
-            expectedSequence,
-            "Operation base identity or hash does not match replay state"
-        );
-      }
-      try {
-        current = editor.apply(
-            current,
-            operation,
-            stored.resultRevisionId(),
-            stored.committedAt()
-        );
-      } catch (RuntimeException exception) {
-        throw new ReplayException(
-            novelId,
-            expectedSequence,
-            "Operation could not be replayed",
-            exception
-        );
-      }
+      current = ReplayStep.apply(novelId, expectedSequence, stored, current, currentHash, editor);
       currentHash = NarrativeCanonicalMapper.toCanonical(current).contentHash();
       if (!currentHash.equals(stored.resultHash())) {
         throw ReplayServiceFailure.failure(

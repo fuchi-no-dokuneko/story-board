@@ -28,7 +28,7 @@ test('the page exposes every referenced control exactly once and loads auth firs
   );
   assert.match(htmlSource, /connect-src 'self'/);
   assert.ok(
-    htmlSource.indexOf('src="/auth.js?') < htmlSource.indexOf('src="/app.js?'),
+    htmlSource.indexOf('src="/auth.js"') < htmlSource.indexOf('src="/app.js"'),
     'auth.js must execute before app.js',
   );
 });

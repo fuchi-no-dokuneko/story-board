@@ -45,7 +45,7 @@
         redirect.createContext("/invoke", exchange -> {
             exchange.getResponseHeaders().add(
                     "Location",
-                    "http://127.0.0.1:" + destination.getAddress().getPort()
+                    "https://127.0.0.1:" + destination.getAddress().getPort()
                             + "/invoke"
             );
             exchange.sendResponseHeaders(302, -1);

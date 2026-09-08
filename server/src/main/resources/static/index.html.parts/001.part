@@ -7,7 +7,7 @@
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; object-src 'none'">
   <title>StoryBlock Library</title>
-  <link rel="stylesheet" href="/styles.css?v=operator-auth-1">
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
   <header class="app-header">
@@ -29,11 +29,12 @@
     <button class="tab-button" id="console-tab" type="button" aria-controls="console-view" aria-selected="false">API console</button>
   </nav>
 
-  <section class="operator-bar" aria-labelledby="operator-access-title">
+  <details class="operator-bar">
+    <summary>Optional credentials</summary>
     <form id="operator-form" class="operator-form" autocomplete="off">
       <div class="operator-copy">
         <strong id="operator-access-title">Operator access</strong>
-        <span id="operator-token-help">Paste the owner token. It stays only in this page's memory and is sent only to this server.</span>
+        <span id="operator-token-help">The default local installation connects automatically. Optional credentials stay in this page's memory.</span>
       </div>
       <div class="operator-controls">
         <label class="sr-only" for="operator-token">Owner bearer token</label>
@@ -43,10 +44,10 @@
         <button id="operator-clear" type="button" disabled>Clear</button>
       </div>
       <output id="operator-status" class="operator-status" data-state="idle" role="status" aria-live="polite">
-        Owner token required outside trusted-LAN mode
+        No credential needed for the default local installation
       </output>
     </form>
-  </section>
+  </details>
 
   <main>
     <section id="library-view" class="view active" aria-labelledby="library-heading">

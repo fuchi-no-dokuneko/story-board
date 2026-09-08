@@ -1,6 +1,6 @@
     private static LlmWorkerSettings settings(HttpServer server, int maxBytes) {
         return new LlmWorkerSettings(
-                URI.create("http://127.0.0.1:" + server.getAddress().getPort()
+                URI.create("https://127.0.0.1:" + server.getAddress().getPort()
                         + "/invoke"),
                 TOKEN,
                 MODEL,
@@ -12,15 +12,14 @@
 
     private static HttpClient noRedirectClient() {
         return HttpClient.newBuilder()
+                .sslContext(LocalSelfSignedTls.context())
                 .followRedirects(HttpClient.Redirect.NEVER)
                 .proxy(DirectProxySelector.INSTANCE)
                 .build();
     }
 
     private static HttpServer server() throws IOException {
-        return HttpServer.create(new InetSocketAddress(
-                InetAddress.getByName("127.0.0.1"), 0
-        ), 0);
+        return HttpsTestServer.create();
     }
 
     private static void handle(

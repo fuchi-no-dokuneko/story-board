@@ -68,7 +68,7 @@ needed. IPv6 is not supported.
 
 The browser library can list, search, and read current persisted revisions but
 contains no write or delete controls. AI authors register manuscripts through
-the tracked `skills/storyblock-author` skill and `POST /v1/agent/novels`; its
+the tracked `plugin` skill and `POST /v1/agent/novels`; its
 `verify` command compares the source Han sequence and SHA-256 digest with the
 revision read back from storage.
 

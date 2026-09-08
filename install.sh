@@ -24,10 +24,7 @@ flock 9
 ./mvnw --batch-mode -DskipTests clean package
 source scripts/install-runtime.sh
 install_runtime
-STORYBLOCK_TLS_PRIVATE_DIR="$local_dir/tls/private" \
-STORYBLOCK_TLS_PUBLIC_DIR="$local_dir/tls/public" \
-STORYBLOCK_TLS_HOST="${STORYBLOCK_TLS_HOST:-localhost}" \
-  "$repo_dir/scripts/generate-self-signed-tls.sh"
+"$repo_dir/scripts/generate-self-signed-tls.sh"
 echo 'Installed / 安裝完成 / 安装完成'
 echo 'Start: ./scripts/local-server.sh start'
 echo 'URL: https://127.0.0.1:8443/ (self-signed / 自簽 / 自签)'

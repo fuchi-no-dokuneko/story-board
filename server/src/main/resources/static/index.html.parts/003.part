@@ -29,7 +29,7 @@
             <input id="path" value="/actuator/health" aria-label="Request path" spellcheck="false">
             <button id="send" type="button">Send</button>
           </div>
-          <p class="console-auth-note">Requests use the owner token configured above.</p>
+          <p class="console-auth-note">Requests connect directly to this server.</p>
         </section>
         <section class="response-panel" aria-labelledby="response-title">
           <div class="response-heading">
@@ -42,7 +42,7 @@
     </section>
   </main>
 
-  <script src="/auth.js?v=operator-auth-1" defer></script>
-  <script src="/app.js?v=operator-auth-1" defer></script>
+  <script src="/auth.js" defer></script>
+  <script src="/app.js" defer></script>
 </body>
 </html>
