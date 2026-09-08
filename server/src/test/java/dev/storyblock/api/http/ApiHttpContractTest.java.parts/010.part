@@ -1,3 +1,28 @@
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertArrayEquals(
+                first.getResponse().getContentAsByteArray(),
+                second.getResponse().getContentAsByteArray()
+        );
+
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-stale")
+                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isPreconditionFailed())
+                .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
+                .andExpect(jsonPath("$.current_revision_id").value(revisionId))
+                .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
+    }
+
+    @Test
+    void uploadsImageCommitsImageBlockAndRendersDeterministicPdf() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
         String revisionId = stringField(revision.canonicalContent(), "revision_id");
         importAsOwner(revision, "image-pdf-import");
         byte[] png = imagePng();
@@ -27,23 +52,3 @@
                 .andExpect(jsonPath("$.idempotent_replay").value(true));
         mvc.perform(post("/v1/novels/{novelId}/images", novelId)
                         .with(userWithScope("novel:commit"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-too-large")
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .content(new byte[ImageUploadService.MAX_IMAGE_BYTES + 1]))
-                .andExpect(status().isContentTooLarge())
-                .andExpect(jsonPath("$.code").value("REQUEST_TOO_LARGE"))
-                .andExpect(jsonPath("$.limit_bytes")
-                        .value(ImageUploadService.MAX_IMAGE_BYTES));
-        MvcResult downloaded = mvc.perform(get("/v1/artifacts/{artifactId}", artifactId)
-                        .with(userWithScope("novel:read")))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.IMAGE_PNG))
-                .andExpect(header().string(
-                        HttpHeaders.CONTENT_DISPOSITION, containsString(".png")
-                ))
-                .andReturn();
-        assertArrayEquals(png, downloaded.getResponse().getContentAsByteArray());
-
-        Map<String, Object> image = new LinkedHashMap<>();
-        for (String field : List.of(

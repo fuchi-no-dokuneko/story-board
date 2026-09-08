@@ -1,3 +1,27 @@
+                .andExpect(jsonPath("$.job_id").value(jobId))
+                .andExpect(jsonPath("$.analysis_id").value(analysisId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        byte[] claimBody = CanonicalJson.bytes(Map.of(
+                "novel_id", novelId,
+                "lease_owner", "style-worker-http",
+                "lease_seconds", 300
+        ));
+        MvcResult claimed = mvc.perform(post("/v1/internal/jobs/claims")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-claim")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(claimBody))
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(jsonPath("$.job_id").value(jobId))
+                .andExpect(jsonPath("$.analysis_id").value(analysisId))
+                .andExpect(jsonPath("$.attempt").value(1))
+                .andExpect(jsonPath("$.snapshot.blocks.length()").value(1000))
+                .andReturn();
+
         var persistedJob = store.getStyleAnalysisJob(new Ids.JobId(jobId));
         StyleAnalysisExecution execution = new StyleAnalysisExecutor().execute(
                 persistedJob.snapshot()
@@ -30,24 +54,3 @@
         resultBody.put("trace", Map.of(
                 "codec", StyleAnalysisTrace.CODEC,
                 "content_base64", Base64.getEncoder().encodeToString(
-                        submittedTrace.compressedContent()
-                ),
-                "content_hash", submittedTrace.contentHash(),
-                "uncompressed_bytes", submittedTrace.uncompressedBytes()
-        ));
-        resultBody.put("completed_at", completedAt.toString());
-        byte[] canonicalResult = CanonicalJson.bytes(resultBody);
-        String claimedEtag = claimed.getResponse().getHeader(HttpHeaders.ETAG);
-
-        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
-                                "analysis-http-result")
-                        .header(HttpHeaders.IF_MATCH, claimedEtag)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(canonicalResult))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("succeeded"))
-                .andExpect(jsonPath("$.idempotent_replay").value(false));
-        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))

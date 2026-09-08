@@ -1,3 +1,26 @@
+        String mismatchKey = "cross-body-commit";
+        Map<String, Object> mismatchedOperation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", mismatchKey,
+                "novel_id", secondNovel,
+                "base_revision_id", secondRevision,
+                "expected_head_hash", second.contentHash(),
+                "type", "restore_revision_content",
+                "payload", Map.of(
+                        "restore_revision_id", secondRevision,
+                        "expected_restore_hash", second.contentHash()
+                )
+        );
+        byte[] mismatchBody = CanonicalJson.bytes(Map.of(
+                "operation", mismatchedOperation,
+                "candidate_revision_id", Ids.RevisionId.create().value(),
+                "candidate_created_at", "2026-08-21T12:10:00Z"
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/commits", firstNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, mismatchKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
                         .content(mismatchBody))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
@@ -25,29 +48,3 @@
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "security-revoke")
                         .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.revoked").value(true));
-        mvc.perform(get("/v1/jobs/{jobId}", ownJobId)
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("INVALID_BEARER_CREDENTIAL"));
-
-    }
-
-    @Test
-    void realBearerCommitAndReplayWriteCompleteAuditEvents() throws Exception {
-        CanonicalRevision revision = genesis();
-        String novelId = stringField(revision.canonicalContent(), "novel_id");
-        String revisionId = stringField(revision.canonicalContent(), "revision_id");
-        importAsOwner(revision, "commit-audit-import");
-        Map<String, Object> key = issueAsOwner(
-                revision, "commit-audit-issue", List.of("novel:commit")
-        );
-        String token = stringField(key, "secret");
-        String keyId = stringField(key, "key_id");
-        String operationId = Ids.OperationId.create().value();
-        String idempotencyKey = "http-commit-audit";
-        Map<String, Object> operation = Map.of(
-                "operation_id", operationId,
-                "idempotency_key", idempotencyKey,
-                "novel_id", novelId,
-                "base_revision_id", revisionId,

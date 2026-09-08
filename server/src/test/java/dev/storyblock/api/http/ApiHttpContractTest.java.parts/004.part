@@ -1,3 +1,30 @@
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(post("/v1/agent/novels")
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "agent-default-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTHENTICATION_REQUIRED"));
+
+        mvc.perform(get("/v1/admin/novels")
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+    }
+
+    @Test
+    void rejectsAnAuthenticatedPrincipalWithoutTheRouteScope() throws Exception {
+        mvc.perform(get("/v1/novels/nov_test")
+                        .with(userWithScope("style:admin")))
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.status").value(403))
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+    }
+
+    @Test
     void authorizedReadReachesTheInstalledRouteValidation() throws Exception {
         mvc.perform(get("/v1/novels/nov_test")
                         .with(userWithScope("novel:read")))
@@ -27,29 +54,3 @@
                         .content("{}"))
                 .andExpect(status().isPreconditionRequired())
                 .andExpect(jsonPath("$.status").value(428))
-                .andExpect(jsonPath("$.code").value("IF_MATCH_REQUIRED"));
-    }
-
-    @Test
-    void rejectsWeakOrMalformedEtags() throws Exception {
-        mvc.perform(post("/v1/novels")
-                        .with(userWithScope("novel:admin"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
-                        .header(HttpHeaders.IF_MATCH, "W/" + VALID_ETAG)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.code").value("INVALID_IF_MATCH"));
-    }
-
-    @Test
-    void rejectsWildcardEtagsOutsideCollectionCreation() throws Exception {
-        mvc.perform(post("/v1/novels/nov_test/commits")
-                        .with(userWithScope("novel:commit"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
-                        .header(HttpHeaders.IF_MATCH, "*")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))

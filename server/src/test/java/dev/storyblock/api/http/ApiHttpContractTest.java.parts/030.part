@@ -1,3 +1,25 @@
+                new Ids.NovelId(novelId), StyleScopeKind.NOVEL, null
+        );
+        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                keyPrefix + "-profile")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "name", "Durable analysis baseline",
+                                "scope", scope.canonicalValue(),
+                                "provenance", "Generated HTTP durability fixture"
+                        ))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String profileId = stringField(object(profileResult), "profile_id");
+
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                NarrativeCanonicalMapper.fromCanonical(revision).liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
         );
         StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
         List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
@@ -30,25 +52,3 @@
                 )),
                 features,
                 windows,
-                calibration.canonicalValue()
-        );
-        MvcResult versionResult = mvc.perform(post(
-                        "/v1/style-profiles/{profileId}/versions", profileId
-                )
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
-                                keyPrefix + "-version")
-                        .header(HttpHeaders.IF_MATCH,
-                                profileResult.getResponse().getHeader(HttpHeaders.ETAG))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(CanonicalJson.bytes(versionContent.canonicalValue())))
-                .andExpect(status().isCreated())
-                .andReturn();
-        String versionId = stringField(
-                objectField(object(versionResult), "profile_version"), "version_id"
-        );
-        MvcResult calibrating = mvc.perform(post(
-                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
-                        profileId, versionId
-                )
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))

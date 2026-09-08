@@ -1,3 +1,24 @@
+                        .with(userWithScope("novel:commit"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, mismatchKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "operation", mismatchOperation,
+                                "candidate_revision_id", Ids.RevisionId.create().value(),
+                                "candidate_created_at", "2026-08-29T00:00:00Z"
+                        ))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+        String resultRevisionId = Ids.RevisionId.create().value();
+        Map<String, Object> operation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", "image-block-http",
+                "novel_id", novelId,
+                "base_revision_id", revisionId,
+                "expected_head_hash", revision.contentHash(),
+                "type", "insert_blocks",
+                "payload", Map.of(
+                        "insertion_point", Map.of(
                                 "scene_id", firstSceneId(revision),
                                 "position", "end"
                         ),
@@ -26,23 +47,3 @@
         String resultHash = stringField(object(committed), "content_hash");
 
         byte[] renderBody = CanonicalJson.bytes(Map.of("revision_id", resultRevisionId));
-        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
-                        .with(userWithScope("novel:read"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-text-render")
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(renderBody))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.blocks[1].image.artifact_id").value(artifactId));
-
-        MvcResult firstPdf = mvc.perform(post(
-                        "/v1/novels/{novelId}/pdf-renders", novelId
-                )
-                        .with(userWithScope("novel:read"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "pdf-render-one")
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(renderBody))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PDF))
-                .andExpect(header().string("X-PDF-Renderer-Version", "pdf-renderer-1.0.0"))

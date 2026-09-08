@@ -1,3 +1,33 @@
+                        ))))
+                .andExpect(status().isOk());
+        return new ReadyStyleProfile(profileId, versionId);
+    }
+
+    private record ReadyStyleProfile(String profileId, String versionId) {
+    }
+
+    private static CanonicalRevision genesis() {
+        String novelId = Ids.NovelId.create().value();
+        String chapterId = Ids.ChapterId.create().value();
+        Map<String, Object> block = Map.of(
+                "id", Ids.BlockId.create().value(),
+                "block_version_id", Ids.BlockVersionId.create().value(),
+                "order_key", OrderKey.initial().value(),
+                "text", "First sentence.",
+                "meta", Map.of()
+        );
+        Map<String, Object> scene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "Opening",
+                "transition_mode", "opening",
+                "blocks", List.of(block)
+        );
+        Map<String, Object> chapter = Map.of(
+                "id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "Chapter",
                 "scenes", List.of(scene)
         );
         Map<String, Object> document = new LinkedHashMap<>();
@@ -30,28 +60,3 @@
                 "order_key", OrderKey.initial().value(),
                 "title", "Durability fixture",
                 "transition_mode", "opening",
-                "blocks", List.copyOf(blocks)
-        );
-        Map<String, Object> chapter = Map.of(
-                "id", chapterId,
-                "order_key", OrderKey.initial().value(),
-                "title", "One thousand blocks",
-                "scenes", List.of(scene)
-        );
-        Map<String, Object> document = new LinkedHashMap<>();
-        document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
-        document.put("novel_id", novelId);
-        document.put("revision_id", Ids.RevisionId.create().value());
-        document.put("parent_revision_id", null);
-        document.put("chapters", List.of(chapter));
-        document.put("created_at", Instant.parse("2026-08-21T12:00:00Z").toString());
-        return CanonicalRevision.of(document);
-    }
-
-    private static CanonicalRevision detectorRevision() {
-        String novelId = Ids.NovelId.create().value();
-        String chapterId = Ids.ChapterId.create().value();
-        Map<String, Object> firstBlock = Map.of(
-                "id", Ids.BlockId.create().value(),
-                "block_version_id", Ids.BlockVersionId.create().value(),
-                "order_key", OrderKey.initial().value(),

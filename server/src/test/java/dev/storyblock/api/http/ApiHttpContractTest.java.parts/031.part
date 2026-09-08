@@ -1,3 +1,25 @@
+                calibration.canonicalValue()
+        );
+        MvcResult versionResult = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions", profileId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                keyPrefix + "-version")
+                        .header(HttpHeaders.IF_MATCH,
+                                profileResult.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(versionContent.canonicalValue())))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String versionId = stringField(
+                objectField(object(versionResult), "profile_version"), "version_id"
+        );
+        MvcResult calibrating = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
                                 keyPrefix + "-calibrating")
                         .header(HttpHeaders.IF_MATCH,
@@ -24,33 +46,3 @@
                                 "target_state", "ready",
                                 "reason", "Human-approved durable analysis fixture",
                                 "confirm_generated_corpus_promotion", true
-                        ))))
-                .andExpect(status().isOk());
-        return new ReadyStyleProfile(profileId, versionId);
-    }
-
-    private record ReadyStyleProfile(String profileId, String versionId) {
-    }
-
-    private static CanonicalRevision genesis() {
-        String novelId = Ids.NovelId.create().value();
-        String chapterId = Ids.ChapterId.create().value();
-        Map<String, Object> block = Map.of(
-                "id", Ids.BlockId.create().value(),
-                "block_version_id", Ids.BlockVersionId.create().value(),
-                "order_key", OrderKey.initial().value(),
-                "text", "First sentence.",
-                "meta", Map.of()
-        );
-        Map<String, Object> scene = Map.of(
-                "id", Ids.SceneId.create().value(),
-                "chapter_id", chapterId,
-                "order_key", OrderKey.initial().value(),
-                "title", "Opening",
-                "transition_mode", "opening",
-                "blocks", List.of(block)
-        );
-        Map<String, Object> chapter = Map.of(
-                "id", chapterId,
-                "order_key", OrderKey.initial().value(),
-                "title", "Chapter",

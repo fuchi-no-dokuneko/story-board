@@ -1,0 +1,24 @@
+        graphics.fillRect(0, 0, 120, 80);
+        graphics.setColor(new Color(20, 95, 155));
+        graphics.fillOval(35, 10, 50, 60);
+        graphics.dispose();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        assertTrue(ImageIO.write(image, "png", output));
+        return output.toByteArray();
+    }
+
+    private static String quotedEtag(String hash) {
+        return "\"" + hash + "\"";
+    }
+
+    private static String bearer(String token) {
+        return "Bearer " + token;
+    }
+
+    private static org.springframework.test.web.servlet.request.RequestPostProcessor
+            userWithScope(String scope) {
+        return user("contract-test").authorities(
+                new SimpleGrantedAuthority("SCOPE_" + scope)
+        );
+    }
+}

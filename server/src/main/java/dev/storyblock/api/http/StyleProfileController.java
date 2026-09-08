@@ -5,8 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.time.Clock;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 

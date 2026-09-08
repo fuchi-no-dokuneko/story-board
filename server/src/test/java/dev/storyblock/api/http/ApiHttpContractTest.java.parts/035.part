@@ -1,3 +1,27 @@
+            String idempotencyKey
+    ) throws Exception {
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "format", CanonicalExportFormat.PACKAGE.canonicalName()
+        ));
+        MvcResult result = mvc.perform(post(
+                        "/v1/novels/{novelId}/exports", novelId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isAccepted())
+                .andReturn();
+        return object(result);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> object(MvcResult result) {
+        return CanonicalJson.parse(
                 result.getResponse().getContentAsByteArray(), Map.class
         );
     }
@@ -38,27 +62,3 @@
         BufferedImage image = new BufferedImage(120, 80, BufferedImage.TYPE_INT_RGB);
         Graphics2D graphics = image.createGraphics();
         graphics.setColor(Color.WHITE);
-        graphics.fillRect(0, 0, 120, 80);
-        graphics.setColor(new Color(20, 95, 155));
-        graphics.fillOval(35, 10, 50, 60);
-        graphics.dispose();
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        assertTrue(ImageIO.write(image, "png", output));
-        return output.toByteArray();
-    }
-
-    private static String quotedEtag(String hash) {
-        return "\"" + hash + "\"";
-    }
-
-    private static String bearer(String token) {
-        return "Bearer " + token;
-    }
-
-    private static org.springframework.test.web.servlet.request.RequestPostProcessor
-            userWithScope(String scope) {
-        return user("contract-test").authorities(
-                new SimpleGrantedAuthority("SCOPE_" + scope)
-        );
-    }
-}

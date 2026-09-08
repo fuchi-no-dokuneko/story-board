@@ -1,3 +1,26 @@
+                artifactResult.getResponse().getHeader(HttpHeaders.ETAG)
+        );
+    }
+
+    @Test
+    void rendersStoredRevisionAsARepeatableCanonicalPacket() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "render-import");
+        byte[] body = CanonicalJson.bytes(Map.of("revision_id", revisionId));
+
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("style:admin"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult first = mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-first")
                         .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -22,28 +45,3 @@
                         .with(userWithScope("novel:read"))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-second")
                         .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk())
-                .andReturn();
-        assertArrayEquals(
-                first.getResponse().getContentAsByteArray(),
-                second.getResponse().getContentAsByteArray()
-        );
-
-        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
-                        .with(userWithScope("novel:read"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-stale")
-                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isPreconditionFailed())
-                .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
-                .andExpect(jsonPath("$.current_revision_id").value(revisionId))
-                .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
-    }
-
-    @Test
-    void uploadsImageCommitsImageBlockAndRendersDeterministicPdf() throws Exception {
-        CanonicalRevision revision = genesis();
-        String novelId = stringField(revision.canonicalContent(), "novel_id");

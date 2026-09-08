@@ -1,3 +1,22 @@
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .header(ApiRequestMetadata.REQUEST_ID_HEADER, "req_http_commit_retry")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.revision_id").value(committedRevision))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        var commitEvents = store.listAuditEvents(new Ids.NovelId(novelId)).stream()
+                .filter(event -> event.action() == AuditAction.COMMIT)
+                .toList();
+        assertEquals(2, commitEvents.size());
+        assertEquals(AuditResult.SUCCEEDED, commitEvents.get(0).result());
+        assertEquals(AuditResult.IDEMPOTENT, commitEvents.get(1).result());
+        assertEquals("req_http_commit_first", commitEvents.get(0).requestId());
+        assertEquals("req_http_commit_retry", commitEvents.get(1).requestId());
+        commitEvents.forEach(event -> {
             assertEquals("security-test-actor", event.actorId());
             assertEquals(keyId, event.actorKeyId().value());
             assertEquals(operationId, event.operationId().value());
@@ -31,26 +50,3 @@
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
                                 "style-http-profile")
-                        .header(HttpHeaders.IF_MATCH, "*")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(profileBody))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists(HttpHeaders.ETAG))
-                .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(jsonPath("$.scope.novel_id").value(novelId))
-                .andReturn();
-        Map<String, Object> profile = object(profileResult);
-        String profileId = stringField(profile, "profile_id");
-        String profileEtag = profileResult.getResponse().getHeader(HttpHeaders.ETAG);
-
-        var manifest = NarrativeCanonicalMapper.fromCanonical(revision);
-        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
-        var features = new StyleFeatureAnalyzer().extract(
-                manifest.liveBlocks(),
-                lexicon,
-                StyleFeatureContract.defaults(lexicon.vocabularyHash())
-        );
-        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
-        List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
-                30, new BigDecimal("0.1")
-        );

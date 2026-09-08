@@ -1,3 +1,26 @@
+                "order_key", OrderKey.initial().value(),
+                "title", "Detector chapter",
+                "scenes", List.of(firstScene, secondScene)
+        );
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
+        document.put("novel_id", novelId);
+        document.put("revision_id", Ids.RevisionId.create().value());
+        document.put("parent_revision_id", null);
+        document.put("chapters", List.of(chapter));
+        document.put("created_at", Instant.parse("2026-08-21T12:00:00Z").toString());
+        return CanonicalRevision.of(document);
+    }
+
+    private void importAsOwner(CanonicalRevision revision, String idempotencyKey)
+            throws Exception {
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "format", CanonicalExportFormat.REVISION.canonicalName(),
+                "document", revision.envelope()
+        ));
+        mvc.perform(post("/v1/imports")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
                         .header(HttpHeaders.IF_MATCH, "*")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
@@ -34,27 +57,3 @@
     private Map<String, Object> startExport(
             CanonicalRevision revision,
             String token,
-            String idempotencyKey
-    ) throws Exception {
-        String novelId = stringField(revision.canonicalContent(), "novel_id");
-        String revisionId = stringField(revision.canonicalContent(), "revision_id");
-        byte[] body = CanonicalJson.bytes(Map.of(
-                "revision_id", revisionId,
-                "format", CanonicalExportFormat.PACKAGE.canonicalName()
-        ));
-        MvcResult result = mvc.perform(post(
-                        "/v1/novels/{novelId}/exports", novelId
-                )
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isAccepted())
-                .andReturn();
-        return object(result);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Object> object(MvcResult result) {
-        return CanonicalJson.parse(

@@ -38,25 +38,16 @@ class ApiHttpContractTest {
     private SqliteRevisionStore store;
 
     @Test
-    void servesOpenApiWithoutAuthentication() throws Exception {
-        mvc.perform(get("/v1/openapi.yaml"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentTypeCompatibleWith("application/yaml"))
-                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, containsString("no-cache")))
-                .andExpect(content().string(containsString("openapi: 3.1.0")));
-    }
-
-    @Test
-    void operationalMetricsRequireTheOperatorScope() throws Exception {
-        mvc.perform(get("/actuator/metrics"))
-                .andExpect(status().isUnauthorized());
-
-        MvcResult metrics = mvc.perform(get("/actuator/metrics")
-                        .with(user("operator").roles("OPERATOR")))
-                .andExpect(status().isOk())
-                .andReturn();
-        String metricIndex = metrics.getResponse().getContentAsString();
-        for (String name : List.of(
-                "commit_wait_ms", "commit_transaction_ms", "sqlite_busy_total",
-                "wal_bytes", "checkpoint_ms", "queue_depth", "oldest_job_age",
-                "analysis_duration_ms", "rewrite_duration_ms",
+    void pdfRequestsWithJsonAcceptReturnTheExistingProblemShape() throws Exception {
+        CanonicalRevision revision = genesis();
+        importAsOwner(revision, "media-contract-import");
+        mvc.perform(post("/v1/novels/{novelId}/pdf-renders", stringField(revision.canonicalContent(), "novel_id"))
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "media-contract-pdf")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of("revision_id", stringField(revision.canonicalContent(), "revision_id")))))
+                .andExpect(status().isNotAcceptable())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"))

@@ -1,3 +1,24 @@
+                        submittedTrace.compressedContent()
+                ),
+                "content_hash", submittedTrace.contentHash(),
+                "uncompressed_bytes", submittedTrace.uncompressedBytes()
+        ));
+        resultBody.put("completed_at", completedAt.toString());
+        byte[] canonicalResult = CanonicalJson.bytes(resultBody);
+        String claimedEtag = claimed.getResponse().getHeader(HttpHeaders.ETAG);
+
+        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-result")
+                        .header(HttpHeaders.IF_MATCH, claimedEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(canonicalResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("succeeded"))
+                .andExpect(jsonPath("$.idempotent_replay").value(false));
+        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
                                 "analysis-http-result")
                         .header(HttpHeaders.IF_MATCH, claimedEtag)
@@ -27,22 +48,3 @@
                         "/v1/style-analyses/{analysisId}/windows", analysisId
                 )
                         .param("limit", "1")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items.length()").value(1))
-                .andExpect(jsonPath("$.items[0].ordinal").value(0))
-                .andExpect(jsonPath("$.next_cursor").isString())
-                .andReturn();
-        String cursor = stringField(object(firstPage), "next_cursor");
-        mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
-                        .param("limit", "1")
-                        .param("cursor", cursor)
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items.length()").value(1))
-                .andExpect(jsonPath("$.items[0].ordinal").value(1));
-        mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
-                        .param("cursor", "not-a-valid-cursor")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));

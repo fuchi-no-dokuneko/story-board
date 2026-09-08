@@ -1,3 +1,23 @@
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-text-render")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(renderBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.blocks[1].image.artifact_id").value(artifactId));
+
+        MvcResult firstPdf = mvc.perform(post(
+                        "/v1/novels/{novelId}/pdf-renders", novelId
+                )
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "pdf-render-one")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(renderBody))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PDF))
+                .andExpect(header().string("X-PDF-Renderer-Version", "pdf-renderer-1.0.0"))
                 .andExpect(header().string("X-PDF-Image-Count", "1"))
                 .andExpect(header().string(
                         HttpHeaders.CONTENT_DISPOSITION, containsString(".pdf")
@@ -27,25 +47,3 @@
         importAsOwner(revision, "detector-import");
         byte[] body = CanonicalJson.bytes(Map.of(
                 "revision_id", revisionId,
-                "revision_hash", revision.contentHash()
-        ));
-
-        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
-                        .with(userWithScope("novel:read"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-denied")
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
-
-        MvcResult first = mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
-                        .with(userWithScope("novel:analyze"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-first")
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isOk())
-                .andExpect(header().string(
-                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
-                ))

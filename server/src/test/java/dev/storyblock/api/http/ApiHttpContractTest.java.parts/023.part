@@ -1,3 +1,26 @@
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(profileBody))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.scope.novel_id").value(novelId))
+                .andReturn();
+        Map<String, Object> profile = object(profileResult);
+        String profileId = stringField(profile, "profile_id");
+        String profileEtag = profileResult.getResponse().getHeader(HttpHeaders.ETAG);
+
+        var manifest = NarrativeCanonicalMapper.fromCanonical(revision);
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                manifest.liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
+        List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
+                30, new BigDecimal("0.1")
+        );
         StyleCalibrationProfile calibration = new StyleCalibrationProfile(
                 dev.storyblock.style.StyleModule.CALIBRATION_SCHEMA_VERSION,
                 features.sourceHash(),
@@ -30,25 +53,3 @@
         MvcResult versionResult = mvc.perform(post(
                         "/v1/style-profiles/{profileId}/versions", profileId
                 )
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
-                                "style-http-version")
-                        .header(HttpHeaders.IF_MATCH, profileEtag)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(CanonicalJson.bytes(versionContent.canonicalValue())))
-                .andExpect(status().isCreated())
-                .andExpect(header().exists(HttpHeaders.ETAG))
-                .andExpect(jsonPath("$.state").value("draft"))
-                .andExpect(jsonPath("$.can_gate_rewrites").value(false))
-                .andReturn();
-        Map<String, Object> versionView = object(versionResult);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> storedVersion = (Map<String, Object>)
-                versionView.get("profile_version");
-        String versionId = stringField(storedVersion, "version_id");
-
-        MvcResult calibrating = mvc.perform(post(
-                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
-                        profileId, versionId
-                )
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))

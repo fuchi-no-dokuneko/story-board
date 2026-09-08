@@ -1,3 +1,28 @@
+                "blocks", List.copyOf(blocks)
+        );
+        Map<String, Object> chapter = Map.of(
+                "id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "One thousand blocks",
+                "scenes", List.of(scene)
+        );
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
+        document.put("novel_id", novelId);
+        document.put("revision_id", Ids.RevisionId.create().value());
+        document.put("parent_revision_id", null);
+        document.put("chapters", List.of(chapter));
+        document.put("created_at", Instant.parse("2026-08-21T12:00:00Z").toString());
+        return CanonicalRevision.of(document);
+    }
+
+    private static CanonicalRevision detectorRevision() {
+        String novelId = Ids.NovelId.create().value();
+        String chapterId = Ids.ChapterId.create().value();
+        Map<String, Object> firstBlock = Map.of(
+                "id", Ids.BlockId.create().value(),
+                "block_version_id", Ids.BlockVersionId.create().value(),
+                "order_key", OrderKey.initial().value(),
                 "text", "The story starts here.",
                 "meta", Map.of()
         );
@@ -34,26 +59,3 @@
         );
         Map<String, Object> chapter = Map.of(
                 "id", chapterId,
-                "order_key", OrderKey.initial().value(),
-                "title", "Detector chapter",
-                "scenes", List.of(firstScene, secondScene)
-        );
-        Map<String, Object> document = new LinkedHashMap<>();
-        document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
-        document.put("novel_id", novelId);
-        document.put("revision_id", Ids.RevisionId.create().value());
-        document.put("parent_revision_id", null);
-        document.put("chapters", List.of(chapter));
-        document.put("created_at", Instant.parse("2026-08-21T12:00:00Z").toString());
-        return CanonicalRevision.of(document);
-    }
-
-    private void importAsOwner(CanonicalRevision revision, String idempotencyKey)
-            throws Exception {
-        byte[] body = CanonicalJson.bytes(Map.of(
-                "format", CanonicalExportFormat.REVISION.canonicalName(),
-                "document", revision.envelope()
-        ));
-        mvc.perform(post("/v1/imports")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)

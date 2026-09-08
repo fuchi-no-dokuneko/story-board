@@ -1,3 +1,25 @@
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-version")
+                        .header(HttpHeaders.IF_MATCH, profileEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(versionContent.canonicalValue())))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(jsonPath("$.state").value("draft"))
+                .andExpect(jsonPath("$.can_gate_rewrites").value(false))
+                .andReturn();
+        Map<String, Object> versionView = object(versionResult);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> storedVersion = (Map<String, Object>)
+                versionView.get("profile_version");
+        String versionId = stringField(storedVersion, "version_id");
+
+        MvcResult calibrating = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
                                 "style-http-calibrating")
                         .header(HttpHeaders.IF_MATCH,
@@ -24,25 +46,3 @@
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(CanonicalJson.bytes(Map.of(
                                 "target_state", "ready",
-                                "reason", "Attempt without confirmation",
-                                "confirm_generated_corpus_promotion", false
-                        ))))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value("STYLE_LIFECYCLE_CONFLICT"));
-
-        MvcResult ready = mvc.perform(post(
-                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
-                        profileId, versionId
-                )
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
-                                "style-http-ready-confirmed")
-                        .header(HttpHeaders.IF_MATCH,
-                                calibrating.getResponse().getHeader(HttpHeaders.ETAG))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(CanonicalJson.bytes(Map.of(
-                                "target_state", "ready",
-                                "reason", "Human approved generated baseline",
-                                "confirm_generated_corpus_promotion", true
-                        ))))
-                .andExpect(status().isOk())

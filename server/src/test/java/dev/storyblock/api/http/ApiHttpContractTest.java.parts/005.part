@@ -1,3 +1,29 @@
+                .andExpect(jsonPath("$.code").value("IF_MATCH_REQUIRED"));
+    }
+
+    @Test
+    void rejectsWeakOrMalformedEtags() throws Exception {
+        mvc.perform(post("/v1/novels")
+                        .with(userWithScope("novel:admin"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
+                        .header(HttpHeaders.IF_MATCH, "W/" + VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("INVALID_IF_MATCH"));
+    }
+
+    @Test
+    void rejectsWildcardEtagsOutsideCollectionCreation() throws Exception {
+        mvc.perform(post("/v1/novels/nov_test/commits")
+                        .with(userWithScope("novel:commit"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.code").value("INVALID_IF_MATCH"));
     }
 
@@ -30,29 +56,3 @@
     }
 
     @Test
-    void reportsMalformedJsonAfterPreconditionsPass() throws Exception {
-        mvc.perform(post("/v1/novels")
-                        .with(userWithScope("novel:admin"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
-                        .header(HttpHeaders.IF_MATCH, "*")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
-    }
-
-    @Test
-    void installedMutationRejectsAnIncompleteRequest() throws Exception {
-        mvc.perform(post("/v1/novels")
-                        .with(userWithScope("novel:admin"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
-                        .header(HttpHeaders.IF_MATCH, "*")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
-    }
-
-    @Test
-    void workerContractUsesItsDedicatedScope() throws Exception {

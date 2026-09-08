@@ -1,3 +1,25 @@
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(submissionBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult created = mvc.perform(submit.with(userWithScope("monitor:submit")))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.output_kind").value("finding"))
+                .andExpect(jsonPath("$.state").value("current"))
+                .andExpect(jsonPath("$.stale_reasons.length()").value(0))
+                .andExpect(jsonPath("$.rebase_allowed").value(false))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        String runId = stringField(object(created), "monitor_run_id");
+
+        mvc.perform(submit.with(userWithScope("monitor:submit")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.monitor_run_id").value(runId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        mvc.perform(get("/v1/novels/{novelId}/monitor-runs/{runId}", novelId, runId)
                         .with(userWithScope("novel:read")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.monitor_run_id").value(runId))
@@ -34,29 +56,3 @@
         mvc.perform(get("/v1/admin/novels")
                         .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
-
-        byte[] crossNovelRegistration = CanonicalJson.bytes(Map.of(
-                "chapters", List.of(),
-                "created_at", "2026-08-21T12:00:00Z",
-                "expected_han_characters", 0,
-                "language", "zh-Hant",
-                "main_characters", List.of(),
-                "novel_id", secondNovel,
-                "title", "Cross novel attempt",
-                "tnt_cannon_count", 0,
-                "zombie_count", 0
-        ));
-        mvc.perform(post("/v1/agent/novels")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
-                        .header(
-                                MutationPreconditionFilter.IDEMPOTENCY_KEY,
-                                "cross-agent-registration"
-                        )
-                        .header(HttpHeaders.IF_MATCH, "*")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(crossNovelRegistration))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
-
-        byte[] escalationBody = CanonicalJson.bytes(Map.of(

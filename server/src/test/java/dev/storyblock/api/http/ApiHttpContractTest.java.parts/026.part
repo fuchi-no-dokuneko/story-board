@@ -1,3 +1,33 @@
+    void thousandBlockStyleAnalysisCompletesThroughAsyncApiWithCompressedTrace()
+            throws Exception {
+        CanonicalRevision revision = thousandBlockRevision();
+        importAsOwner(revision, "analysis-http-import");
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        String token = stringField(issueAsOwner(
+                revision,
+                "analysis-http-key",
+                List.of(
+                        "novel:read",
+                        "style:admin",
+                        "style:analyze",
+                        "worker:execute"
+                )
+        ), "secret");
+        ReadyStyleProfile profile = createReadyStyleProfile(
+                revision, token, "analysis-http"
+        );
+        byte[] requestBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "profile_id", profile.profileId(),
+                "profile_version_id", profile.versionId(),
+                "max_attempts", 3,
+                "retention_days", 1
+        ));
+
+        MvcResult requested = mvc.perform(post(
+                        "/v1/novels/{novelId}/style-analyses", novelId
+                )
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
                                 "analysis-http-create")
@@ -22,27 +52,3 @@
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.job_id").value(jobId))
-                .andExpect(jsonPath("$.analysis_id").value(analysisId))
-                .andExpect(jsonPath("$.idempotent_replay").value(true));
-
-        byte[] claimBody = CanonicalJson.bytes(Map.of(
-                "novel_id", novelId,
-                "lease_owner", "style-worker-http",
-                "lease_seconds", 300
-        ));
-        MvcResult claimed = mvc.perform(post("/v1/internal/jobs/claims")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
-                                "analysis-http-claim")
-                        .header(HttpHeaders.IF_MATCH, "*")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(claimBody))
-                .andExpect(status().isOk())
-                .andExpect(header().exists(HttpHeaders.ETAG))
-                .andExpect(jsonPath("$.job_id").value(jobId))
-                .andExpect(jsonPath("$.analysis_id").value(analysisId))
-                .andExpect(jsonPath("$.attempt").value(1))
-                .andExpect(jsonPath("$.snapshot.blocks.length()").value(1000))
-                .andReturn();
-

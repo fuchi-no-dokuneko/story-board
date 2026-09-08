@@ -1,3 +1,29 @@
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        byte[] crossNovelRegistration = CanonicalJson.bytes(Map.of(
+                "chapters", List.of(),
+                "created_at", "2026-08-21T12:00:00Z",
+                "expected_han_characters", 0,
+                "language", "zh-Hant",
+                "main_characters", List.of(),
+                "novel_id", secondNovel,
+                "title", "Cross novel attempt",
+                "tnt_cannon_count", 0,
+                "zombie_count", 0
+        ));
+        mvc.perform(post("/v1/agent/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(
+                                MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "cross-agent-registration"
+                        )
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(crossNovelRegistration))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        byte[] escalationBody = CanonicalJson.bytes(Map.of(
                 "actor_id", "escalated-worker",
                 "scopes", List.of("worker:execute"),
                 "expires_at", "2099-01-01T00:00:00Z"
@@ -23,26 +49,3 @@
                         .content(expiryEscalationBody))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("EXPIRY_DELEGATION_DENIED"));
-        mvc.perform(post("/v1/style-profiles")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-route-denied")
-                        .header(HttpHeaders.IF_MATCH, "*")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
-
-        Map<String, Object> ownExport = startExport(
-                first, bearer, "security-export-first"
-        );
-        String ownJobId = stringField(ownExport, "job_id");
-        mvc.perform(get("/v1/jobs/{jobId}", ownJobId)
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.novel_id").value(firstNovel));
-
-        mvc.perform(get("/v1/novels/{novelId}", secondNovel)
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
-                .andExpect(jsonPath("$.detail")

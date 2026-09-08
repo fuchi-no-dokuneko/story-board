@@ -1,3 +1,25 @@
+                                "reason", "Attempt without confirmation",
+                                "confirm_generated_corpus_promotion", false
+                        ))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STYLE_LIFECYCLE_CONFLICT"));
+
+        MvcResult ready = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-ready-confirmed")
+                        .header(HttpHeaders.IF_MATCH,
+                                calibrating.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "target_state", "ready",
+                                "reason", "Human approved generated baseline",
+                                "confirm_generated_corpus_promotion", true
+                        ))))
+                .andExpect(status().isOk())
                 .andExpect(header().exists(HttpHeaders.ETAG))
                 .andExpect(jsonPath("$.state").value("ready"))
                 .andExpect(jsonPath("$.approved_by").value("security-test-actor"))
@@ -30,33 +52,3 @@
     }
 
     @Test
-    void thousandBlockStyleAnalysisCompletesThroughAsyncApiWithCompressedTrace()
-            throws Exception {
-        CanonicalRevision revision = thousandBlockRevision();
-        importAsOwner(revision, "analysis-http-import");
-        String novelId = stringField(revision.canonicalContent(), "novel_id");
-        String revisionId = stringField(revision.canonicalContent(), "revision_id");
-        String token = stringField(issueAsOwner(
-                revision,
-                "analysis-http-key",
-                List.of(
-                        "novel:read",
-                        "style:admin",
-                        "style:analyze",
-                        "worker:execute"
-                )
-        ), "secret");
-        ReadyStyleProfile profile = createReadyStyleProfile(
-                revision, token, "analysis-http"
-        );
-        byte[] requestBody = CanonicalJson.bytes(Map.of(
-                "revision_id", revisionId,
-                "profile_id", profile.profileId(),
-                "profile_version_id", profile.versionId(),
-                "max_attempts", 3,
-                "retention_days", 1
-        ));
-
-        MvcResult requested = mvc.perform(post(
-                        "/v1/novels/{novelId}/style-analyses", novelId
-                )

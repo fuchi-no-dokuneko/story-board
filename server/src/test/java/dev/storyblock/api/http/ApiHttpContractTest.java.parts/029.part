@@ -1,3 +1,22 @@
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].ordinal").value(0))
+                .andExpect(jsonPath("$.next_cursor").isString())
+                .andReturn();
+        String cursor = stringField(object(firstPage), "next_cursor");
+        mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
+                        .param("limit", "1")
+                        .param("cursor", cursor)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items.length()").value(1))
+                .andExpect(jsonPath("$.items[0].ordinal").value(1));
+        mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
+                        .param("cursor", "not-a-valid-cursor")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
         mvc.perform(get("/v1/style-analyses/{analysisId}/windows", analysisId)
                         .param("limit", "not-an-integer")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))
@@ -29,25 +48,3 @@
     ) throws Exception {
         String novelId = stringField(revision.canonicalContent(), "novel_id");
         StyleProfileScope scope = new StyleProfileScope(
-                new Ids.NovelId(novelId), StyleScopeKind.NOVEL, null
-        );
-        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
-                                keyPrefix + "-profile")
-                        .header(HttpHeaders.IF_MATCH, "*")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(CanonicalJson.bytes(Map.of(
-                                "name", "Durable analysis baseline",
-                                "scope", scope.canonicalValue(),
-                                "provenance", "Generated HTTP durability fixture"
-                        ))))
-                .andExpect(status().isCreated())
-                .andReturn();
-        String profileId = stringField(object(profileResult), "profile_id");
-
-        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
-        var features = new StyleFeatureAnalyzer().extract(
-                NarrativeCanonicalMapper.fromCanonical(revision).liveBlocks(),
-                lexicon,
-                StyleFeatureContract.defaults(lexicon.vocabularyHash())
