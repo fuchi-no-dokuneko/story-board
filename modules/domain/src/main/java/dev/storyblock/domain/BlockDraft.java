@@ -14,10 +14,26 @@ public record BlockDraft(
         Objects.requireNonNull(text, "text");
         Objects.requireNonNull(metadata, "metadata");
         extensions = CanonicalValues.freezeMap(extensions, "block_draft.extensions");
+        BlockImage.fromExtensions(extensions);
     }
 
     public static BlockDraft create(String text, BlockMetadata metadata) {
         return new BlockDraft(Ids.BlockId.create(), text, metadata, Map.of());
+    }
+
+    public static BlockDraft createImage(
+            String caption,
+            BlockMetadata metadata,
+            BlockImage image
+    ) {
+        Objects.requireNonNull(image, "image");
+        return new BlockDraft(
+                Ids.BlockId.create(), caption, metadata, image.attachTo(Map.of())
+        );
+    }
+
+    public java.util.Optional<BlockImage> image() {
+        return BlockImage.fromExtensions(extensions);
     }
 
     public NarrativeBlock materialize(OrderKey orderKey) {

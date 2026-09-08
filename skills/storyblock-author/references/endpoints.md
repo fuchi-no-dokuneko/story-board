@@ -1,6 +1,6 @@
 # StoryBlock endpoint catalog
 
-This catalog contains 37 code-verified programmatic routes. Static browser assets are excluded. Paths are full deployed paths, including `/v1`.
+This catalog contains 39 code-verified programmatic routes. Static browser assets are excluded. Paths are full deployed paths, including `/v1`.
 
 The repository OpenAPI was treated only as an extraction aid. Controller code corrects three known differences: the OpenAPI endpoint itself is added, the monitor status variable is `runId`, and rewrite-proposal response DTOs follow `RewriteProposalController` rather than the published `JobAccepted`/proposal schemas. Actuator routes come from runtime configuration and security tests.
 
@@ -327,6 +327,34 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
 - Sources: `apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+
+## novels.images.create
+
+- Method and path: `POST /v1/novels/{novelId}/images`
+- Purpose: Upload one immutable PNG or JPEG artifact for later image blocks
+- Auth: bearer-or-trusted-lan-owner; scopes: `novel:commit`; roles: none.
+- Path parameters: `novelId` (required; type="string", pattern="^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$").
+- Query parameters: none.
+- Request headers: `Authorization` (optional; type="string", writeOnly=true); `If-Match` (required; type="string", pattern="^\"sha256:[0-9a-f]{64}\"$"); `Idempotency-Key` (required; type="string", minLength=1, maxLength=200); `X-Request-Id` (optional; type="string", pattern="^[A-Za-z0-9._:-]{1,128}$").
+- Request DTO: none (image/png or image/jpeg, required).
+- Responses: 200 `ImageUploadResponse` (application/json); 201 `ImageUploadResponse` (application/json).
+- Errors: default `ApiProblem` (application/problem+json).
+- Confidence: `confirmed-from-code`.
+- Sources: `apps/api/src/main/java/dev/storyblock/api/http/ImageController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
+
+## novels.pdf-renders.create
+
+- Method and path: `POST /v1/novels/{novelId}/pdf-renders`
+- Purpose: Render a complete immutable revision as a deterministic PDF
+- Auth: bearer-or-trusted-lan-owner; scopes: `novel:read`; roles: none.
+- Path parameters: `novelId` (required; type="string", pattern="^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$").
+- Query parameters: none.
+- Request headers: `Authorization` (optional; type="string", writeOnly=true); `If-Match` (required; type="string", pattern="^\"sha256:[0-9a-f]{64}\"$"); `Idempotency-Key` (required; type="string", minLength=1, maxLength=200); `X-Request-Id` (optional; type="string", pattern="^[A-Za-z0-9._:-]{1,128}$").
+- Request DTO: `PdfRenderRequest` (application/json, required).
+- Responses: 200 `PdfDocument` (application/pdf).
+- Errors: default `ApiProblem` (application/problem+json).
+- Confidence: `confirmed-from-code`.
+- Sources: `apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
 
 ## novels.renders.create
 

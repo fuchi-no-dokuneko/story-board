@@ -26,10 +26,10 @@ test("required offline commands work from a standalone folder copy", async () =>
     await cp(source, copy, { recursive: true });
 
     const endpoints = JSON.parse((await command(copy, ["endpoints", "--json"])).stdout);
-    assert.equal(endpoints.endpoints.length, 37);
+    assert.equal(endpoints.endpoints.length, 39);
 
     const dtos = JSON.parse((await command(copy, ["dtos", "--json"])).stdout);
-    assert.equal(dtos.count, 135);
+    assert.equal(dtos.count, 140);
 
     const validation = JSON.parse((await command(copy, [
       "validate", "--dto", "ApiProblem", "--file", "examples/api-problem.json", "--json",
@@ -45,7 +45,7 @@ test("required offline commands work from a standalone folder copy", async () =>
     ])).stdout);
     assert.equal(manuscript.valid, true);
 
-    assert.equal((await readFile(join(copy, "VERSION"), "utf8")).trim(), "1.0.0");
+    assert.equal((await readFile(join(copy, "VERSION"), "utf8")).trim(), "1.1.0");
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }

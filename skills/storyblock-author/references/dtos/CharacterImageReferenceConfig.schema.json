@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/CharacterImageReferenceConfig.schema.json",
+  "title": "CharacterImageReferenceConfig",
+  "description": "Five-character visual identity lock with one initial image and at least two plain-background variants each.",
+  "type": "object",
+  "required": ["schema_version", "characters"],
+  "properties": {
+    "schema_version": {"const": "character-image-references-1.0.0"},
+    "characters": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/character"}
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": ["label", "background", "image"],
+      "properties": {
+        "label": {"type": "string", "minLength": 1, "maxLength": 80},
+        "background": {"const": "plain"},
+        "image": {"$ref": "BlockImage.schema.json"}
+      },
+      "additionalProperties": false
+    },
+    "character": {
+      "type": "object",
+      "required": ["character_id", "name", "identity_lock", "initial", "variants"],
+      "properties": {
+        "character_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,63}$"
+        },
+        "name": {"type": "string", "minLength": 1, "maxLength": 80},
+        "identity_lock": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "initial": {
+          "allOf": [
+            {"$ref": "#/$defs/asset"},
+            {"properties": {"label": {"const": "initial"}}}
+          ]
+        },
+        "variants": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/asset"}
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "x-confidence": "skill-policy",
+  "x-source": [
+    "skills/storyblock-author/SKILL.md",
+    "modules/domain/src/main/java/dev/storyblock/domain/BlockImage.java"
+  ],
+  "examples": [
+    {
+      "schema_version": "character-image-references-1.0.0",
+      "characters": [
+        {
+          "character_id": "character-one",
+          "name": "角色一",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {
+            "label": "initial",
+            "background": "plain",
+            "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000001", "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色一的初始參考圖。"}
+          },
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000002", "content_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色一的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000003", "content_hash": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色一的四分之三參考圖。"}}
+          ]
+        },
+        {
+          "character_id": "character-two",
+          "name": "角色二",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {"label": "initial", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000004", "content_hash": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色二的初始參考圖。"}},
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000005", "content_hash": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色二的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000006", "content_hash": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色二的四分之三參考圖。"}}
+          ]
+        },
+        {
+          "character_id": "character-three",
+          "name": "角色三",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {"label": "initial", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000007", "content_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色三的初始參考圖。"}},
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000008", "content_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色三的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000009", "content_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色三的四分之三參考圖。"}}
+          ]
+        },
+        {
+          "character_id": "character-four",
+          "name": "角色四",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {"label": "initial", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000010", "content_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色四的初始參考圖。"}},
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000011", "content_hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色四的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000012", "content_hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色四的四分之三參考圖。"}}
+          ]
+        },
+        {
+          "character_id": "character-five",
+          "name": "角色五",
+          "identity_lock": "固定髮型、面形、服裝與隨身道具。",
+          "initial": {"label": "initial", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000013", "content_hash": "sha256:7777777777777777777777777777777777777777777777777777777777777777", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色五的初始參考圖。"}},
+          "variants": [
+            {"label": "front", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000014", "content_hash": "sha256:8888888888888888888888888888888888888888888888888888888888888888", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色五的正面參考圖。"}},
+            {"label": "three-quarter", "background": "plain", "image": {"artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000015", "content_hash": "sha256:9999999999999999999999999999999999999999999999999999999999999999", "media_type": "image/png", "width_px": 1024, "height_px": 1024, "alt_text": "角色五的四分之三參考圖。"}}
+          ]
+        }
+      ]
+    }
+  ]
+}

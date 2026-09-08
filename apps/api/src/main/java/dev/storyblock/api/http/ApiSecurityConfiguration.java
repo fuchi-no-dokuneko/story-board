@@ -82,6 +82,8 @@ public class ApiSecurityConfiguration {
                         .hasAuthority(scope("worker:execute"))
                         .requestMatchers(HttpMethod.POST, "/v1/novels/*/commits")
                         .hasAuthority(scope("novel:commit"))
+                        .requestMatchers(HttpMethod.POST, "/v1/novels/*/images")
+                        .hasAuthority(scope("novel:commit"))
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/v1/novels/*/edit-previews",
@@ -104,6 +106,7 @@ public class ApiSecurityConfiguration {
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/v1/novels/*/renders",
+                                "/v1/novels/*/pdf-renders",
                                 "/v1/novels/*/exports"
                         ).hasAuthority(scope("novel:read"))
                         .anyRequest().denyAll()

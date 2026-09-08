@@ -80,12 +80,15 @@ public record RenderPacket(
     }
 
     private static Map<String, Object> canonicalBlock(RenderedBlock block) {
-        return Map.of(
-                "block_id", block.blockId().value(),
-                "block_version_id", block.blockVersionId().value(),
-                "local_meta", block.localMetadata().fields(),
-                "text", block.text()
-        );
+        Map<String, Object> value = new LinkedHashMap<>();
+        value.put("block_id", block.blockId().value());
+        value.put("block_version_id", block.blockVersionId().value());
+        value.put("local_meta", block.localMetadata().fields());
+        value.put("text", block.text());
+        if (block.image() != null) {
+            value.put("image", block.image().canonicalValue());
+        }
+        return Map.copyOf(value);
     }
 
     private static Map<String, Object> canonicalMetadata(ResolvedBlockMetadata metadata) {

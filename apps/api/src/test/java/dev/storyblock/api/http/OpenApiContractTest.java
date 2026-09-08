@@ -31,6 +31,8 @@ class OpenApiContractTest {
             "GET /novels/{novelId}",
             "GET /novels/{novelId}/revisions/{revisionId}",
             "POST /novels/{novelId}/renders",
+            "POST /novels/{novelId}/pdf-renders",
+            "POST /novels/{novelId}/images",
             "POST /novels/{novelId}/edit-previews",
             "POST /novels/{novelId}/commits",
             "POST /novels/{novelId}/undo-previews",
@@ -188,6 +190,9 @@ class OpenApiContractTest {
         assertStrongEtag("POST /imports", "201");
         assertStrongEtag("POST /imports", "200");
         assertStrongEtag("POST /novels/{novelId}/renders", "200");
+        assertStrongEtag("POST /novels/{novelId}/pdf-renders", "200");
+        assertStrongEtag("POST /novels/{novelId}/images", "200");
+        assertStrongEtag("POST /novels/{novelId}/images", "201");
         assertStrongEtag("POST /novels/{novelId}/detector-runs", "200");
         assertStrongEtag("POST /novels/{novelId}/monitor-packets", "200");
         assertStrongEtag("POST /novels/{novelId}/monitor-runs", "200");
@@ -260,6 +265,9 @@ class OpenApiContractTest {
         assertTrue(schemas.containsKey("CanonicalPackageRevision"));
         assertTrue(schemas.containsKey("CanonicalPackageOperation"));
         assertTrue(schemas.containsKey("CanonicalPackageArtifact"));
+        assertTrue(schemas.containsKey("BlockImage"));
+        assertTrue(schemas.containsKey("ImageUploadResponse"));
+        assertTrue(schemas.containsKey("PdfRenderRequest"));
 
         Map<String, Object> claim = map(schemas.get("WorkerClaimRequest"));
         assertEquals(

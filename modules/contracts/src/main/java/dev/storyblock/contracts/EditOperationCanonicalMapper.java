@@ -1,6 +1,7 @@
 package dev.storyblock.contracts;
 
 import dev.storyblock.domain.BlockDraft;
+import dev.storyblock.domain.BlockImage;
 import dev.storyblock.domain.BlockMetadata;
 import dev.storyblock.domain.BlockRangeGuard;
 import dev.storyblock.domain.BlockVersionRef;
@@ -210,14 +211,33 @@ public final class EditOperationCanonicalMapper {
     }
 
     private static BlockDraft parseDraft(Map<String, Object> value) {
-        requireKeys(value, Set.of("id", "text", "meta"), Set.of("extensions"), "block_draft");
+        requireKeys(
+                value,
+                Set.of("id", "text", "meta"),
+                Set.of("extensions", "image"),
+                "block_draft"
+        );
+        Map<String, Object> extensions = value.containsKey("extensions")
+                ? new LinkedHashMap<>(object(
+                        value.get("extensions"), "block_draft.extensions"
+                ))
+                : new LinkedHashMap<>();
+        if (extensions.containsKey(BlockImage.EXTENSION_KEY)) {
+            throw new IllegalArgumentException(
+                    "block_draft must declare storyblock.image through the image field"
+            );
+        }
+        if (value.containsKey("image")) {
+            extensions.put(
+                    BlockImage.EXTENSION_KEY,
+                    object(value.get("image"), "block_draft.image")
+            );
+        }
         return new BlockDraft(
                 new Ids.BlockId(string(value, "id", "block_draft")),
                 string(value, "text", "block_draft"),
                 new BlockMetadata(object(value.get("meta"), "block_draft.meta")),
-                value.containsKey("extensions")
-                        ? object(value.get("extensions"), "block_draft.extensions")
-                        : Map.of()
+                extensions
         );
     }
 
@@ -430,8 +450,11 @@ public final class EditOperationCanonicalMapper {
         result.put("id", draft.id().value());
         result.put("text", draft.text());
         result.put("meta", draft.metadata().fields());
-        if (!draft.extensions().isEmpty()) {
-            result.put("extensions", draft.extensions());
+        draft.image().ifPresent(image -> result.put("image", image.canonicalValue()));
+        Map<String, Object> publicExtensions = new LinkedHashMap<>(draft.extensions());
+        publicExtensions.remove(BlockImage.EXTENSION_KEY);
+        if (!publicExtensions.isEmpty()) {
+            result.put("extensions", Map.copyOf(publicExtensions));
         }
         return Map.copyOf(result);
     }

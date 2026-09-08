@@ -13,6 +13,12 @@ offset map uses zero-based, half-open Unicode code-point offsets into
 Each block, resolved metadata entry, and offset entry has the same block ID at
 the same list position.
 
+An image block remains part of this sequence. Its normalized caption is emitted
+into `rendered_text` exactly like another block's text, so offsets and compiled
+TXT remain unambiguous. Its rendered-block entry additionally carries the
+immutable artifact ID, content SHA-256, media type, pixel dimensions, and alt
+text. Render packets never inline the binary image.
+
 A subrange is inclusive. Its first offset is zero, but metadata `before` is
 resolved from the complete preceding scene history. Its `scene_boundaries`
 contains every scene from the first selected block's scene through the last,
@@ -48,3 +54,30 @@ keys and scalar typed IDs and includes `revision_hash`, `renderer_version`,
 `scene_boundaries`. Serializing this value with canonical JSON produces
 byte-identical output for identical inputs. The golden state-machine fixture is
 `modules/renderer/src/test/resources/golden/renderer-state-machine.json`.
+
+## Image blocks
+
+Canonical revisions store the reserved `storyblock.image` descriptor in block
+extensions; API edit drafts and render packets expose it as the typed `image`
+member. Callers cannot smuggle that reserved key through generic extensions.
+Image blocks support insert, replace, move, and delete operations. Text-only
+split, merge, and extend operations reject any source or replacement image so a
+binary reference is never silently discarded or duplicated.
+
+The descriptor accepts PNG or JPEG and binds an immutable portable artifact by
+novel, artifact ID, content SHA-256, detected dimensions, media type, and alt
+text. Commit and PDF rendering independently recheck those bindings.
+
+## PDF rendering
+
+`pdf-renderer-1.0.0` lays out one immutable full revision as A4 pages. It emits
+a cover, chapter and optional scene headings, wrapped body paragraphs, scaled
+illustrations, captions, and page numbers. Each page is deterministically
+rasterized and encoded into a PDF 1.4 document using fixed layout, JPEG settings,
+object order, and metadata-free bytes. The renderer reads no time or network
+state; image bytes arrive through a resolver that must satisfy the canonical
+descriptor hash and dimensions.
+
+The REST response reports the renderer version plus exact page and image counts.
+Two renders of the same revision and portable artifacts must be byte-identical;
+the renderer and API suites assert that property.

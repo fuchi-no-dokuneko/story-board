@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: StoryBlock Engine API
-  version: 1.0.0
+  version: 1.1.0
   description: Immutable, evidence-bound narrative editing contracts.
 servers:
   - url: /v1
@@ -244,6 +244,99 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RenderPacket"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/pdf-renders:
+    post:
+      operationId: renderRevisionPdf
+      summary: Render a complete immutable revision as a deterministic PDF
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PdfRenderRequest"
+      responses:
+        "200":
+          description: Deterministic A4 PDF containing narrative text and image blocks
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Content-Disposition:
+              $ref: "#/components/headers/ContentDisposition"
+            X-PDF-Renderer-Version:
+              schema:
+                const: pdf-renderer-1.0.0
+            X-PDF-Page-Count:
+              schema:
+                type: integer
+                minimum: 1
+            X-PDF-Image-Count:
+              schema:
+                type: integer
+                minimum: 0
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/images:
+    post:
+      operationId: uploadNovelImage
+      summary: Upload one immutable PNG or JPEG artifact for later image blocks
+      x-required-scopes: ["novel:commit"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+              maxLength: 1500000
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+              maxLength: 1500000
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+              maxLength: 1500000
+      responses:
+        "200":
+          description: Existing idempotent image upload result
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageUploadResponse"
+        "201":
+          description: Portable immutable image artifact created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageUploadResponse"
         default:
           $ref: "#/components/responses/Problem"
   /novels/{novelId}/edit-previews:
@@ -736,6 +829,18 @@ paths:
                 type: string
                 format: binary
             application/vnd.storyblock.style-trace+json:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
               schema:
                 type: string
                 format: binary
@@ -1390,6 +1495,70 @@ components:
         to_block_id:
           type: [string, "null"]
       additionalProperties: false
+    PdfRenderRequest:
+      type: object
+      required: [revision_id]
+      properties:
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+      additionalProperties: false
+    BlockImage:
+      type: object
+      required: [artifact_id, content_hash, media_type, width_px, height_px, alt_text]
+      properties:
+        artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        media_type:
+          type: string
+          enum: [image/png, image/jpeg]
+        width_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        height_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        alt_text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          x-storyblock-max-graphemes: 500
+      additionalProperties: false
+    ImageUploadResponse:
+      type: object
+      required: [schema_version, artifact_id, artifact_uri, content_hash, media_type, width_px, height_px, idempotent_replay]
+      properties:
+        schema_version:
+          const: image-upload-1.0.0
+        artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        artifact_uri:
+          type: string
+          format: uri-reference
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        media_type:
+          type: string
+          enum: [image/png, image/jpeg]
+        width_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        height_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false
     RenderPacket:
       type: object
       required: [novel_id, revision_id, revision_hash, renderer_version, range, rendered_text, blocks, resolved_meta, offset_map, scene_boundaries]
@@ -1446,6 +1615,8 @@ components:
         local_meta:
           type: object
           additionalProperties: true
+        image:
+          $ref: "#/components/schemas/BlockImage"
       additionalProperties: false
     ResolvedBlockMetadata:
       type: object

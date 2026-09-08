@@ -23,7 +23,11 @@ public final class EditOperationValidator {
             case EditOperation.DeleteBlockRange delete -> validateRange(base, delete.range());
             case EditOperation.SplitBlock split -> validateSplit(base, split);
             case EditOperation.MergeBlocks merge -> {
-                validateRange(base, merge.range());
+                RangeLocation range = validateRange(base, merge.range());
+                if (range.blocks().stream().anyMatch(block -> block.image().isPresent())
+                        || merge.newBlock().image().isPresent()) {
+                    throw invalid("merge_blocks does not support image blocks");
+                }
                 validateDraftIdentities(base, List.of(merge.newBlock()), rangeIds(merge.range()));
             }
             case EditOperation.ExtendBlock extend -> validateExtend(base, extend);
@@ -123,6 +127,10 @@ public final class EditOperationValidator {
     private static void validateSplit(RevisionManifest base, EditOperation.SplitBlock split) {
         RangeLocation range = validateRange(base, split.block());
         NarrativeBlock original = range.blocks().getFirst();
+        if (original.image().isPresent()
+                || split.newBlocks().stream().anyMatch(draft -> draft.image().isPresent())) {
+            throw invalid("split_block does not support image blocks");
+        }
         if (!UnicodeText.analyze(original.text()).safeSplitAnchors().contains(split.splitAfterGrapheme())) {
             throw invalid("split_block anchor is not a sentence, dialogue, or author-approved boundary");
         }
@@ -140,6 +148,9 @@ public final class EditOperationValidator {
         RangeLocation range = validateRange(base, extend.block());
         NarrativeBlock original = range.blocks().getFirst();
         BlockDraft replacement = extend.replacement();
+        if (original.image().isPresent() || replacement.image().isPresent()) {
+            throw invalid("extend_block does not support image blocks");
+        }
         if (!replacement.id().equals(original.id())) {
             throw invalid("extend_block must preserve the stable block ID");
         }

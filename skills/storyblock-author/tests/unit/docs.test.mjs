@@ -14,6 +14,6 @@ test("generated catalogs are reproducible from bundled manifests", async () => {
   await execute(process.execPath, [new URL("scripts/generate-docs.mjs", skillRoot).pathname]);
   const after = await Promise.all([readFile(endpointUrl, "utf8"), readFile(dtoUrl, "utf8")]);
   assert.deepEqual(after, before);
-  assert.match(after[0], /37 code-verified programmatic routes/u);
-  assert.match(after[1], /135 standalone JSON Schema/u);
+  assert.match(after[0], /39 code-verified programmatic routes/u);
+  assert.match(after[1], /140 standalone JSON Schema/u);
 });

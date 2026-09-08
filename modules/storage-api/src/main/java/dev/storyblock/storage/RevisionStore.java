@@ -45,6 +45,8 @@ public interface RevisionStore {
 
     StoredArtifact getArtifact(Ids.ArtifactId artifactId);
 
+    PortableArtifactPutResult putPortableArtifact(PortableArtifactPutRequest request);
+
     CommitResult commitCas(CommitRequest request);
 
     CommitResult commitCas(CommitRequest request, AuditContext auditContext);

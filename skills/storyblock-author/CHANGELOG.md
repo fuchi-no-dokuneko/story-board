@@ -2,6 +2,13 @@
 
 All notable changes to this standalone skill are recorded here.
 
+## 1.1.0 - 2026-08-29
+
+- Added first-class editable image-block contracts backed by portable immutable PNG/JPEG artifacts.
+- Added raw binary `upload-image` and deterministic `render-pdf` commands with private, no-clobber output handling.
+- Added five-character visual-reference validation: one initial image and 2–6 plain-background variants per identity.
+- Expanded the catalog to 39 routes and 140 DTO schemas, with executable binary transport and workflow coverage.
+
 ## 1.0.0 - 2026-08-27
 
 - Rebuilt the skill from StoryBlock controllers, application/domain contracts, canonical schemas, security filters, tests, fixtures, and runtime configuration.

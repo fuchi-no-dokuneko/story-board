@@ -24,9 +24,15 @@
     },
     "extensions": {
       "type": "object",
+      "properties": {
+        "storyblock.image": false
+      },
       "propertyNames": {
         "pattern": "^[a-z][a-z0-9.-]{1,63}$"
       }
+    },
+    "image": {
+      "$ref": "BlockImage.schema.json"
     }
   },
   "additionalProperties": false,

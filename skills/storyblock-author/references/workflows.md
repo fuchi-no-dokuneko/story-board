@@ -48,6 +48,15 @@ The operation variants are:
 
 Use `dtos --json` or the individual schema files to inspect payload guards. Blocks must respect sentence and 100-grapheme constraints enforced by the domain.
 
+### Image-block edit
+
+1. Read the current head, then run `upload-image` with a stable image file and key. The command sends the file as raw PNG/JPEG bytes and returns a validated `block_image` descriptor.
+2. Copy that descriptor into `BlockDraft.image`; write one or two complete sentences in `BlockDraft.text` as the caption.
+3. Insert or replace the image block through the same preview/commit flow as text. Move and delete also work. Do not use split, merge, or extend on an image block.
+4. For character art, validate `CharacterImageReferenceConfig`. It requires exactly five identities, one initial reference per identity, 2–6 variants, and a plain background for every asset.
+
+Portable image artifacts are included automatically when a canonical package is exported. Never embed image bytes in an edit operation or character-reference config.
+
 ## Preview before commit
 
 ```bash
@@ -71,6 +80,16 @@ node scripts/storyblock-author.mjs render \
 ```
 
 The result is a structured `RenderPacket` with rendered blocks and offsets. Do not treat rendered text as a new canonical revision.
+
+For a binary, deterministic A4 document, render the same immutable full revision through the PDF route:
+
+```bash
+node scripts/storyblock-author.mjs render-pdf \
+  --novel-id nov_UUIDV7 --file pdf-render-request.json \
+  --output novel.pdf --json
+```
+
+The command reports exact byte, page, and embedded-image counts from response metadata. It writes mode `0600` and does not overwrite an existing file unless `--force` is explicit.
 
 ## Export and import
 

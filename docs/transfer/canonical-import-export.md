@@ -12,6 +12,15 @@ accepted versions. Unknown fields, duplicate JSON keys, malformed IDs, broken
 lineage, count drift, hash drift, non-canonical timestamps or Base64, and
 operation replay drift are rejected.
 
+Uploaded narrative images are portable artifacts. A package includes each
+referenced image exactly once with its artifact ID, novel and revision binding,
+media type, codec, size, content SHA-256, and canonical Base64 bytes. Import
+validates the decoded byte count and digest before atomically installing any
+part of the package; image-block descriptors are then checked against decoded
+media type and dimensions during replay. Image-bearing revisions therefore use
+`canonical-package`; `canonical-revision` export rejects them because that
+single-document format has no artifact payload.
+
 ## HTTP Flow
 
 Import a new novel with `POST /v1/imports`, `If-Match: *`, an
@@ -54,5 +63,5 @@ transaction.
 Import followed by package export preserves the complete canonical chain and
 head hash. Generated export artifacts are deliberately not embedded in later
 packages, preventing recursive package growth; imported portable artifacts are
-preserved. The API database path is configured with
+preserved, including narrative images. The API database path is configured with
 `storyblock.database.path` and defaults to `data/storyblock.db`.

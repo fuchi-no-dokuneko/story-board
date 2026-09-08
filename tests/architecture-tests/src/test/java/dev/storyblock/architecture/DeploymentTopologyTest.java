@@ -46,6 +46,21 @@ class DeploymentTopologyTest {
         assertTrue(tlsGenerator.contains("EKU=serverAuth"));
     }
 
+    @Test
+    void localInstallerIsUnprivilegedRepositoryLocalAndRepeatable() throws Exception {
+        String installer = Files.readString(ROOT.resolve("install.sh"));
+
+        assertTrue(installer.contains("local_dir=$repo_dir/.local/storyblock"));
+        assertTrue(installer.contains("scripts/generate-self-signed-tls.sh"));
+        assertTrue(installer.contains("install -m 500 --"));
+        assertTrue(installer.contains("mv -f -- \"$staged_jar\" \"$installed_jar\""));
+        assertFalse(installer.matches("(?s).*\\n\\s*sudo\\s+.*"));
+        assertFalse(installer.contains("$HOME"));
+        assertFalse(installer.contains("/etc/"));
+        assertFalse(installer.contains("/opt/"));
+        assertFalse(installer.contains("/var/"));
+    }
+
     private static String section(String compose, String marker, String nextMarker) {
         int start = compose.indexOf(marker);
         int end = compose.indexOf(nextMarker, start + 1);

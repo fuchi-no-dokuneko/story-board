@@ -84,8 +84,12 @@ if ((${#api_jars[@]} != 1)); then
   printf 'Expected exactly one API jar; found %s.\n' "${#api_jars[@]}" >&2
   exit 1
 fi
-cp -- "${api_jars[0]}" "$local_dir/server/application.jar"
-chmod 500 "$local_dir/server/application.jar"
+installed_jar=$local_dir/server/application.jar
+staged_jar=$local_dir/server/.application.jar.$$
+trap 'rm -f -- "$staged_jar"' EXIT
+install -m 500 -- "${api_jars[0]}" "$staged_jar"
+mv -f -- "$staged_jar" "$installed_jar"
+trap - EXIT
 
 random_hex() {
   od -An -N48 -tx1 /dev/urandom | tr -d ' \n'

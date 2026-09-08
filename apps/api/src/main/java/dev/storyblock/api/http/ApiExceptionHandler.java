@@ -1,6 +1,7 @@
 package dev.storyblock.api.http;
 
 import dev.storyblock.application.CommitRejectedException;
+import dev.storyblock.application.ImagePayloadTooLargeException;
 import dev.storyblock.security.AccessAuthenticationException;
 import dev.storyblock.security.AccessKeyRequestConflictException;
 import dev.storyblock.security.CrossNovelAccessException;
@@ -351,6 +352,22 @@ public final class ApiExceptionHandler {
                 "request-too-large",
                 "The uploaded artifact exceeds the configured byte limit.",
                 Map.of("limit_bytes", MutationPreconditionFilter.MAX_REQUEST_BYTES),
+                null
+        ));
+    }
+
+    @ExceptionHandler(ImagePayloadTooLargeException.class)
+    ResponseEntity<Map<String, Object>> imageTooLarge(
+            ImagePayloadTooLargeException failure,
+            HttpServletRequest request
+    ) {
+        return response(request, new ApiFailureException(
+                HttpStatus.CONTENT_TOO_LARGE,
+                "REQUEST_TOO_LARGE",
+                "Request too large",
+                "request-too-large",
+                "The uploaded image exceeds the configured byte limit.",
+                Map.of("limit_bytes", failure.limitBytes()),
                 null
         ));
     }

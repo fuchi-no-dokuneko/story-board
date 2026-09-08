@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/skills/storyblock-author/dtos/PdfDocument.schema.json",
+  "title": "PdfDocument",
+  "description": "Binary application/pdf response; save it instead of decoding it as text.",
+  "type": "string",
+  "contentEncoding": "binary",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
+    "modules/renderer/src/main/java/dev/storyblock/renderer/DeterministicPdfRenderer.java"
+  ],
+  "examples": ["%PDF-1.4"]
+}
