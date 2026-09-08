@@ -1,10 +1,7 @@
 package dev.storyblock.renderer;
 
 import dev.storyblock.domain.DerivedSceneBoundary;
-import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
-import dev.storyblock.domain.NarrativeChapter;
-import dev.storyblock.domain.NarrativeScene;
 import dev.storyblock.domain.RevisionManifest;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +22,7 @@ public final class DeterministicRenderer {
         }
         Objects.requireNonNull(requestedRange, "requestedRange");
 
-        Resolution resolution = resolveAll(revision);
+        Resolution resolution = DeterministicRendererResolveAll.resolveAll(revision);
         List<ResolvedEntry> resolved = resolution.entries();
         if (resolved.isEmpty()) {
             if (!requestedRange.isAll()) {
@@ -45,10 +42,10 @@ public final class DeterministicRenderer {
             );
         }
 
-        int from = requestedRange.isAll() ? 0 : indexOf(resolved, requestedRange.fromBlockId());
+        int from = requestedRange.isAll() ? 0 : DeterministicRendererIndexOf.indexOf(resolved, requestedRange.fromBlockId());
         int to = requestedRange.isAll()
                 ? resolved.size() - 1
-                : indexOf(resolved, requestedRange.toBlockId());
+                : DeterministicRendererIndexOf.indexOf(resolved, requestedRange.toBlockId());
         if (from > to) {
             throw new IllegalArgumentException("Render range endpoints are reversed");
         }
@@ -104,53 +101,13 @@ public final class DeterministicRenderer {
         );
     }
 
-    private static Resolution resolveAll(RevisionManifest revision) {
-        List<ResolvedEntry> result = new ArrayList<>();
-        List<DerivedSceneBoundary> boundaries = new ArrayList<>();
-        int sceneIndex = 0;
-        for (NarrativeChapter chapter : revision.novel().chapters()) {
-            for (NarrativeScene scene : chapter.scenes()) {
-                MetadataResolutionState state = MetadataResolutionState.fromSceneSeed(
-                        scene.initialMeta()
-                );
-                var stateIn = state.snapshot();
-                for (NarrativeBlock block : scene.blocks()) {
-                    var before = state.snapshot();
-                    var events = state.apply(block.metadata());
-                    var after = state.snapshot();
-                    result.add(new ResolvedEntry(
-                            sceneIndex,
-                            block,
-                            new ResolvedBlockMetadata(block.id(), before, events, after)
-                    ));
-                }
-                boundaries.add(new DerivedSceneBoundary(
-                        scene.id(), stateIn, state.snapshot()
-                ));
-                sceneIndex++;
-            }
-        }
-        return new Resolution(List.copyOf(result), List.copyOf(boundaries));
-    }
-
-    private static int indexOf(List<ResolvedEntry> entries, Ids.BlockId blockId) {
-        for (int index = 0; index < entries.size(); index++) {
-            if (entries.get(index).block().id().equals(blockId)) {
-                return index;
-            }
-        }
-        throw new IllegalArgumentException(
-                "Revision does not contain render endpoint " + blockId.value()
-        );
-    }
-
-    private record Resolution(
+    record Resolution(
             List<ResolvedEntry> entries,
             List<DerivedSceneBoundary> sceneBoundaries
     ) {
     }
 
-    private record ResolvedEntry(
+    record ResolvedEntry(
             int sceneIndex,
             NarrativeBlock block,
             ResolvedBlockMetadata resolved

@@ -15,9 +15,7 @@ import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -49,7 +47,7 @@ public final class StyleAnalysisController {
             "analyzer_contract_hash", "window_configuration_hash", "summary",
             "windows", "trace", "completed_at"
     );
-    private static final Set<String> COMPRESSED_TRACE_FIELDS = Set.of(
+    static final Set<String> COMPRESSED_TRACE_FIELDS = Set.of(
             "codec", "content_base64", "content_hash", "uncompressed_bytes"
     );
 
@@ -75,7 +73,7 @@ public final class StyleAnalysisController {
         Map<String, Object> request = StrictJsonRequest.parseObject(
                 requestBytes, "style analysis request"
         );
-        requireFields(
+        StyleAnalysisControllerRequireFields.requireFields(
                 request,
                 Set.of("revision_id", "profile_id", "profile_version_id"),
                 CREATE_FIELDS,
@@ -108,8 +106,8 @@ public final class StyleAnalysisController {
                 new Ids.StyleProfileVersionId(StrictJsonRequest.string(
                         request, "profile_version_id", "style analysis request"
                 )),
-                optionalBlockId(request.get("from_block_id"), "from_block_id"),
-                optionalBlockId(request.get("to_block_id"), "to_block_id"),
+                StyleAnalysisControllerOptionalBlockId.optionalBlockId(request.get("from_block_id"), "from_block_id"),
+                StyleAnalysisControllerOptionalBlockId.optionalBlockId(request.get("to_block_id"), "to_block_id"),
                 lexicon,
                 maxAttempts,
                 Duration.ofDays(retentionDays),
@@ -213,7 +211,7 @@ public final class StyleAnalysisController {
                     "style job result.completed_at cannot be in the future"
             );
         }
-        StyleAnalysisTrace trace = parseTrace(
+        StyleAnalysisTrace trace = StyleAnalysisControllerParseTrace.parseTrace(
                 job,
                 StrictJsonRequest.object(
                         request.get("trace"), "style job result.trace"
@@ -280,75 +278,4 @@ public final class StyleAnalysisController {
         return value;
     }
 
-    private static Ids.BlockId optionalBlockId(Object value, String field) {
-        if (value == null) {
-            return null;
-        }
-        if (!(value instanceof String text)) {
-            throw new IllegalArgumentException(
-                    "style analysis request." + field + " must be a string or null"
-            );
-        }
-        return new Ids.BlockId(text);
-    }
-
-    private static StyleAnalysisTrace parseTrace(
-            StyleAnalysisJob job,
-            Map<String, Object> trace,
-            Instant completedAt
-    ) {
-        if (!trace.keySet().equals(COMPRESSED_TRACE_FIELDS)) {
-            return StyleAnalysisTrace.create(
-                    job.analysisId(), trace, completedAt, job.retentionUntil()
-            );
-        }
-        String codec = StrictJsonRequest.string(
-                trace, "codec", "style job result.trace"
-        );
-        if (!StyleAnalysisTrace.CODEC.equals(codec)) {
-            throw new IllegalArgumentException(
-                    "style job result.trace.codec must be gzip"
-            );
-        }
-        final byte[] compressed;
-        try {
-            compressed = Base64.getDecoder().decode(StrictJsonRequest.string(
-                    trace, "content_base64", "style job result.trace"
-            ));
-        } catch (IllegalArgumentException failure) {
-            throw new IllegalArgumentException(
-                    "style job result.trace.content_base64 is invalid", failure
-            );
-        }
-        return StyleAnalysisTrace.fromCompressed(
-                job.analysisId(),
-                StrictJsonRequest.string(
-                        trace, "content_hash", "style job result.trace"
-                ),
-                compressed,
-                StrictJsonRequest.integer(
-                        trace, "uncompressed_bytes", "style job result.trace"
-                ),
-                completedAt,
-                job.retentionUntil()
-        );
-    }
-
-    private static void requireFields(
-            Map<String, Object> request,
-            Set<String> required,
-            Set<String> allowed,
-            String path
-    ) {
-        for (String field : required) {
-            if (!request.containsKey(field)) {
-                throw new IllegalArgumentException(path + " is missing " + field);
-            }
-        }
-        for (String field : request.keySet()) {
-            if (!allowed.contains(field)) {
-                throw new IllegalArgumentException(path + " contains unknown field " + field);
-            }
-        }
-    }
 }

@@ -4,7 +4,6 @@ import dev.storyblock.domain.BlockMetadata;
 import dev.storyblock.domain.CanonicalValues;
 import dev.storyblock.domain.MetadataValueState;
 import dev.storyblock.domain.SceneSeed;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +15,7 @@ final class MetadataResolutionState {
             "time", "location", "weather", "pov"
     );
 
-    private static final Set<String> EXPLICIT_CONTROL_FIELDS = Set.of("mode", "evidence");
+    static final Set<String> EXPLICIT_CONTROL_FIELDS = Set.of("mode", "evidence");
     private static final Map<String, Object> UNKNOWN = Map.of("mode", "unknown");
     private static final Map<String, Object> NOT_APPLICABLE = Map.of("mode", "not_applicable");
 
@@ -41,7 +40,7 @@ final class MetadataResolutionState {
                 state.applyObservation(field, fields.get(field), "scene.initial_meta." + field);
             }
         }
-        state.presentCharacterIds.addAll(strings(
+        state.presentCharacterIds.addAll(MetadataResolutionStateStrings.strings(
                 fields.get("present_character_ids"),
                 "scene.initial_meta.present_character_ids"
         ));
@@ -56,10 +55,10 @@ final class MetadataResolutionState {
             }
         }
 
-        List<Map<String, Object>> events = presenceEvents(fields.get("presence_events"));
+        List<Map<String, Object>> events = MetadataResolutionStatePresenceEvents.presenceEvents(fields.get("presence_events"));
         for (Map<String, Object> event : events) {
-            String type = requiredString(event.get("type"), "presence event type");
-            String characterId = requiredString(
+            String type = MetadataResolutionStateRequiredString.requiredString(event.get("type"), "presence event type");
+            String characterId = MetadataResolutionStateRequiredString.requiredString(
                     event.get("character_id"), "presence event character_id"
             );
             switch (type) {
@@ -87,7 +86,7 @@ final class MetadataResolutionState {
 
         MetadataValueState mode = MetadataValueState.fromCanonicalName(canonicalMode);
         switch (mode) {
-            case EXPLICIT -> values.put(field, explicitValue(observation, path));
+            case EXPLICIT -> values.put(field, MetadataResolutionStateExplicitValue.explicitValue(observation, path));
             case INHERITED -> {
                 // Retain the resolved value, including unknown or not-applicable.
             }
@@ -96,80 +95,4 @@ final class MetadataResolutionState {
         }
     }
 
-    private static Object explicitValue(Map<?, ?> observation, String path) {
-        if (observation.containsKey("value")) {
-            Object value = observation.get("value");
-            if (value == null) {
-                throw new IllegalArgumentException(path + " explicit mode requires a value");
-            }
-            return CanonicalValues.freeze(value, path + ".value");
-        }
-
-        Map<String, Object> inlineValue = new LinkedHashMap<>();
-        for (Map.Entry<?, ?> field : observation.entrySet()) {
-            if (!(field.getKey() instanceof String key)) {
-                throw new IllegalArgumentException(path + " contains a non-string key");
-            }
-            if (!EXPLICIT_CONTROL_FIELDS.contains(key)) {
-                inlineValue.put(key, field.getValue());
-            }
-        }
-        if (inlineValue.isEmpty()) {
-            throw new IllegalArgumentException(path + " explicit mode requires a value");
-        }
-        return CanonicalValues.freezeMap(inlineValue, path + ".value");
-    }
-
-    private static List<Map<String, Object>> presenceEvents(Object raw) {
-        if (raw == null) {
-            return List.of();
-        }
-        if (!(raw instanceof List<?> entries)) {
-            throw new IllegalArgumentException("block.meta.presence_events must be a list");
-        }
-
-        List<Map<String, Object>> events = new ArrayList<>(entries.size());
-        for (int index = 0; index < entries.size(); index++) {
-            Object entry = entries.get(index);
-            if (!(entry instanceof Map<?, ?> event)) {
-                throw new IllegalArgumentException(
-                        "block.meta.presence_events[" + index + "] must be an object"
-                );
-            }
-            Map<String, Object> typed = new LinkedHashMap<>();
-            for (Map.Entry<?, ?> field : event.entrySet()) {
-                if (!(field.getKey() instanceof String key)) {
-                    throw new IllegalArgumentException(
-                            "block.meta.presence_events[" + index + "] contains a non-string key"
-                    );
-                }
-                typed.put(key, field.getValue());
-            }
-            events.add(CanonicalValues.freezeMap(
-                    typed, "block.meta.presence_events[" + index + "]"
-            ));
-        }
-        return List.copyOf(events);
-    }
-
-    private static List<String> strings(Object raw, String path) {
-        if (raw == null) {
-            return List.of();
-        }
-        if (!(raw instanceof List<?> entries)) {
-            throw new IllegalArgumentException(path + " must be a list");
-        }
-        Set<String> sorted = new TreeSet<>();
-        for (Object entry : entries) {
-            sorted.add(requiredString(entry, path + " entry"));
-        }
-        return List.copyOf(sorted);
-    }
-
-    private static String requiredString(Object value, String label) {
-        if (!(value instanceof String string) || string.isBlank()) {
-            throw new IllegalArgumentException(label + " must be a non-blank string");
-        }
-        return string;
-    }
 }

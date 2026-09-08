@@ -2,7 +2,6 @@ package dev.storyblock.security;
 
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.Ids;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -20,9 +19,9 @@ public final class AccessKeyService {
     public static final Duration LAST_USED_WRITE_INTERVAL = Duration.ofMinutes(5);
     public static final int SECRET_BYTES = 32;
 
-    private static final String TOKEN_PREFIX = "nv_";
-    private static final Base64.Encoder ENCODER = Base64.getUrlEncoder().withoutPadding();
-    private static final Base64.Decoder DECODER = Base64.getUrlDecoder();
+    static final String TOKEN_PREFIX = "nv_";
+    static final Base64.Encoder ENCODER = Base64.getUrlEncoder().withoutPadding();
+    static final Base64.Decoder DECODER = Base64.getUrlDecoder();
 
     private final AccessKeyStore store;
     private final byte[] pepper;
@@ -94,7 +93,7 @@ public final class AccessKeyService {
         Objects.requireNonNull(now, "now");
         ParsedCredential credential;
         try {
-            credential = parse(bearerToken);
+            credential = AccessKeyServiceParse.parse(bearerToken);
         } catch (RuntimeException failure) {
             throw new AccessAuthenticationException();
         }
@@ -148,28 +147,8 @@ public final class AccessKeyService {
         }
     }
 
-    private static ParsedCredential parse(String token) {
-        if (token == null || !token.startsWith(TOKEN_PREFIX)) {
-            throw new IllegalArgumentException("Invalid bearer token");
-        }
-        int separator = token.indexOf('.', TOKEN_PREFIX.length());
-        if (separator < 0 || token.indexOf('.', separator + 1) >= 0) {
-            throw new IllegalArgumentException("Invalid bearer token");
-        }
-        Ids.AccessKeyId keyId = new Ids.AccessKeyId(
-                token.substring(TOKEN_PREFIX.length(), separator)
-        );
-        String encoded = token.substring(separator + 1);
-        byte[] secret = DECODER.decode(encoded.getBytes(StandardCharsets.US_ASCII));
-        if (secret.length != SECRET_BYTES || !ENCODER.encodeToString(secret).equals(encoded)) {
-            Arrays.fill(secret, (byte) 0);
-            throw new IllegalArgumentException("Invalid bearer token");
-        }
-        return new ParsedCredential(keyId, secret);
-    }
-
-    private record ParsedCredential(Ids.AccessKeyId keyId, byte[] secret) {
-        private ParsedCredential {
+    record ParsedCredential(Ids.AccessKeyId keyId, byte[] secret) {
+        ParsedCredential {
             Objects.requireNonNull(keyId, "keyId");
             Objects.requireNonNull(secret, "secret");
         }

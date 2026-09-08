@@ -1,22 +1,17 @@
 package dev.storyblock.rewrite.policy;
 
 import dev.storyblock.contracts.CanonicalJson;
-import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
-import dev.storyblock.domain.UnicodeText;
 import dev.storyblock.rewrite.RewriteCandidateBlock;
 import dev.storyblock.rewrite.RewriteTextProposal;
 import dev.storyblock.style.StyleCorpusSource;
-import dev.storyblock.style.StyleCorpusSourceKind;
 import dev.storyblock.style.StyleProfileVersionView;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -68,8 +63,8 @@ public final class RewriteNearCopyChecker {
 
         List<RewriteNearCopyFinding> result = new ArrayList<>();
         for (RewriteCandidateBlock candidate : proposal.candidates()) {
-            List<String> candidateUnits = normalized(candidate.proposedText());
-            List<String> candidateNgrams = ngrams(candidateUnits);
+            List<String> candidateUnits = RewriteNearCopyCheckerNormalized.normalized(candidate.proposedText());
+            List<String> candidateNgrams = RewriteNearCopyCheckerNgrams.ngrams(candidateUnits);
             if (candidateNgrams.isEmpty()) {
                 continue;
             }
@@ -78,7 +73,7 @@ public final class RewriteNearCopyChecker {
                 Set<String> reference = new HashSet<>();
                 for (NarrativeBlock block : corpus.blocks()) {
                     if (!block.id().equals(candidate.blockId())) {
-                        reference.addAll(ngrams(normalized(block.text())));
+                        reference.addAll(RewriteNearCopyCheckerNgrams.ngrams(RewriteNearCopyCheckerNormalized.normalized(block.text())));
                     }
                 }
                 LinkedHashSet<String> matched = new LinkedHashSet<>();
@@ -99,7 +94,7 @@ public final class RewriteNearCopyChecker {
                             NGRAM_GRAPHEMES,
                             matchedCount,
                             candidateNgrams.size(),
-                            disposition(source.kind())
+                            RewriteNearCopyCheckerDisposition.disposition(source.kind())
                     ));
                 }
             }
@@ -111,28 +106,4 @@ public final class RewriteNearCopyChecker {
                 .toList();
     }
 
-    private static NearCopyDisposition disposition(StyleCorpusSourceKind kind) {
-        return kind == StyleCorpusSourceKind.OWNER
-                || kind == StyleCorpusSourceKind.PUBLIC_DOMAIN
-                ? NearCopyDisposition.MANUAL_ONLY : NearCopyDisposition.BLOCK;
-    }
-
-    private static List<String> normalized(String text) {
-        return UnicodeText.graphemes(Normalizer.normalize(
-                text, Normalizer.Form.NFC
-        ).toLowerCase(Locale.ROOT)).stream().filter(unit -> !unit.isBlank()).toList();
-    }
-
-    private static List<String> ngrams(List<String> units) {
-        if (units.size() < NGRAM_GRAPHEMES) {
-            return List.of();
-        }
-        List<String> result = new ArrayList<>();
-        for (int index = 0; index + NGRAM_GRAPHEMES <= units.size(); index++) {
-            result.add(String.join(
-                    "", units.subList(index, index + NGRAM_GRAPHEMES)
-            ));
-        }
-        return List.copyOf(result);
-    }
 }

@@ -4,7 +4,6 @@ import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.CanonicalValues;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.StableIds;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,9 +35,9 @@ public record DetectorFinding(
         if (ruleVersion == null || ruleVersion.isBlank()) {
             throw new IllegalArgumentException("Finding rule version cannot be blank");
         }
-        affectedBlockIds = distinctCopy(affectedBlockIds, "affectedBlockIds");
-        affectedSceneIds = distinctCopy(affectedSceneIds, "affectedSceneIds");
-        contextBlockIds = distinctCopy(contextBlockIds, "contextBlockIds");
+        affectedBlockIds = DetectorFindingDistinctCopy.distinctCopy(affectedBlockIds, "affectedBlockIds");
+        affectedSceneIds = DetectorFindingDistinctCopy.distinctCopy(affectedSceneIds, "affectedSceneIds");
+        contextBlockIds = DetectorFindingDistinctCopy.distinctCopy(contextBlockIds, "contextBlockIds");
         if (affectedBlockIds.isEmpty() && affectedSceneIds.isEmpty()) {
             throw new IllegalArgumentException("A detector finding must identify an affected object");
         }
@@ -113,11 +112,4 @@ public record DetectorFinding(
         return CanonicalValues.freezeMap(value, "detector_finding");
     }
 
-    private static <T> List<T> distinctCopy(List<T> values, String label) {
-        List<T> copy = List.copyOf(values);
-        if (new HashSet<>(copy).size() != copy.size()) {
-            throw new IllegalArgumentException(label + " cannot contain duplicates");
-        }
-        return copy;
-    }
 }

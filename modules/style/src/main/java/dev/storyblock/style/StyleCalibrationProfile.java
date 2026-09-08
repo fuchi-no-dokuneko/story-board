@@ -18,7 +18,7 @@ public record StyleCalibrationProfile(
         String windowConfigurationHash,
         List<StyleStratumCalibration> strata
 ) {
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final Set<String> FIELDS = Set.of(
             "calibration_schema_version", "target_corpus_hash", "contract_hash",
             "window_configuration_hash", "strata"
@@ -30,9 +30,9 @@ public record StyleCalibrationProfile(
                     "Unsupported style calibration schema version"
             );
         }
-        validateHash(targetCorpusHash, "target corpus");
-        validateHash(contractHash, "contract");
-        validateHash(windowConfigurationHash, "window configuration");
+        StyleCalibrationProfileValidateHash.validateHash(targetCorpusHash, "target corpus");
+        StyleCalibrationProfileValidateHash.validateHash(contractHash, "contract");
+        StyleCalibrationProfileValidateHash.validateHash(windowConfigurationHash, "window configuration");
         strata = List.copyOf(strata).stream()
                 .sorted(Comparator.comparing(value -> value.stratum().canonicalKey()))
                 .toList();
@@ -97,9 +97,4 @@ public record StyleCalibrationProfile(
         return CanonicalValues.freezeMap(value, "style_calibration_profile");
     }
 
-    private static void validateHash(String value, String field) {
-        if (value == null || !HASH.matcher(value).matches()) {
-            throw new IllegalArgumentException("Style calibration " + field + " hash is invalid");
-        }
-    }
 }

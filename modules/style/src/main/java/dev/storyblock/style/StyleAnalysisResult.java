@@ -53,7 +53,7 @@ public record StyleAnalysisResult(
         return CanonicalValues.freezeMap(value, "style_analysis_result");
     }
 
-    private static void requireHash(String value, String field) {
+    static void requireHash(String value, String field) {
         if (value == null || !HASH.matcher(value).matches()) {
             throw new IllegalArgumentException("Style " + field + " hash is invalid");
         }

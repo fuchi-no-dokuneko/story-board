@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 public final class StableIds {
-    private static final Pattern PREFIX = Pattern.compile("[a-z][a-z0-9]{1,7}");
+    static final Pattern PREFIX = Pattern.compile("[a-z][a-z0-9]{1,7}");
     private static final SecureRandom RANDOM = new SecureRandom();
 
     private StableIds() {
@@ -21,7 +21,7 @@ public final class StableIds {
     }
 
     public static String derive(String prefix, String sourceId, String discriminator) {
-        requirePrefix(prefix);
+        StableIdsRequirePrefix.requirePrefix(prefix);
         Objects.requireNonNull(sourceId, "sourceId");
         Objects.requireNonNull(discriminator, "discriminator");
         int separator = sourceId.indexOf('_');
@@ -58,7 +58,7 @@ public final class StableIds {
     }
 
     static String generate(String prefix, Clock clock) {
-        requirePrefix(prefix);
+        StableIdsRequirePrefix.requirePrefix(prefix);
         Objects.requireNonNull(clock, "clock");
 
         long timestamp = clock.millis() & 0x0000FFFFFFFFFFFFL;
@@ -71,7 +71,7 @@ public final class StableIds {
 
     public static String require(String value, String prefix) {
         Objects.requireNonNull(value, "value");
-        requirePrefix(prefix);
+        StableIdsRequirePrefix.requirePrefix(prefix);
         String expectedPrefix = prefix + "_";
         if (!value.startsWith(expectedPrefix)) {
             throw new IllegalArgumentException("Expected " + prefix + " identifier");
@@ -88,9 +88,4 @@ public final class StableIds {
         return value;
     }
 
-    private static void requirePrefix(String prefix) {
-        if (prefix == null || !PREFIX.matcher(prefix).matches()) {
-            throw new IllegalArgumentException("Invalid identifier prefix");
-        }
-    }
 }

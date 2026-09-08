@@ -1,10 +1,7 @@
 package dev.storyblock.application;
 
 import dev.storyblock.domain.Ids;
-import dev.storyblock.domain.UnicodeText;
-import dev.storyblock.rewrite.RewriteConstraints;
 import dev.storyblock.rewrite.RewriteModule;
-import dev.storyblock.rewrite.RewriteSourceBlock;
 import dev.storyblock.rewrite.RewriteWorkerInput;
 import dev.storyblock.rewrite.policy.ReserveRewriteCandidateCommand;
 import dev.storyblock.rewrite.policy.RewriteCandidateReservation;
@@ -12,15 +9,12 @@ import dev.storyblock.rewrite.policy.RewriteCandidateReservationSaveResult;
 import dev.storyblock.rewrite.policy.RewriteEligibility;
 import dev.storyblock.rewrite.policy.RewriteEligibilityException;
 import dev.storyblock.rewrite.policy.RewriteEligibilityPolicy;
-import dev.storyblock.rewrite.policy.RewritePolicyModule;
 import dev.storyblock.rewrite.policy.RewriteReservationStore;
 import dev.storyblock.security.AuditContext;
-import dev.storyblock.style.StyleAnalysisBlock;
 import dev.storyblock.style.StyleAnalysisJob;
 import dev.storyblock.style.StyleAnalysisStore;
 import dev.storyblock.style.StyleAnalysisWindowFinding;
 import dev.storyblock.style.StyleAnalysisWindowSlice;
-import dev.storyblock.style.StyleFeatureChannel;
 import dev.storyblock.style.StyleProfileStore;
 import dev.storyblock.style.StyleProfileVersionView;
 import java.time.Duration;
@@ -68,7 +62,7 @@ public final class RewriteGateService {
     ) {
         Objects.requireNonNull(analysisId, "analysisId");
         Objects.requireNonNull(auditContext, "auditContext");
-        validateCooldown(cooldown);
+        RewriteGateServiceValidateCooldown.validateCooldown(cooldown);
         StyleAnalysisJob analysis = analyses.getStyleAnalysis(analysisId);
         if (!analysis.statusHash().equals(expectedAnalysisStatusHash)) {
             throw new RewriteEligibilityException(
@@ -85,7 +79,7 @@ public final class RewriteGateService {
                 selectFindings(analysisId, findingIds),
                 auditContext.occurredAt()
         );
-        RewriteWorkerInput input = workerInput(analysis, eligibility);
+        RewriteWorkerInput input = RewriteGateServiceWorkerInput.workerInput(analysis, eligibility);
         RewriteCandidateReservation reservation = new RewriteCandidateReservation(
                 eligibility,
                 input,
@@ -137,78 +131,4 @@ public final class RewriteGateService {
         return List.copyOf(selected);
     }
 
-    private static RewriteWorkerInput workerInput(
-            StyleAnalysisJob analysis,
-            RewriteEligibility eligibility
-    ) {
-        List<StyleAnalysisBlock> snapshot = analysis.snapshot().blocks();
-        Ids.BlockId firstId = eligibility.affectedBlockIds().getFirst();
-        Ids.BlockId lastId = eligibility.affectedBlockIds().getLast();
-        int first = indexOf(snapshot, firstId);
-        int last = indexOf(snapshot, lastId);
-        int from = Math.max(0, first - RewriteModule.MAX_CONTEXT_BLOCKS_PER_SIDE);
-        int to = Math.min(
-                snapshot.size(), last + RewriteModule.MAX_CONTEXT_BLOCKS_PER_SIDE + 1
-        );
-        List<RewriteSourceBlock> blocks = new ArrayList<>();
-        for (int index = from; index < to; index++) {
-            var block = snapshot.get(index).block();
-            blocks.add(RewriteSourceBlock.create(
-                    block.id(), block.versionId(), block.text(),
-                    index >= first && index <= last
-            ));
-        }
-        List<String> directives = eligibility.decisions().stream()
-                .flatMap(decision -> decision.independentQ99Channels().stream())
-                .distinct()
-                .sorted(java.util.Comparator.comparing(Enum::ordinal))
-                .map(RewriteGateService::directive)
-                .toList();
-        int editableCount = eligibility.affectedBlockIds().size();
-        return new RewriteWorkerInput(
-                Ids.ProposalId.create(),
-                eligibility.analysisId(),
-                eligibility.novelId(),
-                eligibility.revisionId(),
-                eligibility.revisionHash(),
-                eligibility.profileVersionId(),
-                eligibility.profileVersionHash(),
-                eligibility.analyzerContractHash(),
-                eligibility.windowConfigurationHash(),
-                eligibility.findingIds(),
-                blocks,
-                new RewriteConstraints(
-                        editableCount,
-                        editableCount * UnicodeText.MAX_BLOCK_GRAPHEMES,
-                        directives
-                )
-        );
-    }
-
-    private static String directive(StyleFeatureChannel channel) {
-        return "Reduce " + channel.canonicalName()
-                + " style deviation while preserving facts and metadata.";
-    }
-
-    private static int indexOf(
-            List<StyleAnalysisBlock> blocks,
-            Ids.BlockId blockId
-    ) {
-        for (int index = 0; index < blocks.size(); index++) {
-            if (blocks.get(index).block().id().equals(blockId)) {
-                return index;
-            }
-        }
-        throw new RewriteEligibilityException(
-                "Rewrite affected block is outside the analysis snapshot"
-        );
-    }
-
-    private static void validateCooldown(Duration cooldown) {
-        Objects.requireNonNull(cooldown, "cooldown");
-        if (cooldown.compareTo(RewritePolicyModule.MIN_COOLDOWN) < 0
-                || cooldown.compareTo(RewritePolicyModule.MAX_COOLDOWN) > 0) {
-            throw new IllegalArgumentException("Rewrite cooldown duration is invalid");
-        }
-    }
 }

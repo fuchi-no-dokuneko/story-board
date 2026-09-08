@@ -12,7 +12,6 @@ import java.sql.Statement;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.flywaydb.core.Flyway;
-import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteDataSource;
 
@@ -50,7 +49,7 @@ public final class SqliteDatabase implements AutoCloseable {
 
         String jdbcUrl = "jdbc:sqlite:" + absolutePath;
         SQLiteDataSource migrationDataSource = new SQLiteDataSource(
-                sqliteConfig(settings, false)
+                SqliteDatabaseSqliteConfig.sqliteConfig(settings, false)
         );
         migrationDataSource.setUrl(jdbcUrl);
         try {
@@ -69,7 +68,7 @@ public final class SqliteDatabase implements AutoCloseable {
         SqliteMetrics metrics = new SqliteMetrics();
         VerifyingSqliteDataSource verified = new VerifyingSqliteDataSource(
                 jdbcUrl,
-                sqliteConfig(settings, true),
+                SqliteDatabaseSqliteConfig.sqliteConfig(settings, true),
                 settings,
                 metrics
         );
@@ -146,19 +145,6 @@ public final class SqliteDatabase implements AutoCloseable {
         pool.close();
     }
 
-    private static SQLiteConfig sqliteConfig(SqliteSettings settings, boolean explicitReadOnly) {
-        SQLiteConfig sqlite = new SQLiteConfig();
-        sqlite.setJournalMode(SQLiteConfig.JournalMode.WAL);
-        sqlite.setSynchronous(SQLiteConfig.SynchronousMode.FULL);
-        sqlite.enforceForeignKeys(true);
-        sqlite.setBusyTimeout(settings.busyTimeoutMillis());
-        sqlite.setExplicitReadOnly(explicitReadOnly);
-        sqlite.setTransactionMode(SQLiteConfig.TransactionMode.DEFERRED);
-        sqlite.setSharedCache(false);
-        sqlite.enableLoadExtension(false);
-        return sqlite;
-    }
-
     private <T> T transaction(boolean readOnly, SqliteWork<T> work) throws SQLException {
         Objects.requireNonNull(work, "work");
         long waitStarted = System.nanoTime();
@@ -167,7 +153,7 @@ public final class SqliteDatabase implements AutoCloseable {
             connection.unwrap(SQLiteConnection.class).setFirstStatementExecuted(false);
             connection.setReadOnly(readOnly);
             connection.setAutoCommit(false);
-            prepareTransaction(connection, readOnly);
+            SqliteDatabasePrepareTransaction.prepareTransaction(connection, readOnly);
             long transactionStarted = System.nanoTime();
             Throwable primaryFailure = null;
             try {
@@ -182,10 +168,10 @@ public final class SqliteDatabase implements AutoCloseable {
                 return result;
             } catch (SQLException | RuntimeException | Error exception) {
                 primaryFailure = exception;
-                rollback(connection, exception);
+                SqliteDatabaseRollback.rollback(connection, exception);
                 throw exception;
             } finally {
-                reset(connection, readOnly, primaryFailure);
+                SqliteDatabaseReset.reset(connection, readOnly, primaryFailure);
             }
         } catch (SQLException exception) {
             metrics.recordFailure(exception);
@@ -193,62 +179,4 @@ public final class SqliteDatabase implements AutoCloseable {
         }
     }
 
-    private static void rollback(Connection connection, Throwable primaryFailure) {
-        try {
-            connection.rollback();
-        } catch (SQLException rollbackFailure) {
-            primaryFailure.addSuppressed(rollbackFailure);
-        }
-    }
-
-    private static void prepareTransaction(Connection connection, boolean readOnly)
-            throws SQLException {
-        SQLiteConnection sqlite = connection.unwrap(SQLiteConnection.class);
-        sqlite.setFirstStatementExecuted(false);
-        if (readOnly) {
-            sqlite.getDatabase()._exec("PRAGMA query_only = true;");
-            return;
-        }
-
-        sqlite.getDatabase()._exec("commit;");
-        sqlite.getDatabase()._exec("PRAGMA query_only = false;");
-        sqlite.getDatabase()._exec("BEGIN IMMEDIATE;");
-        sqlite.setCurrentTransactionMode(SQLiteConfig.TransactionMode.IMMEDIATE);
-    }
-
-    private static void reset(
-            Connection connection,
-            boolean readOnly,
-            Throwable primaryFailure
-    ) throws SQLException {
-        SQLException resetFailure = null;
-        try {
-            if (!connection.getAutoCommit()) {
-                connection.setAutoCommit(true);
-            }
-        } catch (SQLException exception) {
-            resetFailure = exception;
-        }
-        if (readOnly) {
-            try {
-                connection.setReadOnly(false);
-                try (Statement statement = connection.createStatement()) {
-                    statement.execute("PRAGMA query_only = false");
-                }
-            } catch (SQLException exception) {
-                if (resetFailure == null) {
-                    resetFailure = exception;
-                } else {
-                    resetFailure.addSuppressed(exception);
-                }
-            }
-        }
-        if (resetFailure != null) {
-            if (primaryFailure != null) {
-                primaryFailure.addSuppressed(resetFailure);
-            } else {
-                throw resetFailure;
-            }
-        }
-    }
 }

@@ -1,9 +1,7 @@
 package dev.storyblock.domain;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 public sealed interface EditOperation permits
@@ -58,7 +56,7 @@ public sealed interface EditOperation permits
         public InsertBlocks {
             Objects.requireNonNull(context, "context");
             Objects.requireNonNull(insertionPoint, "insertionPoint");
-            blocks = requireDistinctDrafts(blocks, 1, "insert_blocks");
+            blocks = EditOperationRequireDistinctDrafts.requireDistinctDrafts(blocks, 1, "insert_blocks");
         }
 
         @Override
@@ -75,7 +73,7 @@ public sealed interface EditOperation permits
         public ReplaceBlockRange {
             Objects.requireNonNull(context, "context");
             Objects.requireNonNull(range, "range");
-            newBlocks = requireDistinctDrafts(newBlocks, 1, "replace_block_range");
+            newBlocks = EditOperationRequireDistinctDrafts.requireDistinctDrafts(newBlocks, 1, "replace_block_range");
         }
 
         @Override
@@ -111,7 +109,7 @@ public sealed interface EditOperation permits
             if (splitAfterGrapheme < 1) {
                 throw new IllegalArgumentException("Split anchor must be a positive grapheme offset");
             }
-            newBlocks = requireDistinctDrafts(newBlocks, 2, "split_block");
+            newBlocks = EditOperationRequireDistinctDrafts.requireDistinctDrafts(newBlocks, 2, "split_block");
             if (newBlocks.size() != 2) {
                 throw new IllegalArgumentException("split_block must produce exactly two blocks");
             }
@@ -262,22 +260,4 @@ public sealed interface EditOperation permits
         }
     }
 
-    private static List<BlockDraft> requireDistinctDrafts(
-            List<BlockDraft> drafts,
-            int minimum,
-            String operation
-    ) {
-        drafts = List.copyOf(drafts);
-        if (drafts.size() < minimum) {
-            throw new IllegalArgumentException(operation + " requires at least " + minimum + " block(s)");
-        }
-        Set<Ids.BlockId> ids = new HashSet<>();
-        for (BlockDraft draft : drafts) {
-            Objects.requireNonNull(draft, "block draft");
-            if (!ids.add(draft.id())) {
-                throw new IllegalArgumentException(operation + " cannot repeat a draft block ID");
-            }
-        }
-        return drafts;
-    }
 }

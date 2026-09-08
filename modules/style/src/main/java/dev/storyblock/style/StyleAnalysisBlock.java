@@ -37,8 +37,8 @@ public record StyleAnalysisBlock(
         if (speakerId != null && !SUBJECT.matcher(speakerId).matches()) {
             throw new IllegalArgumentException("Style analysis speaker ID is invalid");
         }
-        pov = normalizedLabel(pov, "pov");
-        narrativeMode = normalizedLabel(narrativeMode, "narrativeMode");
+        pov = StyleAnalysisBlockNormalizedLabel.normalizedLabel(pov, "pov");
+        narrativeMode = StyleAnalysisBlockNormalizedLabel.normalizedLabel(narrativeMode, "narrativeMode");
         if (intentionalStyleShiftReason != null
                 && (intentionalStyleShiftReason.isBlank()
                 || intentionalStyleShiftReason.length() > 500)) {
@@ -54,13 +54,13 @@ public record StyleAnalysisBlock(
             throw new IllegalArgumentException("Style block does not belong to its scene");
         }
         Map<String, Object> metadata = block.metadata().fields();
-        String mode = scalar(metadata.get("narrative_mode"), null);
-        String speaker = speaker(metadata.get("speech"));
+        String mode = StyleAnalysisBlockScalar.scalar(metadata.get("narrative_mode"), null);
+        String speaker = StyleAnalysisBlockSpeaker.speaker(metadata.get("speech"));
         boolean dialogue = isDialogue(block);
         if (mode == null) {
             mode = dialogue ? "dialogue" : "narration";
         }
-        String shift = scalar(
+        String shift = StyleAnalysisBlockScalar.scalar(
                 scene.extensions().get("intentional_style_shift_reason"), null
         );
         return new StyleAnalysisBlock(
@@ -68,7 +68,7 @@ public record StyleAnalysisBlock(
                 block,
                 dialogue ? StyleStratumKind.DIALOGUE : StyleStratumKind.NARRATION,
                 speaker,
-                scalar(metadata.get("pov"), "unknown"),
+                StyleAnalysisBlockScalar.scalar(metadata.get("pov"), "unknown"),
                 mode,
                 shift
         );
@@ -77,11 +77,11 @@ public record StyleAnalysisBlock(
     static boolean isDialogue(NarrativeBlock block) {
         Objects.requireNonNull(block, "block");
         Map<String, Object> metadata = block.metadata().fields();
-        String mode = scalar(metadata.get("narrative_mode"), null);
+        String mode = StyleAnalysisBlockScalar.scalar(metadata.get("narrative_mode"), null);
         return "dialogue".equalsIgnoreCase(mode)
-                || speaker(metadata.get("speech")) != null
-                || speechIsDialogue(metadata.get("speech"))
-                || containsDialogueMarks(block.text());
+                || StyleAnalysisBlockSpeaker.speaker(metadata.get("speech")) != null
+                || StyleAnalysisBlockSpeechIsDialogue.speechIsDialogue(metadata.get("speech"))
+                || StyleAnalysisBlockContainsDialogueMarks.containsDialogueMarks(block.text());
     }
 
     public static StyleAnalysisBlock fromCanonical(Map<String, Object> value) {
@@ -152,70 +152,4 @@ public record StyleAnalysisBlock(
         return CanonicalValues.freezeMap(value, "style_analysis_block");
     }
 
-    private static String normalizedLabel(String value, String field) {
-        if (value == null || value.isBlank() || value.length() > 128) {
-            throw new IllegalArgumentException("Style analysis " + field + " is invalid");
-        }
-        return value.toLowerCase(java.util.Locale.ROOT);
-    }
-
-    private static String speaker(Object speech) {
-        if (!(speech instanceof Map<?, ?> map)) {
-            return null;
-        }
-        for (String field : java.util.List.of(
-                "speaker_id", "direct_speaker_id", "character_id"
-        )) {
-            Object direct = map.get(field);
-            if (direct instanceof String text && !text.isBlank()) {
-                return text;
-            }
-        }
-        Object nested = map.get("value");
-        if (nested instanceof Map<?, ?> value) {
-            for (String field : java.util.List.of(
-                    "speaker_id", "direct_speaker_id", "character_id"
-            )) {
-                Object direct = value.get(field);
-                if (direct instanceof String text && !text.isBlank()) {
-                    return text;
-                }
-            }
-        }
-        return null;
-    }
-
-    private static boolean speechIsDialogue(Object speech) {
-        if (!(speech instanceof Map<?, ?> map)) {
-            return false;
-        }
-        String type = scalar(map.get("type"), null);
-        if (type == null && map.get("value") instanceof Map<?, ?> nested) {
-            type = scalar(nested.get("type"), null);
-        }
-        return type != null && !java.util.Set.of("none", "narrated").contains(
-                type.toLowerCase(java.util.Locale.ROOT)
-        );
-    }
-
-    private static String scalar(Object value, String fallback) {
-        if (value instanceof String text && !text.isBlank()) {
-            return text;
-        }
-        if (value instanceof Map<?, ?> map) {
-            for (String field : java.util.List.of("value", "mode", "label")) {
-                Object nested = map.get(field);
-                if (nested instanceof String text && !text.isBlank()) {
-                    return text;
-                }
-            }
-        }
-        return fallback;
-    }
-
-    private static boolean containsDialogueMarks(String text) {
-        return text.indexOf('"') >= 0 || text.indexOf('\u201c') >= 0
-                || text.indexOf('\u201d') >= 0 || text.indexOf('\u300c') >= 0
-                || text.indexOf('\u300d') >= 0;
-    }
 }

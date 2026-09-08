@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 
 @Configuration
 public class ApiSecurityConfiguration {
-    private static final String SCOPE_PREFIX = "SCOPE_";
+    static final String SCOPE_PREFIX = "SCOPE_";
 
     @Bean
     SecurityFilterChain apiSecurityFilterChain(
@@ -69,46 +69,46 @@ public class ApiSecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/v1/admin/**")
                         .hasRole("OPERATOR")
                         .requestMatchers(HttpMethod.POST, "/v1/novels", "/v1/imports")
-                        .hasAuthority(scope("novel:admin"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))
                         .requestMatchers(HttpMethod.POST, "/v1/agent/novels")
-                        .hasAuthority(scope("novel:admin"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))
                         .requestMatchers(HttpMethod.POST, "/v1/style-profiles/**")
-                        .hasAuthority(scope("style:admin"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("style:admin"))
                         .requestMatchers(HttpMethod.POST, "/v1/rewrite-proposals")
-                        .hasAuthority(scope("rewrite:propose"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("rewrite:propose"))
                         .requestMatchers(HttpMethod.POST, "/v1/internal/jobs/claims")
-                        .hasAuthority(scope("worker:execute"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("worker:execute"))
                         .requestMatchers(HttpMethod.POST, "/v1/internal/jobs/*/results")
-                        .hasAuthority(scope("worker:execute"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("worker:execute"))
                         .requestMatchers(HttpMethod.POST, "/v1/novels/*/commits")
-                        .hasAuthority(scope("novel:commit"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:commit"))
                         .requestMatchers(HttpMethod.POST, "/v1/novels/*/images")
-                        .hasAuthority(scope("novel:commit"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:commit"))
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/v1/novels/*/edit-previews",
                                 "/v1/novels/*/undo-previews"
-                        ).hasAuthority(scope("novel:propose"))
+                        ).hasAuthority(ApiSecurityConfigurationScope.scope("novel:propose"))
                         .requestMatchers(HttpMethod.POST, "/v1/novels/*/detector-runs")
-                        .hasAuthority(scope("novel:analyze"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:analyze"))
                         .requestMatchers(HttpMethod.POST, "/v1/novels/*/monitor-packets")
-                        .hasAuthority(scope("novel:read"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:read"))
                         .requestMatchers(HttpMethod.POST, "/v1/novels/*/monitor-runs")
-                        .hasAuthority(scope("monitor:submit"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("monitor:submit"))
                         .requestMatchers(HttpMethod.POST, "/v1/novels/*/style-analyses")
-                        .hasAuthority(scope("style:analyze"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("style:analyze"))
                         .requestMatchers(HttpMethod.POST, "/v1/novels/*/access-keys")
-                        .hasAuthority(scope("novel:admin"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))
                         .requestMatchers(HttpMethod.DELETE, "/v1/access-keys/*")
-                        .hasAuthority(scope("novel:admin"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))
                         .requestMatchers(HttpMethod.GET, "/v1/**")
-                        .hasAuthority(scope("novel:read"))
+                        .hasAuthority(ApiSecurityConfigurationScope.scope("novel:read"))
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/v1/novels/*/renders",
                                 "/v1/novels/*/pdf-renders",
                                 "/v1/novels/*/exports"
-                        ).hasAuthority(scope("novel:read"))
+                        ).hasAuthority(ApiSecurityConfigurationScope.scope("novel:read"))
                         .anyRequest().denyAll()
                 )
                 .exceptionHandling(exceptions -> exceptions
@@ -150,7 +150,4 @@ public class ApiSecurityConfiguration {
         return http.build();
     }
 
-    private static String scope(String value) {
-        return SCOPE_PREFIX + value;
-    }
 }

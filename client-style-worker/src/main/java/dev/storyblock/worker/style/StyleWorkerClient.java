@@ -13,8 +13,6 @@ import java.net.http.HttpResponse;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -82,7 +80,7 @@ final class StyleWorkerClient {
         if (claim.statusCode() == 204) {
             return Outcome.NO_JOB;
         }
-        requireStatus(claim, 200, "claim");
+        StyleWorkerClientRequireStatus.requireStatus(claim, 200, "claim");
         if (claim.body().length > MAX_CLAIM_RESPONSE_BYTES) {
             throw new StyleWorkerProtocolException(
                     "Style job claim response exceeds the worker limit"
@@ -91,7 +89,7 @@ final class StyleWorkerClient {
         StyleAnalysisLease lease = StyleAnalysisLease.fromCanonical(
                 parseObject(claim.body(), "style job claim response")
         );
-        String responseStatusHash = unquoteEtag(claim.headers()
+        String responseStatusHash = StyleWorkerClientUnquoteEtag.unquoteEtag(claim.headers()
                 .firstValue("ETag")
                 .orElseThrow(() -> new StyleWorkerProtocolException(
                         "Style job claim response has no ETag"
@@ -134,7 +132,7 @@ final class StyleWorkerClient {
                 resultKey,
                 completedAt
         );
-        byte[] resultBody = resultBody(completion);
+        byte[] resultBody = StyleWorkerClientResultBody.resultBody(completion);
         if (resultBody.length > MAX_RESULT_REQUEST_BYTES) {
             throw new StyleWorkerProtocolException(
                     "Style job result exceeds the API request limit"
@@ -148,16 +146,16 @@ final class StyleWorkerClient {
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .header("Idempotency-Key", resultKey)
-                .header("If-Match", quoteEtag(lease.claimedStatusHash()))
+                .header("If-Match", StyleWorkerClientQuoteEtag.quoteEtag(lease.claimedStatusHash()))
                 .POST(HttpRequest.BodyPublishers.ofByteArray(resultBody))
                 .build());
-        requireStatus(result, 200, "result submission");
+        StyleWorkerClientRequireStatus.requireStatus(result, 200, "result submission");
         Map<String, Object> response = parseObject(
                 result.body(), "style job result response"
         );
-        if (!lease.jobId().value().equals(string(response, "job_id"))
-                || !"succeeded".equals(string(response, "status"))
-                || !completion.resultHash().equals(string(response, "result_hash"))) {
+        if (!lease.jobId().value().equals(StyleWorkerClientString.string(response, "job_id"))
+                || !"succeeded".equals(StyleWorkerClientString.string(response, "status"))
+                || !completion.resultHash().equals(StyleWorkerClientString.string(response, "result_hash"))) {
             throw new StyleWorkerProtocolException(
                     "Style job result response does not match the submitted result"
             );
@@ -196,32 +194,8 @@ final class StyleWorkerClient {
         throw new IOException("Style worker request retry did not produce a response");
     }
 
-    private static byte[] resultBody(StyleAnalysisCompletionCommand completion) {
-        StyleAnalysisTrace trace = completion.trace();
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("analyzer_contract_hash", completion.analyzerContractHash());
-        result.put("attempt", completion.attempt());
-        result.put("completed_at", completion.completedAt().toString());
-        result.put("lease_owner", completion.leaseOwner());
-        result.put("profile_version_hash", completion.profileVersionHash());
-        result.put("snapshot_hash", completion.snapshotHash());
-        result.put("summary", completion.summary().canonicalValue());
-        result.put("trace", Map.of(
-                "codec", StyleAnalysisTrace.CODEC,
-                "content_base64", Base64.getEncoder().encodeToString(
-                        trace.compressedContent()
-                ),
-                "content_hash", trace.contentHash(),
-                "uncompressed_bytes", trace.uncompressedBytes()
-        ));
-        result.put("window_configuration_hash", completion.windowConfigurationHash());
-        result.put("windows", completion.windows().stream()
-                .map(value -> value.canonicalValue()).toList());
-        return CanonicalJson.bytes(result);
-    }
-
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> parseObject(byte[] body, String path) {
+    static Map<String, Object> parseObject(byte[] body, String path) {
         try {
             Object parsed = CanonicalJson.mapper().readValue(body, Map.class);
             if (!(parsed instanceof Map<?, ?> map)
@@ -234,43 +208,6 @@ final class StyleWorkerClient {
         } catch (RuntimeException failure) {
             throw new StyleWorkerProtocolException(path + " is malformed", failure);
         }
-    }
-
-    private static void requireStatus(
-            HttpResponse<byte[]> response,
-            int expected,
-            String operation
-    ) {
-        if (response.statusCode() != expected) {
-            throw new StyleWorkerProtocolException(
-                    "Style worker " + operation + " returned HTTP "
-                            + response.statusCode()
-            );
-        }
-    }
-
-    private static String string(Map<String, Object> value, String field) {
-        Object raw = value.get(field);
-        if (!(raw instanceof String text)) {
-            throw new StyleWorkerProtocolException(
-                    "Style job result response." + field + " must be a string"
-            );
-        }
-        return text;
-    }
-
-    private static String unquoteEtag(String value) {
-        if (value.length() < 2 || value.charAt(0) != '"'
-                || value.charAt(value.length() - 1) != '"') {
-            throw new StyleWorkerProtocolException(
-                    "Style job claim ETag is not a quoted strong ETag"
-            );
-        }
-        return value.substring(1, value.length() - 1);
-    }
-
-    private static String quoteEtag(String value) {
-        return '"' + value + '"';
     }
 
     private String nextKey() {

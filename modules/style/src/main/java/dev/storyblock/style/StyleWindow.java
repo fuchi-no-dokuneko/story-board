@@ -1,10 +1,8 @@
 package dev.storyblock.style;
 
-import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.CanonicalValues;
 import dev.storyblock.domain.Ids;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,8 +29,8 @@ public record StyleWindow(
             throw new IllegalArgumentException("Style window segment cannot be negative");
         }
         Objects.requireNonNull(requestedStratum, "requestedStratum");
-        pov = requireLabel(pov, "pov");
-        narrativeMode = requireLabel(narrativeMode, "narrativeMode");
+        pov = StyleWindowRequireLabel.requireLabel(pov, "pov");
+        narrativeMode = StyleWindowRequireLabel.requireLabel(narrativeMode, "narrativeMode");
         blockIds = List.copyOf(blockIds);
         if (blockIds.isEmpty() || new HashSet<>(blockIds).size() != blockIds.size()) {
             throw new IllegalArgumentException("Style window block IDs must be nonempty and unique");
@@ -45,7 +43,7 @@ public record StyleWindow(
                 || intentionalStyleShiftReason.length() > 500)) {
             throw new IllegalArgumentException("Style window shift reason is invalid");
         }
-        String calculated = calculateId(
+        String calculated = StyleWindowCalculateId.calculateId(
                 kind,
                 segment,
                 requestedStratum,
@@ -74,7 +72,7 @@ public record StyleWindow(
             String intentionalStyleShiftReason
     ) {
         return new StyleWindow(
-                calculateId(
+                StyleWindowCalculateId.calculateId(
                         kind,
                         segment,
                         requestedStratum,
@@ -115,7 +113,7 @@ public record StyleWindow(
     }
 
     public Map<String, Object> canonicalValue() {
-        Map<String, Object> value = contentValue(
+        Map<String, Object> value = StyleWindowContentValue.contentValue(
                 kind,
                 segment,
                 requestedStratum,
@@ -133,58 +131,4 @@ public record StyleWindow(
         return CanonicalValues.freezeMap(value, "style_window");
     }
 
-    private static String calculateId(
-            StyleWindowKind kind,
-            int segment,
-            StyleStratum stratum,
-            String pov,
-            String narrativeMode,
-            List<Ids.BlockId> blockIds,
-            int graphemeCount,
-            boolean fullSized,
-            String shiftReason
-    ) {
-        return CanonicalJson.hash(contentValue(
-                kind,
-                segment,
-                stratum,
-                pov,
-                narrativeMode,
-                blockIds,
-                graphemeCount,
-                fullSized,
-                shiftReason
-        ));
-    }
-
-    private static Map<String, Object> contentValue(
-            StyleWindowKind kind,
-            int segment,
-            StyleStratum stratum,
-            String pov,
-            String narrativeMode,
-            List<Ids.BlockId> blockIds,
-            int graphemeCount,
-            boolean fullSized,
-            String shiftReason
-    ) {
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("block_ids", blockIds.stream().map(Ids.BlockId::value).toList());
-        value.put("full_sized", fullSized);
-        value.put("grapheme_count", graphemeCount);
-        value.put("intentional_style_shift_reason", shiftReason);
-        value.put("kind", kind.canonicalName());
-        value.put("narrative_mode", narrativeMode);
-        value.put("pov", pov);
-        value.put("requested_stratum", stratum.canonicalValue());
-        value.put("segment", segment);
-        return value;
-    }
-
-    private static String requireLabel(String value, String field) {
-        if (value == null || value.isBlank() || value.length() > 128) {
-            throw new IllegalArgumentException("Style window " + field + " is invalid");
-        }
-        return value;
-    }
 }

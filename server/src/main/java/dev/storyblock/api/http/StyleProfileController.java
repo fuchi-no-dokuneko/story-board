@@ -37,7 +37,7 @@ public final class StyleProfileController {
             "target_state", "reason", "confirm_generated_corpus_promotion"
     );
 
-    private final StyleProfileService profiles;
+    final StyleProfileService profiles;
     private final Clock clock;
 
     public StyleProfileController(StyleProfileService profiles, Clock clock) {
@@ -134,7 +134,7 @@ public final class StyleProfileController {
         );
         HttpStatus status = result.idempotentReplay()
                 ? HttpStatus.OK : HttpStatus.CREATED;
-        String location = versionLocation(result.view());
+        String location = StyleProfileControllerVersionLocation.versionLocation(result.view());
         return ResponseEntity.status(status)
                 .location(URI.create(location))
                 .eTag(result.view().statusHash())
@@ -201,16 +201,10 @@ public final class StyleProfileController {
                 AccessPrincipalSupport.auditContext(authentication, servletRequest, now)
         );
         return ResponseEntity.ok()
-                .location(URI.create(versionLocation(result.view())))
+                .location(URI.create(StyleProfileControllerVersionLocation.versionLocation(result.view())))
                 .eTag(result.view().statusHash())
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .body(result.view().canonicalValue());
     }
 
-    private static String versionLocation(StyleProfileVersionView view) {
-        return "/v1/style-profiles/"
-                + view.profileVersion().profileId().value()
-                + "/versions/"
-                + view.profileVersion().versionId().value();
-    }
 }

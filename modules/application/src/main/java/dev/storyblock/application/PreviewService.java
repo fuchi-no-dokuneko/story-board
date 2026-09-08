@@ -1,6 +1,5 @@
 package dev.storyblock.application;
 
-import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.contracts.EditOperationCanonicalMapper;
 import dev.storyblock.contracts.NarrativeCanonicalMapper;
 import dev.storyblock.domain.EditOperation;
@@ -11,13 +10,8 @@ import dev.storyblock.renderer.RenderPacket;
 import dev.storyblock.renderer.RenderRange;
 import dev.storyblock.validator.DeterministicValidator;
 import dev.storyblock.validator.ValidationCode;
-import dev.storyblock.validator.ValidationIssue;
 import dev.storyblock.validator.ValidationReport;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -66,7 +60,7 @@ public final class PreviewService {
         Map<String, Object> normalizedMap = EditOperationCanonicalMapper.toCanonical(normalized);
 
         if (!operationReport.committable()) {
-            return rejected(base, baseHash, normalizedMap, operationReport);
+            return PreviewServiceRejected.rejected(base, baseHash, normalizedMap, operationReport);
         }
 
         ValidationReport proposedBlocks = validator.validateOperationCandidates(
@@ -74,7 +68,7 @@ public final class PreviewService {
         );
         if (proposedBlocks.violations().stream()
                 .anyMatch(issue -> NON_CANONICAL_TEXT_CODES.contains(issue.code()))) {
-            return rejected(base, baseHash, normalizedMap, proposedBlocks);
+            return PreviewServiceRejected.rejected(base, baseHash, normalizedMap, proposedBlocks);
         }
 
         RevisionManifest candidate = editor.apply(
@@ -82,7 +76,7 @@ public final class PreviewService {
         );
         String candidateHash = NarrativeCanonicalMapper.toCanonical(candidate).contentHash();
         ValidationReport candidateReport = validator.validateRevision(candidate, base, candidateHash);
-        ValidationReport combined = deduplicate(proposedBlocks.plus(candidateReport));
+        ValidationReport combined = PreviewServiceDeduplicate.deduplicate(proposedBlocks.plus(candidateReport));
         RenderPacket packet = renderer.render(candidate, candidateHash, RenderRange.all());
         RevisionDiff diff = RevisionDiff.between(base, candidate);
 
@@ -99,31 +93,4 @@ public final class PreviewService {
         );
     }
 
-    private static PreviewResponse rejected(
-            RevisionManifest base,
-            String baseHash,
-            Map<String, Object> normalizedOperation,
-            ValidationReport report
-    ) {
-        Map<String, Object> fingerprint = new LinkedHashMap<>();
-        fingerprint.put("base_hash", baseHash);
-        fingerprint.put("normalized_operation", normalizedOperation);
-        return new PreviewResponse(
-                base.id(),
-                baseHash,
-                normalizedOperation,
-                CanonicalJson.hash(fingerprint),
-                RevisionDiff.empty(),
-                null,
-                report.violations(),
-                report.warnings(),
-                false
-        );
-    }
-
-    private static ValidationReport deduplicate(ValidationReport report) {
-        List<ValidationIssue> errors = new ArrayList<>(new LinkedHashSet<>(report.violations()));
-        List<ValidationIssue> warnings = new ArrayList<>(new LinkedHashSet<>(report.warnings()));
-        return new ValidationReport(errors, warnings);
-    }
 }

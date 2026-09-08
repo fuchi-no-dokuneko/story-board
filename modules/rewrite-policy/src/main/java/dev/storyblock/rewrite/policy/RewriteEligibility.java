@@ -31,7 +31,7 @@ public record RewriteEligibility(
         List<Ids.BlockId> affectedBlockIds,
         List<StyleAnomalyDecision> decisions
 ) {
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final Set<String> FIELDS = Set.of(
             "affected_block_ids", "analysis_id", "analysis_result_hash",
             "analyzer_contract_hash", "decisions", "finding_ids", "novel_id",
@@ -41,15 +41,15 @@ public record RewriteEligibility(
 
     public RewriteEligibility {
         Objects.requireNonNull(analysisId, "analysisId");
-        requireHash(analysisResultHash, "analysis result");
+        RewriteEligibilityRequireHash.requireHash(analysisResultHash, "analysis result");
         Objects.requireNonNull(novelId, "novelId");
         Objects.requireNonNull(revisionId, "revisionId");
-        requireHash(revisionHash, "revision");
+        RewriteEligibilityRequireHash.requireHash(revisionHash, "revision");
         Objects.requireNonNull(profileId, "profileId");
         Objects.requireNonNull(profileVersionId, "profileVersionId");
-        requireHash(profileVersionHash, "profile version");
-        requireHash(analyzerContractHash, "analyzer contract");
-        requireHash(windowConfigurationHash, "window configuration");
+        RewriteEligibilityRequireHash.requireHash(profileVersionHash, "profile version");
+        RewriteEligibilityRequireHash.requireHash(analyzerContractHash, "analyzer contract");
+        RewriteEligibilityRequireHash.requireHash(windowConfigurationHash, "window configuration");
         findingIds = List.copyOf(findingIds);
         affectedBlockIds = List.copyOf(affectedBlockIds);
         decisions = List.copyOf(decisions);
@@ -155,9 +155,4 @@ public record RewriteEligibility(
         return CanonicalValues.freezeMap(value, "rewrite_eligibility");
     }
 
-    private static void requireHash(String value, String field) {
-        if (value == null || !HASH.matcher(value).matches()) {
-            throw new IllegalArgumentException("Rewrite " + field + " hash is invalid");
-        }
-    }
 }

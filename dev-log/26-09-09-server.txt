@@ -23,3 +23,9 @@ Current status: 四個應用移至根目錄；Maven 固定 3.9.11，工具與暫
 Issues: 完整檔案拆分、部署驗證及指南稽核仍待完成。
 affect scope: 啟動器、IPv4 三種策略、程序內自簽 HTTPS；第一版全模組編譯通過。
 ---
+---00:43---拆分邏輯驗證
+category: refactor
+Current status: SQL 操作與私有純函式已拆出；完整 Maven verify 通過。
+Issues: 仍有大型資料型別、控制器、測試及文件需要拆分。
+affect scope: 全部 Java 模組；既有 API、黃金資料、併發、崩潰回復測試保留。
+---

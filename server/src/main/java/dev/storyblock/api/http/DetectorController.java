@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1")
 public final class DetectorController {
-    private static final Set<String> REQUEST_FIELDS = Set.of(
+    static final Set<String> REQUEST_FIELDS = Set.of(
             "revision_id", "revision_hash", "from_block_id", "to_block_id"
     );
 
@@ -46,7 +46,7 @@ public final class DetectorController {
         Map<String, Object> request = StrictJsonRequest.parseObject(
                 requestBytes, "detector request"
         );
-        requireRequestFields(request);
+        DetectorControllerRequireRequestFields.requireRequestFields(request);
 
         String requestHash = StrictJsonRequest.string(
                 request, "revision_hash", "detector request"
@@ -58,8 +58,8 @@ public final class DetectorController {
             );
         }
         RenderRange range = new RenderRange(
-                optionalBlockId(request.get("from_block_id"), "from_block_id"),
-                optionalBlockId(request.get("to_block_id"), "to_block_id")
+                DetectorControllerOptionalBlockId.optionalBlockId(request.get("from_block_id"), "from_block_id"),
+                DetectorControllerOptionalBlockId.optionalBlockId(request.get("to_block_id"), "to_block_id")
         );
         DetectorRun run = detectors.detect(
                 requestedNovel,
@@ -75,32 +75,4 @@ public final class DetectorController {
                 .body(run.canonicalValue());
     }
 
-    private static void requireRequestFields(Map<String, Object> request) {
-        for (String required : Set.of("revision_id", "revision_hash")) {
-            if (!request.containsKey(required)) {
-                throw new IllegalArgumentException(
-                        "detector request is missing " + required
-                );
-            }
-        }
-        for (String field : request.keySet()) {
-            if (!REQUEST_FIELDS.contains(field)) {
-                throw new IllegalArgumentException(
-                        "detector request contains unknown field " + field
-                );
-            }
-        }
-    }
-
-    private static Ids.BlockId optionalBlockId(Object value, String field) {
-        if (value == null) {
-            return null;
-        }
-        if (!(value instanceof String id)) {
-            throw new IllegalArgumentException(
-                    "detector request." + field + " must be a string or null"
-            );
-        }
-        return new Ids.BlockId(id);
-    }
 }

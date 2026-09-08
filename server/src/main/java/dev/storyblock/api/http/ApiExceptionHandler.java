@@ -29,9 +29,7 @@ import dev.storyblock.storage.StorageException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -57,7 +55,7 @@ public final class ApiExceptionHandler {
             ApiFailureException failure,
             HttpServletRequest request
     ) {
-        return response(request, failure);
+        return ApiExceptionHandlerResponse.response(request, failure);
     }
 
     @ExceptionHandler(StaleHeadException.class)
@@ -65,7 +63,7 @@ public final class ApiExceptionHandler {
             StaleHeadException failure,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.PRECONDITION_FAILED,
                 "REVISION_CONFLICT",
                 "Revision conflict",
@@ -84,7 +82,7 @@ public final class ApiExceptionHandler {
             IdempotencyConflictException failure,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.CONFLICT,
                 "IDEMPOTENCY_CONFLICT",
                 "Idempotency conflict",
@@ -103,7 +101,7 @@ public final class ApiExceptionHandler {
             CommitRejectedException failure,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.UNPROCESSABLE_CONTENT,
                 "DETERMINISTIC_VALIDATION_FAILED",
                 "Deterministic validation failed",
@@ -134,7 +132,7 @@ public final class ApiExceptionHandler {
             RuntimeException failure,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.of(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.of(
                 HttpStatus.NOT_FOUND,
                 "RESOURCE_NOT_FOUND",
                 "Resource not found",
@@ -148,7 +146,7 @@ public final class ApiExceptionHandler {
             StyleAnalysisSnapshotConflictException failure,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.PRECONDITION_FAILED,
                 "ANALYSIS_SNAPSHOT_CONFLICT",
                 "Analysis snapshot conflict",
@@ -164,7 +162,7 @@ public final class ApiExceptionHandler {
             StyleAnalysisLeaseConflictException failure,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.PRECONDITION_FAILED,
                 "ANALYSIS_LEASE_CONFLICT",
                 "Analysis lease conflict",
@@ -180,7 +178,7 @@ public final class ApiExceptionHandler {
             StyleAnalysisResultConflictException failure,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.CONFLICT,
                 "ANALYSIS_RESULT_CONFLICT",
                 "Analysis result conflict",
@@ -199,7 +197,7 @@ public final class ApiExceptionHandler {
             ExpiredStyleArtifactException failure,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.of(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.of(
                 HttpStatus.GONE,
                 "ARTIFACT_EXPIRED",
                 "Artifact expired",
@@ -213,7 +211,7 @@ public final class ApiExceptionHandler {
             StyleStatusPreconditionException failure,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.PRECONDITION_FAILED,
                 "STYLE_STATUS_CONFLICT",
                 "Style status conflict",
@@ -229,7 +227,7 @@ public final class ApiExceptionHandler {
             StyleLifecycleConflictException failure,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.of(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.of(
                 HttpStatus.CONFLICT,
                 "STYLE_LIFECYCLE_CONFLICT",
                 "Style lifecycle conflict",
@@ -258,7 +256,7 @@ public final class ApiExceptionHandler {
                         "novel-access-denied",
                         "The credential cannot access the requested novel."
                 );
-        return response(request, failure);
+        return ApiExceptionHandlerResponse.response(request, failure);
     }
 
     @ExceptionHandler(AccessAuthenticationException.class)
@@ -266,7 +264,7 @@ public final class ApiExceptionHandler {
             AccessAuthenticationException ignored,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.of(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.of(
                 HttpStatus.UNAUTHORIZED,
                 "INVALID_BEARER_CREDENTIAL",
                 "Invalid bearer credential",
@@ -283,7 +281,7 @@ public final class ApiExceptionHandler {
             RuntimeException failure,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.of(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.of(
                 HttpStatus.CONFLICT,
                 "ACCESS_KEY_CONFLICT",
                 "Access key conflict",
@@ -297,7 +295,7 @@ public final class ApiExceptionHandler {
             NovelConflictException failure,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.of(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.of(
                 HttpStatus.CONFLICT,
                 "RESOURCE_CONFLICT",
                 "Resource conflict",
@@ -311,7 +309,7 @@ public final class ApiExceptionHandler {
             NoResourceFoundException ignored,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.of(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.of(
                 HttpStatus.NOT_FOUND,
                 "RESOURCE_NOT_FOUND",
                 "Resource not found",
@@ -331,7 +329,7 @@ public final class ApiExceptionHandler {
             Exception ignored,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.of(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.of(
                 HttpStatus.BAD_REQUEST,
                 "MALFORMED_REQUEST",
                 "Malformed request",
@@ -345,7 +343,7 @@ public final class ApiExceptionHandler {
             MaxUploadSizeExceededException ignored,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.CONTENT_TOO_LARGE,
                 "REQUEST_TOO_LARGE",
                 "Request too large",
@@ -361,7 +359,7 @@ public final class ApiExceptionHandler {
             ImagePayloadTooLargeException failure,
             HttpServletRequest request
     ) {
-        return response(request, new ApiFailureException(
+        return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
                 HttpStatus.CONTENT_TOO_LARGE,
                 "REQUEST_TOO_LARGE",
                 "Request too large",
@@ -377,28 +375,9 @@ public final class ApiExceptionHandler {
             StorageException ignored,
             HttpServletRequest request
     ) {
-        return response(request, ApiFailureException.unavailable(
+        return ApiExceptionHandlerResponse.response(request, ApiFailureException.unavailable(
                 "Canonical storage is temporarily unavailable."
         ));
     }
 
-    private static ResponseEntity<Map<String, Object>> response(
-            HttpServletRequest request,
-            ApiFailureException failure
-    ) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
-        headers.set(ApiRequestMetadata.REQUEST_ID_HEADER, ApiRequestMetadata.requestId(request));
-        if (failure.retryAfterSeconds() != null) {
-            headers.set(
-                    HttpHeaders.RETRY_AFTER,
-                    Integer.toString(failure.retryAfterSeconds())
-            );
-        }
-        return new ResponseEntity<>(
-                ApiProblemFactory.create(request, failure),
-                headers,
-                failure.status()
-        );
-    }
 }

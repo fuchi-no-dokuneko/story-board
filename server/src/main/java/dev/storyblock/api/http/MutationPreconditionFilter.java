@@ -30,7 +30,7 @@ public final class MutationPreconditionFilter extends OncePerRequestFilter {
             HttpMethod.PATCH.name(),
             HttpMethod.DELETE.name()
     );
-    private static final Set<String> WILDCARD_CREATION_ROUTES = Set.of(
+    static final Set<String> WILDCARD_CREATION_ROUTES = Set.of(
             "/v1/novels",
             "/v1/agent/novels",
             "/v1/imports",
@@ -94,7 +94,7 @@ public final class MutationPreconditionFilter extends OncePerRequestFilter {
         }
         boolean wildcard = "*".equals(ifMatch);
         if ((!wildcard && !STRONG_ETAG.matcher(ifMatch).matches())
-                || (wildcard && !allowsWildcardCreation(request))) {
+                || (wildcard && !MutationPreconditionFilterAllowsWildcardCreation.allowsWildcardCreation(request))) {
             reject(request, response, ApiFailureException.of(
                     HttpStatus.BAD_REQUEST,
                     "INVALID_IF_MATCH",
@@ -124,11 +124,6 @@ public final class MutationPreconditionFilter extends OncePerRequestFilter {
             requestToUse = new BufferedBodyRequest(request, body);
         }
         filterChain.doFilter(requestToUse, response);
-    }
-
-    private static boolean allowsWildcardCreation(HttpServletRequest request) {
-        return HttpMethod.POST.matches(request.getMethod())
-                && WILDCARD_CREATION_ROUTES.contains(request.getRequestURI());
     }
 
     private void reject(

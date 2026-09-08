@@ -8,10 +8,8 @@ import dev.storyblock.monitor.MonitorRunStatus;
 import dev.storyblock.monitor.MonitorSubmissionResult;
 import dev.storyblock.security.AuditContext;
 import jakarta.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpHeaders;
@@ -60,18 +58,18 @@ public final class MonitorController {
         StrictJsonRequest.requireKeys(
                 request, PACKET_FIELDS, "monitor packet request"
         );
-        String expectedHash = matchedRevisionHash(
+        String expectedHash = MonitorControllerMatchedRevisionHash.matchedRevisionHash(
                 request, ifMatch, "monitor packet request"
         );
         MonitorPacket packet = monitors.packet(
                 requestedNovel,
-                revisionId(request, "monitor packet request"),
+                MonitorControllerRevisionId.revisionId(request, "monitor packet request"),
                 expectedHash,
-                blockId(request, "target_block_id", "monitor packet request"),
-                exactInt(request.get("neighbor_count"), "monitor packet request.neighbor_count")
+                MonitorControllerBlockId.blockId(request, "target_block_id", "monitor packet request"),
+                MonitorControllerExactInt.exactInt(request.get("neighbor_count"), "monitor packet request.neighbor_count")
         );
         return ResponseEntity.ok()
-                .header(HttpHeaders.ETAG, quote(packet.revisionHash()))
+                .header(HttpHeaders.ETAG, MonitorControllerQuote.quote(packet.revisionHash()))
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .body(packet.canonicalValue());
     }
@@ -93,7 +91,7 @@ public final class MonitorController {
         StrictJsonRequest.requireKeys(
                 request, SUBMISSION_FIELDS, "monitor submission"
         );
-        String expectedHash = matchedRevisionHash(
+        String expectedHash = MonitorControllerMatchedRevisionHash.matchedRevisionHash(
                 request, ifMatch, "monitor submission"
         );
         Instant submittedAt = clock.instant();
@@ -102,10 +100,10 @@ public final class MonitorController {
         );
         MonitorSubmissionResult result = monitors.submit(
                 requestedNovel,
-                revisionId(request, "monitor submission"),
+                MonitorControllerRevisionId.revisionId(request, "monitor submission"),
                 expectedHash,
-                blockId(request, "target_block_id", "monitor submission"),
-                exactInt(request.get("neighbor_count"), "monitor submission.neighbor_count"),
+                MonitorControllerBlockId.blockId(request, "target_block_id", "monitor submission"),
+                MonitorControllerExactInt.exactInt(request.get("neighbor_count"), "monitor submission.neighbor_count"),
                 StrictJsonRequest.string(request, "rule_version", "monitor submission"),
                 StrictJsonRequest.uniqueStrings(
                         request, "affected_block_ids", "monitor submission"
@@ -118,7 +116,7 @@ public final class MonitorController {
         );
         HttpStatus status = result.idempotentReplay() ? HttpStatus.OK : HttpStatus.CREATED;
         return ResponseEntity.status(status)
-                .header(HttpHeaders.ETAG, quote(result.status().run().revisionHash()))
+                .header(HttpHeaders.ETAG, MonitorControllerQuote.quote(result.status().run().revisionHash()))
                 .header(
                         HttpHeaders.LOCATION,
                         "/v1/novels/" + novelId + "/monitor-runs/"
@@ -140,57 +138,9 @@ public final class MonitorController {
                 requestedNovel, new Ids.MonitorRunId(runId)
         );
         return ResponseEntity.ok()
-                .header(HttpHeaders.ETAG, quote(status.run().revisionHash()))
+                .header(HttpHeaders.ETAG, MonitorControllerQuote.quote(status.run().revisionHash()))
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .body(status.canonicalValue());
     }
 
-    private static Ids.RevisionId revisionId(
-            Map<String, Object> request,
-            String path
-    ) {
-        return new Ids.RevisionId(StrictJsonRequest.string(
-                request, "revision_id", path
-        ));
-    }
-
-    private static Ids.BlockId blockId(
-            Map<String, Object> request,
-            String field,
-            String path
-    ) {
-        return new Ids.BlockId(StrictJsonRequest.string(request, field, path));
-    }
-
-    private static String matchedRevisionHash(
-            Map<String, Object> request,
-            String ifMatch,
-            String path
-    ) {
-        String requestHash = StrictJsonRequest.string(
-                request, "revision_hash", path
-        );
-        String expectedHash = StrictJsonRequest.unquoteEtag(ifMatch);
-        if (!requestHash.equals(expectedHash)) {
-            throw new IllegalArgumentException(
-                    path + ".revision_hash must match If-Match"
-            );
-        }
-        return expectedHash;
-    }
-
-    private static int exactInt(Object value, String path) {
-        if (!(value instanceof Number number)) {
-            throw new IllegalArgumentException(path + " must be an integer");
-        }
-        try {
-            return new BigDecimal(number.toString()).intValueExact();
-        } catch (ArithmeticException | NumberFormatException failure) {
-            throw new IllegalArgumentException(path + " must be an exact integer", failure);
-        }
-    }
-
-    private static String quote(String hash) {
-        return '"' + hash + '"';
-    }
 }

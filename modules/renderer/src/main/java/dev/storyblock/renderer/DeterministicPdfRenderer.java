@@ -11,30 +11,23 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
-import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 
 /** Deterministically lays out a revision and packages rasterized A4 pages as PDF. */
@@ -50,7 +43,7 @@ public final class DeterministicPdfRenderer {
     private static final int BODY_SIZE = 20;
     private static final int BODY_LEADING = 32;
     private static final int MAX_IMAGE_HEIGHT = 500;
-    private static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of(
+    static final Set<String> SUPPORTED_IMAGE_TYPES = Set.of(
             "image/jpeg", "image/png"
     );
 
@@ -65,8 +58,8 @@ public final class DeterministicPdfRenderer {
         }
         Objects.requireNonNull(imageResolver, "imageResolver");
 
-        String title = title(revision);
-        Font bodyFont = chooseFont(visibleText(revision, title), Font.PLAIN, BODY_SIZE);
+        String title = DeterministicPdfRendererTitle.title(revision);
+        Font bodyFont = DeterministicPdfRendererChooseFont.chooseFont(DeterministicPdfRendererVisibleText.visibleText(revision, title), Font.PLAIN, BODY_SIZE);
         Font chapterFont = bodyFont.deriveFont(Font.BOLD, 30f);
         Font titleFont = bodyFont.deriveFont(Font.BOLD, 42f);
         PageComposer pages = new PageComposer(bodyFont, chapterFont, titleFont);
@@ -82,7 +75,7 @@ public final class DeterministicPdfRenderer {
                 for (NarrativeBlock block : scene.blocks()) {
                     if (block.image().isPresent()) {
                         BlockImage descriptor = block.image().orElseThrow();
-                        pages.image(decodeImage(descriptor, imageResolver.resolve(descriptor)));
+                        pages.image(DeterministicPdfRendererDecodeImage.decodeImage(descriptor, imageResolver.resolve(descriptor)));
                         pages.caption(block.text());
                         imageCount++;
                     } else {
@@ -94,111 +87,6 @@ public final class DeterministicPdfRenderer {
         List<BufferedImage> renderedPages = pages.finish();
         byte[] pdf = PdfWriter.write(renderedPages);
         return new PdfRenderResult(pdf, renderedPages.size(), imageCount, VERSION);
-    }
-
-    private static String title(RevisionManifest revision) {
-        Object value = revision.novel().extensions().get("title");
-        return value instanceof String text && !text.isBlank()
-                ? text.strip()
-                : "StoryBlock Novel";
-    }
-
-    private static String visibleText(RevisionManifest revision, String title) {
-        StringBuilder text = new StringBuilder(title);
-        for (NarrativeChapter chapter : revision.novel().chapters()) {
-            if (chapter.title() != null) {
-                text.append(chapter.title());
-            }
-            for (NarrativeScene scene : chapter.scenes()) {
-                if (scene.title() != null) {
-                    text.append(scene.title());
-                }
-                scene.blocks().forEach(block -> text.append(block.text()));
-            }
-        }
-        return text.toString();
-    }
-
-    private static Font chooseFont(String text, int style, int size) {
-        Set<String> available = Set.of(
-                GraphicsEnvironment.getLocalGraphicsEnvironment()
-                        .getAvailableFontFamilyNames(Locale.ROOT)
-        );
-        List<String> candidates = List.of(
-                "Noto Serif CJK TC",
-                "Noto Sans CJK TC",
-                "Droid Sans Fallback",
-                "AR PL KaitiM Big5",
-                Font.SERIF,
-                Font.DIALOG
-        );
-        Font best = new Font(Font.DIALOG, style, size);
-        long bestScore = -1;
-        for (String family : candidates) {
-            if (!family.equals(Font.SERIF) && !family.equals(Font.DIALOG)
-                    && !available.contains(family)) {
-                continue;
-            }
-            Font candidate = new Font(family, style, size);
-            long score = text.codePoints().filter(candidate::canDisplay).count();
-            if (score > bestScore) {
-                best = candidate;
-                bestScore = score;
-            }
-            if (score == text.codePoints().count()) {
-                return candidate;
-            }
-        }
-        return best;
-    }
-
-    private static BufferedImage decodeImage(BlockImage descriptor, byte[] content) {
-        Objects.requireNonNull(content, "Image resolver returned null");
-        if (!SUPPORTED_IMAGE_TYPES.contains(descriptor.mediaType())
-                || !hash(content).equals(descriptor.contentHash())) {
-            throw new IllegalArgumentException("Resolved image does not match its block descriptor");
-        }
-        try (ImageInputStream input = ImageIO.createImageInputStream(
-                new ByteArrayInputStream(content)
-        )) {
-            if (input == null) {
-                throw new IllegalArgumentException("Resolved image cannot be decoded");
-            }
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
-            if (!readers.hasNext()) {
-                throw new IllegalArgumentException("Resolved image cannot be decoded");
-            }
-            ImageReader reader = readers.next();
-            try {
-                reader.setInput(input, true, true);
-                int width = reader.getWidth(0);
-                int height = reader.getHeight(0);
-                if (width != descriptor.widthPixels() || height != descriptor.heightPixels()
-                        || (long) width * height > 40_000_000L) {
-                    throw new IllegalArgumentException(
-                            "Resolved image dimensions do not match its block descriptor"
-                    );
-                }
-                BufferedImage decoded = reader.read(0);
-                if (decoded == null) {
-                    throw new IllegalArgumentException("Resolved image cannot be decoded");
-                }
-                return decoded;
-            } finally {
-                reader.dispose();
-            }
-        } catch (IOException failure) {
-            throw new IllegalArgumentException("Resolved image cannot be decoded", failure);
-        }
-    }
-
-    private static String hash(byte[] content) {
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(content);
-            return "sha256:" + java.util.HexFormat.of().formatHex(digest);
-        } catch (NoSuchAlgorithmException failure) {
-            throw new IllegalStateException("JVM does not provide SHA-256", failure);
-        }
     }
 
     private static final class PageComposer {

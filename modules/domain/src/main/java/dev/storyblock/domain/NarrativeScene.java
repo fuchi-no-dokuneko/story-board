@@ -38,7 +38,7 @@ public record NarrativeScene(
         );
     }
 
-    private static void validateOrderedBlocks(List<NarrativeBlock> blocks) {
+    static void validateOrderedBlocks(List<NarrativeBlock> blocks) {
         Set<Ids.BlockId> ids = new HashSet<>();
         Set<Ids.BlockVersionId> versions = new HashSet<>();
         OrderKey previous = null;

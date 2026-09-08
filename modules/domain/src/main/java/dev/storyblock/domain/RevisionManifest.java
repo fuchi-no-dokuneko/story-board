@@ -21,7 +21,7 @@ public record RevisionManifest(
         if (id.equals(parentId)) {
             throw new IllegalArgumentException("A revision cannot be its own parent");
         }
-        validateGlobalIdentity(novel);
+        RevisionManifestValidateGlobalIdentity.validateGlobalIdentity(novel);
     }
 
     public Map<Ids.BlockId, Ids.BlockVersionId> selectedBlockVersions() {
@@ -62,29 +62,4 @@ public record RevisionManifest(
         throw new IllegalArgumentException("Revision does not contain block " + blockId.value());
     }
 
-    private static void validateGlobalIdentity(NarrativeNovel novel) {
-        Map<Ids.SceneId, Boolean> scenes = new LinkedHashMap<>();
-        Map<Ids.BlockId, Ids.BlockVersionId> selections = new LinkedHashMap<>();
-        Map<Ids.BlockVersionId, Ids.BlockId> versions = new LinkedHashMap<>();
-        for (NarrativeChapter chapter : novel.chapters()) {
-            for (NarrativeScene scene : chapter.scenes()) {
-                if (scenes.put(scene.id(), Boolean.TRUE) != null) {
-                    throw new IllegalArgumentException("Revision contains duplicate scene ID " + scene.id().value());
-                }
-                for (NarrativeBlock block : scene.blocks()) {
-                    if (selections.put(block.id(), block.versionId()) != null) {
-                        throw new IllegalArgumentException(
-                                "A live block must have exactly one selected version: " + block.id().value()
-                        );
-                    }
-                    if (versions.put(block.versionId(), block.id()) != null) {
-                        throw new IllegalArgumentException(
-                                "Block version cannot be selected by multiple live blocks: "
-                                        + block.versionId().value()
-                        );
-                    }
-                }
-            }
-        }
-    }
 }

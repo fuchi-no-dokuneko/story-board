@@ -22,7 +22,7 @@ public record NarrativeNovel(
         return new NarrativeNovel(id, newChapters, extensions);
     }
 
-    private static void validateChapters(List<NarrativeChapter> chapters) {
+    static void validateChapters(List<NarrativeChapter> chapters) {
         Set<Ids.ChapterId> ids = new HashSet<>();
         OrderKey previous = null;
         for (NarrativeChapter chapter : chapters) {

@@ -84,9 +84,9 @@ public final class ImageUploadService {
 
     static ImageInfo inspect(byte[] content) {
         String expectedMediaType;
-        if (isPng(content)) {
+        if (ImageUploadServiceIsPng.isPng(content)) {
             expectedMediaType = "image/png";
-        } else if (isJpeg(content)) {
+        } else if (ImageUploadServiceIsJpeg.isJpeg(content)) {
             expectedMediaType = "image/jpeg";
         } else {
             throw new IllegalArgumentException("Only PNG and JPEG image uploads are supported");
@@ -120,28 +120,6 @@ public final class ImageUploadService {
         } catch (IOException failure) {
             throw new IllegalArgumentException("Image input could not be decoded", failure);
         }
-    }
-
-    private static boolean isPng(byte[] content) {
-        byte[] signature = {
-                (byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a
-        };
-        if (content.length < signature.length) {
-            return false;
-        }
-        for (int index = 0; index < signature.length; index++) {
-            if (content[index] != signature[index]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isJpeg(byte[] content) {
-        return content.length >= 3
-                && content[0] == (byte) 0xff
-                && content[1] == (byte) 0xd8
-                && content[2] == (byte) 0xff;
     }
 
     record ImageInfo(String mediaType, int widthPixels, int heightPixels) {

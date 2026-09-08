@@ -18,7 +18,7 @@ record LlmWorkerSettings(
     private static final Pattern MODEL_ID = Pattern.compile("[A-Za-z0-9._:/-]{1,128}");
 
     LlmWorkerSettings {
-        modelEndpoint = requireModelEndpoint(modelEndpoint);
+        modelEndpoint = LlmWorkerSettingsRequireModelEndpoint.requireModelEndpoint(modelEndpoint);
         if (modelToken == null || modelToken.length() < 16
                 || modelToken.length() > 4096
                 || modelToken.chars().anyMatch(Character::isWhitespace)
@@ -28,11 +28,11 @@ record LlmWorkerSettings(
         if (modelId == null || !MODEL_ID.matcher(modelId).matches()) {
             throw new IllegalArgumentException("LLM worker model ID is invalid");
         }
-        requireDuration(
+        LlmWorkerSettingsRequireDuration.requireDuration(
                 connectTimeout, Duration.ofSeconds(1), Duration.ofSeconds(30),
                 "connect timeout"
         );
-        requireDuration(
+        LlmWorkerSettingsRequireDuration.requireDuration(
                 requestTimeout, Duration.ofSeconds(1), Duration.ofMinutes(10),
                 "request timeout"
         );
@@ -46,9 +46,9 @@ record LlmWorkerSettings(
     static LlmWorkerSettings from(Environment environment) {
         Objects.requireNonNull(environment, "environment");
         return new LlmWorkerSettings(
-                URI.create(required(environment, "storyblock.llm-worker.model-endpoint")),
-                required(environment, "storyblock.llm-worker.model-token"),
-                required(environment, "storyblock.llm-worker.model-id"),
+                URI.create(LlmWorkerSettingsRequired.required(environment, "storyblock.llm-worker.model-endpoint")),
+                LlmWorkerSettingsRequired.required(environment, "storyblock.llm-worker.model-token"),
+                LlmWorkerSettingsRequired.required(environment, "storyblock.llm-worker.model-id"),
                 environment.getProperty(
                         "storyblock.llm-worker.connect-timeout",
                         Duration.class,
@@ -76,43 +76,4 @@ record LlmWorkerSettings(
                 + ", maxResponseBytes=" + maxResponseBytes + "]";
     }
 
-    private static URI requireModelEndpoint(URI value) {
-        Objects.requireNonNull(value, "modelEndpoint");
-        String scheme = value.getScheme();
-        if (!("http".equals(scheme) || "https".equals(scheme))
-                || value.getHost() == null
-                || value.getUserInfo() != null
-                || value.getRawQuery() != null
-                || value.getRawFragment() != null
-                || value.getHost().contains(":")
-                || ("http".equals(scheme)
-                && !"127.0.0.1".equals(value.getHost()))) {
-            throw new IllegalArgumentException(
-                    "LLM worker model endpoint must use HTTPS or loopback IPv4 HTTP"
-            );
-        }
-        return value;
-    }
-
-    private static void requireDuration(
-            Duration value,
-            Duration minimum,
-            Duration maximum,
-            String field
-    ) {
-        Objects.requireNonNull(value, field);
-        if (value.compareTo(minimum) < 0 || value.compareTo(maximum) > 0) {
-            throw new IllegalArgumentException("LLM worker " + field + " is invalid");
-        }
-    }
-
-    private static String required(Environment environment, String property) {
-        String value = environment.getProperty(property);
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Required LLM worker property is missing: " + property
-            );
-        }
-        return value;
-    }
 }

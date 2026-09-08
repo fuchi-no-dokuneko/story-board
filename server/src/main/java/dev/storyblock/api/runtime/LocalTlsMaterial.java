@@ -38,7 +38,7 @@ final class LocalTlsMaterial {
         Files.setPosixFilePermissions(certificate, permissions);
     }
 
-    private static void keytool(String... arguments) throws Exception {
+    static void keytool(String... arguments) throws Exception {
         List<String> command = new ArrayList<>();
         command.add(Path.of(System.getProperty("java.home"), "bin/keytool").toString());
         command.addAll(List.of(arguments));

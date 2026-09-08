@@ -1,6 +1,5 @@
 package dev.storyblock.domain;
 
-import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -94,35 +93,13 @@ public record BlockImage(
             }
         }
         return Optional.of(new BlockImage(
-                new Ids.ArtifactId(string(map, "artifact_id")),
-                string(map, "content_hash"),
-                string(map, "media_type"),
-                integer(map, "width_px"),
-                integer(map, "height_px"),
-                string(map, "alt_text")
+                new Ids.ArtifactId(BlockImageString.string(map, "artifact_id")),
+                BlockImageString.string(map, "content_hash"),
+                BlockImageString.string(map, "media_type"),
+                BlockImageInteger.integer(map, "width_px"),
+                BlockImageInteger.integer(map, "height_px"),
+                BlockImageString.string(map, "alt_text")
         ));
     }
 
-    private static String string(Map<?, ?> map, String field) {
-        Object value = map.get(field);
-        if (!(value instanceof String text)) {
-            throw new IllegalArgumentException(EXTENSION_KEY + "." + field + " must be a string");
-        }
-        return text;
-    }
-
-    private static int integer(Map<?, ?> map, String field) {
-        Object value = map.get(field);
-        if (!(value instanceof Number number)) {
-            throw new IllegalArgumentException(EXTENSION_KEY + "." + field + " must be an integer");
-        }
-        try {
-            return new BigDecimal(number.toString()).intValueExact();
-        } catch (ArithmeticException | NumberFormatException failure) {
-            throw new IllegalArgumentException(
-                    EXTENSION_KEY + "." + field + " must be an exact integer",
-                    failure
-            );
-        }
-    }
 }

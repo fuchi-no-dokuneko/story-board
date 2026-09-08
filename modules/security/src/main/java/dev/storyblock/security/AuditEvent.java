@@ -1,11 +1,8 @@
 package dev.storyblock.security;
 
-import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.Ids;
 import java.time.Instant;
-import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 public record AuditEvent(
@@ -24,7 +21,7 @@ public record AuditEvent(
         String contentHash,
         String eventHash
 ) {
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
 
     public AuditEvent {
         Objects.requireNonNull(eventId, "eventId");
@@ -35,12 +32,12 @@ public record AuditEvent(
         Objects.requireNonNull(action, "action");
         subjectId = SecurityIdentifier.optional(subjectId, "Subject ID");
         Objects.requireNonNull(result, "result");
-        requireOptionalHash(operationHash, "Operation hash");
-        requireOptionalHash(contentHash, "Content hash");
+        AuditEventRequireOptionalHash.requireOptionalHash(operationHash, "Operation hash");
+        AuditEventRequireOptionalHash.requireOptionalHash(contentHash, "Content hash");
         if (eventHash == null || !HASH.matcher(eventHash).matches()) {
             throw new IllegalArgumentException("Event hash must be lowercase SHA-256");
         }
-        String expectedHash = calculateHash(
+        String expectedHash = AuditEventCalculateHash.calculateHash(
                 eventId,
                 occurredAt,
                 requestId,
@@ -72,7 +69,7 @@ public record AuditEvent(
             String contentHash
     ) {
         Ids.AuditEventId eventId = Ids.AuditEventId.create();
-        String eventHash = calculateHash(
+        String eventHash = AuditEventCalculateHash.calculateHash(
                 eventId,
                 context.occurredAt(),
                 context.requestId(),
@@ -105,41 +102,4 @@ public record AuditEvent(
         );
     }
 
-    private static String calculateHash(
-            Ids.AuditEventId eventId,
-            Instant occurredAt,
-            String requestId,
-            String actorId,
-            Ids.AccessKeyId actorKeyId,
-            Ids.NovelId novelId,
-            AuditAction action,
-            String subjectId,
-            Ids.OperationId operationId,
-            Ids.RevisionId revisionId,
-            AuditResult result,
-            String operationHash,
-            String contentHash
-    ) {
-        Map<String, Object> hashInput = new TreeMap<>();
-        hashInput.put("event_id", eventId.value());
-        hashInput.put("occurred_at", occurredAt.toString());
-        hashInput.put("request_id", requestId);
-        hashInput.put("actor_id", actorId);
-        hashInput.put("actor_key_id", actorKeyId == null ? null : actorKeyId.value());
-        hashInput.put("novel_id", novelId.value());
-        hashInput.put("action", action.canonicalName());
-        hashInput.put("subject_id", subjectId);
-        hashInput.put("operation_id", operationId == null ? null : operationId.value());
-        hashInput.put("revision_id", revisionId == null ? null : revisionId.value());
-        hashInput.put("result", result.canonicalName());
-        hashInput.put("operation_hash", operationHash);
-        hashInput.put("content_hash", contentHash);
-        return CanonicalJson.hash(hashInput);
-    }
-
-    private static void requireOptionalHash(String value, String field) {
-        if (value != null && !HASH.matcher(value).matches()) {
-            throw new IllegalArgumentException(field + " must be lowercase SHA-256");
-        }
-    }
 }

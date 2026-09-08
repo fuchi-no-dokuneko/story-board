@@ -1,13 +1,8 @@
 package dev.storyblock.application;
 
-import dev.storyblock.domain.BlockDraft;
-import dev.storyblock.domain.BlockRangeGuard;
-import dev.storyblock.domain.EditContext;
 import dev.storyblock.domain.EditOperation;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
-import dev.storyblock.domain.NarrativeChapter;
-import dev.storyblock.domain.NarrativeScene;
 import dev.storyblock.rewrite.RewriteCandidateBlock;
 import dev.storyblock.rewrite.RewriteTextProposal;
 import dev.storyblock.rewrite.policy.RewriteCandidateReservation;
@@ -81,7 +76,7 @@ public final class RewriteProposalReviewService {
         }
         Instant expiresAt = proposal.createdAt().plus(expiry);
         if (!reviewedAt.isBefore(expiresAt)) {
-            return unavailable(proposal, RewriteReviewState.EXPIRED, List.of(), expiresAt);
+            return RewriteProposalReviewServiceUnavailable.unavailable(proposal, RewriteReviewState.EXPIRED, List.of(), expiresAt);
         }
 
         StyleAnalysisJob analysis = analyses.getStyleAnalysis(
@@ -96,10 +91,10 @@ public final class RewriteProposalReviewService {
         );
         List<String> stale = staleReasons(reservation, stored, profile);
         if (!stale.isEmpty()) {
-            return unavailable(proposal, RewriteReviewState.STALE, stale, expiresAt);
+            return RewriteProposalReviewServiceUnavailable.unavailable(proposal, RewriteReviewState.STALE, stale, expiresAt);
         }
 
-        List<NarrativeBlock> sourceInput = exactInputBlocks(
+        List<NarrativeBlock> sourceInput = RewriteProposalReviewServiceExactInputBlocks.exactInputBlocks(
                 proposal, analysis.snapshot().blocks().stream()
                         .map(value -> value.block()).toList()
         );
@@ -110,7 +105,7 @@ public final class RewriteProposalReviewService {
                 profile,
                 corpora
         );
-        CandidateEdit edit = candidateEdit(stored, reservation, proposal, reviewedAt);
+        CandidateEdit edit = RewriteProposalReviewServiceCandidateEdit.candidateEdit(stored, reservation, proposal, reviewedAt);
         PreviewResponse preview = new PreviewService(revisionId -> revisions
                 .getRevision(reservation.novelId(), revisionId).manifest())
                 .preview(
@@ -146,18 +141,6 @@ public final class RewriteProposalReviewService {
         );
     }
 
-    private static RewriteProposalReview unavailable(
-            RewriteTextProposal proposal,
-            RewriteReviewState state,
-            List<String> staleReasons,
-            Instant expiresAt
-    ) {
-        return new RewriteProposalReview(
-                proposal.proposalId(), proposal.proposalHash(), state,
-                staleReasons, null, null, Map.of(), Map.of(), null, null, expiresAt
-        );
-    }
-
     private List<String> staleReasons(
             RewriteCandidateReservation reservation,
             StoredRevision stored,
@@ -178,7 +161,7 @@ public final class RewriteProposalReviewService {
                 )) {
             reasons.add("profile_changed");
         }
-        Map<Ids.BlockId, NarrativeBlock> current = blocks(stored);
+        Map<Ids.BlockId, NarrativeBlock> current = RewriteProposalReviewServiceBlocks.blocks(stored);
         reservation.workerInput().blocks().forEach(binding -> {
             NarrativeBlock block = current.get(binding.blockId());
             if (block == null) {
@@ -189,62 +172,6 @@ public final class RewriteProposalReviewService {
             }
         });
         return reasons.stream().distinct().sorted().toList();
-    }
-
-    private static CandidateEdit candidateEdit(
-            StoredRevision stored,
-            RewriteCandidateReservation reservation,
-            RewriteTextProposal proposal,
-            Instant reviewedAt
-    ) {
-        List<Ids.BlockId> affected = reservation.eligibility().affectedBlockIds();
-        NarrativeScene scene = null;
-        for (NarrativeChapter chapter : stored.manifest().novel().chapters()) {
-            for (NarrativeScene candidate : chapter.scenes()) {
-                if (candidate.blocks().stream().anyMatch(block ->
-                        block.id().equals(affected.getFirst()))) {
-                    scene = candidate;
-                }
-            }
-        }
-        if (scene == null || !scene.blocks().stream().map(NarrativeBlock::id)
-                .toList().containsAll(affected)) {
-            throw new IllegalArgumentException(
-                    "Rewrite affected range must remain inside one scene"
-            );
-        }
-        NarrativeScene selectedScene = scene;
-        Map<Ids.BlockId, RewriteCandidateBlock> replacements = new HashMap<>();
-        proposal.candidates().forEach(value -> replacements.put(value.blockId(), value));
-        List<BlockDraft> drafts = affected.stream().map(blockId -> {
-            NarrativeBlock source = selectedScene.blocks().stream()
-                    .filter(block -> block.id().equals(blockId)).findFirst().orElseThrow();
-            RewriteCandidateBlock replacement = replacements.get(blockId);
-            return new BlockDraft(
-                    source.id(),
-                    replacement == null ? source.text() : replacement.proposedText(),
-                    source.metadata(),
-                    source.extensions()
-            );
-        }).toList();
-        EditContext context = new EditContext(
-                Ids.OperationId.create(),
-                "rewrite:" + proposal.proposalId().value(),
-                reservation.novelId(),
-                reservation.eligibility().revisionId(),
-                reservation.eligibility().revisionHash()
-        );
-        Ids.RevisionId candidateRevisionId = Ids.RevisionId.create();
-        return new CandidateEdit(
-                new EditOperation.ReplaceBlockRange(
-                        context,
-                        BlockRangeGuard.capture(
-                                selectedScene, affected.getFirst(), affected.getLast()
-                        ),
-                        drafts
-                ),
-                candidateRevisionId
-        );
     }
 
     private StyleScores scores(
@@ -287,34 +214,7 @@ public final class RewriteProposalReviewService {
         );
     }
 
-    private static List<NarrativeBlock> exactInputBlocks(
-            RewriteTextProposal proposal,
-            List<NarrativeBlock> snapshot
-    ) {
-        Map<Ids.BlockId, NarrativeBlock> values = new HashMap<>();
-        snapshot.forEach(block -> values.put(block.id(), block));
-        return proposal.input().blocks().stream().map(binding -> {
-            NarrativeBlock block = values.get(binding.blockId());
-            if (block == null) {
-                throw new IllegalArgumentException(
-                        "Rewrite input block is outside its analysis snapshot"
-                );
-            }
-            return block;
-        }).toList();
-    }
-
-    private static Map<Ids.BlockId, NarrativeBlock> blocks(StoredRevision revision) {
-        Map<Ids.BlockId, NarrativeBlock> result = new HashMap<>();
-        revision.manifest().novel().chapters().forEach(chapter ->
-                chapter.scenes().forEach(scene ->
-                        scene.blocks().forEach(block -> result.put(block.id(), block))
-                )
-        );
-        return result;
-    }
-
-    private record CandidateEdit(
+    record CandidateEdit(
             EditOperation operation,
             Ids.RevisionId candidateRevisionId
     ) {

@@ -2,8 +2,6 @@ package dev.storyblock.application;
 
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.Ids;
-import dev.storyblock.domain.NarrativeChapter;
-import dev.storyblock.domain.NarrativeScene;
 import dev.storyblock.security.AuditContext;
 import dev.storyblock.storage.RevisionStore;
 import dev.storyblock.storage.StoredRevision;
@@ -28,11 +26,8 @@ import dev.storyblock.style.StyleLifecycleConflictException;
 import dev.storyblock.style.StyleMaskingLexicon;
 import dev.storyblock.style.StyleProfileStore;
 import dev.storyblock.style.StyleProfileVersionView;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -87,7 +82,7 @@ public final class StyleAnalysisService {
         Objects.requireNonNull(profileVersionId, "profileVersionId");
         Objects.requireNonNull(lexicon, "lexicon");
         Objects.requireNonNull(auditContext, "auditContext");
-        validateRetention(retention);
+        StyleAnalysisServiceValidateRetention.validateRetention(retention);
 
         StoredRevision stored = revisions.getRevision(novelId, revisionId);
         if (!stored.contentHash().equals(expectedRevisionHash)) {
@@ -106,7 +101,7 @@ public final class StyleAnalysisService {
                     "Style analysis requires an immutable calibrated profile version"
             );
         }
-        List<StyleAnalysisBlock> selected = selectBlocks(
+        List<StyleAnalysisBlock> selected = StyleAnalysisServiceSelectBlocks.selectBlocks(
                 stored, fromBlockId, toBlockId
         );
         StyleAnalysisSnapshot snapshot = new StyleAnalysisSnapshot(
@@ -228,12 +223,12 @@ public final class StyleAnalysisService {
             String cursor,
             int limit
     ) {
-        int after = cursor == null ? -1 : decodeCursor(analysisId, cursor);
+        int after = cursor == null ? -1 : StyleAnalysisServiceDecodeCursor.decodeCursor(analysisId, cursor);
         StyleAnalysisWindowSlice slice = analyses.listStyleAnalysisWindows(
                 analysisId, after, limit
         );
         String next = slice.nextOrdinal() == null
-                ? null : encodeCursor(analysisId, slice.nextOrdinal());
+                ? null : StyleAnalysisServiceEncodeCursor.encodeCursor(analysisId, slice.nextOrdinal());
         return new StyleAnalysisWindowPage(analysisId, slice.items(), next);
     }
 
@@ -245,86 +240,4 @@ public final class StyleAnalysisService {
         });
     }
 
-    private static List<StyleAnalysisBlock> selectBlocks(
-            StoredRevision stored,
-            Ids.BlockId fromBlockId,
-            Ids.BlockId toBlockId
-    ) {
-        List<StyleAnalysisBlock> all = new ArrayList<>();
-        for (NarrativeChapter chapter : stored.manifest().novel().chapters()) {
-            for (NarrativeScene scene : chapter.scenes()) {
-                scene.blocks().forEach(block -> all.add(
-                        StyleAnalysisBlock.from(scene, block)
-                ));
-            }
-        }
-        int first = fromBlockId == null ? 0 : indexOf(all, fromBlockId);
-        int last = toBlockId == null ? all.size() - 1 : indexOf(all, toBlockId);
-        if (first < 0 || last < first) {
-            throw new IllegalArgumentException("Style analysis block range is invalid");
-        }
-        List<StyleAnalysisBlock> selected = List.copyOf(all.subList(first, last + 1));
-        if (selected.size() > StyleAnalysisSnapshot.MAX_BLOCKS) {
-            throw new IllegalArgumentException(
-                    "Style analysis range exceeds the 1000-block limit"
-            );
-        }
-        return selected;
-    }
-
-    private static int indexOf(List<StyleAnalysisBlock> blocks, Ids.BlockId blockId) {
-        for (int index = 0; index < blocks.size(); index++) {
-            if (blocks.get(index).block().id().equals(blockId)) {
-                return index;
-            }
-        }
-        return -1;
-    }
-
-    private static void validateRetention(Duration retention) {
-        Objects.requireNonNull(retention, "retention");
-        if (retention.compareTo(Duration.ofHours(1)) < 0
-                || retention.compareTo(Duration.ofDays(365)) > 0) {
-            throw new IllegalArgumentException(
-                    "Style analysis retention must be between one hour and 365 days"
-            );
-        }
-    }
-
-    private static String encodeCursor(
-            Ids.StyleAnalysisId analysisId,
-            int ordinal
-    ) {
-        String payload = analysisId.value() + ":" + ordinal;
-        String signed = payload + ":" + CanonicalJson.hash(payload).substring(7, 23);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(
-                signed.getBytes(StandardCharsets.US_ASCII)
-        );
-    }
-
-    private static int decodeCursor(
-            Ids.StyleAnalysisId analysisId,
-            String cursor
-    ) {
-        try {
-            String decoded = new String(
-                    Base64.getUrlDecoder().decode(cursor), StandardCharsets.US_ASCII
-            );
-            int checksumSeparator = decoded.lastIndexOf(':');
-            String payload = decoded.substring(0, checksumSeparator);
-            String checksum = decoded.substring(checksumSeparator + 1);
-            String prefix = analysisId.value() + ":";
-            if (!payload.startsWith(prefix)
-                    || !checksum.equals(CanonicalJson.hash(payload).substring(7, 23))) {
-                throw new IllegalArgumentException("Cursor does not match style analysis");
-            }
-            int ordinal = Integer.parseInt(payload.substring(prefix.length()));
-            if (ordinal < 0) {
-                throw new IllegalArgumentException("Cursor ordinal is invalid");
-            }
-            return ordinal;
-        } catch (IllegalArgumentException | IndexOutOfBoundsException failure) {
-            throw new IllegalArgumentException("Style analysis cursor is invalid", failure);
-        }
-    }
 }

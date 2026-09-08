@@ -23,13 +23,13 @@ public record StyleFeatureContract(
     );
 
     public StyleFeatureContract {
-        analyzerVersion = nonBlank(analyzerVersion, "analyzerVersion");
-        featureSchemaVersion = nonBlank(featureSchemaVersion, "featureSchemaVersion");
-        tokenizerId = nonBlank(tokenizerId, "tokenizerId");
+        analyzerVersion = StyleFeatureContractNonBlank.nonBlank(analyzerVersion, "analyzerVersion");
+        featureSchemaVersion = StyleFeatureContractNonBlank.nonBlank(featureSchemaVersion, "featureSchemaVersion");
+        tokenizerId = StyleFeatureContractNonBlank.nonBlank(tokenizerId, "tokenizerId");
         if (vocabularyHash == null || !HASH.matcher(vocabularyHash).matches()) {
             throw new IllegalArgumentException("Style vocabulary hash must be lowercase SHA-256");
         }
-        normalizerVersion = nonBlank(normalizerVersion, "normalizerVersion");
+        normalizerVersion = StyleFeatureContractNonBlank.nonBlank(normalizerVersion, "normalizerVersion");
         if (additiveSmoothingAlpha == null
                 || additiveSmoothingAlpha.signum() <= 0
                 || additiveSmoothingAlpha.compareTo(BigDecimal.ONE) > 0) {
@@ -88,10 +88,4 @@ public record StyleFeatureContract(
         ), "style_feature_contract");
     }
 
-    private static String nonBlank(String value, String field) {
-        if (value == null || value.isBlank() || value.length() > 128) {
-            throw new IllegalArgumentException("Style " + field + " is invalid");
-        }
-        return value;
-    }
 }

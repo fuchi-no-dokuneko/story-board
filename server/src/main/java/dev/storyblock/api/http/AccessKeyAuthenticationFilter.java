@@ -3,23 +3,17 @@ package dev.storyblock.api.http;
 import dev.storyblock.security.AccessAuthenticationException;
 import dev.storyblock.security.AccessKeyService;
 import dev.storyblock.security.AccessPrincipal;
-import dev.storyblock.security.AccessScope;
 import dev.storyblock.storage.StorageException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -47,7 +41,7 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
         this.telemetry = java.util.Objects.requireNonNull(telemetry, "telemetry");
         this.trustedLan = trustedLan;
         this.ownerTokenHash = ownerToken == null || ownerToken.isBlank()
-                ? null : sha256(ownerToken);
+                ? null : AccessKeyAuthenticationFilterSha256.sha256(ownerToken);
         if (ownerTokenHash != null && ownerToken.length() < 32) {
             throw new IllegalArgumentException(
                     "storyblock.security.owner-token must contain at least 32 characters"
@@ -73,7 +67,7 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         if (trustedLan) {
-            authenticate(AccessPrincipal.ownerPrincipal());
+            AccessKeyAuthenticationFilterAuthenticate.authenticate(AccessPrincipal.ownerPrincipal());
             filterChain.doFilter(request, response);
             return;
         }
@@ -104,29 +98,13 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
             ));
             return;
         }
-        authenticate(principal);
+        AccessKeyAuthenticationFilterAuthenticate.authenticate(principal);
         filterChain.doFilter(request, response);
-    }
-
-    private static void authenticate(AccessPrincipal principal) {
-        List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>(
-                principal.scopes().stream()
-                .map(AccessScope::canonicalName)
-                .sorted()
-                .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
-                .toList()
-        );
-        if (principal.owner()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_OPERATOR"));
-        }
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(principal, null, authorities)
-        );
     }
 
     private boolean isOwnerToken(String token) {
         return ownerTokenHash != null && MessageDigest.isEqual(
-                ownerTokenHash, sha256(token)
+                ownerTokenHash, AccessKeyAuthenticationFilterSha256.sha256(token)
         );
     }
 
@@ -142,13 +120,4 @@ final class AccessKeyAuthenticationFilter extends OncePerRequestFilter {
         ));
     }
 
-    private static byte[] sha256(String value) {
-        try {
-            return MessageDigest.getInstance("SHA-256").digest(
-                    value.getBytes(StandardCharsets.UTF_8)
-            );
-        } catch (NoSuchAlgorithmException failure) {
-            throw new IllegalStateException("SHA-256 is unavailable", failure);
-        }
-    }
 }

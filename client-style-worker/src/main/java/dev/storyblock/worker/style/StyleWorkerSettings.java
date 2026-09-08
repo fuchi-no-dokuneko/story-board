@@ -24,7 +24,7 @@ record StyleWorkerSettings(
     );
 
     StyleWorkerSettings {
-        apiBaseUri = normalizeApiBase(apiBaseUri);
+        apiBaseUri = StyleWorkerSettingsNormalizeApiBase.normalizeApiBase(apiBaseUri);
         if (bearerToken == null || !TOKEN.matcher(bearerToken).matches()) {
             throw new IllegalArgumentException("Style worker bearer token is invalid");
         }
@@ -51,9 +51,9 @@ record StyleWorkerSettings(
     static StyleWorkerSettings from(Environment environment) {
         Objects.requireNonNull(environment, "environment");
         return new StyleWorkerSettings(
-                URI.create(required(environment, "storyblock.worker.api-base-url")),
-                required(environment, "storyblock.worker.token"),
-                new Ids.NovelId(required(
+                URI.create(StyleWorkerSettingsRequired.required(environment, "storyblock.worker.api-base-url")),
+                StyleWorkerSettingsRequired.required(environment, "storyblock.worker.token"),
+                new Ids.NovelId(StyleWorkerSettingsRequired.required(
                         environment, "storyblock.worker.novel-id"
                 )),
                 environment.getProperty(
@@ -88,30 +88,4 @@ record StyleWorkerSettings(
                 + ", pollInterval=" + pollInterval + ", runOnce=" + runOnce + "]";
     }
 
-    private static URI normalizeApiBase(URI value) {
-        Objects.requireNonNull(value, "apiBaseUri");
-        String scheme = value.getScheme();
-        if (!("http".equals(scheme) || "https".equals(scheme))
-                || value.getHost() == null
-                || value.getUserInfo() != null
-                || value.getRawQuery() != null
-                || value.getRawFragment() != null
-                || value.getHost().contains(":")) {
-            throw new IllegalArgumentException(
-                    "Style worker API base URL must be an IPv4 HTTP(S) origin"
-            );
-        }
-        String text = value.toString();
-        return URI.create(text.endsWith("/") ? text : text + "/");
-    }
-
-    private static String required(Environment environment, String property) {
-        String value = environment.getProperty(property);
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Required style worker property is missing: " + property
-            );
-        }
-        return value;
-    }
 }

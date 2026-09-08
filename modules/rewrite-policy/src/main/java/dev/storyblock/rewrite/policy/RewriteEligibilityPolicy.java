@@ -16,7 +16,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 public final class RewriteEligibilityPolicy {
     public RewriteEligibility evaluate(
@@ -70,7 +69,7 @@ public final class RewriteEligibilityPolicy {
         LinkedHashSet<Ids.BlockId> selectedBlocks = new LinkedHashSet<>();
         List<StyleAnomalyDecision> decisions = new ArrayList<>();
         for (StyleAnalysisWindowFinding finding : selectedFindings) {
-            StyleAnomalyDecision decision = decision(finding);
+            StyleAnomalyDecision decision = RewriteEligibilityPolicyDecision.decision(finding);
             if (!finding.windowId().equals(decision.operationalWindowId())
                     || !finding.canTriggerRewrite()
                     || finding.decisionState() != decision.state()
@@ -119,31 +118,4 @@ public final class RewriteEligibilityPolicy {
         );
     }
 
-    private static StyleAnomalyDecision decision(
-            StyleAnalysisWindowFinding finding
-    ) {
-        Map<String, Object> payload = finding.payload();
-        if (!payload.keySet().equals(Set.of("decision"))
-                || !(payload.get("decision") instanceof Map<?, ?> raw)) {
-            throw new RewriteEligibilityException(
-                    "Rewrite finding lacks an exact anomaly decision payload"
-            );
-        }
-        Map<String, Object> value = new HashMap<>();
-        for (Map.Entry<?, ?> entry : raw.entrySet()) {
-            if (!(entry.getKey() instanceof String key)) {
-                throw new RewriteEligibilityException(
-                        "Rewrite anomaly decision contains a non-string field"
-                );
-            }
-            value.put(key, entry.getValue());
-        }
-        try {
-            return StyleAnomalyDecision.fromCanonical(value);
-        } catch (IllegalArgumentException failure) {
-            throw new RewriteEligibilityException(
-                    "Rewrite anomaly decision is not eligible"
-            );
-        }
-    }
 }

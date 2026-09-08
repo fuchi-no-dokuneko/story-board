@@ -1,7 +1,6 @@
 package dev.storyblock.storage.sqlite;
 
 import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAccumulator;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.atomic.AtomicLong;
@@ -54,8 +53,8 @@ public final class SqliteMetrics {
                 writeAttempts.sum(),
                 writeCommits.sum(),
                 sqliteBusyTotal.sum(),
-                nanosToMillis(writerWaitNanos.sum()),
-                nanosToMillis(maxTransactionNanos.get()),
+                SqliteMetricsNanosToMillis.nanosToMillis(writerWaitNanos.sum()),
+                SqliteMetricsNanosToMillis.nanosToMillis(maxTransactionNanos.get()),
                 lastCheckpointMillis.get()
         );
     }
@@ -77,10 +76,6 @@ public final class SqliteMetrics {
             current = current.getCause();
         }
         return false;
-    }
-
-    private static long nanosToMillis(long nanos) {
-        return TimeUnit.NANOSECONDS.toMillis(nanos);
     }
 
     public record Snapshot(

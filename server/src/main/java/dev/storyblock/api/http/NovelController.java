@@ -132,7 +132,7 @@ public final class NovelController {
         );
     }
 
-    private static Map<String, Object> head(Ids.NovelId novelId, RevisionRef head) {
+    static Map<String, Object> head(Ids.NovelId novelId, RevisionRef head) {
         return Map.of(
                 "head_hash", head.contentHash(),
                 "head_revision_id", head.revisionId().value(),

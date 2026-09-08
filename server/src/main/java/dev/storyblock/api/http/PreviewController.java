@@ -7,7 +7,6 @@ import dev.storyblock.domain.EditContext;
 import dev.storyblock.domain.EditOperation;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.storage.sqlite.SqliteRevisionStore;
-import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.http.HttpHeaders;
@@ -40,13 +39,13 @@ public final class PreviewController {
     ) {
         Ids.NovelId requestedNovel = new Ids.NovelId(novelId);
         AccessPrincipalSupport.requireNovel(authentication, requestedNovel);
-        Map<String, Object> request = request(requestBytes, "edit preview request");
+        Map<String, Object> request = PreviewControllerRequest.request(requestBytes, "edit preview request");
         EditOperation operation = EditOperationCanonicalMapper.fromCanonical(
                 StrictJsonRequest.object(
                         request.get("operation"), "edit preview request.operation"
                 )
         );
-        requireContext(operation.context(), requestedNovel, ifMatch, idempotencyKey);
+        PreviewControllerRequireContext.requireContext(operation.context(), requestedNovel, ifMatch, idempotencyKey);
         PreviewResponse result = service(requestedNovel).preview(
                 revisions.getRevision(
                         requestedNovel, operation.context().baseRevisionId()
@@ -121,28 +120,4 @@ public final class PreviewController {
         ).manifest());
     }
 
-    private static Map<String, Object> request(byte[] bytes, String path) {
-        Map<String, Object> request = StrictJsonRequest.parseObject(bytes, path);
-        StrictJsonRequest.requireKeys(request, Set.of(
-                "operation", "candidate_revision_id", "candidate_created_at"
-        ), path);
-        return request;
-    }
-
-    private static void requireContext(
-            EditContext context,
-            Ids.NovelId novelId,
-            String ifMatch,
-            String idempotencyKey
-    ) {
-        if (!context.novelId().equals(novelId)
-                || !context.idempotencyKey().equals(idempotencyKey)
-                || !context.expectedHeadHash().equals(
-                        StrictJsonRequest.unquoteEtag(ifMatch)
-                )) {
-            throw new IllegalArgumentException(
-                    "Preview headers and operation context do not match"
-            );
-        }
-    }
 }

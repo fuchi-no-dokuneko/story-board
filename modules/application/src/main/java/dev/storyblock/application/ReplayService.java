@@ -28,7 +28,7 @@ public final class ReplayService {
     ) {
         StoredRevision target = store.getRevision(novelId, targetRevisionId);
         StoredCheckpoint checkpoint = store.loadCheckpoint(novelId, target.sequence())
-                .orElseThrow(() -> failure(
+                .orElseThrow(() -> ReplayServiceFailure.failure(
                         novelId, target.sequence(), "No checkpoint exists at or before target"
                 ));
         RevisionManifest start = readCheckpoint(novelId, checkpoint);
@@ -54,14 +54,14 @@ public final class ReplayService {
         StoredRevision target = store.getRevision(novelId, targetRevisionId);
         StoredRevision genesis = store.getRevisionAtSequence(novelId, 0);
         if (genesis.manifest().parentId() != null) {
-            throw failure(novelId, 0, "Genesis revision has a parent");
+            throw ReplayServiceFailure.failure(novelId, 0, "Genesis revision has a parent");
         }
         Map<Ids.RevisionId, RevisionManifest> replayed = new HashMap<>();
         replayed.put(genesis.manifest().id(), genesis.manifest());
         RevisionLookup lookup = revisionId -> {
             RevisionManifest revision = replayed.get(revisionId);
             if (revision == null) {
-                throw failure(
+                throw ReplayServiceFailure.failure(
                         novelId,
                         -1,
                         "Restore target was not present in replayed history: "
@@ -118,14 +118,14 @@ public final class ReplayService {
             Map<Ids.RevisionId, RevisionManifest> replayed
     ) {
         if (startingSequence > target.sequence()) {
-            throw failure(novelId, target.sequence(), "Replay starts after target revision");
+            throw ReplayServiceFailure.failure(novelId, target.sequence(), "Replay starts after target revision");
         }
         List<StoredOperation> operations = store.listOperations(
                 novelId, startingSequence, target.sequence()
         );
         long requiredCount = target.sequence() - startingSequence;
         if (operations.size() != requiredCount) {
-            throw failure(
+            throw ReplayServiceFailure.failure(
                     novelId,
                     target.sequence(),
                     "Operation log has a gap: expected " + requiredCount
@@ -139,13 +139,13 @@ public final class ReplayService {
         long expectedSequence = startingSequence + 1;
         for (StoredOperation stored : operations) {
             if (stored.sequence() != expectedSequence) {
-                throw failure(novelId, expectedSequence, "Operation sequence is not contiguous");
+                throw ReplayServiceFailure.failure(novelId, expectedSequence, "Operation sequence is not contiguous");
             }
             EditOperation operation = stored.operation();
             if (!operation.context().novelId().equals(novelId)
                     || !operation.context().baseRevisionId().equals(current.id())
                     || !operation.context().expectedHeadHash().equals(currentHash)) {
-                throw failure(
+                throw ReplayServiceFailure.failure(
                         novelId,
                         expectedSequence,
                         "Operation base identity or hash does not match replay state"
@@ -168,7 +168,7 @@ public final class ReplayService {
             }
             currentHash = NarrativeCanonicalMapper.toCanonical(current).contentHash();
             if (!currentHash.equals(stored.resultHash())) {
-                throw failure(
+                throw ReplayServiceFailure.failure(
                         novelId,
                         expectedSequence,
                         "Operation result hash does not match replayed content"
@@ -177,7 +177,7 @@ public final class ReplayService {
             StoredRevision relational = store.getRevisionAtSequence(novelId, expectedSequence);
             if (!relational.manifest().equals(current)
                     || !relational.contentHash().equals(currentHash)) {
-                throw failure(
+                throw ReplayServiceFailure.failure(
                         novelId,
                         expectedSequence,
                         "Stored revision does not match operation replay"
@@ -189,7 +189,7 @@ public final class ReplayService {
 
         if (!current.id().equals(target.manifest().id())
                 || !currentHash.equals(target.contentHash())) {
-            throw failure(
+            throw ReplayServiceFailure.failure(
                     novelId, target.sequence(), "Replay did not reproduce the target revision"
             );
         }
@@ -224,7 +224,7 @@ public final class ReplayService {
                 || !revision.id().equals(checkpoint.revisionId())
                 || !relational.manifest().equals(revision)
                 || !relational.contentHash().equals(checkpoint.contentHash())) {
-            throw failure(
+            throw ReplayServiceFailure.failure(
                     novelId,
                     checkpoint.sequence(),
                     "Checkpoint identity or hash does not match canonical revision"
@@ -233,11 +233,4 @@ public final class ReplayService {
         return revision;
     }
 
-    private static ReplayException failure(
-            Ids.NovelId novelId,
-            long sequence,
-            String message
-    ) {
-        return new ReplayException(novelId, sequence, message);
-    }
 }

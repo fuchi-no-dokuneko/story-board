@@ -37,7 +37,7 @@ public class StyleWorkerApplication {
         return args -> run(StyleWorkerSettings.from(environment));
     }
 
-    private static void run(StyleWorkerSettings settings) throws Exception {
+    static void run(StyleWorkerSettings settings) throws Exception {
         HttpClient http = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .followRedirects(HttpClient.Redirect.NEVER)

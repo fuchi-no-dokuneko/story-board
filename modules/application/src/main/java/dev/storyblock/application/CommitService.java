@@ -10,7 +10,6 @@ import dev.storyblock.domain.RevisionManifest;
 import dev.storyblock.security.AuditContext;
 import dev.storyblock.storage.CommitRequest;
 import dev.storyblock.storage.CommitResult;
-import dev.storyblock.storage.IdempotencyConflictException;
 import dev.storyblock.storage.RevisionRef;
 import dev.storyblock.storage.RevisionStore;
 import dev.storyblock.storage.StaleHeadException;
@@ -18,7 +17,6 @@ import dev.storyblock.storage.StoredOperation;
 import dev.storyblock.storage.StoredRevision;
 import dev.storyblock.storage.StoredArtifact;
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -63,7 +61,7 @@ public final class CommitService {
                 operation.context().novelId(), operation.context().idempotencyKey()
         );
         if (prior.isPresent()) {
-            CommitResult result = priorResult(operation, operationHash, prior.get());
+            CommitResult result = CommitServicePriorResult.priorResult(operation, operationHash, prior.get());
             store.recordCommitReplayAudit(prior.get(), auditContext);
             return result;
         }
@@ -107,7 +105,7 @@ public final class CommitService {
     }
 
     private void validateImageReferences(EditOperation operation) {
-        for (BlockDraft draft : candidateDrafts(operation)) {
+        for (BlockDraft draft : CommitServiceCandidateDrafts.candidateDrafts(operation)) {
             draft.image().ifPresent(image -> validateImageReference(
                     operation.context().novelId(), image
             ));
@@ -133,39 +131,4 @@ public final class CommitService {
         }
     }
 
-    private static List<BlockDraft> candidateDrafts(EditOperation operation) {
-        return switch (operation) {
-            case EditOperation.InsertBlocks insert -> insert.blocks();
-            case EditOperation.ReplaceBlockRange replace -> replace.newBlocks();
-            case EditOperation.SplitBlock split -> split.newBlocks();
-            case EditOperation.MergeBlocks merge -> List.of(merge.newBlock());
-            case EditOperation.ExtendBlock extend -> List.of(extend.replacement());
-            case EditOperation.DeleteBlockRange ignored -> List.of();
-            case EditOperation.MoveBlockRange ignored -> List.of();
-            case EditOperation.CorrectBlockMeta ignored -> List.of();
-            case EditOperation.SetSceneInitialMeta ignored -> List.of();
-            case EditOperation.RestoreRevisionContent ignored -> List.of();
-        };
-    }
-
-    private static CommitResult priorResult(
-            EditOperation operation,
-            String operationHash,
-            StoredOperation prior
-    ) {
-        if (!prior.operationHash().equals(operationHash)) {
-            throw new IdempotencyConflictException(
-                    operation.context().idempotencyKey(),
-                    prior.operationHash(),
-                    operationHash
-            );
-        }
-        return new CommitResult(
-                new RevisionRef(
-                        prior.resultRevisionId(), prior.sequence(), prior.resultHash()
-                ),
-                prior.operation().context().operationId(),
-                true
-        );
-    }
 }

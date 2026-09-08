@@ -42,14 +42,14 @@ public record StyleChannelCalibration(
                     "Style calibration distances must be nonnegative and bounded"
             );
         }
-        sorted.replaceAll(StyleChannelCalibration::normalized);
+        sorted.replaceAll(StyleChannelCalibrationNormalized::normalized);
         sorted.sort(BigDecimal::compareTo);
         referenceDistances = List.copyOf(sorted);
         Statistics calculated = Statistics.from(referenceDistances);
-        if (!calculated.median().equals(normalized(median))
-                || !calculated.mad().equals(normalized(mad))
-                || !calculated.q95().equals(normalized(q95))
-                || !calculated.q99().equals(normalized(q99))) {
+        if (!calculated.median().equals(StyleChannelCalibrationNormalized.normalized(median))
+                || !calculated.mad().equals(StyleChannelCalibrationNormalized.normalized(mad))
+                || !calculated.q95().equals(StyleChannelCalibrationNormalized.normalized(q95))
+                || !calculated.q99().equals(StyleChannelCalibrationNormalized.normalized(q99))) {
             throw new IllegalArgumentException(
                     "Style calibration summaries do not match reference distances"
             );
@@ -65,7 +65,7 @@ public record StyleChannelCalibration(
             List<BigDecimal> distances
     ) {
         List<BigDecimal> sorted = new ArrayList<>(List.copyOf(distances));
-        sorted.replaceAll(StyleChannelCalibration::normalized);
+        sorted.replaceAll(StyleChannelCalibrationNormalized::normalized);
         sorted.sort(BigDecimal::compareTo);
         Statistics statistics = Statistics.from(sorted);
         return new StyleChannelCalibration(
@@ -105,7 +105,7 @@ public record StyleChannelCalibration(
     }
 
     public BigDecimal percentile(BigDecimal distance) {
-        BigDecimal normalizedDistance = normalized(distance);
+        BigDecimal normalizedDistance = StyleChannelCalibrationNormalized.normalized(distance);
         if (referenceDistances.isEmpty()) {
             return BigDecimal.ZERO;
         }
@@ -122,7 +122,7 @@ public record StyleChannelCalibration(
     }
 
     public BigDecimal robustZ(BigDecimal distance) {
-        distance = normalized(distance);
+        distance = StyleChannelCalibrationNormalized.normalized(distance);
         BigDecimal absolute = distance.subtract(median).abs();
         if (mad.signum() == 0) {
             return absolute.signum() == 0
@@ -148,13 +148,6 @@ public record StyleChannelCalibration(
         return CanonicalValues.freezeMap(value, "style_channel_calibration");
     }
 
-    private static BigDecimal normalized(BigDecimal value) {
-        if (value == null || value.signum() < 0) {
-            throw new IllegalArgumentException("Style calibration value is invalid");
-        }
-        return value.stripTrailingZeros();
-    }
-
     private record Statistics(
             BigDecimal median,
             BigDecimal mad,
@@ -176,10 +169,10 @@ public record StyleChannelCalibration(
                     .sorted()
                     .toList();
             return new Statistics(
-                    normalized(median),
-                    normalized(median(deviations)),
-                    normalized(quantile(sorted, 95)),
-                    normalized(quantile(sorted, 99))
+                    StyleChannelCalibrationNormalized.normalized(median),
+                    StyleChannelCalibrationNormalized.normalized(median(deviations)),
+                    StyleChannelCalibrationNormalized.normalized(quantile(sorted, 95)),
+                    StyleChannelCalibrationNormalized.normalized(quantile(sorted, 99))
             );
         }
 

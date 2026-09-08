@@ -46,7 +46,7 @@ public final class StyleAnalysisExecutor {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Style analysis requires persisted calibration statistics"
                 ));
-        StyleFeatureSet baseline = requiredBaseline(content.featureSet());
+        StyleFeatureSet baseline = StyleAnalysisExecutorRequiredBaseline.requiredBaseline(content.featureSet());
         List<StyleWindowFeatures> extracted = rollingAnalyzer.analyze(
                 snapshot.blocks(),
                 snapshot.maskingLexicon(),
@@ -67,11 +67,11 @@ public final class StyleAnalysisExecutor {
                 .filter(score -> score.window().primaryDecisionEligible()).toList()) {
             List<StyleWindowScore> nonOverlap = scores.stream()
                     .filter(score -> score.window().sustainmentEligible())
-                    .filter(score -> sameContext(operational, score))
+                    .filter(score -> StyleAnalysisExecutorSameContext.sameContext(operational, score))
                     .toList();
             List<StyleWindowScore> micro = scores.stream()
                     .filter(score -> score.window().localizationOnly())
-                    .filter(score -> sameContext(operational, score))
+                    .filter(score -> StyleAnalysisExecutorSameContext.sameContext(operational, score))
                     .toList();
             StyleAnomalyDecision decision = policy.evaluate(
                     operational, nonOverlap, micro
@@ -124,32 +124,4 @@ public final class StyleAnalysisExecutor {
         );
     }
 
-    private static StyleFeatureSet requiredBaseline(StyleFeatureSet source) {
-        return new StyleFeatureSet(
-                source.sourceHash(),
-                source.contract(),
-                source.channels().stream()
-                        .filter(vector -> vector.channel().required())
-                        .toList()
-        );
-    }
-
-    private static boolean sameContext(
-            StyleWindowScore operational,
-            StyleWindowScore supporting
-    ) {
-        StyleWindow expected = operational.window();
-        StyleWindow actual = supporting.window();
-        return expected.segment() == actual.segment()
-                && expected.requestedStratum().equals(actual.requestedStratum())
-                && expected.pov().equals(actual.pov())
-                && expected.narrativeMode().equals(actual.narrativeMode())
-                && Objects.equals(
-                        expected.intentionalStyleShiftReason(),
-                        actual.intentionalStyleShiftReason()
-                )
-                && operational.profileSelection().selectedStratum().equals(
-                        supporting.profileSelection().selectedStratum()
-                );
-    }
 }

@@ -4,17 +4,11 @@ import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.contracts.CanonicalRevision;
 import dev.storyblock.contracts.EditOperationCanonicalMapper;
 import dev.storyblock.contracts.NarrativeCanonicalMapper;
-import dev.storyblock.domain.BlockMetadata;
-import dev.storyblock.domain.EditOperation;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
-import dev.storyblock.domain.NarrativeChapter;
-import dev.storyblock.domain.NarrativeScene;
-import dev.storyblock.domain.OrderKey;
 import dev.storyblock.domain.RevisionManifest;
 import dev.storyblock.security.AccessKeyInsertResult;
 import dev.storyblock.security.AccessKeyStore;
-import dev.storyblock.security.AuditAction;
 import dev.storyblock.security.AuditContext;
 import dev.storyblock.security.AuditEvent;
 import dev.storyblock.security.AuditResult;
@@ -51,7 +45,6 @@ import dev.storyblock.storage.CommitResult;
 import dev.storyblock.storage.ExportJobRequest;
 import dev.storyblock.storage.ExportJobResult;
 import dev.storyblock.storage.IdempotencyConflictException;
-import dev.storyblock.storage.MissingNovelException;
 import dev.storyblock.storage.MissingRevisionException;
 import dev.storyblock.storage.PortableArtifactPutRequest;
 import dev.storyblock.storage.PortableArtifactPutResult;
@@ -65,7 +58,6 @@ import dev.storyblock.storage.StoredExportJob;
 import dev.storyblock.storage.StoredOperation;
 import dev.storyblock.storage.StoredRevision;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -170,9 +162,9 @@ public final class SqliteRevisionStore implements
                 statement.setString(4, CanonicalRevision.SCHEMA_VERSION);
                 statement.executeUpdate();
             }
-            insertRevision(connection, initialRevision, 0, contentHash, envelope, null);
-            rebuildProjection(connection, initialRevision);
-            insertCheckpoint(connection, initialRevision, 0, contentHash, envelope);
+            SqliteRevisionStoreInsertRevision.insertRevision(connection, initialRevision, 0, contentHash, envelope, null);
+            SqliteRevisionStoreRebuildProjection.rebuildProjection(connection, initialRevision);
+            SqliteRevisionStoreInsertCheckpoint.insertCheckpoint(connection, initialRevision, 0, contentHash, envelope);
             return null;
         });
     }
@@ -194,7 +186,7 @@ public final class SqliteRevisionStore implements
 
     @Override
     public RevisionRef getHead(Ids.NovelId novelId) {
-        return read(connection -> requireHead(connection, novelId));
+        return read(connection -> SqliteRevisionStoreRequireHead.requireHead(connection, novelId));
     }
 
     @Override
@@ -212,7 +204,7 @@ public final class SqliteRevisionStore implements
                     if (!result.next()) {
                         throw new MissingRevisionException(novelId, revisionId);
                     }
-                    return readRevision(result, novelId, revisionId);
+                    return SqliteRevisionStoreReadRevision.readRevision(result, novelId, revisionId);
                 }
             }
         });
@@ -235,7 +227,7 @@ public final class SqliteRevisionStore implements
                                 "Novel " + novelId.value() + " has no revision sequence " + sequence
                         );
                     }
-                    return readRevision(
+                    return SqliteRevisionStoreReadRevision.readRevision(
                             result, novelId, new Ids.RevisionId(result.getString("revision_id"))
                     );
                 }
@@ -316,7 +308,7 @@ public final class SqliteRevisionStore implements
                 statement.setLong(3, throughSequence);
                 try (ResultSet result = statement.executeQuery()) {
                     while (result.next()) {
-                        operations.add(readOperation(result));
+                        operations.add(SqliteRevisionStoreReadOperation.readOperation(result));
                     }
                 }
             }
@@ -342,7 +334,7 @@ public final class SqliteRevisionStore implements
                                 new Ids.OperationId(result.getString("operation_id")),
                                 new Ids.RevisionId(result.getString("deleted_in_revision_id")),
                                 new Ids.SceneId(result.getString("source_scene_id")),
-                                parseBlock(result.getString("block_json"))
+                                SqliteRevisionStoreParseBlock.parseBlock(result.getString("block_json"))
                         ));
                     }
                 }
@@ -355,13 +347,13 @@ public final class SqliteRevisionStore implements
     public dev.storyblock.contracts.CanonicalNovelPackage loadCanonicalPackage(
             Ids.NovelId novelId
     ) {
-        return read(connection -> SqliteCanonicalTransfer.loadPackage(connection, novelId));
+        return read(connection -> SqliteTransferLoadPackage.loadPackage(connection, novelId));
     }
 
     @Override
     public CanonicalImportResult importCanonicalPackage(CanonicalImportRequest request) {
         Objects.requireNonNull(request, "request");
-        return write(connection -> SqliteCanonicalTransfer.importPackage(
+        return write(connection -> SqliteTransferImportPackage.importPackage(
                 connection, request, importFaultInjector
         ));
     }
@@ -369,25 +361,25 @@ public final class SqliteRevisionStore implements
     @Override
     public ExportJobResult createCompletedExport(ExportJobRequest request) {
         Objects.requireNonNull(request, "request");
-        return write(connection -> SqliteCanonicalTransfer.createCompletedExport(
+        return write(connection -> SqliteTransferCreateCompletedExport.createCompletedExport(
                 connection, request
         ));
     }
 
     @Override
     public StoredExportJob getExportJob(Ids.JobId jobId) {
-        return read(connection -> SqliteCanonicalTransfer.getExportJob(connection, jobId));
+        return read(connection -> SqliteTransferGetExportJob.getExportJob(connection, jobId));
     }
 
     @Override
     public StoredArtifact getArtifact(Ids.ArtifactId artifactId) {
-        return read(connection -> SqliteCanonicalTransfer.getArtifact(connection, artifactId));
+        return read(connection -> SqliteTransferGetArtifact.getArtifact(connection, artifactId));
     }
 
     @Override
     public PortableArtifactPutResult putPortableArtifact(PortableArtifactPutRequest request) {
         Objects.requireNonNull(request, "request");
-        return write(connection -> SqliteCanonicalTransfer.putPortableArtifact(
+        return write(connection -> SqliteTransferPutPortableArtifact.putPortableArtifact(
                 connection, request
         ));
     }
@@ -401,7 +393,7 @@ public final class SqliteRevisionStore implements
     ) {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(auditContext, "auditContext");
-        return write(connection -> SqliteSecurityStore.issueAccessKey(
+        return write(connection -> SqliteSecurityIssueAccessKey.issueAccessKey(
                 connection, key, idempotencyKey, requestHash, auditContext
         ));
     }
@@ -409,7 +401,7 @@ public final class SqliteRevisionStore implements
     @Override
     public Optional<StoredAccessKey> findAccessKey(Ids.AccessKeyId keyId) {
         Objects.requireNonNull(keyId, "keyId");
-        return read(connection -> SqliteSecurityStore.findAccessKey(connection, keyId));
+        return read(connection -> SqliteSecurityFindAccessKey.findAccessKey(connection, keyId));
     }
 
     @Override
@@ -421,7 +413,7 @@ public final class SqliteRevisionStore implements
         Objects.requireNonNull(keyId, "keyId");
         Objects.requireNonNull(expectedNovelId, "expectedNovelId");
         Objects.requireNonNull(auditContext, "auditContext");
-        return write(connection -> SqliteSecurityStore.revokeAccessKey(
+        return write(connection -> SqliteSecurityRevokeAccessKey.revokeAccessKey(
                 connection, keyId, expectedNovelId, auditContext
         ));
     }
@@ -435,7 +427,7 @@ public final class SqliteRevisionStore implements
         Objects.requireNonNull(keyId, "keyId");
         Objects.requireNonNull(usedAt, "usedAt");
         Objects.requireNonNull(staleBefore, "staleBefore");
-        return write(connection -> SqliteSecurityStore.touchAccessKeyLastUsed(
+        return write(connection -> SqliteSecurityTouchAccessKeyLastUsed.touchAccessKeyLastUsed(
                 connection, keyId, usedAt, staleBefore
         ));
     }
@@ -444,7 +436,7 @@ public final class SqliteRevisionStore implements
     public void appendAuditEvent(AuditEvent event) {
         Objects.requireNonNull(event, "event");
         write(connection -> {
-            SqliteSecurityStore.insertAuditEvent(connection, event);
+            SqliteSecurityInsertAuditEvent.insertAuditEvent(connection, event);
             return null;
         });
     }
@@ -452,7 +444,7 @@ public final class SqliteRevisionStore implements
     @Override
     public List<AuditEvent> listAuditEvents(Ids.NovelId novelId) {
         Objects.requireNonNull(novelId, "novelId");
-        return read(connection -> SqliteSecurityStore.listAuditEvents(
+        return read(connection -> SqliteSecurityListAuditEvents.listAuditEvents(
                 connection, novelId
         ));
     }
@@ -473,7 +465,7 @@ public final class SqliteRevisionStore implements
     public CommitResult commitCas(CommitRequest request, AuditContext auditContext) {
         Objects.requireNonNull(request, "request");
         Objects.requireNonNull(auditContext, "auditContext");
-        verifyRequestHashes(request);
+        SqliteRevisionStoreVerifyRequestHashes.verifyRequestHashes(request);
         return write(connection -> commit(connection, request, auditContext));
     }
 
@@ -485,7 +477,7 @@ public final class SqliteRevisionStore implements
         Objects.requireNonNull(operation, "operation");
         Objects.requireNonNull(auditContext, "auditContext");
         write(connection -> {
-            SqliteSecurityStore.insertAuditEvent(connection, commitAuditEvent(
+            SqliteSecurityInsertAuditEvent.insertAuditEvent(connection, SqliteRevisionStoreCommitAuditEvent.commitAuditEvent(
                     operation.operation().context().novelId(),
                     operation.operation().context().operationId(),
                     operation.resultRevisionId(),
@@ -501,7 +493,7 @@ public final class SqliteRevisionStore implements
     @Override
     public MonitorSaveResult saveMonitorRun(StoredMonitorRun run) {
         Objects.requireNonNull(run, "run");
-        return write(connection -> SqliteMonitorStore.save(connection, run));
+        return write(connection -> SqliteMonitorSave.save(connection, run));
     }
 
     @Override
@@ -511,13 +503,13 @@ public final class SqliteRevisionStore implements
     ) {
         Objects.requireNonNull(novelId, "novelId");
         Objects.requireNonNull(runId, "runId");
-        return read(connection -> SqliteMonitorStore.get(connection, novelId, runId));
+        return read(connection -> SqliteMonitorGet.get(connection, novelId, runId));
     }
 
     @Override
     public StyleProfileSaveResult createStyleProfile(CreateStyleProfileCommand command) {
         Objects.requireNonNull(command, "command");
-        return write(connection -> SqliteStyleProfileStore.createProfile(
+        return write(connection -> SqliteProfileCreateProfile.createProfile(
                 connection, command
         ));
     }
@@ -525,7 +517,7 @@ public final class SqliteRevisionStore implements
     @Override
     public StyleProfile getStyleProfile(Ids.StyleProfileId profileId) {
         Objects.requireNonNull(profileId, "profileId");
-        return read(connection -> SqliteStyleProfileStore.getProfile(
+        return read(connection -> SqliteProfileGetProfile.getProfile(
                 connection, profileId
         ));
     }
@@ -535,7 +527,7 @@ public final class SqliteRevisionStore implements
             CreateStyleProfileVersionCommand command
     ) {
         Objects.requireNonNull(command, "command");
-        return write(connection -> SqliteStyleProfileStore.createVersion(
+        return write(connection -> SqliteProfileCreateVersion.createVersion(
                 connection, command
         ));
     }
@@ -547,7 +539,7 @@ public final class SqliteRevisionStore implements
     ) {
         Objects.requireNonNull(profileId, "profileId");
         Objects.requireNonNull(versionId, "versionId");
-        return read(connection -> SqliteStyleProfileStore.getVersion(
+        return read(connection -> SqliteProfileGetVersion.getVersion(
                 connection, profileId, versionId
         ));
     }
@@ -557,7 +549,7 @@ public final class SqliteRevisionStore implements
             TransitionStyleProfileVersionCommand command
     ) {
         Objects.requireNonNull(command, "command");
-        return write(connection -> SqliteStyleProfileStore.transition(
+        return write(connection -> SqliteProfileTransition.transition(
                 connection, command
         ));
     }
@@ -565,19 +557,19 @@ public final class SqliteRevisionStore implements
     @Override
     public StyleAnalysisJobSaveResult createStyleAnalysisJob(StyleAnalysisJob job) {
         Objects.requireNonNull(job, "job");
-        return write(connection -> SqliteStyleAnalysisStore.createJob(connection, job));
+        return write(connection -> SqliteAnalysisCreateJob.createJob(connection, job));
     }
 
     @Override
     public StyleAnalysisJob getStyleAnalysisJob(Ids.JobId jobId) {
         Objects.requireNonNull(jobId, "jobId");
-        return read(connection -> SqliteStyleAnalysisStore.getJob(connection, jobId));
+        return read(connection -> SqliteAnalysisGetJob.getJob(connection, jobId));
     }
 
     @Override
     public StyleAnalysisJob getStyleAnalysis(Ids.StyleAnalysisId analysisId) {
         Objects.requireNonNull(analysisId, "analysisId");
-        return read(connection -> SqliteStyleAnalysisStore.getAnalysis(
+        return read(connection -> SqliteAnalysisGetAnalysis.getAnalysis(
                 connection, analysisId
         ));
     }
@@ -587,7 +579,7 @@ public final class SqliteRevisionStore implements
             StyleAnalysisClaimCommand command
     ) {
         Objects.requireNonNull(command, "command");
-        return write(connection -> SqliteStyleAnalysisStore.claim(connection, command));
+        return write(connection -> SqliteAnalysisClaim.claim(connection, command));
     }
 
     @Override
@@ -595,7 +587,7 @@ public final class SqliteRevisionStore implements
             StyleAnalysisCompletionCommand command
     ) {
         Objects.requireNonNull(command, "command");
-        return write(connection -> SqliteStyleAnalysisStore.complete(
+        return write(connection -> SqliteAnalysisComplete.complete(
                 connection, command
         ));
     }
@@ -611,7 +603,7 @@ public final class SqliteRevisionStore implements
     ) {
         Objects.requireNonNull(jobId, "jobId");
         Objects.requireNonNull(failedAt, "failedAt");
-        return write(connection -> SqliteStyleAnalysisStore.fail(
+        return write(connection -> SqliteAnalysisFail.fail(
                 connection,
                 jobId,
                 leaseOwner,
@@ -627,7 +619,7 @@ public final class SqliteRevisionStore implements
             Ids.StyleAnalysisId analysisId
     ) {
         Objects.requireNonNull(analysisId, "analysisId");
-        return read(connection -> SqliteStyleAnalysisStore.findResult(
+        return read(connection -> SqliteAnalysisFindResult.findResult(
                 connection, analysisId
         ));
     }
@@ -639,7 +631,7 @@ public final class SqliteRevisionStore implements
             int limit
     ) {
         Objects.requireNonNull(analysisId, "analysisId");
-        return read(connection -> SqliteStyleAnalysisStore.listWindows(
+        return read(connection -> SqliteAnalysisListWindows.listWindows(
                 connection, analysisId, afterOrdinal, limit
         ));
     }
@@ -647,7 +639,7 @@ public final class SqliteRevisionStore implements
     @Override
     public Optional<Instant> findStyleArtifactExpiry(Ids.ArtifactId artifactId) {
         Objects.requireNonNull(artifactId, "artifactId");
-        return read(connection -> SqliteStyleAnalysisStore.findArtifactExpiry(
+        return read(connection -> SqliteAnalysisFindArtifactExpiry.findArtifactExpiry(
                 connection, artifactId
         ));
     }
@@ -657,7 +649,7 @@ public final class SqliteRevisionStore implements
             ReserveRewriteCandidateCommand command
     ) {
         Objects.requireNonNull(command, "command");
-        return write(connection -> SqliteRewriteReservationStore.reserve(
+        return write(connection -> SqliteReservationReserve.reserve(
                 connection, command
         ));
     }
@@ -667,7 +659,7 @@ public final class SqliteRevisionStore implements
             Ids.ProposalId proposalId
     ) {
         Objects.requireNonNull(proposalId, "proposalId");
-        return read(connection -> SqliteRewriteReservationStore.get(
+        return read(connection -> SqliteReservationGet.get(
                 connection, proposalId
         ));
     }
@@ -801,7 +793,7 @@ public final class SqliteRevisionStore implements
                     stored.operation().context().operationId(),
                     true
             );
-            SqliteSecurityStore.insertAuditEvent(connection, commitAuditEvent(
+            SqliteSecurityInsertAuditEvent.insertAuditEvent(connection, SqliteRevisionStoreCommitAuditEvent.commitAuditEvent(
                     novelId,
                     stored.operation().context().operationId(),
                     stored.resultRevisionId(),
@@ -814,7 +806,7 @@ public final class SqliteRevisionStore implements
             return result;
         }
 
-        RevisionRef actualHead = requireHead(connection, novelId);
+        RevisionRef actualHead = SqliteRevisionStoreRequireHead.requireHead(connection, novelId);
         if (!actualHead.equals(request.expectedHead())) {
             throw new StaleHeadException(request.expectedHead(), actualHead);
         }
@@ -824,9 +816,9 @@ public final class SqliteRevisionStore implements
         );
         byte[] candidateBytes = NarrativeCanonicalMapper.toCanonical(request.candidate()).envelopeBytes();
 
-        insertOperation(connection, request, sequence, operationBytes);
+        SqliteRevisionStoreInsertOperation.insertOperation(connection, request, sequence, operationBytes);
         faultInjector.after(CommitStage.AFTER_OPERATION_APPEND);
-        insertRevision(
+        SqliteRevisionStoreInsertRevision.insertRevision(
                 connection,
                 request.candidate(),
                 sequence,
@@ -837,10 +829,10 @@ public final class SqliteRevisionStore implements
         faultInjector.after(CommitStage.AFTER_REVISION_APPEND);
         insertTombstones(connection, request);
         faultInjector.after(CommitStage.AFTER_TOMBSTONES);
-        rebuildProjection(connection, request.candidate());
+        SqliteRevisionStoreRebuildProjection.rebuildProjection(connection, request.candidate());
         faultInjector.after(CommitStage.AFTER_PROJECTION);
         if (shouldCheckpoint(connection, novelId, sequence)) {
-            insertCheckpoint(
+            SqliteRevisionStoreInsertCheckpoint.insertCheckpoint(
                     connection,
                     request.candidate(),
                     sequence,
@@ -864,11 +856,11 @@ public final class SqliteRevisionStore implements
             statement.setString(6, request.expectedHead().contentHash());
             if (statement.executeUpdate() != 1) {
                 throw new StaleHeadException(
-                        request.expectedHead(), requireHead(connection, novelId)
+                        request.expectedHead(), SqliteRevisionStoreRequireHead.requireHead(connection, novelId)
                 );
             }
         }
-        SqliteSecurityStore.insertAuditEvent(connection, commitAuditEvent(
+        SqliteSecurityInsertAuditEvent.insertAuditEvent(connection, SqliteRevisionStoreCommitAuditEvent.commitAuditEvent(
                 novelId,
                 request.operation().context().operationId(),
                 request.candidate().id(),
@@ -885,162 +877,14 @@ public final class SqliteRevisionStore implements
         );
     }
 
-    private static AuditEvent commitAuditEvent(
-            Ids.NovelId novelId,
-            Ids.OperationId operationId,
-            Ids.RevisionId revisionId,
-            String operationHash,
-            String contentHash,
-            AuditResult result,
-            AuditContext context
-    ) {
-        return AuditEvent.create(
-                context,
-                novelId,
-                AuditAction.COMMIT,
-                operationId.value(),
-                operationId,
-                revisionId,
-                result,
-                operationHash,
-                contentHash
-        );
-    }
-
-    private static void verifyRequestHashes(CommitRequest request) {
-        String operationHash = EditOperationCanonicalMapper.hash(request.operation());
-        if (!operationHash.equals(request.operationHash())) {
-            throw new IllegalArgumentException("Commit operation hash does not match canonical payload");
-        }
-        String candidateHash = NarrativeCanonicalMapper.toCanonical(request.candidate()).contentHash();
-        if (!candidateHash.equals(request.candidateHash())) {
-            throw new IllegalArgumentException("Commit candidate hash does not match canonical content");
-        }
-    }
-
-    private static void insertOperation(
-            Connection connection,
-            CommitRequest request,
-            long sequence,
-            byte[] operationBytes
-    ) throws SQLException {
-        EditOperation operation = request.operation();
-        try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO operations(
-                    operation_id, novel_id, sequence, base_revision_id, operation_type,
-                    operation_hash, idempotency_key, payload_json, result_revision_id,
-                    result_hash, committed_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """)) {
-            statement.setString(1, operation.context().operationId().value());
-            statement.setString(2, operation.context().novelId().value());
-            statement.setLong(3, sequence);
-            statement.setString(4, operation.context().baseRevisionId().value());
-            statement.setString(5, operation.type().canonicalName());
-            statement.setString(6, request.operationHash());
-            statement.setString(7, operation.context().idempotencyKey());
-            statement.setString(8, new String(operationBytes, StandardCharsets.UTF_8));
-            statement.setString(9, request.candidate().id().value());
-            statement.setString(10, request.candidateHash());
-            statement.setString(11, request.candidate().createdAt().toString());
-            statement.executeUpdate();
-        }
-    }
-
-    private static void insertRevision(
-            Connection connection,
-            RevisionManifest revision,
-            long sequence,
-            String contentHash,
-            byte[] canonicalJson,
-            Ids.OperationId operationId
-    ) throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO revisions(
-                    revision_id, novel_id, parent_revision_id, sequence, content_hash,
-                    canonical_json, created_at, operation_id
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """)) {
-            statement.setString(1, revision.id().value());
-            statement.setString(2, revision.novel().id().value());
-            statement.setString(3, revision.parentId() == null ? null : revision.parentId().value());
-            statement.setLong(4, sequence);
-            statement.setString(5, contentHash);
-            statement.setBytes(6, canonicalJson);
-            statement.setString(7, revision.createdAt().toString());
-            statement.setString(8, operationId == null ? null : operationId.value());
-            statement.executeUpdate();
-        }
-    }
-
-    private static void insertCheckpoint(
-            Connection connection,
-            RevisionManifest revision,
-            long sequence,
-            String contentHash,
-            byte[] canonicalJson
-    ) throws SQLException {
-        byte[] compressed = GzipCheckpointCodec.compress(canonicalJson);
-        try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO checkpoints(
-                    novel_id, revision_id, sequence, content_hash, codec,
-                    uncompressed_bytes, compressed_json, created_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """)) {
-            statement.setString(1, revision.novel().id().value());
-            statement.setString(2, revision.id().value());
-            statement.setLong(3, sequence);
-            statement.setString(4, contentHash);
-            statement.setString(5, GzipCheckpointCodec.NAME);
-            statement.setInt(6, canonicalJson.length);
-            statement.setBytes(7, compressed);
-            statement.setString(8, revision.createdAt().toString());
-            statement.executeUpdate();
-        }
-    }
-
-    private static void rebuildProjection(
-            Connection connection,
-            RevisionManifest revision
-    ) throws SQLException {
-        try (PreparedStatement delete = connection.prepareStatement(
-                "DELETE FROM head_block_projection WHERE novel_id = ?"
-        )) {
-            delete.setString(1, revision.novel().id().value());
-            delete.executeUpdate();
-        }
-        try (PreparedStatement insert = connection.prepareStatement("""
-                INSERT INTO head_block_projection(
-                    novel_id, chapter_id, scene_id, block_id, block_version_id,
-                    order_key, text_hash
-                ) VALUES (?, ?, ?, ?, ?, ?, ?)
-                """)) {
-            for (NarrativeChapter chapter : revision.novel().chapters()) {
-                for (NarrativeScene scene : chapter.scenes()) {
-                    for (NarrativeBlock block : scene.blocks()) {
-                        insert.setString(1, revision.novel().id().value());
-                        insert.setString(2, chapter.id().value());
-                        insert.setString(3, scene.id().value());
-                        insert.setString(4, block.id().value());
-                        insert.setString(5, block.versionId().value());
-                        insert.setString(6, block.orderKey().value());
-                        insert.setString(7, CanonicalJson.hash(block.text()));
-                        insert.addBatch();
-                    }
-                }
-            }
-            insert.executeBatch();
-        }
-    }
-
     private void insertTombstones(
             Connection connection,
             CommitRequest request
     ) throws SQLException {
         StoredRevision base = getRevision(connection,
                 request.operation().context().novelId(), request.expectedHead().revisionId());
-        Map<Ids.BlockId, LocatedBlock> previous = locateBlocks(base.manifest());
-        Map<Ids.BlockId, LocatedBlock> current = locateBlocks(request.candidate());
+        Map<Ids.BlockId, LocatedBlock> previous = SqliteRevisionStoreLocateBlocks.locateBlocks(base.manifest());
+        Map<Ids.BlockId, LocatedBlock> current = SqliteRevisionStoreLocateBlocks.locateBlocks(request.candidate());
         try (PreparedStatement statement = connection.prepareStatement("""
                 INSERT INTO block_tombstones(
                     novel_id, operation_id, deleted_in_revision_id, source_scene_id,
@@ -1058,7 +902,7 @@ public final class SqliteRevisionStore implements
                 statement.setString(4, deleted.sceneId().value());
                 statement.setString(5, deleted.block().id().value());
                 statement.setString(6, deleted.block().versionId().value());
-                statement.setString(7, CanonicalJson.string(blockToMap(deleted.block())));
+                statement.setString(7, CanonicalJson.string(SqliteRevisionStoreBlockToMap.blockToMap(deleted.block())));
                 statement.addBatch();
             }
             statement.executeBatch();
@@ -1098,7 +942,7 @@ public final class SqliteRevisionStore implements
         }
     }
 
-    private static Optional<StoredOperation> findByIdempotencyKey(
+    static Optional<StoredOperation> findByIdempotencyKey(
             Connection connection,
             Ids.NovelId novelId,
             String key
@@ -1113,64 +957,12 @@ public final class SqliteRevisionStore implements
             statement.setString(1, novelId.value());
             statement.setString(2, key);
             try (ResultSet result = statement.executeQuery()) {
-                return result.next() ? Optional.of(readOperation(result)) : Optional.empty();
+                return result.next() ? Optional.of(SqliteRevisionStoreReadOperation.readOperation(result)) : Optional.empty();
             }
         }
     }
 
-    private static StoredOperation readOperation(ResultSet result) throws SQLException {
-        EditOperation operation = EditOperationCanonicalMapper.fromCanonical(
-                result.getString("payload_json").getBytes(StandardCharsets.UTF_8)
-        );
-        String storedHash = result.getString("operation_hash");
-        if (!EditOperationCanonicalMapper.hash(operation).equals(storedHash)) {
-            throw new StorageException(
-                    "Stored operation hash does not match " + operation.context().operationId().value()
-            );
-        }
-        if (!operation.context().operationId().value().equals(result.getString("operation_id"))
-                || !operation.context().novelId().value().equals(result.getString("novel_id"))
-                || !operation.context().baseRevisionId().value().equals(
-                        result.getString("base_revision_id")
-                )
-                || !operation.type().canonicalName().equals(result.getString("operation_type"))
-                || !operation.context().idempotencyKey().equals(
-                        result.getString("idempotency_key")
-                )) {
-            throw new StorageException("Stored operation relational identity does not match payload");
-        }
-        return new StoredOperation(
-                operation,
-                result.getLong("sequence"),
-                storedHash,
-                new Ids.RevisionId(result.getString("result_revision_id")),
-                result.getString("result_hash"),
-                Instant.parse(result.getString("committed_at"))
-        );
-    }
-
-    private static RevisionRef requireHead(Connection connection, Ids.NovelId novelId)
-            throws SQLException {
-        try (PreparedStatement statement = connection.prepareStatement("""
-                SELECT head_revision_id, head_sequence, head_hash
-                FROM novels
-                WHERE novel_id = ?
-                """)) {
-            statement.setString(1, novelId.value());
-            try (ResultSet result = statement.executeQuery()) {
-                if (!result.next()) {
-                    throw new MissingNovelException(novelId);
-                }
-                return new RevisionRef(
-                        new Ids.RevisionId(result.getString("head_revision_id")),
-                        result.getLong("head_sequence"),
-                        result.getString("head_hash")
-                );
-            }
-        }
-    }
-
-    private static StoredRevision getRevision(
+    static StoredRevision getRevision(
             Connection connection,
             Ids.NovelId novelId,
             Ids.RevisionId revisionId
@@ -1187,32 +979,9 @@ public final class SqliteRevisionStore implements
                 if (!result.next()) {
                     throw new MissingRevisionException(novelId, revisionId);
                 }
-                return readRevision(result, novelId, revisionId);
+                return SqliteRevisionStoreReadRevision.readRevision(result, novelId, revisionId);
             }
         }
-    }
-
-    private static StoredRevision readRevision(
-            ResultSet result,
-            Ids.NovelId novelId,
-            Ids.RevisionId revisionId
-    ) throws SQLException {
-        String storedHash = result.getString("content_hash");
-        CanonicalRevision canonical = CanonicalRevision.parseEnvelope(result.getBytes("canonical_json"));
-        if (!canonical.contentHash().equals(storedHash)) {
-            throw new StorageException("Stored revision hash does not match " + revisionId.value());
-        }
-        RevisionManifest manifest = NarrativeCanonicalMapper.fromCanonical(canonical);
-        if (!manifest.novel().id().equals(novelId) || !manifest.id().equals(revisionId)) {
-            throw new StorageException("Stored revision identity does not match relational columns");
-        }
-        String relationalParent = result.getString("parent_revision_id");
-        String canonicalParent = manifest.parentId() == null ? null : manifest.parentId().value();
-        if (!Objects.equals(relationalParent, canonicalParent)
-                || !manifest.createdAt().toString().equals(result.getString("created_at"))) {
-            throw new StorageException("Stored revision lineage does not match canonical content");
-        }
-        return new StoredRevision(manifest, result.getLong("sequence"), storedHash);
     }
 
     private long count(Ids.NovelId novelId, String table) {
@@ -1232,54 +1001,8 @@ public final class SqliteRevisionStore implements
         });
     }
 
-    private static Map<Ids.BlockId, LocatedBlock> locateBlocks(RevisionManifest revision) {
-        Map<Ids.BlockId, LocatedBlock> blocks = new LinkedHashMap<>();
-        for (NarrativeChapter chapter : revision.novel().chapters()) {
-            for (NarrativeScene scene : chapter.scenes()) {
-                for (NarrativeBlock block : scene.blocks()) {
-                    blocks.put(block.id(), new LocatedBlock(scene.id(), block));
-                }
-            }
-        }
-        return blocks;
-    }
-
-    private static Map<String, Object> blockToMap(NarrativeBlock block) {
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("id", block.id().value());
-        value.put("block_version_id", block.versionId().value());
-        value.put("order_key", block.orderKey().value());
-        value.put("text", block.text());
-        value.put("meta", block.metadata().fields());
-        if (!block.extensions().isEmpty()) {
-            value.put("extensions", block.extensions());
-        }
-        return value;
-    }
-
-    private static NarrativeBlock parseBlock(String json) {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> value = CanonicalJson.mapper().readValue(json, Map.class);
-        return new NarrativeBlock(
-                new Ids.BlockId(requiredString(value, "id")),
-                new Ids.BlockVersionId(requiredString(value, "block_version_id")),
-                new OrderKey(requiredString(value, "order_key")),
-                requiredString(value, "text"),
-                new BlockMetadata(requiredMap(value, "meta")),
-                value.containsKey("extensions") ? requiredMap(value, "extensions") : Map.of()
-        );
-    }
-
-    private static String requiredString(Map<String, Object> value, String field) {
-        Object entry = value.get(field);
-        if (!(entry instanceof String string)) {
-            throw new StorageException("Stored tombstone field " + field + " is not a string");
-        }
-        return string;
-    }
-
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> requiredMap(Map<String, Object> value, String field) {
+    static Map<String, Object> requiredMap(Map<String, Object> value, String field) {
         Object entry = value.get(field);
         if (!(entry instanceof Map<?, ?> map)) {
             throw new StorageException("Stored tombstone field " + field + " is not an object");
@@ -1303,6 +1026,6 @@ public final class SqliteRevisionStore implements
         }
     }
 
-    private record LocatedBlock(Ids.SceneId sceneId, NarrativeBlock block) {
+    record LocatedBlock(Ids.SceneId sceneId, NarrativeBlock block) {
     }
 }

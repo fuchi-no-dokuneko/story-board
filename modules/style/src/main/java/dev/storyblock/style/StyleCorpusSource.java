@@ -57,7 +57,7 @@ public record StyleCorpusSource(
         ), "style_corpus_source");
     }
 
-    private static String requireText(String value, String field, int maximum) {
+    static String requireText(String value, String field, int maximum) {
         if (value == null || value.isBlank() || value.length() > maximum) {
             throw new IllegalArgumentException("Style corpus " + field + " is invalid");
         }

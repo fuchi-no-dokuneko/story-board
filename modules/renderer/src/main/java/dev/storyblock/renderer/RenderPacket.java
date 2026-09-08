@@ -53,15 +53,15 @@ public record RenderPacket(
         value.put("renderer_version", rendererVersion);
         value.put("range", canonicalRange());
         value.put("rendered_text", renderedText);
-        value.put("blocks", blocks.stream().map(RenderPacket::canonicalBlock).toList());
+        value.put("blocks", blocks.stream().map(RenderPacketCanonicalBlock::canonicalBlock).toList());
         value.put(
                 "resolved_meta",
-                resolvedMetadata.stream().map(RenderPacket::canonicalMetadata).toList()
+                resolvedMetadata.stream().map(RenderPacketCanonicalMetadata::canonicalMetadata).toList()
         );
-        value.put("offset_map", offsetMap.stream().map(RenderPacket::canonicalOffset).toList());
+        value.put("offset_map", offsetMap.stream().map(RenderPacketCanonicalOffset::canonicalOffset).toList());
         value.put(
                 "scene_boundaries",
-                sceneBoundaries.stream().map(RenderPacket::canonicalBoundary).toList()
+                sceneBoundaries.stream().map(RenderPacketCanonicalBoundary::canonicalBoundary).toList()
         );
         return CanonicalValues.freezeMap(value, "render_packet");
     }
@@ -79,40 +79,4 @@ public record RenderPacket(
         return value;
     }
 
-    private static Map<String, Object> canonicalBlock(RenderedBlock block) {
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("block_id", block.blockId().value());
-        value.put("block_version_id", block.blockVersionId().value());
-        value.put("local_meta", block.localMetadata().fields());
-        value.put("text", block.text());
-        if (block.image() != null) {
-            value.put("image", block.image().canonicalValue());
-        }
-        return Map.copyOf(value);
-    }
-
-    private static Map<String, Object> canonicalMetadata(ResolvedBlockMetadata metadata) {
-        return Map.of(
-                "after", metadata.after(),
-                "before", metadata.before(),
-                "block_id", metadata.blockId().value(),
-                "events", metadata.events()
-        );
-    }
-
-    private static Map<String, Object> canonicalOffset(OffsetMapEntry offset) {
-        return Map.of(
-                "block_id", offset.blockId().value(),
-                "rendered_end", offset.renderedEnd(),
-                "rendered_start", offset.renderedStart()
-        );
-    }
-
-    private static Map<String, Object> canonicalBoundary(DerivedSceneBoundary boundary) {
-        return Map.of(
-                "scene_id", boundary.sceneId().value(),
-                "state_in", boundary.stateIn(),
-                "state_out", boundary.stateOut()
-        );
-    }
 }

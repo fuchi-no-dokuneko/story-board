@@ -67,7 +67,7 @@ public record StyleCalibratedChannelScore(
         return CanonicalValues.freezeMap(value, "style_calibrated_channel_score");
     }
 
-    private static BigDecimal nonNegative(BigDecimal value, String field) {
+    static BigDecimal nonNegative(BigDecimal value, String field) {
         if (value == null || value.signum() < 0) {
             throw new IllegalArgumentException(
                     "Style calibrated " + field + " must be nonnegative"

@@ -20,7 +20,7 @@ public record StyleAnalysisSnapshot(
         List<StyleAnalysisBlock> blocks
 ) {
     public static final int MAX_BLOCKS = 1_000;
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final Set<String> FIELDS = Set.of(
             "novel_id", "revision_id", "revision_hash", "profile_version",
             "masking_lexicon", "blocks"
@@ -29,7 +29,7 @@ public record StyleAnalysisSnapshot(
     public StyleAnalysisSnapshot {
         Objects.requireNonNull(novelId, "novelId");
         Objects.requireNonNull(revisionId, "revisionId");
-        requireHash(revisionHash, "revision");
+        StyleAnalysisSnapshotRequireHash.requireHash(revisionHash, "revision");
         Objects.requireNonNull(profileVersion, "profileVersion");
         if (!profileVersion.content().scope().novelId().equals(novelId)) {
             throw new IllegalArgumentException(
@@ -113,11 +113,4 @@ public record StyleAnalysisSnapshot(
         return CanonicalValues.freezeMap(value, "style_analysis_snapshot");
     }
 
-    private static void requireHash(String value, String field) {
-        if (value == null || !HASH.matcher(value).matches()) {
-            throw new IllegalArgumentException(
-                    "Style analysis " + field + " hash is invalid"
-            );
-        }
-    }
 }

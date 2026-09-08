@@ -26,7 +26,7 @@ public record RewriteWorkerInput(
         List<RewriteSourceBlock> blocks,
         RewriteConstraints constraints
 ) {
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
     private static final Set<String> FIELDS = Set.of(
             "analysis_id", "analyzer_contract_hash", "blocks", "constraints",
             "finding_ids", "novel_id", "profile_version_hash",
@@ -39,11 +39,11 @@ public record RewriteWorkerInput(
         Objects.requireNonNull(analysisId, "analysisId");
         Objects.requireNonNull(novelId, "novelId");
         Objects.requireNonNull(revisionId, "revisionId");
-        requireHash(revisionHash, "revision");
+        RewriteWorkerInputRequireHash.requireHash(revisionHash, "revision");
         Objects.requireNonNull(profileVersionId, "profileVersionId");
-        requireHash(profileVersionHash, "profile version");
-        requireHash(analyzerContractHash, "analyzer contract");
-        requireHash(windowConfigurationHash, "window configuration");
+        RewriteWorkerInputRequireHash.requireHash(profileVersionHash, "profile version");
+        RewriteWorkerInputRequireHash.requireHash(analyzerContractHash, "analyzer contract");
+        RewriteWorkerInputRequireHash.requireHash(windowConfigurationHash, "window configuration");
         findingIds = List.copyOf(findingIds);
         if (findingIds.isEmpty() || findingIds.size() > RewriteModule.MAX_FINDINGS
                 || new HashSet<>(findingIds).size() != findingIds.size()
@@ -178,9 +178,4 @@ public record RewriteWorkerInput(
         return CanonicalValues.freezeMap(value, "rewrite_worker_input");
     }
 
-    private static void requireHash(String value, String field) {
-        if (value == null || !HASH.matcher(value).matches()) {
-            throw new IllegalArgumentException("Rewrite " + field + " hash is invalid");
-        }
-    }
 }

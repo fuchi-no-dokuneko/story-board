@@ -27,7 +27,7 @@ public record StoredOperation(
         Objects.requireNonNull(committedAt, "committedAt");
     }
 
-    private static void requireHash(String value, String field) {
+    static void requireHash(String value, String field) {
         if (value == null || !SHA_256.matcher(value).matches()) {
             throw new IllegalArgumentException(field + " must be lowercase SHA-256");
         }

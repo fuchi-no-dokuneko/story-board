@@ -27,7 +27,7 @@ final class RewriteProposalGenerator {
     );
 
     private final LlmModelTransport transport;
-    private final String modelId;
+    final String modelId;
 
     RewriteProposalGenerator(LlmModelTransport transport, String modelId) {
         this.transport = Objects.requireNonNull(transport, "transport");
@@ -39,7 +39,7 @@ final class RewriteProposalGenerator {
         Objects.requireNonNull(input, "input");
         Objects.requireNonNull(createdAt, "createdAt");
         byte[] responseBytes = transport.invoke(CanonicalJson.bytes(request(input)));
-        RewriteModelResponse response = parseResponse(responseBytes);
+        RewriteModelResponse response = RewriteProposalGeneratorParseResponse.parseResponse(responseBytes);
         if (!modelId.equals(response.modelId())
                 || !input.inputHash().equals(response.inputHash())) {
             throw new LlmWorkerProtocolException(
@@ -92,71 +92,17 @@ final class RewriteProposalGenerator {
         }
     }
 
-    private static RewriteModelResponse parseResponse(byte[] responseBytes) {
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> value = CanonicalJson.mapper().readValue(
-                    responseBytes, Map.class
-            );
-            return RewriteModelResponse.fromCanonical(value);
-        } catch (RuntimeException invalid) {
-            throw new LlmWorkerProtocolException(
-                    "Model response does not match the rewrite protocol"
-            );
-        }
-    }
-
     private Map<String, Object> request(RewriteWorkerInput input) {
         Map<String, Object> value = new LinkedHashMap<>();
         value.put("input", input.modelValue());
         value.put("instructions", INSTRUCTIONS);
         value.put("model", modelId);
         value.put("protocol_version", RewriteModule.MODEL_PROTOCOL_VERSION);
-        value.put("response_schema", responseSchema(
+        value.put("response_schema", RewriteProposalGeneratorResponseSchema.responseSchema(
                 modelId, input.constraints().maxChangedBlocks()
         ));
         value.put("tools", List.of());
         return CanonicalValues.freezeMap(value, "rewrite_model_request");
     }
 
-    private static Map<String, Object> responseSchema(
-            String modelId,
-            int maxChangedBlocks
-    ) {
-        Map<String, Object> replacement = Map.of(
-                "additionalProperties", false,
-                "properties", Map.of(
-                        "block_id", Map.of("type", "string"),
-                        "text", Map.of("type", "string")
-                ),
-                "required", List.of("block_id", "text"),
-                "type", "object"
-        );
-        Map<String, Object> output = Map.of(
-                "additionalProperties", false,
-                "properties", Map.of(
-                        "input_hash", Map.of("type", "string"),
-                        "replacements", Map.of(
-                                "items", replacement,
-                                "maxItems", maxChangedBlocks,
-                                "minItems", 1,
-                                "type", "array"
-                        )
-                ),
-                "required", List.of("input_hash", "replacements"),
-                "type", "object"
-        );
-        return Map.of(
-                "additionalProperties", false,
-                "properties", Map.of(
-                        "model", Map.of("const", modelId),
-                        "output", output,
-                        "protocol_version", Map.of(
-                                "const", RewriteModule.MODEL_PROTOCOL_VERSION
-                        )
-                ),
-                "required", List.of("model", "output", "protocol_version"),
-                "type", "object"
-        );
-    }
 }

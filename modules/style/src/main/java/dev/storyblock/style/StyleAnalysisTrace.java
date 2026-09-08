@@ -3,17 +3,12 @@ package dev.storyblock.style;
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.CanonicalValues;
 import dev.storyblock.domain.Ids;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 public record StyleAnalysisTrace(
         Ids.StyleAnalysisId analysisId,
@@ -53,7 +48,7 @@ public record StyleAnalysisTrace(
         if (!expiresAt.isAfter(createdAt)) {
             throw new IllegalArgumentException("Style trace expiry must follow creation");
         }
-        byte[] expanded = decompress(compressedContent, uncompressedBytes);
+        byte[] expanded = StyleAnalysisTraceDecompress.decompress(compressedContent, uncompressedBytes);
         @SuppressWarnings("unchecked")
         Map<String, Object> parsed = CanonicalJson.mapper().readValue(expanded, Map.class);
         if (!MessageDigest.isEqual(expanded, CanonicalJson.bytes(parsed))) {
@@ -70,7 +65,7 @@ public record StyleAnalysisTrace(
         byte[] canonical = CanonicalJson.bytes(CanonicalValues.freezeMap(
                 trace, "style_analysis_trace"
         ));
-        byte[] compressed = compress(canonical);
+        byte[] compressed = StyleAnalysisTraceCompress.compress(canonical);
         String hash = CanonicalJson.hashBytes(compressed);
         return new StyleAnalysisTrace(
                 analysisId,
@@ -119,28 +114,4 @@ public record StyleAnalysisTrace(
         return CanonicalValues.freezeMap(value, "style_analysis_trace_metadata");
     }
 
-    private static byte[] compress(byte[] value) {
-        try {
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            try (GZIPOutputStream gzip = new GZIPOutputStream(output)) {
-                gzip.write(value);
-            }
-            return output.toByteArray();
-        } catch (IOException failure) {
-            throw new IllegalStateException("Could not compress style trace", failure);
-        }
-    }
-
-    private static byte[] decompress(byte[] value, int expectedBytes) {
-        try (GZIPInputStream gzip = new GZIPInputStream(new ByteArrayInputStream(value))) {
-            byte[] expanded = gzip.readNBytes(MAX_UNCOMPRESSED_BYTES + 1);
-            if (expanded.length != expectedBytes || expanded.length > MAX_UNCOMPRESSED_BYTES
-                    || gzip.read() != -1) {
-                throw new IllegalArgumentException("Style trace expanded size is invalid");
-            }
-            return expanded;
-        } catch (IOException failure) {
-            throw new IllegalArgumentException("Style trace is not valid gzip", failure);
-        }
-    }
 }

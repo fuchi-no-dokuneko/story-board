@@ -26,7 +26,7 @@ public record StyleAnalysisCompletionCommand(
         String idempotencyKey,
         Instant completedAt
 ) {
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
 
     public StyleAnalysisCompletionCommand {
         Objects.requireNonNull(jobId, "jobId");
@@ -34,11 +34,11 @@ public record StyleAnalysisCompletionCommand(
                 || attempt < 1) {
             throw new IllegalArgumentException("Style completion lease identity is invalid");
         }
-        requireHash(expectedStatusHash, "status");
-        requireHash(snapshotHash, "snapshot");
-        requireHash(profileVersionHash, "profile version");
-        requireHash(analyzerContractHash, "analyzer contract");
-        requireHash(windowConfigurationHash, "window configuration");
+        StyleAnalysisCompletionCommandRequireHash.requireHash(expectedStatusHash, "status");
+        StyleAnalysisCompletionCommandRequireHash.requireHash(snapshotHash, "snapshot");
+        StyleAnalysisCompletionCommandRequireHash.requireHash(profileVersionHash, "profile version");
+        StyleAnalysisCompletionCommandRequireHash.requireHash(analyzerContractHash, "analyzer contract");
+        StyleAnalysisCompletionCommandRequireHash.requireHash(windowConfigurationHash, "window configuration");
         Objects.requireNonNull(summary, "summary");
         windows = List.copyOf(windows);
         if (windows.size() != summary.operationalWindowCount()
@@ -108,11 +108,4 @@ public record StyleAnalysisCompletionCommand(
         ));
     }
 
-    private static void requireHash(String value, String field) {
-        if (value == null || !HASH.matcher(value).matches()) {
-            throw new IllegalArgumentException(
-                    "Style completion " + field + " hash is invalid"
-            );
-        }
-    }
 }

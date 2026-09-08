@@ -74,7 +74,7 @@ public record StoredArtifact(
         );
     }
 
-    private static void requireToken(String value, String field) {
+    static void requireToken(String value, String field) {
         if (value == null || !TOKEN.matcher(value).matches()) {
             throw new CanonicalPackageException(field + " is not a canonical token");
         }

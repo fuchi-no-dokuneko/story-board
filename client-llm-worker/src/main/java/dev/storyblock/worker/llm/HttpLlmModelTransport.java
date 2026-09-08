@@ -19,14 +19,14 @@ final class HttpLlmModelTransport implements LlmModelTransport {
         this.client = Objects.requireNonNull(client, "client");
         this.settings = Objects.requireNonNull(settings, "settings");
         this.credentialBytes = settings.modelToken().getBytes(StandardCharsets.UTF_8);
-        this.credentialPrefix = prefixTable(credentialBytes);
+        this.credentialPrefix = HttpLlmModelTransportPrefixTable.prefixTable(credentialBytes);
     }
 
     @Override
     public byte[] invoke(byte[] canonicalRequest)
             throws IOException, InterruptedException {
         Objects.requireNonNull(canonicalRequest, "canonicalRequest");
-        if (contains(canonicalRequest, credentialBytes, credentialPrefix)) {
+        if (HttpLlmModelTransportContains.contains(canonicalRequest, credentialBytes, credentialPrefix)) {
             throw new LlmWorkerProtocolException(
                     "Model request contains a transport credential"
             );
@@ -71,7 +71,7 @@ final class HttpLlmModelTransport implements LlmModelTransport {
                         "Model endpoint response exceeds the byte limit"
                 );
             }
-            if (contains(result, credentialBytes, credentialPrefix)) {
+            if (HttpLlmModelTransportContains.contains(result, credentialBytes, credentialPrefix)) {
                 throw new LlmWorkerProtocolException(
                         "Model response contains a transport credential"
                 );
@@ -80,41 +80,4 @@ final class HttpLlmModelTransport implements LlmModelTransport {
         }
     }
 
-    private static boolean contains(
-            byte[] value,
-            byte[] candidate,
-            int[] prefix
-    ) {
-        if (candidate.length == 0 || candidate.length > value.length) {
-            return false;
-        }
-        int matched = 0;
-        for (byte current : value) {
-            while (matched > 0 && current != candidate[matched]) {
-                matched = prefix[matched - 1];
-            }
-            if (current == candidate[matched]) {
-                matched++;
-            }
-            if (matched == candidate.length) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static int[] prefixTable(byte[] candidate) {
-        int[] prefix = new int[candidate.length];
-        int matched = 0;
-        for (int index = 1; index < candidate.length; index++) {
-            while (matched > 0 && candidate[index] != candidate[matched]) {
-                matched = prefix[matched - 1];
-            }
-            if (candidate[index] == candidate[matched]) {
-                matched++;
-            }
-            prefix[index] = matched;
-        }
-        return prefix;
-    }
 }

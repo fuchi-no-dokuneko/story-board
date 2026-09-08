@@ -18,7 +18,7 @@ public record StyleFeatureVector(
         List<BigDecimal> embedding
 ) {
     private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
-    private static final Pattern KEY = Pattern.compile("[^\\p{Cc}]{1,256}");
+    static final Pattern KEY = Pattern.compile("[^\\p{Cc}]{1,256}");
     private static final Set<String> FIELDS = Set.of(
             "channel", "channel_version", "contract_hash", "distribution",
             "measurements", "embedding"
@@ -32,8 +32,8 @@ public record StyleFeatureVector(
         if (contractHash == null || !HASH.matcher(contractHash).matches()) {
             throw new IllegalArgumentException("Style feature contract hash is invalid");
         }
-        distribution = validatedMap(distribution, true, "distribution");
-        measurements = validatedMap(measurements, false, "measurements");
+        distribution = StyleFeatureVectorValidatedMap.validatedMap(distribution, true, "distribution");
+        measurements = StyleFeatureVectorValidatedMap.validatedMap(measurements, false, "measurements");
         embedding = List.copyOf(embedding);
         for (BigDecimal value : embedding) {
             Objects.requireNonNull(value, "embedding value");
@@ -76,19 +76,4 @@ public record StyleFeatureVector(
         return CanonicalValues.freezeMap(value, "style_feature_vector");
     }
 
-    private static Map<String, BigDecimal> validatedMap(
-            Map<String, BigDecimal> values,
-            boolean nonNegative,
-            String field
-    ) {
-        Map<String, BigDecimal> result = new LinkedHashMap<>();
-        for (Map.Entry<String, BigDecimal> entry : Map.copyOf(values).entrySet()) {
-            if (!KEY.matcher(entry.getKey()).matches() || entry.getValue() == null
-                    || (nonNegative && entry.getValue().signum() < 0)) {
-                throw new IllegalArgumentException("Style feature " + field + " is invalid");
-            }
-            result.put(entry.getKey(), entry.getValue().stripTrailingZeros());
-        }
-        return Map.copyOf(result);
-    }
 }

@@ -2,7 +2,6 @@ package dev.storyblock.style;
 
 import dev.storyblock.domain.CanonicalValues;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,8 +37,8 @@ public record StyleAnomalyDecision(
                     "Style decision independent q99 channels are invalid"
             );
         }
-        sustainingWindowIds = uniqueHashes(sustainingWindowIds, "sustaining");
-        localizedMicroWindowIds = uniqueHashes(localizedMicroWindowIds, "micro");
+        sustainingWindowIds = StyleAnomalyDecisionUniqueHashes.uniqueHashes(sustainingWindowIds, "sustaining");
+        localizedMicroWindowIds = StyleAnomalyDecisionUniqueHashes.uniqueHashes(localizedMicroWindowIds, "micro");
         if (canTriggerRewrite != (state == StyleDecisionState.REWRITE_CANDIDATE)
                 || (confidence == StyleCalibrationConfidence.LOW_CONFIDENCE
                 && canTriggerRewrite)
@@ -116,16 +115,4 @@ public record StyleAnomalyDecision(
         return CanonicalValues.freezeMap(value, "style_anomaly_decision");
     }
 
-    private static List<String> uniqueHashes(List<String> values, String field) {
-        values = List.copyOf(values);
-        if (new LinkedHashSet<>(values).size() != values.size()
-                || values.stream().anyMatch(value ->
-                        value == null || !value.matches("sha256:[0-9a-f]{64}")
-                )) {
-            throw new IllegalArgumentException(
-                    "Style decision " + field + " window IDs are invalid"
-            );
-        }
-        return values;
-    }
 }

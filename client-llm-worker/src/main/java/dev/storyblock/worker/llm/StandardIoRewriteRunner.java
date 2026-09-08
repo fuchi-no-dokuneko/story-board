@@ -36,7 +36,7 @@ final class StandardIoRewriteRunner {
         output.flush();
     }
 
-    private static byte[] readBounded(InputStream input) throws IOException {
+    static byte[] readBounded(InputStream input) throws IOException {
         byte[] value = input.readNBytes(MAX_INPUT_BYTES + 1);
         if (value.length > MAX_INPUT_BYTES) {
             throw new LlmWorkerProtocolException(
@@ -56,7 +56,7 @@ final class StandardIoRewriteRunner {
         return length == value.length ? value : Arrays.copyOf(value, length);
     }
 
-    private static RewriteWorkerInput parse(byte[] value) {
+    static RewriteWorkerInput parse(byte[] value) {
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> parsed = CanonicalJson.mapper().readValue(

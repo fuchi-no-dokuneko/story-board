@@ -50,7 +50,7 @@ public record MonitorProposedOperation(
         return CanonicalValues.freezeMap(value, "monitor_proposed_operation");
     }
 
-    private static Map<String, Object> object(Object value, String path) {
+    static Map<String, Object> object(Object value, String path) {
         if (!(value instanceof Map<?, ?> raw)) {
             throw new IllegalArgumentException(path + " must be an object");
         }

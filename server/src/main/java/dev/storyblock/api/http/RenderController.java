@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/v1")
 public final class RenderController {
-    private static final Set<String> REQUEST_FIELDS = Set.of(
+    static final Set<String> REQUEST_FIELDS = Set.of(
             "revision_id", "from_block_id", "to_block_id"
     );
 
@@ -41,11 +41,11 @@ public final class RenderController {
         Map<String, Object> request = StrictJsonRequest.parseObject(
                 requestBytes, "render request"
         );
-        requireRequestFields(request);
+        RenderControllerRequireRequestFields.requireRequestFields(request);
 
         RenderRange range = new RenderRange(
-                optionalBlockId(request.get("from_block_id"), "from_block_id"),
-                optionalBlockId(request.get("to_block_id"), "to_block_id")
+                RenderControllerOptionalBlockId.optionalBlockId(request.get("from_block_id"), "from_block_id"),
+                RenderControllerOptionalBlockId.optionalBlockId(request.get("to_block_id"), "to_block_id")
         );
         RenderPacket packet = renders.render(
                 requestedNovel,
@@ -60,28 +60,4 @@ public final class RenderController {
                 .body(packet.canonicalValue());
     }
 
-    private static void requireRequestFields(Map<String, Object> request) {
-        if (!request.containsKey("revision_id")) {
-            throw new IllegalArgumentException("render request is missing revision_id");
-        }
-        for (String field : request.keySet()) {
-            if (!REQUEST_FIELDS.contains(field)) {
-                throw new IllegalArgumentException(
-                        "render request contains unknown field " + field
-                );
-            }
-        }
-    }
-
-    private static Ids.BlockId optionalBlockId(Object value, String field) {
-        if (value == null) {
-            return null;
-        }
-        if (!(value instanceof String id)) {
-            throw new IllegalArgumentException(
-                    "render request." + field + " must be a string or null"
-            );
-        }
-        return new Ids.BlockId(id);
-    }
 }

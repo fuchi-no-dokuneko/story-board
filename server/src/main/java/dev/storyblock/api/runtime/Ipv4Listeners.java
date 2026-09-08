@@ -31,7 +31,7 @@ public final class Ipv4Listeners {
         catch (UnknownHostException impossible) { throw new IllegalStateException(impossible); }
     }
 
-    private static List<InetAddress> tunnelAddresses() throws SocketException {
+    static List<InetAddress> tunnelAddresses() throws SocketException {
         List<InetAddress> addresses = new ArrayList<>();
         for (NetworkInterface network : Collections.list(NetworkInterface.getNetworkInterfaces())) {
             String name = network.getName();

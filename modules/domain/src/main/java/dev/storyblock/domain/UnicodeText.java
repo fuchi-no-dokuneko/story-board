@@ -80,7 +80,7 @@ public final class UnicodeText {
         int count = 0;
         while (matcher.find()) {
             String grapheme = matcher.group();
-            if (!isLineBreak(grapheme)) {
+            if (!UnicodeTextIsLineBreak.isLineBreak(grapheme)) {
                 count++;
             }
         }
@@ -93,14 +93,11 @@ public final class UnicodeText {
         List<String> graphemes = new ArrayList<>();
         while (matcher.find()) {
             String grapheme = matcher.group();
-            if (!isLineBreak(grapheme)) {
+            if (!UnicodeTextIsLineBreak.isLineBreak(grapheme)) {
                 graphemes.add(grapheme);
             }
         }
         return List.copyOf(graphemes);
     }
 
-    private static boolean isLineBreak(String grapheme) {
-        return grapheme.equals("\n") || grapheme.equals("\r") || grapheme.equals("\r\n");
-    }
 }
