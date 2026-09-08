@@ -24,3 +24,9 @@ Current status: Markdown 已整理為英繁簡三語；大型歷史記錄保存�
 Issues: 未新增版本標記；現行安裝文件優先於歷史部署記錄。
 affect scope: 39 個端點、140 個 DTO 的小型目錄頁與獨立作者工具；173 項測試通過。
 ---
+---02:42---備份與執行設定
+category: refactor
+Current status: 安裝重跑成功；啟動設定與日誌內容設定分離，應用啟動入口完整。
+Issues: 併發備份可能覆寫同秒產物；以目錄鎖及自動金鑰鎖修正。
+affect scope: 真實 SQLite 併發備份均可還原；金鑰與資料全部留在儲存庫。
+---

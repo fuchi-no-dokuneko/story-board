@@ -7,7 +7,7 @@ mkdir -p "$work/scripts" "$work/server" "$work/.local/storyblock"/{server,runtim
 cp "$repo_dir/scripts/"{local-server,repository-paths,server-runtime,server-process,server-control}.sh "$work/scripts/"
 cp "$repo_dir/scripts/server-listener.py" "$work/scripts/"
 cp -R "$repo_dir/server/config" "$work/server/"
-cp "$repo_dir/.local/storyblock/server/application.jar" "$work/.local/storyblock/server/"
+cp --remove-destination "$repo_dir/.local/storyblock/server/application.jar" "$work/.local/storyblock/server/"
 printf '%s\n' "$JAVA_HOME" >"$work/.local/storyblock/runtime/java-home"
 printf '%s' 'isolated-lifecycle-test-pepper-thirty-two-bytes' >"$work/.local/storyblock/secrets/server-pepper"
 printf '%s' 'isolated-lifecycle-test-owner-thirty-two-bytes' >"$work/.local/storyblock/secrets/owner-token"

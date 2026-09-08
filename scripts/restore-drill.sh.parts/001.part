@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/backup-environment.sh"
 umask 077
 
 if [[ $# -ne 2 ]]; then
@@ -7,9 +8,9 @@ if [[ $# -ne 2 ]]; then
   exit 2
 fi
 
-artifact=$(realpath "$1")
-work=$(realpath -m "$2")
-key_file=${STORYBLOCK_BACKUP_KEY_FILE:-}
+artifact=$(repository_path "$1")
+work=$(repository_path "$2")
+key_file=$(repository_path "${STORYBLOCK_BACKUP_KEY_FILE:-$(key_for_artifact "$artifact")}")
 manifest="$artifact.json"
 checksum="$artifact.sha256"
 
@@ -77,5 +78,3 @@ missing_artifacts='[]'
 if [[ "$artifact_count" != "$(jq -r '.artifact_count' "$manifest")" ]]; then
   missing_artifacts='["artifact_count_mismatch"]'
 fi
-if [[ "$source_migration_version" != "none" \
-   && "$migration_version" != "$source_migration_version" ]]; then

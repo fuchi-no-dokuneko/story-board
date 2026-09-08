@@ -14,7 +14,7 @@ run_server() {
   STORYBLOCK_SECURITY_PEPPER=$(<"$local_dir/secrets/server-pepper")
   export STORYBLOCK_SECURITY_OWNER_TOKEN
   STORYBLOCK_SECURITY_OWNER_TOKEN=$(<"$local_dir/secrets/owner-token")
-  args=("--spring.config.additional-location=file:$repo_dir/server/config/config.yaml,file:$repo_dir/server/config/port-config.yaml")
+  args=("--spring.config.additional-location=file:$repo_dir/server/config/config.yaml,file:$repo_dir/server/config/port-config.yaml,file:$repo_dir/server/config/content-config/logging.yaml")
   [[ -z ${STORYBLOCK_PORT_POLICY:-} ]] || args+=("--policy=$STORYBLOCK_PORT_POLICY")
   [[ -z ${STORYBLOCK_LOCAL_PORT:-} ]] || args+=("--port=$STORYBLOCK_LOCAL_PORT")
   cd "$repo_dir"

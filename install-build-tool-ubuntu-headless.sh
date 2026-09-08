@@ -7,4 +7,4 @@ if ((EUID != 0)); then
 fi
 apt-get update
 apt-get install -y make cmake build-essential openjdk-21-jdk-headless \
-  curl unzip openssl sqlite3 zstd iproute2 util-linux
+  curl unzip openssl sqlite3 zstd iproute2 util-linux jq

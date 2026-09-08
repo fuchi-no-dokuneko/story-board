@@ -17,7 +17,7 @@ install_runtime() {
   install -m 500 -- "${api_jars[0]}" "$staged_jar"
   mv -f -- "$staged_jar" "$installed_jar"
   trap - EXIT
-  for secret_name in owner-token server-pepper style-worker-token llm-model-token; do
+  for secret_name in owner-token server-pepper; do
     secret_file=$local_dir/secrets/$secret_name
     repository_path "$secret_file" >/dev/null
     if [[ ! -s $secret_file ]]; then

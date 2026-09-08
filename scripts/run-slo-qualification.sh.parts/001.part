@@ -5,6 +5,8 @@ umask 077
 output=${1:-artifacts/slo/ADR-318.json}
 root=$(cd "$(dirname "$0")/.." && pwd)
 cd "$root"
+source "$root/scripts/build-environment.sh"
+output=$(repository_path "$output")
 mkdir -p "$(dirname "$output")"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
@@ -67,4 +69,3 @@ jq -n \
       nfr:($measured + {
         "NFR-006":{metric:"process crash durability",stages:8,
                    passed:$integration_pass},
-        "NFR-007":{metric:"negative cross-novel HTTP isolation",passed:$integration_pass,

@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/backup-environment.sh"
 umask 077
 
 if [[ $# -ne 2 ]]; then
-  echo "Usage: scripts/backup.sh <database> <offsite-directory>" >&2
+  echo "Usage: scripts/backup.sh <database> <repository-backup-directory>" >&2
   exit 2
 fi
 
-database=$(realpath "$1")
-destination=$(realpath -m "$2")
-key_file=${STORYBLOCK_BACKUP_KEY_FILE:-}
+database=$(repository_path "$1")
+destination=$(repository_path "$2")
+key_file=$(backup_key "${STORYBLOCK_BACKUP_KEY_FILE:-$backup_secret_dir/backup.key}")
 
 if [[ ! -f "$database" ]]; then
   echo "Database does not exist: $database" >&2
@@ -28,10 +29,14 @@ case "$key_file" in
     ;;
 esac
 
-mkdir -p "$destination"
+lock_backup_directory "$destination"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 stamp=$(date -u +%Y%m%dT%H%M%SZ)
+while [[ -e "$destination/storyblock-$stamp.db.zst.enc" ]]; do
+  sleep 1
+  stamp=$(date -u +%Y%m%dT%H%M%SZ)
+done
 plain="$work/storyblock-$stamp.db"
 compressed="$plain.zst"
 artifact="$destination/storyblock-$stamp.db.zst.enc"

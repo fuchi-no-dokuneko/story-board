@@ -12,7 +12,7 @@ if [[ ${STORYBLOCK_CONTAINER_APP:-api} == api ]]; then
   fi
   export STORYBLOCK_SECURITY_PEPPER
   STORYBLOCK_SECURITY_PEPPER=$(<"$pepper")
-  args+=(--spring.config.additional-location=file:/workspace/server/config/config.yaml,file:/workspace/server/config/port-config.yaml)
+  args+=(--spring.config.additional-location=file:/workspace/server/config/config.yaml,file:/workspace/server/config/port-config.yaml,file:/workspace/server/config/content-config/logging.yaml)
   args+=("--policy=${POLICY:-public}" "--port=${PORT:-8443}")
 fi
 exec java -jar /workspace/application.jar "${args[@]}" "$@"

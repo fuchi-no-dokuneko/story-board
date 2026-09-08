@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/backup-environment.sh"
 
 if [[ $# -lt 1 || $# -gt 2 ]]; then
   echo "Usage: scripts/prune-backups.sh <backup-directory> [--apply]" >&2
   exit 2
 fi
 
-directory=$(realpath "$1")
+directory=$(repository_path "$1")
 apply=${2:-}
 if [[ "$apply" != "" && "$apply" != "--apply" ]]; then
   echo "Second argument must be --apply" >&2

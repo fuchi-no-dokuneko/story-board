@@ -28,14 +28,16 @@ jobs:
           -Dtest='!InitialSloQualificationTest'
           -Dsurefire.failIfNoSpecifiedTests=false
       - name: Verify author skill
-        run: npm --prefix plugin test
+        run: |
+          source scripts/build-environment.sh
+          npm --prefix plugin test
       - name: Verify admin UI authentication
         run: node --test server/src/test/js/*.test.cjs
       - name: Smoke-test self-signed HTTPS
         run: |
           ./scripts/local-server.sh start
           trap './scripts/local-server.sh stop || true' EXIT
-          curl --fail --silent --show-error \
+          curl -4 --fail --silent --show-error \
             --cacert .local/storyblock/tls/public/storyblock.crt \
             https://127.0.0.1:8443/actuator/health
           ./scripts/local-server.sh stop
