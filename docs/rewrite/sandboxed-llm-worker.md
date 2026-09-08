@@ -110,7 +110,7 @@ as follows after packaging:
 
 ```bash
 java -Djava.net.preferIPv4Stack=true \
-  -jar apps/llm-worker/target/storyblock-llm-worker-0.1.0-SNAPSHOT.jar \
+  -jar client-llm-worker/target/storyblock-llm-worker-0.1.0-SNAPSHOT.jar \
   < rewrite-input.json > rewrite-proposal.json
 ```
 

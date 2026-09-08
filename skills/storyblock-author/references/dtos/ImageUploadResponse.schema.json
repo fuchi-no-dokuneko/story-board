@@ -30,7 +30,7 @@
   "additionalProperties": false,
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/ImageController.java",
+    "server/src/main/java/dev/storyblock/api/http/ImageController.java",
     "modules/application/src/main/java/dev/storyblock/application/ImageUploadService.java"
   ],
   "examples": [

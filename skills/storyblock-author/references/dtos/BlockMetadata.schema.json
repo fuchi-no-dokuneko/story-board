@@ -32,8 +32,8 @@
   "description": "Code-derived StoryBlock Block Metadata JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-    "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+    "server/src/main/resources/openapi/storyblock-v1.yaml",
+    "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
   ],
   "examples": [
     {

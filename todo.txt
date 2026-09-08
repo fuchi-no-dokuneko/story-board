@@ -1,0 +1,13 @@
+ADR-311: Refactor and verify the complete guide without changing HTTP/DTO/DB contracts.
+ADR-311：依完整指南重構並驗證；保留 HTTP、DTO 與資料庫契約。
+
+Pending / 待完成：
+- Reproduce and fix bugs; real workflow regression tests. 重現並修正錯誤，測試真實流程。
+- Root applications, shared/local tools, unprivileged installer. 根目錄應用、工具分層、無特權安裝。
+- IPv4 local/standard/public configuration; default loopback, public development, no default whitelist. IPv4 三種策略。
+- Automatic self-signed CA=false HTTPS; trust reachable clients. 自動自簽 HTTPS，信任可連線裝置。
+- Split all text sources to <=3000 bytes; Markdown <=200 lines in EN/繁中/简中. 拆分檔案及三語文件。
+- Preserve endpoint/DTO/OpenAPI, migrations and existing DB/data compatibility. 保留全部契約及既有資料。
+- Full meaningful tests, browser UAT, installation/restart/concurrency checks. 完整測試、GUI 驗收、安裝及併發驗證。
+- Coverage inventory, append-only logs, bilingual ticket commits, push every five commits. 覆蓋清單、日誌及提交。
+- Final requirement-by-requirement audit. 逐項完成稽核。

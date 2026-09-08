@@ -14,8 +14,8 @@
   "additionalProperties": false,
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
-    "apps/api/src/main/resources/openapi/storyblock-v1.yaml"
+    "server/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
+    "server/src/main/resources/openapi/storyblock-v1.yaml"
   ],
   "examples": [
     {"revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001"}

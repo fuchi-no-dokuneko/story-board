@@ -80,8 +80,8 @@
   "description": "Code-derived StoryBlock Worker Result Request JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
-    "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+    "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
     "modules/style/src/main/java/dev/storyblock/style"
   ],
   "examples": [

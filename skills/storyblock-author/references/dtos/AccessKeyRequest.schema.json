@@ -43,7 +43,7 @@
   "description": "Code-derived StoryBlock Access Key Request JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
+    "server/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
     "modules/security/src/main/java/dev/storyblock/security/AccessKeyService.java",
     "modules/security/src/main/java/dev/storyblock/security/AccessScope.java"
   ],

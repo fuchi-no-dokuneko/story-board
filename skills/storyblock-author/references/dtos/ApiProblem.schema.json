@@ -50,10 +50,10 @@
   "description": "Code-derived StoryBlock Api Problem JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/ApiExceptionHandler.java",
-    "apps/api/src/main/java/dev/storyblock/api/http/ApiProblemFactory.java",
-    "apps/api/src/main/java/dev/storyblock/api/http/ApiProblemWriter.java",
-    "apps/api/src/test/resources/golden/api-problem-details.json"
+    "server/src/main/java/dev/storyblock/api/http/ApiExceptionHandler.java",
+    "server/src/main/java/dev/storyblock/api/http/ApiProblemFactory.java",
+    "server/src/main/java/dev/storyblock/api/http/ApiProblemWriter.java",
+    "server/src/test/resources/golden/api-problem-details.json"
   ],
   "examples": [
     {

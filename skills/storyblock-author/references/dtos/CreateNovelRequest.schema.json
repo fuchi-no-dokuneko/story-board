@@ -15,8 +15,8 @@
   "description": "Code-derived StoryBlock Create Novel Request JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
-    "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
+    "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+    "server/src/main/java/dev/storyblock/api/http/NovelController.java",
     "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
     "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
   ],

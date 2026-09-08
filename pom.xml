@@ -32,10 +32,10 @@
     <module>modules/monitor-adapter</module>
     <module>modules/rewrite</module>
     <module>modules/rewrite-policy</module>
-    <module>apps/api</module>
-    <module>apps/style-worker</module>
-    <module>apps/llm-worker</module>
-    <module>apps/cli</module>
+    <module>server</module>
+    <module>client-style-worker</module>
+    <module>client-llm-worker</module>
+    <module>client-cli</module>
     <module>tests/architecture-tests</module>
   </modules>
 

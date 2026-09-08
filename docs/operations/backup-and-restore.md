@@ -4,7 +4,7 @@ Build the CLI, create a key outside the repository and database volume, then
 run the live backup command:
 
 ```bash
-./mvnw -q -pl apps/cli -am package -DskipTests
+./mvnw -q -pl client-cli -am package -DskipTests
 umask 077
 openssl rand -base64 48 > /protected/storyblock-backup.key
 export STORYBLOCK_BACKUP_KEY_FILE=/protected/storyblock-backup.key

@@ -7,7 +7,7 @@
   "contentEncoding": "binary",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
+    "server/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
     "modules/renderer/src/main/java/dev/storyblock/renderer/DeterministicPdfRenderer.java"
   ],
   "examples": ["%PDF-1.4"]

@@ -10,20 +10,20 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
 core_status=0
-timeout 60s ./mvnw -q -pl apps/cli -am package \
+timeout 60s ./mvnw -q -pl client-cli -am package \
   -Dtest=InitialSloQualificationTest \
   -Dsurefire.failIfNoSpecifiedTests=false || core_status=$?
 
 integration_status=0
-timeout 60s ./mvnw -q -pl apps/api,modules/storage-sqlite -am test \
+timeout 60s ./mvnw -q -pl server,modules/storage-sqlite -am test \
   -Dtest=SqliteProcessCrashTest,SqliteDatabaseTest#controlledWriterContentionProducesObservableBusyMetric,ApiHttpContractTest#realBearerCredentialsEnforceScopesNovelBoundariesAndRevocation \
   -Dsurefire.failIfNoSpecifiedTests=false || integration_status=$?
 
 backup_status=1
 restore_report="$work/restore-failed.json"
 printf '{"passed":false,"error":"core database unavailable"}\n' > "$restore_report"
-database=apps/cli/target/slo/storyblock.db
-core_report=apps/cli/target/slo/core.json
+database=client-cli/target/slo/storyblock.db
+core_report=client-cli/target/slo/core.json
 if [[ -f "$database" && -f "$core_report" ]]; then
   openssl rand -base64 -out "$work/backup.key" 48
   mkdir -p "$work/offsite"

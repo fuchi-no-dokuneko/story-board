@@ -79,9 +79,9 @@
   "title": "ActuatorMetricResponse",
   "description": "Code-derived StoryBlock Actuator Metric Response JSON contract.",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
-    "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-    "apps/api/src/main/resources/application.properties"
+    "server/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
+    "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+    "server/src/main/resources/application.properties"
   ],
   "examples": [
     {

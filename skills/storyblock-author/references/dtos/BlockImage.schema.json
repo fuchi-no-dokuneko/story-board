@@ -47,7 +47,7 @@
   "x-source": [
     "modules/domain/src/main/java/dev/storyblock/domain/BlockImage.java",
     "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
-    "apps/api/src/main/resources/openapi/storyblock-v1.yaml"
+    "server/src/main/resources/openapi/storyblock-v1.yaml"
   ],
   "examples": [
     {

@@ -45,8 +45,8 @@ it does not trust a later checkpoint.
 Build the executable verifier and check every novel head with:
 
 ```bash
-./mvnw -o -pl apps/cli -am package
-java -jar apps/cli/target/storyblock-cli-0.1.0-SNAPSHOT.jar \
+./mvnw -o -pl client-cli -am package
+java -jar client-cli/target/storyblock-cli-0.1.0-SNAPSHOT.jar \
   replay-verify /absolute/path/to/storyblock.db
 ```
 

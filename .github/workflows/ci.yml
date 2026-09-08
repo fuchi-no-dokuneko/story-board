@@ -28,9 +28,9 @@ jobs:
           -Dtest='!InitialSloQualificationTest'
           -Dsurefire.failIfNoSpecifiedTests=false
       - name: Verify author skill
-        run: node --test skills/storyblock-author/tests/storyblock-author.test.mjs
+        run: npm --prefix skills/storyblock-author test
       - name: Verify admin UI authentication
-        run: node --test apps/api/src/test/js/*.test.cjs
+        run: node --test server/src/test/js/*.test.cjs
       - name: Smoke-test self-signed HTTPS
         run: |
           ./scripts/local-server.sh start
@@ -44,5 +44,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: storyblock-api
-          path: apps/api/target/storyblock-api-*.jar
+          path: server/target/storyblock-api-*.jar
           if-no-files-found: error

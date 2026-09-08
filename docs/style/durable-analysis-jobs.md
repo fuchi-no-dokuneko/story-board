@@ -70,7 +70,7 @@ same completed job returns `409`.
 Build the executable worker JAR offline after dependencies are installed:
 
 ```bash
-./mvnw -o -pl apps/style-worker -am package
+./mvnw -o -pl client-style-worker -am package
 ```
 
 Configure it with Spring properties or their environment equivalents. The
@@ -95,7 +95,7 @@ self-signed leaf; it never mounts the API private key.
 ## Verification
 
 ```bash
-./mvnw -o -pl modules/storage-sqlite,apps/api,apps/style-worker -am test
+./mvnw -o -pl modules/storage-sqlite,server,client-style-worker -am test
 ```
 
 Tests cover expired-lease reclamation, stale-owner rejection, exact-expiry

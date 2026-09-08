@@ -23,8 +23,8 @@
   "description": "Code-derived StoryBlock Agent Novel Registration Response JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
-    "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+    "server/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+    "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
     "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
   ],
   "examples": [

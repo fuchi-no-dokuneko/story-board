@@ -1,0 +1,25 @@
+---00:11---重構啟動
+category: refactor
+Current status: 分支 tickets/ADR-311-guide-refactor；開始基準測試與部署重構。
+Issues: 242 個受追蹤文字檔超過 3000 bytes；啟動判斷會讀到舊日誌。
+affect scope: 全儲存庫；保留 HTTP 端點、DTO、資料庫結構與既有資料。
+---
+---00:11---規則衝突判定
+category: decision_make
+Current status: 四小時預算起點採用使用者 9 月 9 日 00:06（UTC+8）。
+Apporch chosen: 部署預設維持 loopback；開發使用 public、不設白名單；NO NEED CODE 解作報告不貼程式。
+Assumption made to chose this approch: 明確儲存庫預設監聽規則與重構指示同時有效；已提供更正機會。
+affect scope: 部署設定、測試與報告；不移除既有 API／資料格式的版本及雜湊欄位。
+---
+---00:11---瀏覽器前置檢查
+category: devenv_change
+Current status: 使用既有 Chromium 152.0.7977.64 成功渲染 GUI、輸出 DOM 與截圖。
+Issues: 初次測試的 Unix socket 路徑過長；縮短至儲存庫 .local/tmp 後通過。
+affect scope: 僅測試暫存；沒有系統設定或系統套件變更。
+---
+---00:22---部署第一版
+category: refactor
+Current status: 四個應用移至根目錄；Maven 固定 3.9.11，工具與暫存均留在儲存庫。
+Issues: 完整檔案拆分、部署驗證及指南稽核仍待完成。
+affect scope: 啟動器、IPv4 三種策略、程序內自簽 HTTPS；第一版全模組編譯通過。
+---

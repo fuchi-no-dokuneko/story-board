@@ -2,7 +2,7 @@
 
 ADR-298 establishes the versioned HTTP boundary independently of later service
 implementations. The machine-readable OpenAPI 3.1 document is packaged at
-`apps/api/src/main/resources/openapi/storyblock-v1.yaml` and served without
+`server/src/main/resources/openapi/storyblock-v1.yaml` and served without
 authentication at `GET /v1/openapi.yaml`.
 
 ## Runtime Boundary
@@ -150,7 +150,7 @@ Run the API contract and all prerequisite module tests offline after the
 dependencies have been bootstrapped:
 
 ```bash
-./mvnw -o -pl apps/api -am test
+./mvnw -o -pl server -am test
 ```
 
 The tests parse every local OpenAPI reference, compare all 34 required routes,

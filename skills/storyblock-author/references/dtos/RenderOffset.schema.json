@@ -26,7 +26,7 @@
   "description": "Code-derived StoryBlock Render Offset JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/RenderController.java",
+    "server/src/main/java/dev/storyblock/api/http/RenderController.java",
     "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
   ],
   "examples": [

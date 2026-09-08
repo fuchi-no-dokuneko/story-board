@@ -11,10 +11,10 @@ modules/storage-sqlite: real temporary SQLite files; migrations, WAL, CAS, repla
 modules/monitor-adapter: no mocks; immutable packets, output contracts, and proposal separation tested.
 modules/rewrite: fake model transport; proposal parsing, normalization, provenance, and limits tested.
 modules/rewrite-policy: tested through API and SQLite integration; anomaly, preservation, cooldown, and stale gates tested.
-apps/api: real Spring MockMvc and temporary SQLite; routes, auth, trusted-LAN registration, catalog reads, replay, OpenAPI, and isolation tested.
-apps/style-worker: fake HTTP client; claims, result submission, retries, limits, and credential redaction tested.
-apps/llm-worker: fake model transport; sandbox boundary, response limits, prompt isolation, and output tested.
-apps/cli: temporary SQLite; replay, head hashes, render hashes, usage, and failure reporting tested.
+server: real Spring MockMvc and temporary SQLite; routes, auth, trusted-LAN registration, catalog reads, replay, OpenAPI, and isolation tested.
+client-style-worker: fake HTTP client; claims, result submission, retries, limits, and credential redaction tested.
+client-llm-worker: fake model transport; sandbox boundary, response limits, prompt isolation, and output tested.
+client-cli: temporary SQLite; replay, head hashes, render hashes, usage, and failure reporting tested.
 tests/architecture-tests: no mocks; domain dependency and secure deployment topology constraints tested.
 acceptance/runtime.cjs: no mocks; Chromium interaction, IPv4 resolution, recording hooks, screenshots, and browser recovery infrastructure tested by dry binding and GUI UAT.
 acceptance/run.mjs: Cucumber is external; suite selection, dry binding, report orchestration, and optional Sonar scanner invocation tested.

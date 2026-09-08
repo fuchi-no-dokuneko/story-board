@@ -79,7 +79,7 @@ for IPv4 only.
 Verify every SQLite novel head from the full immutable operation log with:
 
 ```bash
-java -jar apps/cli/target/storyblock-cli-0.1.0-SNAPSHOT.jar \
+java -jar client-cli/target/storyblock-cli-0.1.0-SNAPSHOT.jar \
   replay-verify data/storyblock.db
 ```
 
@@ -130,10 +130,10 @@ Adjacent-state rules and reset-boundary behavior are documented in
 
 ## Modules
 
-- `apps/api`: Spring MVC API and commit coordinator
-- `apps/style-worker`: durable style-analysis worker
-- `apps/llm-worker`: isolated one-shot, proposal-only rewrite worker
-- `apps/cli`: replay, backup, restore, and operator commands
+- `server`: Spring MVC API and commit coordinator
+- `client-style-worker`: durable style-analysis worker
+- `client-llm-worker`: isolated one-shot, proposal-only rewrite worker
+- `client-cli`: replay, backup, restore, and operator commands
 - `modules/rewrite`: immutable rewrite input and text-proposal contracts
 - `modules/*`: other framework-independent domain services and adapters
 - `modules/storage-sqlite/src/main/resources/db/migration`: Flyway migrations

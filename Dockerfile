@@ -15,11 +15,11 @@ USER storyblock
 ENTRYPOINT ["/app/container-entrypoint.sh"]
 
 FROM runtime AS api
-COPY --from=build --chown=storyblock:storyblock /workspace/apps/api/target/storyblock-api-*.jar /app/application.jar
+COPY --from=build --chown=storyblock:storyblock /workspace/server/target/storyblock-api-*.jar /app/application.jar
 EXPOSE 8443
 
 FROM runtime AS style-worker
-COPY --from=build --chown=storyblock:storyblock /workspace/apps/style-worker/target/storyblock-style-worker-*.jar /app/application.jar
+COPY --from=build --chown=storyblock:storyblock /workspace/client-style-worker/target/storyblock-style-worker-*.jar /app/application.jar
 
 FROM runtime AS llm-worker
-COPY --from=build --chown=storyblock:storyblock /workspace/apps/llm-worker/target/storyblock-llm-worker-*.jar /app/application.jar
+COPY --from=build --chown=storyblock:storyblock /workspace/client-llm-worker/target/storyblock-llm-worker-*.jar /app/application.jar

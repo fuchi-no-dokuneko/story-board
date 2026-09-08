@@ -52,8 +52,8 @@
   "description": "Code-derived StoryBlock Insertion Point JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
-    "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
+    "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+    "server/src/main/java/dev/storyblock/api/http/CommitController.java",
     "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
     "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
   ],

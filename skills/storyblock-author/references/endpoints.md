@@ -18,7 +18,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `ActuatorHealthResponse` (application/vnd.spring-boot.actuator.v3+json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/application.properties`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/application.properties`.
 
 ## health.components.read
 
@@ -32,7 +32,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `ActuatorHealthResponse` (application/vnd.spring-boot.actuator.v3+json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
 
 ## metrics.list
 
@@ -46,7 +46,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `ActuatorMetricsListResponse` (application/vnd.spring-boot.actuator.v3+json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/application.properties`, `apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/application.properties`, `server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
 
 ## metrics.read
 
@@ -60,7 +60,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `ActuatorMetricResponse` (application/vnd.spring-boot.actuator.v3+json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/application.properties`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/application.properties`.
 
 ## access-keys.revoke
 
@@ -74,7 +74,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `RevokeResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/AccessKeyController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/AccessKeyController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## admin.novels.list
 
@@ -88,7 +88,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `AdminNovelCatalog` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/AdminNovelController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## admin.novels.read
 
@@ -102,7 +102,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `AdminNovelDetail` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/AdminNovelController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## agent.novels.register
 
@@ -116,7 +116,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `AgentNovelRegistrationResponse` (application/json); 201 `AgentNovelRegistrationResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/AgentNovelController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## artifacts.download
 
@@ -130,7 +130,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `ArtifactResponse` (application/vnd.storyblock.package+json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## imports.create
 
@@ -144,7 +144,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `NovelHead` (application/json); 201 `NovelHead` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## internal.jobs.claim
 
@@ -158,7 +158,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `WorkerClaimResponse` (application/json); 204 no body.
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## internal.jobs.results.submit
 
@@ -172,7 +172,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `WorkerResultResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## jobs.read
 
@@ -186,7 +186,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `Job` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.create
 
@@ -200,7 +200,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `NovelHead` (application/json); 201 `NovelHead` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/NovelController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/NovelController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.head.read
 
@@ -214,7 +214,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `NovelHead` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/NovelController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/NovelController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.access-keys.create
 
@@ -228,7 +228,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 201 `AccessKeyCreated` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/AccessKeyController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/AccessKeyController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.commits.create
 
@@ -242,7 +242,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `CommitResponse` (application/json); 201 `CommitResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/CommitController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/CommitController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.detector-runs.create
 
@@ -256,7 +256,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `DetectorRunResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/DetectorController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/DetectorController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.edit-previews.create
 
@@ -270,7 +270,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `PreviewResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/PreviewController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.exports.create
 
@@ -284,7 +284,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 202 `JobAccepted` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.monitor-packets.create
 
@@ -298,7 +298,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `MonitorPacket` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/MonitorController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.monitor-runs.create
 
@@ -312,7 +312,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `MonitorSubmissionResponse` (application/json); 201 `MonitorSubmissionResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/MonitorController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.monitor-runs.read
 
@@ -326,7 +326,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `MonitorRunStatus` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/MonitorController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.images.create
 
@@ -340,7 +340,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `ImageUploadResponse` (application/json); 201 `ImageUploadResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/ImageController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/ImageController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
 
 ## novels.pdf-renders.create
 
@@ -354,7 +354,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `PdfDocument` (application/pdf).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/PdfRenderController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
 
 ## novels.renders.create
 
@@ -368,7 +368,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `RenderPacket` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/RenderController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/RenderController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.revisions.read
 
@@ -382,7 +382,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `CanonicalRevision` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/NovelController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/NovelController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.style-analyses.create
 
@@ -396,7 +396,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 202 `StyleAnalysisAccepted` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## novels.undo-previews.create
 
@@ -410,7 +410,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `PreviewResponse` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/PreviewController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## openapi.read
 
@@ -424,7 +424,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `OpenApiDocument` (application/yaml).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java`, `apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java`, `server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java`.
 
 ## rewrite-proposals.create
 
@@ -438,7 +438,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 202 `RewriteProposalAccepted` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## rewrite-proposals.read
 
@@ -454,7 +454,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Authorization note: Requires novel:read, but the controller/filter code does not bind proposalId back to the credential novel.
 - Confidence: `confirmed-from-code`.
 - OPEN QUESTION: Whether cross-novel rewrite proposal reads are intentionally visible to any novel:read credential.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## style-analyses.read
 
@@ -468,7 +468,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `StyleAnalysisView` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## style-analyses.windows.list
 
@@ -482,7 +482,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `StyleAnalysisWindowPage` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## style-profiles.create
 
@@ -496,7 +496,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `StyleProfile` (application/json); 201 `StyleProfile` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## style-profiles.read
 
@@ -510,7 +510,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `StyleProfile` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## style-profiles.versions.create
 
@@ -524,7 +524,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `StyleProfileVersionView` (application/json); 201 `StyleProfileVersionView` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## style-profiles.versions.read
 
@@ -538,7 +538,7 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `StyleProfileVersionView` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
 
 ## style-profiles.versions.transition
 
@@ -552,4 +552,4 @@ Every `/v1` mutation requires `If-Match` and `Idempotency-Key` in the filter, ev
 - Responses: 200 `StyleProfileVersionView` (application/json).
 - Errors: default `ApiProblem` (application/problem+json).
 - Confidence: `confirmed-from-code`.
-- Sources: `apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `apps/api/src/main/resources/openapi/storyblock-v1.yaml`, `apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.
+- Sources: `server/src/main/java/dev/storyblock/api/http/StyleProfileController.java`, `server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java`, `server/src/main/resources/openapi/storyblock-v1.yaml`, `server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java`.

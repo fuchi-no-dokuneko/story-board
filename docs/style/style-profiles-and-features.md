@@ -95,7 +95,7 @@ apply the profile's stored novel boundary.
 ## Verification
 
 ```bash
-./mvnw -o -pl modules/style,modules/storage-sqlite,apps/api -am test
+./mvnw -o -pl modules/style,modules/storage-sqlite,server -am test
 ```
 
 Tests cover deterministic extraction, every required channel and distance,

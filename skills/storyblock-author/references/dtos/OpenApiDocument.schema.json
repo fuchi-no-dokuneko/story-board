@@ -6,7 +6,7 @@
   "title": "OpenApiDocument",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java"
+    "server/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java"
   ],
   "examples": [
     "example"

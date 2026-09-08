@@ -60,9 +60,9 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/application.properties"
+        "server/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/application.properties"
       ]
     },
     {
@@ -133,9 +133,9 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/OperationalHealthConfiguration.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
       ]
     },
     {
@@ -192,9 +192,9 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/application.properties",
-        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/application.properties",
+        "server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
       ]
     },
     {
@@ -268,8 +268,8 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/application.properties"
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/application.properties"
       ]
     },
     {
@@ -355,10 +355,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -446,10 +446,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -517,10 +517,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -614,10 +614,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -693,10 +693,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -788,10 +788,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -881,10 +881,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -975,10 +975,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1046,10 +1046,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1141,10 +1141,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1212,10 +1212,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1307,10 +1307,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1410,10 +1410,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/CommitController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1504,10 +1504,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/DetectorController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/DetectorController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1598,10 +1598,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1692,10 +1692,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1786,10 +1786,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1891,10 +1891,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -1970,10 +1970,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/MonitorController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -2075,10 +2075,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/ImageController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/ImageController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
       ]
     },
     {
@@ -2173,10 +2173,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/PdfRenderController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
       ]
     },
     {
@@ -2267,10 +2267,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/RenderController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -2346,10 +2346,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/NovelController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -2441,10 +2441,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -2535,10 +2535,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/PreviewController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -2586,8 +2586,8 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java",
-        "apps/api/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java",
+        "server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
       ]
     },
     {
@@ -2671,10 +2671,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -2742,10 +2742,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ],
       "authorizationNotes": "Requires novel:read, but the controller/filter code does not bind proposalId back to the credential novel.",
       "openQuestion": "Whether cross-novel rewrite proposal reads are intentionally visible to any novel:read credential."
@@ -2815,10 +2815,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -2904,10 +2904,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -3001,10 +3001,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -3072,10 +3072,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -3177,10 +3177,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -3256,10 +3256,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     },
     {
@@ -3359,10 +3359,10 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "apps/api/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
-        "apps/api/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "apps/api/src/main/resources/openapi/storyblock-v1.yaml",
-        "apps/api/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
       ]
     }
   ]

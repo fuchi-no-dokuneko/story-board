@@ -35,7 +35,7 @@
   "description": "Code-derived StoryBlock Rewrite Constraints JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+    "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
     "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
     "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
   ],

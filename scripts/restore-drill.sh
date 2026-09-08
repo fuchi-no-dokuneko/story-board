@@ -59,7 +59,7 @@ if [[ "$quick_check" != "ok" || "$integrity_check" != "ok" ]]; then
 fi
 
 java -Djava.net.preferIPv4Stack=true \
-  -jar apps/cli/target/storyblock-cli-0.1.0-SNAPSHOT.jar \
+  -jar client-cli/target/storyblock-cli-0.1.0-SNAPSHOT.jar \
   replay-verify "$database" > "$work/replay-report.json"
 if ! jq -e '.valid == true and (.novel_count == (.novels | length))' \
   "$work/replay-report.json" >/dev/null; then

@@ -31,7 +31,7 @@
   "description": "Code-derived StoryBlock Detector Run Response JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [
-    "apps/api/src/main/java/dev/storyblock/api/http/DetectorController.java",
+    "server/src/main/java/dev/storyblock/api/http/DetectorController.java",
     "modules/detector/src/main/java/dev/storyblock/detector/DetectorRun.java",
     "modules/detector/src/main/java/dev/storyblock/detector/DetectorFinding.java"
   ],
