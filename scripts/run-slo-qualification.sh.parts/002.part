@@ -1,6 +1,4 @@
-        "NFR-007":{metric:"negative cross-novel HTTP isolation",passed:$integration_pass,
-                   passed_cases:(if $integration_pass then 6 else 0 end),total_cases:6},
-        "NFR-008":{metric:"encrypted backup and isolated restore",passed:$backup_pass,
+        "NFR-008":{metric:"compressed backup and isolated restore",passed:$backup_pass,
                    policy_rpo_seconds:3600,policy_rto_ms:14400000,
                    measured_rpo_seconds:0,measured_rto_ms:($restored.rto_ms // null),
                    quick_check:($restored.quick_check // "failed"),

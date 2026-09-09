@@ -1,8 +1,0 @@
-  "$source_manifest" > "$manifest_pending"
-
-mv "$pending" "$destination_artifact"
-mv "$checksum_pending" "$destination_artifact.sha256"
-mv "$manifest_pending" "$destination_artifact.json"
-chmod 600 "$destination_artifact" "$destination_artifact.sha256" \
-  "$destination_artifact.json"
-echo "$destination_artifact"

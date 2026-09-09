@@ -11,6 +11,8 @@ Completed / 已完成:
 - Full Java/Node tests, real browser UAT, image/PDF transfer, concurrent backup and restore. 完整 Java／Node、GUI、圖片／PDF 轉移、併發備份還原。
 - Coverage inventory, append-only logs, milestones and bilingual ticket commits. 覆蓋清單、追加日誌、里程碑與雙語提交。
 
+- Remove backup keys, encryption and rotation; retain compressed backups and integrity checks. 移除備份金鑰、加密與輪替，保留壓縮備份及完整性檢查。
+
 External limitations / 外部限制:
 - Container execution remains unverified: Docker is absent and user namespace creation is denied. 容器執行尚未驗證：缺少 Docker，建立使用者命名空間遭拒。
 - GitHub synchronization is unconfirmed: the fifth-commit push timed out after five seconds; no retry or network changes. GitHub 同步未確認：第五次提交後推送逾時，未重試或變更網路。

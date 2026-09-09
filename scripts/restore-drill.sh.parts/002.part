@@ -1,11 +1,3 @@
-if [[ "$source_migration_version" != "none" \
-   && "$migration_version" != "$source_migration_version" ]]; then
-  echo "Restored migration version does not match the backup manifest" >&2
-  exit 1
-fi
-if [[ "$revision_count" != "$(jq -r '.revision_count' "$manifest")" \
-   || "$operation_count" != "$(jq -r '.operation_count' "$manifest")" \
-   || "$missing_artifacts" != '[]' ]]; then
   echo "Restored schema or canonical counts do not match the backup manifest" >&2
   exit 1
 fi

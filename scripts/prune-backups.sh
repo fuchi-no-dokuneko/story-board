@@ -16,7 +16,7 @@ fi
 
 mapfile -t artifacts < <(
   find "$directory" -maxdepth 1 -type f \
-    -name 'storyblock-????????T??????Z.db.zst.enc' -printf '%f\n' | sort -r
+    -name 'storyblock-????????T??????Z.db.zst' -printf '%f\n' | sort -r
 )
 
 declare -A keep=()
@@ -27,7 +27,7 @@ now=$(date -u +%s)
 for index in "${!artifacts[@]}"; do
   artifact=${artifacts[$index]}
   stamp=${artifact#storyblock-}
-  stamp=${stamp%.db.zst.enc}
+  stamp=${stamp%.db.zst}
   epoch=$(date -u -d "${stamp:0:8} ${stamp:9:2}:${stamp:11:2}:${stamp:13:2}" +%s)
   age_days=$(((now - epoch) / 86400))
 

@@ -27,17 +27,14 @@ printf '{"passed":false,"error":"core database unavailable"}\n' > "$restore_repo
 database=client-cli/target/slo/storyblock.db
 core_report=client-cli/target/slo/core.json
 if [[ -f "$database" && -f "$core_report" ]]; then
-  openssl rand -base64 -out "$work/backup.key" 48
   mkdir -p "$work/offsite"
   artifact=$(env \
-    STORYBLOCK_BACKUP_KEY_FILE="$work/backup.key" \
     STORYBLOCK_BACKUP_PRUNE_AFTER_WRITE=false \
     scripts/backup.sh "$database" "$work/offsite" 2>"$work/backup.err")
   backup_exit=$?
   if [[ $backup_exit -eq 0 ]]; then
     mkdir -p "$work/restore"
-    restore_report=$(env STORYBLOCK_BACKUP_KEY_FILE="$work/backup.key" \
-      scripts/restore-drill.sh "$artifact" "$work/restore" 2>"$work/restore.err")
+    restore_report=$(scripts/restore-drill.sh "$artifact" "$work/restore" 2>"$work/restore.err")
     backup_status=$?
   fi
 fi
@@ -69,3 +66,5 @@ jq -n \
       nfr:($measured + {
         "NFR-006":{metric:"process crash durability",stages:8,
                    passed:$integration_pass},
+        "NFR-007":{metric:"negative cross-novel HTTP isolation",passed:$integration_pass,
+                   passed_cases:(if $integration_pass then 6 else 0 end),total_cases:6},

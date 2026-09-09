@@ -1,10 +1,10 @@
 # Verification / 驗證 / 验证
 
-EN: ADR-311 preserves the existing HTTP routes and DTO shapes. The original OpenAPI document and eight database migrations are unchanged. The final Java run passed 182 tests across 19 modules; the author tool passed 173 tests and browser assets passed 4 tests.
+EN: ADR-311 preserves the existing HTTP routes and DTO shapes. The original OpenAPI document and eight database migrations are unchanged. The final Java run passed 183 tests across 19 modules; the author tool passed 173 tests and browser assets passed 4 tests.
 
-繁體中文：ADR-311 保留既有 HTTP 路徑及 DTO 結構。原始 OpenAPI 與八份資料庫遷移未變更。最終 Java 執行通過 19 個模組中的 182 項測試；作者工具通過 173 項，瀏覽器資源通過 4 項。
+繁體中文：ADR-311 保留既有 HTTP 路徑及 DTO 結構。原始 OpenAPI 與八份資料庫遷移未變更。最終 Java 執行通過 19 個模組中的 183 項測試；作者工具通過 173 項，瀏覽器資源通過 4 項。
 
-简体中文：ADR-311 保留既有 HTTP 路径及 DTO 结构。原始 OpenAPI 与八份数据库迁移未更改。最终 Java 执行通过 19 个模块中的 182 项测试；作者工具通过 173 项，浏览器资源通过 4 项。
+简体中文：ADR-311 保留既有 HTTP 路径及 DTO 结构。原始 OpenAPI 与八份数据库迁移未更改。最终 Java 执行通过 19 个模块中的 183 项测试；作者工具通过 173 项，浏览器资源通过 4 项。
 
 EN: Real Chromium passed 9 scenarios and 85 steps against an isolated HTTPS/SQLite installation. Additional live checks covered image upload, preview, commit replay, deterministic PDF, package import into another database, concurrent startup, restart persistence, port conflicts, PID ownership, concurrent backups and restore. Coverage and mocks are listed in the root inventory.
 

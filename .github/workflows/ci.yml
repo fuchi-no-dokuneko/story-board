@@ -33,6 +33,10 @@ jobs:
           npm --prefix plugin test
       - name: Verify admin UI authentication
         run: node --test server/src/test/js/*.test.cjs
+      - name: Verify keyless backup and restore
+        run: |
+          databases=(server/target/api-http-contract-*.db)
+          ./scripts/test-backup.sh "${databases[0]}"
       - name: Smoke-test self-signed HTTPS
         run: |
           ./scripts/local-server.sh start

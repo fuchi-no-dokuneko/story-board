@@ -20,7 +20,7 @@ final class TelemetryMeters {
     self.gauge("stale_proposal_total", SqliteOperationalSnapshot::staleProposalTotal);
     self.gauge("artifact_bytes", SqliteOperationalSnapshot::artifactBytes);
     Gauge.builder("backup_age_seconds", self, StoryBlockTelemetry::backupAgeSeconds)
-        .description("Age of the newest encrypted backup manifest")
+        .description("Age of the newest backup manifest")
         .baseUnit("seconds")
         .register(self.registry);
     for (FindingCode code : FindingCode.values()) {

@@ -54,6 +54,5 @@ the API private key. The API is the only application service with the
 `storyblock-data` volume. Worker profiles do not mount the database or container
 socket. The LLM worker has neither canonical storage nor API commit credentials.
 
-The encrypted backup destination must be an off-host versioned mount. Keep the
-backup encryption key outside both the SQLite volume and backup destination, as
-described in `backup-and-restore.md`.
+Backups are unencrypted compressed snapshots kept inside this repository.
+The backup workflow has no key generation or rotation; see `backup-and-restore.md`.

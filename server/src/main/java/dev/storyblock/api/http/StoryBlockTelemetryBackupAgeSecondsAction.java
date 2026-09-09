@@ -12,7 +12,7 @@ final class StoryBlockTelemetryBackupAgeSecondsAction {
         }
         try (var files = Files.list(self.backupManifestDirectory)) {
             Instant newest = files
-                    .filter(path -> path.getFileName().toString().endsWith(".enc.json"))
+                    .filter(path -> path.getFileName().toString().endsWith(".db.zst.json"))
                     .map(path -> {
                         try {
                             return Files.getLastModifiedTime(path).toInstant();

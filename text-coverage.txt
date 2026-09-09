@@ -1,5 +1,5 @@
 ADR-311 coverage inventory / 覆蓋清單
-Java: 182 tests passed; 19 reactor modules. Java：182 項通過，19 個建置模組。
+Java: 183 tests passed; 19 modules. Java：183 項通過，19 模組。
 Domain/contracts: real objects, codecs and property tests; no mocks. 領域／契約：實物、編碼及性質測試，無替身。
 Renderer/validator/detector: real implementations and golden fixtures. 渲染／驗證／偵測：真實實作與黃金範例。
 Monitor/style/rewrite: real planners, analysis, contracts and policy fixtures. 監控／風格／改寫：真實規劃、分析、契約與策略範例。
@@ -15,5 +15,6 @@ Plugin: 173 Node tests; validation and standalone assembly real, HTTP transport 
 Browser assets: 4 Node tests with DOM/storage fixtures. 瀏覽器資源：4 項 Node 測試，使用 DOM／儲存範例。
 GUI UAT: 9 scenarios/85 steps, real Chromium/CDP, HTTPS and SQLite; degraded health and offline network simulated. GUI：9 情境／85 步驟，健康降級及斷線為模擬。
 Live authoring/transfer: real HTTPS, image upload, PDF and separate SQLite databases; no mocks. 即時撰寫／轉移：真實 HTTPS、圖片、PDF 與隔離資料庫，無替身。
-Lifecycle/backup: real installed JVM, port conflicts, PID checks, SQLite, encryption and restore. 生命週期／備份：實際 JVM、連接埠、PID、加密與還原。
+Lifecycle/backup: real JVM, SQLite, keyless compressed archives, concurrent backup, restore, corruption rejection and retention; no mocks. 生命週期／備份：真實 JVM、SQLite、無金鑰壓縮、併發、還原、損壞拒絕及保留策略，無替身。
+Backup telemetry: real SQLite, meter registry and filesystem; fixed test clock. 備份監測：真實 SQLite、計量器與檔案系統，固定測試時鐘。
 Containers: static checks only; Docker absent and user namespace denied. 容器：僅靜態檢查；缺少 Docker，命名空間權限遭拒。
