@@ -1,3 +1,4 @@
+          <label class="sr-only" for="catalog-search">Search novels</label>
           <input id="catalog-search" type="search" placeholder="Search novels" autocomplete="off">
           <button id="catalog-refresh" type="button">Refresh</button>
         </div>
@@ -42,19 +43,12 @@
               <div><dt>TNT cannons</dt><dd id="stat-cannons">0</dd></div>
             </dl>
 
-            <div class="character-strip">
-              <h3>Main characters</h3>
-              <ul id="character-list"></ul>
+            <div class="reader-tools">
+              <button id="download-pdf" type="button">Export PDF / 匯出 PDF</button>
+              <button id="download-txt" type="button">Export TXT / 匯出 TXT</button>
+              <output id="reader-action-status" role="status"></output>
             </div>
-
-            <div class="reader-body">
-              <nav id="chapter-nav" class="chapter-nav" aria-label="Chapters"></nav>
-              <div id="chapter-content" class="chapter-content"></div>
-            </div>
-
-            <details class="revision-details">
-              <summary>Revision metadata</summary>
-              <dl>
-                <div><dt>Revision</dt><dd id="meta-revision"></dd></div>
-                <div><dt>Updated</dt><dd id="meta-updated"></dd></div>
-                <div><dt>Content hash</dt><dd id="meta-hash"></dd></div>
+            <section class="style-panel" aria-labelledby="style-title">
+              <h3 id="style-title">Style comparison / 風格比較</h3>
+              <div id="style-choices"></div>
+              <button id="compare-styles" type="button">Compare selected styles / 比較所選風格</button>

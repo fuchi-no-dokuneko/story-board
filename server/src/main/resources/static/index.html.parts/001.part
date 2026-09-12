@@ -8,6 +8,7 @@
         content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; object-src 'none'">
   <title>StoryBlock Library</title>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/reader-tools.css">
 </head>
 <body>
   <header class="app-header">
@@ -57,4 +58,3 @@
           <p id="catalog-total" class="muted">Loading catalog...</p>
         </div>
         <div class="search-controls" role="search">
-          <label class="sr-only" for="catalog-search">Search novels</label>

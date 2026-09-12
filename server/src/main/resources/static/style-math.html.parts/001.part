@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>風格計算公式 / Style formulas</title><link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/reader-tools.css"></head>
+<body><main class="math-page">
+<a href="/">返回書庫 / Back to library</a>
+<h1>風格比較的計算方式 / Style comparison formulas</h1>
+<p>比較整本小說與各 TXT 參考語料的五項特徵。數值越低，該項特徵越接近。
+每欄單位不同，不能直接平均成相似度百分比。</p>
+<p>Five feature distances compare the complete novel with each TXT corpus.
+Compare values within a column; their scales differ and are not similarity percentages.</p>
+<h2>文字與特徵 / Text and features</h2>
+<p>文字先做 NFC 正規化。tokenizer 把每個漢字字素視為一個 token，連續其他字母／數字合成小寫 token；
+標點與空白切開 token。這不是中文斷詞或 LLM 計費 token。</p>
+<p>TXT 按完整句子切分，能容納時合併兩句至 100 字素；保留超長句及未完成尾句的原文，不截斷、不補標點。
+小說使用已保存的 Block。Block 邊界會影響部分節奏與重複詞組統計。</p>
+<p>Each Han grapheme is one token; other letter/number runs form lowercase tokens.
+Reference segmentation preserves long sentences. Existing novel block boundaries remain in use.</p>
+<p>每個分布保留頻率最高的 500 項，其餘合併為 OTHER，除以總次數。
+語料量會影響詞彙多樣性；短範例只用於展示，不構成可靠的文學風格評定。</p>
+<h2>表層與語法 / Surface and grammar</h2>
+<p>表層使用字素 n-gram 與 tokens；此入口使用空的遮罩詞庫。語法使用功能詞與字元類型序列，並非完整句法分析。</p>
+<p>取兩邊特徵聯集 K，α = 0.000001。平滑並重新正規化：</p>
+<pre>pᵢ = (Pᵢ + α) / (ΣP + α|K|)
+qᵢ = (Qᵢ + α) / (ΣQ + α|K|)
+mᵢ = (pᵢ + qᵢ) / 2
+JSD = √[½ Σ pᵢ ln(pᵢ/mᵢ) + ½ Σ qᵢ ln(qᵢ/mᵢ)]</pre>
+<p>使用自然對數。Surface and grammar use Jensen–Shannon distance with natural logarithms.
+表層另回傳雙向 KL 作診斷，不作獨立改寫依據。</p>
+<h2>節奏 / Rhythm</h2>
+<p>句長按 10 字素分桶，將兩邊聯集依桶位置排序。現有實作使用累積分布差的平均：</p>
+<pre>Cⱼ = Σᵢ≤ⱼ (Pᵢ − Qᵢ)
+D = (Σⱼ |Cⱼ|) / |K|</pre>
+<p>This is the existing normalized bucket Wasserstein implementation, without multiplication by bucket width.
+它不是「相差幾個字」的距離；句長、子句長、Block 長度及標點率另有診斷資料。</p>
+<h2>敘事與詞彙 / Narrative and lexical</h2>

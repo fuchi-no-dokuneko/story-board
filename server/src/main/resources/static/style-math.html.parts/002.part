@@ -1,0 +1,11 @@
+<p>合併分布與量測欄位，缺值當作零，計算平均絕對差：</p>
+<pre>D = (Σᵢ∈K |Pᵢ − Qᵢ|) / |K|</pre>
+<p>Narrative and lexical columns report the existing L1 input distance.
+敘事包含對話／動作／描寫、視角、敘事模式與說話者交替；TXT 沒有人工 metadata，因此此欄只能部分反映敘事特徵。
+詞彙包含 unique tokens / tokens、重複三連詞組比例及長 token 比例。</p>
+<h2>結果解讀 / Interpretation</h2>
+<p>此表每次重新計算，不保存小說比較結果；參考 benchmark 在來源改變時更新。
+分數不套用舊工作式分析的 q95／q99 或改寫判定，不代表作品品質。</p>
+<p>Results are recalculated per request. Reference benchmarks refresh when files change.
+These raw distances are not calibrated anomaly decisions or judgments of literary quality.</p>
+</main></body></html>

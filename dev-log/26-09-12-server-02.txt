@@ -4,3 +4,9 @@ Current status: 執行資料與預設資料庫集中 server/data；允許該目�
 Issues: 安裝與容器路徑整合驗證待完成；未搬移既有資料。
 affect scope: Java 啟動、安裝脚本、Compose 與部署說明。
 ---
+---12:50---ADR-298比較與匯出介面
+category: api_schema_change
+Current status: 加入多風格表格、公式靜態頁及 PDF／TXT 按鈕初版。
+Issues: 待實際瀏覽器驗證下載、中文字型與錯誤呈現。
+affect scope: 小說管理網頁；TXT 依選取版本輸出。
+---

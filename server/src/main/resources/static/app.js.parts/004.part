@@ -14,6 +14,7 @@
 }
 
 function renderNovel(payload) {
+  window.StoryBlockFeatures?.select(payload);
   const novel = payload.novel;
   const revision = payload.revision;
   elements['reader-language'].textContent = text(novel.language, 'Unknown language');
@@ -55,4 +56,3 @@ async function selectNovel(novelId) {
     history.replaceState(null, '', `#${encodeURIComponent(novelId)}`);
   } catch (error) {
     if (state.selectedNovelId !== novelId || authRevision !== state.authRevision) return;
-    reportAuthenticationError(error);
