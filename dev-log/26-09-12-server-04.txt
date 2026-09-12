@@ -16,3 +16,9 @@ Current status: 已修正舊驗收步驟仍要求 UUID 的遺漏；重新通過 
 Issues: 使用五碼 ID 時，舊驗收的精確作品選取會拒絕有效 ID；產品端操作正常。
 affect scope: 新增可重跑的比較／下載／公式頁 Chromium 驗收；參考文字兩項邊界測試通過。
 ---
+---14:08---ADR-311資料路徑驗收
+category: refactor
+Current status: 容器啟動包裝器改用各應用 data；資料連結例外同步涵蓋各應用。
+Issues: Docker 執行環境不可用；容器架構靜態檢查、Shell 語法、真實啟停及備份還原均通過。
+affect scope: server/data/storyblock.db、工作程式資料目錄與操作文件；既有 VPS 未變更。
+---

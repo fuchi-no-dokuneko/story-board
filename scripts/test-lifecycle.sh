@@ -8,6 +8,7 @@ mkdir -p "$work/scripts" "$work/server" "$work/server/data"/{server,runtime,secr
 cp "$repo_dir/scripts/"{local-server,repository-paths,server-runtime,server-process,server-control,server-arguments}.sh "$work/scripts/"
 cp "$repo_dir/scripts/server-listener.py" "$work/scripts/"
 cp -R "$repo_dir/server/config" "$work/server/"
+cp -R "$repo_dir/server/style-references" "$work/server/"
 cp --remove-destination "$repo_dir/server/data/server/application.jar" "$work/server/data/server/"
 printf '%s\n' "$JAVA_HOME" >"$work/server/data/runtime/java-home"
 printf '%s' 'isolated-lifecycle-test-pepper-thirty-two-bytes' >"$work/server/data/secrets/server-pepper"
