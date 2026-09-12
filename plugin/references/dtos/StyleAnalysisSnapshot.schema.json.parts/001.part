@@ -91,3 +91,10 @@
           "corpus_sources": [
             {
               "source_id": "example-1",
+              "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "kind": "owner",
+              "provenance": "example-1",
+              "license": "example-1",
+              "ownership": "example-1"
+            }
+          ],

@@ -1,18 +1,3 @@
-              "meta": {
-              }
-            }
-          ]
-        }
-      },
-      "candidate_hash": "example-1",
-      "diff": {
-        "blockChanges": [
-
-        ],
-        "sceneSeedChanges": [
-
-        ]
-      },
       "render_packet": {
         "novel_id": "nov_EUubI",
         "revision_id": "rev_mG1Ct",

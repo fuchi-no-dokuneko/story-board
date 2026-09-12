@@ -13,6 +13,8 @@ final class ApiReadAndCreationRoutes {
                 "/auth.js",
                 "/app.js",
                 "/styles.css",
+                "/reader-actions.js", "/reader-tools.css", "/style-comparison.js",
+                "/style-score-table.js", "/style-math.html",
                 "/v1/openapi.yaml",
                 "/actuator/health"
             ).permitAll()

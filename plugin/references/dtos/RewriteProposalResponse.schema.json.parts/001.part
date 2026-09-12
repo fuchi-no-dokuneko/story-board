@@ -81,3 +81,7 @@
       "proposal_id": "prp_018f0f5e-7b4a-7c00-8000-000000000001",
       "reservation_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "revision_id": "rev_mG1Ct",
+      "status": "pending",
+      "worker_input": {
+        "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",

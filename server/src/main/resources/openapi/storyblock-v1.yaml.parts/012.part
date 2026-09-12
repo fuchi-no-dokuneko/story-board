@@ -65,23 +65,18 @@
                 $ref: "#/components/schemas/WorkerResultResponse"
         default:
           $ref: "#/components/responses/Problem"
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: nv_<public-key-id>.<256-bit-secret>
-  parameters:
-    NovelId:
-      name: novelId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^nov_[0-9a-f-]{36}$'
-    RevisionId:
-      name: revisionId
-      in: path
-      required: true
-      schema:
-        type: string
+  /novels/{novelId}/chapters:
+    get:
+      operationId: novels_chapters_list
+      summary: All chapters at a fixed novel revision.
+      parameters:
+      - name: novelId
+        required: true
+        schema:
+          type: string
+          pattern: ^nov_[A-Za-z0-9]{5}$
+        in: path
+      - name: revision_id
+        required: true
+        schema:
+          type: string

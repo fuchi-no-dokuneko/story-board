@@ -119,3 +119,5 @@
   },
   "additionalProperties": false,
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/MonitorRunStatus.schema.json",
+  "title": "MonitorRunStatus",

@@ -22,7 +22,8 @@ final class ApiMutationRoutes {
             .hasAuthority(ApiSecurityConfigurationScope.scope("novel:read"))
             .requestMatchers(HttpMethod.POST, "/v1/novels/*/monitor-runs")
             .hasAuthority(ApiSecurityConfigurationScope.scope("monitor:submit"))
-            .requestMatchers(HttpMethod.POST, "/v1/novels/*/style-analyses")
+            .requestMatchers(HttpMethod.POST, "/v1/novels/*/style-analyses",
+                "/v1/novels/*/style-comparisons")
             .hasAuthority(ApiSecurityConfigurationScope.scope("style:analyze"))
             .requestMatchers(HttpMethod.POST, "/v1/novels/*/access-keys")
             .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))

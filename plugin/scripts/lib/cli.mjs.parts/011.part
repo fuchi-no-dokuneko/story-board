@@ -1,3 +1,25 @@
+    default:
+      throw new UsageError(`Unknown command: ${parsed.command}`);
+  }
+}
+
+function writeValue(io, value, { json = false, kind } = {}) {
+  if (kind === "text") {
+    io.stdout(value.endsWith("\n") ? value : `${value}\n`);
+    return;
+  }
+  io.stdout(`${JSON.stringify(value, null, json ? 0 : 2)}\n`);
+}
+
+function errorValue(error) {
+  if (error instanceof ApiResponseError) return { error: error.name, ...problemReport(error) };
+  if (error instanceof PayloadValidationError) return { error: error.name, message: error.message, dto: error.dto, issues: error.issues };
+  if (error instanceof VerificationError) return error.report;
+  return { error: error.name ?? "Error", message: error.message };
+}
+
+export async function runCli(argv, {
+  stdout = (text) => process.stdout.write(text),
   stderr = (text) => process.stderr.write(text),
   clientOverrides = {},
 } = {}) {

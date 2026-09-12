@@ -1,5 +1,3 @@
-      "id": "imports.create",
-      "method": "POST",
       "path": "/v1/imports",
       "summary": "Import a versioned canonical JSON document or package",
       "auth": "bearer-or-trusted-lan-owner",
@@ -91,3 +89,7 @@
       "method": "POST",
       "path": "/v1/internal/jobs/claims",
       "summary": "Claim one available or expired durable worker lease",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "worker:execute"
+      ],

@@ -1,22 +1,3 @@
-        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
-        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "server/src/main/resources/openapi/storyblock-v1.yaml",
-        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
-      ]
-    },
-    {
-      "id": "style-profiles.versions.create",
-      "method": "POST",
-      "path": "/v1/style-profiles/{profileId}/versions",
-      "summary": "Create an immutable DRAFT profile baseline version",
-      "auth": "bearer-or-trusted-lan-owner",
-      "scopes": [
-        "style:admin"
-      ],
-      "roles": [],
-      "pathParameters": [
-        {
-          "name": "profileId",
           "required": true,
           "schema": {
             "type": "string",
@@ -89,3 +70,23 @@
             "Location"
           ]
         }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "style-profiles.versions.read",
+      "method": "GET",
+      "path": "/v1/style-profiles/{profileId}/versions/{versionId}",

@@ -114,3 +114,8 @@
         "sequence"
       ],
       "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "document": {

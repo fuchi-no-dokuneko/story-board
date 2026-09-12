@@ -1,12 +1,3 @@
-        }
-      }
-    }
-  },
-  "description": "Code-derived StoryBlock Canonical Revision JSON contract.",
-  "x-confidence": "confirmed-from-code",
-  "x-source": [
-    "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
-    "server/src/main/java/dev/storyblock/api/http/NovelController.java",
     "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
     "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
   ],

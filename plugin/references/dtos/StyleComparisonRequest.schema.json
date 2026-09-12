@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "properties": {
+    "style_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
+    }
+  },
+  "required": [
+    "style_ids"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/StyleComparisonRequest.schema.json",
+  "title": "StyleComparisonRequest",
+  "description": "Compare one novel to multiple styles; revision defaults to current head. Same HTTP request completes with 200; no job.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+    "server/src/main/java/dev/storyblock/api/style"
+  ],
+  "examples": [
+    {
+      "style_ids": [
+        "lyrical"
+      ],
+      "revision_id": "rev_Cd456"
+    }
+  ]
+}

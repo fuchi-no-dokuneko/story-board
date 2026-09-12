@@ -1,20 +1,3 @@
-        "new_block": {
-          "id": "blk_49pHt",
-          "text": "春風到了。",
-          "meta": {
-          }
-        },
-        "provenance_mapping": [
-          {
-            "source": {
-              "block_id": "blk_49pHt",
-              "block_version_id": "blv_xwDzm"
-            },
-            "result_block_ids": [
-              "blk_49pHt"
-            ]
-          },
-          {
             "source": {
               "block_id": "blk_49pHt",
               "block_version_id": "blv_xwDzm"

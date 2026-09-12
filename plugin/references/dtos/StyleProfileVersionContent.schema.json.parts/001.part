@@ -90,3 +90,5 @@
             ]
           },
           {
+            "channel": "surface",
+            "channel_version": "example-1",

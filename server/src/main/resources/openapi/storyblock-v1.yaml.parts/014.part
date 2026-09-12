@@ -1,98 +1,111 @@
+              schema:
+                $ref: '#/components/schemas/StyleList'
+        default:
+          $ref: '#/components/responses/Problem'
+  /novels/{novelId}/style-comparisons:
+    post:
+      operationId: novels_style-comparisons_create
+      summary: Fresh uncached comparison returned after background calculation; no
+        task identifier or polling.
+      parameters:
+      - name: novelId
+        required: true
+        schema:
+          type: string
+          pattern: ^nov_[A-Za-z0-9]{5}$
+        in: path
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Fresh uncached comparison returned after background calculation;
+            no task identifier or polling.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StyleComparisonResponse'
+        default:
+          $ref: '#/components/responses/Problem'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StyleComparisonRequest'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: nv_<public-key-id>.<256-bit-secret>
+  parameters:
+    NovelId:
+      name: novelId
+      in: path
+      required: true
+      schema:
         type: string
-  responses:
-    Problem:
-      description: RFC problem response with a stable machine code
-      content:
-        application/problem+json:
-          schema:
-            $ref: "#/components/schemas/Problem"
-    JobAccepted:
-      description: Durable job accepted
-      headers:
-        Location:
-          $ref: "#/components/headers/Location"
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/JobAccepted"
-  schemas:
-    Problem:
-      type: object
-      required: [type, title, status, code, detail, instance, request_id]
-      properties:
-        type:
-          type: string
-          format: uri
-        title:
-          type: string
-        status:
-          type: integer
-          minimum: 400
-          maximum: 599
-        code:
-          type: string
-          pattern: '^[A-Z][A-Z0-9_]{1,63}$'
-        detail:
-          type: string
-        instance:
-          type: string
-        request_id:
-          type: string
-        current_revision_id:
-          type: string
-        current_etag:
-          type: string
-      additionalProperties: true
-    CreateNovelRequest:
-      type: object
-      required: [initial_revision]
-      properties:
-        initial_revision:
-          $ref: "#/components/schemas/CanonicalRevision"
-      additionalProperties: false
-    ImportRequest:
-      type: object
-      required: [format, document]
-      properties:
-        format:
-          type: string
-          enum: [canonical-revision, canonical-package]
-        document:
-          oneOf:
-            - $ref: "#/components/schemas/CanonicalRevision"
-            - $ref: "#/components/schemas/CanonicalPackage"
-      additionalProperties: false
-    AdminNovelSummary:
-      type: object
-      required: [agent_write_registered, block_count, chapter_count, han_character_count, han_text_sha256, head_hash, head_revision_id, head_sequence, language, main_characters, novel_id, scene_count, title, tnt_cannon_count, updated_at, zombie_count]
-      properties:
-        agent_write_registered:
-          type: boolean
-        block_count:
-          type: integer
-          minimum: 0
-        chapter_count:
-          type: integer
-          minimum: 0
-        han_character_count:
-          type: integer
-          minimum: 0
-        han_text_sha256:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        head_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        head_revision_id:
-          type: string
-          pattern: '^rev_[0-9a-f-]{36}$'
-        head_sequence:
-          type: integer
-          minimum: 0
-        language:
-          type: string
-        main_characters:
-          type: array
-          maxItems: 5
-          items:
-            type: string
+        pattern: '^nov_[A-Za-z0-9]{5}$'
+    RevisionId:
+      name: revisionId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^rev_[A-Za-z0-9]{5}$'
+    AnalysisId:
+      name: analysisId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^ana_[0-9a-f-]{36}$'
+    ProposalId:
+      name: proposalId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^prp_[0-9a-f-]{36}$'
+    MonitorRunId:
+      name: monitorRunId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^mrun_[0-9a-f-]{36}$'
+    ProfileId:
+      name: profileId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^spf_[0-9a-f-]{36}$'
+    ProfileVersionId:
+      name: versionId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^spv_[0-9a-f-]{36}$'
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^job_[0-9a-f-]{36}$'
+    KeyId:
+      name: keyId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^key_[0-9a-f-]{36}$'
+    ArtifactId:
+      name: artifactId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^art_[0-9a-f-]{36}$'

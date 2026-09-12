@@ -1,96 +1,105 @@
-          pattern: '^art_[0-9a-f-]{36}$'
-        content_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        media_type:
-          type: string
-          enum: [image/png, image/jpeg]
-        width_px:
-          type: integer
-          minimum: 1
-          maximum: 8192
-        height_px:
-          type: integer
-          minimum: 1
-          maximum: 8192
-        alt_text:
-          type: string
-          minLength: 1
-          maxLength: 2000
-          x-storyblock-max-graphemes: 500
-      additionalProperties: false
-    ImageUploadResponse:
+        extensions: {}
+    BlockSlice:
       type: object
-      required: [schema_version, artifact_id, artifact_uri, content_hash, media_type, width_px, height_px, idempotent_replay]
-      properties:
-        schema_version:
-          const: image-upload-1.0.0
-        artifact_id:
-          type: string
-          pattern: '^art_[0-9a-f-]{36}$'
-        artifact_uri:
-          type: string
-          format: uri-reference
-        content_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        media_type:
-          type: string
-          enum: [image/png, image/jpeg]
-        width_px:
-          type: integer
-          minimum: 1
-          maximum: 8192
-        height_px:
-          type: integer
-          minimum: 1
-          maximum: 8192
-        idempotent_replay:
-          type: boolean
-      additionalProperties: false
-    RenderPacket:
-      type: object
-      required: [novel_id, revision_id, revision_hash, renderer_version, range, rendered_text, blocks, resolved_meta, offset_map, scene_boundaries]
       properties:
         novel_id:
           type: string
+          pattern: ^nov_[A-Za-z0-9]{5}$
         revision_id:
           type: string
+          pattern: ^rev_[A-Za-z0-9]{5}$
         revision_hash:
           type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        renderer_version:
+          pattern: ^sha256:[0-9a-f]{64}$
+        scene_id:
           type: string
-        range:
-          $ref: "#/components/schemas/RenderRange"
-        rendered_text:
+          pattern: ^scn_[A-Za-z0-9]{5}$
+        chapter_id:
           type: string
+          pattern: ^ch_[A-Za-z0-9]{5}$
+        block_count:
+          type: integer
+          minimum: 0
+        slice:
+          $ref: '#/components/schemas/IndexSlice'
         blocks:
           type: array
           items:
-            $ref: "#/components/schemas/RenderedBlock"
-        resolved_meta:
-          type: array
-          items:
-            $ref: "#/components/schemas/ResolvedBlockMetadata"
-        offset_map:
-          type: array
-          items:
-            $ref: "#/components/schemas/RenderOffset"
-        scene_boundaries:
-          type: array
-          items:
-            $ref: "#/components/schemas/ResolvedSceneBoundary"
+            $ref: '#/components/schemas/BlockSliceItem'
+      required:
+      - novel_id
+      - revision_id
+      - revision_hash
+      - scene_id
+      - chapter_id
+      - block_count
+      - slice
+      - blocks
       additionalProperties: false
-    RenderRange:
+      title: BlockSlice
+      description: Revision-bound scene block slice; [0,0) reads an empty scene.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
+      examples:
+      - novel_id: nov_Ab123
+        revision_id: rev_Cd456
+        revision_hash: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        scene_id: scn_Bb234
+        chapter_id: ch_Aa123
+        block_count: 1
+        slice:
+          start: 0
+          end: 1
+        blocks:
+        - index: 0
+          block_id: blk_Cc345
+          block_version_id: blv_Dd456
+          order_key: a0
+          text: 清晨下雨。
+          meta: {}
+          extensions: {}
+    RegisteredStyle:
       type: object
-      required: [from_block_id, to_block_id]
       properties:
-        from_block_id:
-          type: [string, "null"]
-        to_block_id:
-          type: [string, "null"]
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        status:
+          type: string
+          enum:
+          - ready
+          - stale
+          - unavailable
+        reference_file_count:
+          type: integer
+          minimum: 0
+        reference_graphemes:
+          type: integer
+          minimum: 0
+        benchmark_updated_at:
+          type: string
+          format: date-time
+        error:
+          type: string
+      required:
+      - id
+      - name
+      - description
+      - language
+      - status
       additionalProperties: false
-    RenderedBlock:
-      type: object
-      required: [block_id, block_version_id, text, local_meta]
+      title: RegisteredStyle
+      description: Registered reference benchmark status. Sources stay on the server.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
+      - server/src/main/java/dev/storyblock/api/style
+      examples:
+      - id: lyrical
+        name: 抒情敘事

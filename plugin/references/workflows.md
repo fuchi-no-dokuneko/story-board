@@ -19,9 +19,9 @@ EN: For an existing novel, read the live head and revision. Use one of the ten `
 简体中文：既有作品先读取实时版本头与修订。采用十种 `OperationEnvelope` 之一及真实场景、区块、版本 ID。预览并检查违规，仅提交相同操作、候选 ID 与时间；版本头变更时重新读取及创建操作。导出使用精确修订 ETag，封装转移包含历史与图片产物。
 
 ```bash
-node scripts/storyblock-author.mjs read --novel-id nov_UUIDV7 --json
-node scripts/storyblock-author.mjs preview-edit --novel-id nov_UUIDV7 --file edit.json --json
-node scripts/storyblock-author.mjs commit --novel-id nov_UUIDV7 --file edit.json --json
+node scripts/storyblock-author.mjs read --novel-id nov_Ab123 --json
+node scripts/storyblock-author.mjs preview-edit --novel-id nov_Ab123 --file edit.json --json
+node scripts/storyblock-author.mjs commit --novel-id nov_Ab123 --file edit.json --json
 ```
 
 [DTOs / 綱要 / 纲要](dtos.md) · [Images / 圖片 / 图片](images-pdf.md)

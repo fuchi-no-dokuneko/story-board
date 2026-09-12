@@ -1,28 +1,3 @@
-          "dto": "ApiProblem"
-        }
-      ],
-      "confidence": "confirmed-from-code",
-      "source": [
-        "server/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java",
-        "server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
-      ]
-    },
-    {
-      "id": "rewrite-proposals.create",
-      "method": "POST",
-      "path": "/v1/rewrite-proposals",
-      "summary": "Submit a durable LLM rewrite proposal job",
-      "auth": "bearer-or-trusted-lan-owner",
-      "scopes": [
-        "rewrite:propose"
-      ],
-      "roles": [],
-      "pathParameters": [],
-      "queryParameters": [],
-      "requestHeaders": [
-        {
-          "name": "Authorization",
-          "required": false,
           "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
           "schema": {
             "type": "string",
@@ -91,3 +66,25 @@
     {
       "id": "rewrite-proposals.read",
       "method": "GET",
+      "path": "/v1/rewrite-proposals/{proposalId}",
+      "summary": "Get an immutable rewrite proposal and its validation results",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [],
+      "pathParameters": [
+        {
+          "name": "proposalId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^prp_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          }
+        }
+      ],
+      "queryParameters": [],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,

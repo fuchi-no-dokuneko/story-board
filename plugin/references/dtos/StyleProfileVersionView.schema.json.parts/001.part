@@ -88,3 +88,5 @@
               "tokenizer_id": "example-1",
               "vocabulary_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
               "normalizer_version": "example-1",
+              "additive_smoothing_alpha": 1,
+              "top_k": 10

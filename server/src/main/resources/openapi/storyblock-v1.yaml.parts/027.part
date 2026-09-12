@@ -1,90 +1,87 @@
+          $ref: "#/components/schemas/ResolvedMetadataState"
+        state_out:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+      additionalProperties: false
+    OperationEnvelope:
+      type: object
+      required: [operation_id, idempotency_key, novel_id, base_revision_id, expected_head_hash, type, payload]
+      properties:
+        operation_id:
+          type: string
+        idempotency_key:
+          type: string
+          minLength: 1
+          maxLength: 200
+        novel_id:
+          type: string
+        base_revision_id:
+          type: string
+        expected_head_hash:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        trace_expires_at:
+        type:
           type: string
-          format: date-time
-        trace_uncompressed_bytes:
-          type: integer
-          minimum: 2
-          maximum: 16777216
-      additionalProperties: false
-    StyleAnalysisSummary:
-      type: object
-      required: [analyzed_block_count, calibrated_window_count, decision_counts, operational_window_count]
-      properties:
-        analyzed_block_count:
-          type: integer
-          minimum: 1
-          maximum: 1000
-        calibrated_window_count:
-          type: integer
-          minimum: 0
-          maximum: 1000
-        decision_counts:
-          type: object
-          properties:
-            normal: {type: integer, minimum: 0}
-            warning: {type: integer, minimum: 0}
-            rewrite_candidate: {type: integer, minimum: 0}
-            topic_shift_only: {type: integer, minimum: 0}
-            low_confidence: {type: integer, minimum: 0}
-          additionalProperties: false
-        operational_window_count:
-          type: integer
-          minimum: 0
-          maximum: 1000
-      additionalProperties: false
-    StyleAnalysisWindowFinding:
-      type: object
-      required: [block_ids, can_trigger_rewrite, confidence, decision_state, ordinal, payload, window_id]
-      properties:
-        block_ids:
-          type: array
-          minItems: 1
-          uniqueItems: true
-          items:
-            type: string
-            pattern: '^blk_[0-9a-f-]{36}$'
-        can_trigger_rewrite:
-          type: boolean
-        confidence:
-          type: string
-          enum: [calibrated, low_confidence]
-        decision_state:
-          type: string
-          enum: [normal, warning, rewrite_candidate, topic_shift_only, low_confidence]
-        ordinal:
-          type: integer
-          minimum: 0
-          maximum: 999
+          enum: [insert_blocks, replace_block_range, delete_block_range, split_block, merge_blocks, extend_block, move_block_range, correct_block_meta, set_scene_initial_meta, restore_revision_content]
         payload:
           type: object
           additionalProperties: true
-        window_id:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
       additionalProperties: false
-    StyleAnalysisWindowPage:
+    EditPreviewRequest:
       type: object
-      required: [analysis_id, items, next_cursor]
+      required: [operation, candidate_revision_id, candidate_created_at]
       properties:
-        analysis_id:
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        candidate_revision_id:
           type: string
-          pattern: '^ana_[0-9a-f-]{36}$'
-        items:
+        candidate_created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    CommitRequest:
+      allOf:
+        - $ref: "#/components/schemas/EditPreviewRequest"
+    UndoPreviewRequest:
+      type: object
+      required: [base_revision_id, restore_revision_id, expected_restore_hash, candidate_revision_id, candidate_created_at]
+      properties:
+        base_revision_id:
+          type: string
+        restore_revision_id:
+          type: string
+        expected_restore_hash:
+          type: string
+        candidate_revision_id:
+          type: string
+        candidate_created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    PreviewResponse:
+      type: object
+      required: [base_revision_id, base_hash, normalized_operation, candidate_hash, diff, render_packet, violations, warnings, committable]
+      properties:
+        base_revision_id:
+          type: string
+        base_hash:
+          type: string
+        normalized_operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        candidate_hash:
+          type: string
+        diff:
+          type: object
+        render_packet:
+          oneOf:
+            - $ref: "#/components/schemas/RenderPacket"
+            - type: "null"
+        violations:
           type: array
-          maxItems: 200
           items:
-            $ref: "#/components/schemas/StyleAnalysisWindowFinding"
-        next_cursor:
-          type: [string, "null"]
-          maxLength: 256
-      additionalProperties: false
-    RewriteProposal:
-      type: object
-      required: [proposal_id, novel_id, revision_id, revision_hash, diff, scores, validator_result, status]
-      properties:
-        proposal_id:
-          type: string
-        novel_id:
-          type: string
+            type: object
+        warnings:
+          type: array
+          items:
+            type: object
+        committable:
+          type: boolean

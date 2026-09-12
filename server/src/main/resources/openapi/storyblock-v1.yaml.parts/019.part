@@ -1,95 +1,101 @@
-      properties:
-        block_id:
-          type: string
-        block_version_id:
-          type: string
-        text:
-          type: string
-        local_meta:
-          type: object
-          additionalProperties: true
-        image:
-          $ref: "#/components/schemas/BlockImage"
-      additionalProperties: false
-    ResolvedBlockMetadata:
+        description: 環境與內心描寫
+        language: zh-Hant
+        status: ready
+        reference_file_count: 1
+        reference_graphemes: 100
+        benchmark_updated_at: '2026-09-12T12:00:00Z'
+    StyleList:
       type: object
-      required: [block_id, before, events, after]
       properties:
-        block_id:
-          type: string
-        before:
-          $ref: "#/components/schemas/ResolvedMetadataState"
-        events:
+        styles:
           type: array
           items:
-            type: object
-            additionalProperties: true
-        after:
-          $ref: "#/components/schemas/ResolvedMetadataState"
+            $ref: '#/components/schemas/RegisteredStyle'
+        error:
+          type: string
+      required:
+      - styles
       additionalProperties: false
-    ResolvedMetadataState:
+      title: StyleList
+      description: Available server-side reference styles. Registry errors are explicit.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
+      - server/src/main/java/dev/storyblock/api/style
+      examples:
+      - styles:
+        - id: lyrical
+          name: 抒情敘事
+          description: 環境與內心描寫
+          language: zh-Hant
+          status: ready
+          reference_file_count: 1
+          reference_graphemes: 100
+          benchmark_updated_at: '2026-09-12T12:00:00Z'
+    StyleComparisonRequest:
       type: object
-      required: [time, location, weather, pov, present_character_ids]
       properties:
-        time: {}
-        location: {}
-        weather: {}
-        pov: {}
-        present_character_ids:
+        style_ids:
           type: array
           items:
             type: string
-      additionalProperties: false
-    RenderOffset:
-      type: object
-      required: [block_id, rendered_start, rendered_end]
-      properties:
-        block_id:
+          minItems: 1
+          uniqueItems: true
+        revision_id:
           type: string
-        rendered_start:
+          pattern: ^rev_[A-Za-z0-9]{5}$
+      required:
+      - style_ids
+      additionalProperties: false
+      title: StyleComparisonRequest
+      description: Compare one novel to multiple styles; revision defaults to current
+        head. Same HTTP request completes with 200; no job.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
+      - server/src/main/java/dev/storyblock/api/style
+      examples:
+      - style_ids:
+        - lyrical
+        revision_id: rev_Cd456
+    StyleComparisonItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        status:
+          type: string
+          enum:
+          - ready
+          - stale
+          - unavailable
+        reference_file_count:
           type: integer
           minimum: 0
-        rendered_end:
+        reference_graphemes:
           type: integer
           minimum: 0
-      additionalProperties: false
-    ResolvedSceneBoundary:
-      type: object
-      required: [scene_id, state_in, state_out]
-      properties:
-        scene_id:
+        benchmark_updated_at:
           type: string
-        state_in:
-          $ref: "#/components/schemas/ResolvedMetadataState"
-        state_out:
-          $ref: "#/components/schemas/ResolvedMetadataState"
-      additionalProperties: false
-    OperationEnvelope:
-      type: object
-      required: [operation_id, idempotency_key, novel_id, base_revision_id, expected_head_hash, type, payload]
-      properties:
-        operation_id:
+          format: date-time
+        error:
           type: string
-        idempotency_key:
-          type: string
-          minLength: 1
-          maxLength: 200
-        novel_id:
-          type: string
-        base_revision_id:
-          type: string
-        expected_head_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        type:
-          type: string
-          enum: [insert_blocks, replace_block_range, delete_block_range, split_block, merge_blocks, extend_block, move_block_range, correct_block_meta, set_scene_initial_meta, restore_revision_content]
-        payload:
-          type: object
-          additionalProperties: true
-      additionalProperties: false
-    EditPreviewRequest:
-      type: object
-      required: [operation, candidate_revision_id, candidate_created_at]
-      properties:
-        operation:
+        scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/StyleChannelDistance'
+          minItems: 5
+          maxItems: 5
+        reference_metadata:
+          const: text_only
+      required:
+      - id
+      - name
+      - description
+      - language

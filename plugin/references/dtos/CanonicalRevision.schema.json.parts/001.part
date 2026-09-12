@@ -110,3 +110,20 @@
         },
         "scenes": {
           "type": "array",
+          "items": {
+            "$ref": "#/$defs/scene"
+          }
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
+      }
+    },
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocks",
+        "chapter_id",
+        "id",
+        "order_key",

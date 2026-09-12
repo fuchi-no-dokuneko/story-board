@@ -19,7 +19,10 @@
     "image-blocks",
     "pdf-rendering",
     "export-import",
-    "problem-diagnostics"
+    "problem-diagnostics",
+    "scene-block-slices",
+    "recent-reading-guard",
+    "server-style-comparisons"
   ],
   "environment": {
     "required": [],

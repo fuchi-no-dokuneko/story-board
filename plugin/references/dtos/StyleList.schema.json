@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "styles": {
+      "type": "array",
+      "items": {
+        "$ref": "RegisteredStyle.schema.json"
+      }
+    },
+    "error": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "styles"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/StyleList.schema.json",
+  "title": "StyleList",
+  "description": "Available server-side reference styles. Registry errors are explicit.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+    "server/src/main/java/dev/storyblock/api/style"
+  ],
+  "examples": [
+    {
+      "styles": [
+        {
+          "id": "lyrical",
+          "name": "抒情敘事",
+          "description": "環境與內心描寫",
+          "language": "zh-Hant",
+          "status": "ready",
+          "reference_file_count": 1,
+          "reference_graphemes": 100,
+          "benchmark_updated_at": "2026-09-12T12:00:00Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+      "description": "Compare one novel to multiple styles; revision defaults to current head. Same HTTP request completes with 200; no job.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+        "server/src/main/java/dev/storyblock/api/style"
+      ]
+    },
+    {
+      "name": "StyleComparisonItem",
+      "file": "dtos/StyleComparisonItem.schema.json",
+      "description": "Five raw channel distances, not quality percentages; smaller means closer. TXT has no narrative metadata.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+        "server/src/main/java/dev/storyblock/api/style"
+      ]
+    },
+    {
+      "name": "StyleComparisonResponse",
+      "file": "dtos/StyleComparisonResponse.schema.json",
+      "description": "Fresh uncached comparison returned after background calculation; no task identifier or polling.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+        "server/src/main/java/dev/storyblock/api/style"
+      ]
+    }
+  ]
+}

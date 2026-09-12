@@ -1,0 +1,73 @@
+      properties:
+        lease_owner:
+          type: string
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        attempt:
+          type: integer
+          minimum: 1
+          maximum: 20
+        snapshot_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        profile_version_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        analyzer_contract_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        window_configuration_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        summary:
+          $ref: "#/components/schemas/StyleAnalysisSummary"
+        windows:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/StyleAnalysisWindowFinding"
+        trace:
+          oneOf:
+            - $ref: "#/components/schemas/CompressedStyleAnalysisTrace"
+            - type: object
+              not:
+                required: [codec, content_base64, content_hash, uncompressed_bytes]
+              additionalProperties: true
+        completed_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    CompressedStyleAnalysisTrace:
+      type: object
+      required: [codec, content_base64, content_hash, uncompressed_bytes]
+      properties:
+        codec:
+          const: gzip
+        content_base64:
+          type: string
+          contentEncoding: base64
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        uncompressed_bytes:
+          type: integer
+          minimum: 2
+          maximum: 16777216
+      additionalProperties: false
+    WorkerResultResponse:
+      type: object
+      required: [analysis_id, idempotent_replay, job_id, result_hash, status]
+      properties:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
+        idempotent_replay:
+          type: boolean
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        result_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        status:
+          const: succeeded
+      additionalProperties: false

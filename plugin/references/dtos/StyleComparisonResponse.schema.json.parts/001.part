@@ -1,0 +1,88 @@
+{
+  "type": "object",
+  "properties": {
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[A-Za-z0-9]{5}$"
+    },
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
+    },
+    "revision_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "comparisons": {
+      "type": "array",
+      "items": {
+        "$ref": "StyleComparisonItem.schema.json"
+      },
+      "minItems": 1
+    }
+  },
+  "required": [
+    "novel_id",
+    "revision_id",
+    "revision_hash",
+    "comparisons"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/StyleComparisonResponse.schema.json",
+  "title": "StyleComparisonResponse",
+  "description": "Fresh uncached comparison returned after background calculation; no task identifier or polling.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+    "server/src/main/java/dev/storyblock/api/style"
+  ],
+  "examples": [
+    {
+      "novel_id": "nov_Ab123",
+      "revision_id": "rev_Cd456",
+      "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "comparisons": [
+        {
+          "id": "lyrical",
+          "name": "抒情敘事",
+          "description": "環境與內心描寫",
+          "language": "zh-Hant",
+          "status": "ready",
+          "reference_file_count": 1,
+          "reference_graphemes": 100,
+          "benchmark_updated_at": "2026-09-12T12:00:00Z",
+          "scores": [
+            {
+              "channel": "surface",
+              "channel_version": "example-1",
+              "primary_metric": "jensen_shannon_distance",
+              "primary_distance": 0,
+              "independent_gate_evidence": true,
+              "diagnostics": {}
+            },
+            {
+              "channel": "grammar",
+              "channel_version": "example-1",
+              "primary_metric": "jensen_shannon_distance",
+              "primary_distance": 0,
+              "independent_gate_evidence": true,
+              "diagnostics": {}
+            },
+            {
+              "channel": "rhythm",
+              "channel_version": "example-1",
+              "primary_metric": "wasserstein_distance",
+              "primary_distance": 0,
+              "independent_gate_evidence": true,
+              "diagnostics": {}
+            },
+            {
+              "channel": "narrative",
+              "channel_version": "example-1",
+              "primary_metric": "robust_l1_input",
+              "primary_distance": 0,
+              "independent_gate_evidence": true,
+              "diagnostics": {}
+            },
+            {

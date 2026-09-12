@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "chapter_id": {
+      "type": "string",
+      "pattern": "^ch_[A-Za-z0-9]{5}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "scene_count": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "index",
+    "chapter_id",
+    "title",
+    "scene_count"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/ChapterListItem.schema.json",
+  "title": "ChapterListItem",
+  "description": "Chapter metadata; does not count as reading block text.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+  ],
+  "examples": [
+    {
+      "index": 0,
+      "chapter_id": "ch_Aa123",
+      "title": "第一章",
+      "scene_count": 1
+    }
+  ]
+}

@@ -1,5 +1,3 @@
-  "$id": "https://storyblock.local/plugin/dtos/MonitorRunStatus.schema.json",
-  "title": "MonitorRunStatus",
   "description": "Code-derived StoryBlock Monitor Run Status JSON contract.",
   "x-confidence": "confirmed-from-code",
   "x-source": [

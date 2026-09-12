@@ -1,10 +1,3 @@
-              "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-              "kind": "owner",
-              "provenance": "example-1",
-              "license": "example-1",
-              "ownership": "example-1"
-            }
-          ],
           "feature_set": {
             "source_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
             "contract": {
@@ -78,4 +71,11 @@
                 ]
               }
             ]
+          },
+          "window_configuration": {
+            "operational_graphemes": 2000,
+            "operational_stride_graphemes": 1,
+            "micro_graphemes": 500,
+            "micro_stride_graphemes": 1,
+            "non_overlap_enabled": true
           },

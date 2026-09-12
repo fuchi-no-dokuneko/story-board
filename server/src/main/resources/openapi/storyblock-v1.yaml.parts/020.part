@@ -1,98 +1,84 @@
-          $ref: "#/components/schemas/OperationEnvelope"
-        candidate_revision_id:
-          type: string
-        candidate_created_at:
-          type: string
-          format: date-time
+      - status
+      - reference_file_count
+      - reference_graphemes
+      - benchmark_updated_at
+      - scores
+      - reference_metadata
       additionalProperties: false
-    CommitRequest:
-      allOf:
-        - $ref: "#/components/schemas/EditPreviewRequest"
-    UndoPreviewRequest:
+      title: StyleComparisonItem
+      description: Five raw channel distances, not quality percentages; smaller means
+        closer. TXT has no narrative metadata.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
+      - server/src/main/java/dev/storyblock/api/style
+      examples:
+      - id: lyrical
+        name: 抒情敘事
+        description: 環境與內心描寫
+        language: zh-Hant
+        status: ready
+        reference_file_count: 1
+        reference_graphemes: 100
+        benchmark_updated_at: '2026-09-12T12:00:00Z'
+        scores:
+        - channel: surface
+          channel_version: example-1
+          primary_metric: jensen_shannon_distance
+          primary_distance: 0
+          independent_gate_evidence: true
+          diagnostics: {}
+        - channel: grammar
+          channel_version: example-1
+          primary_metric: jensen_shannon_distance
+          primary_distance: 0
+          independent_gate_evidence: true
+          diagnostics: {}
+        - channel: rhythm
+          channel_version: example-1
+          primary_metric: wasserstein_distance
+          primary_distance: 0
+          independent_gate_evidence: true
+          diagnostics: {}
+        - channel: narrative
+          channel_version: example-1
+          primary_metric: robust_l1_input
+          primary_distance: 0
+          independent_gate_evidence: true
+          diagnostics: {}
+        - channel: lexical
+          channel_version: example-1
+          primary_metric: robust_l1_input
+          primary_distance: 0
+          independent_gate_evidence: true
+          diagnostics: {}
+        reference_metadata: text_only
+    StyleComparisonResponse:
       type: object
-      required: [base_revision_id, restore_revision_id, expected_restore_hash, candidate_revision_id, candidate_created_at]
       properties:
-        base_revision_id:
+        novel_id:
           type: string
-        restore_revision_id:
-          type: string
-        expected_restore_hash:
-          type: string
-        candidate_revision_id:
-          type: string
-        candidate_created_at:
-          type: string
-          format: date-time
-      additionalProperties: false
-    PreviewResponse:
-      type: object
-      required: [base_revision_id, base_hash, normalized_operation, candidate_hash, diff, render_packet, violations, warnings, committable]
-      properties:
-        base_revision_id:
-          type: string
-        base_hash:
-          type: string
-        normalized_operation:
-          $ref: "#/components/schemas/OperationEnvelope"
-        candidate_hash:
-          type: string
-        diff:
-          type: object
-        render_packet:
-          oneOf:
-            - $ref: "#/components/schemas/RenderPacket"
-            - type: "null"
-        violations:
-          type: array
-          items:
-            type: object
-        warnings:
-          type: array
-          items:
-            type: object
-        committable:
-          type: boolean
-      additionalProperties: false
-    CommitResponse:
-      type: object
-      required: [revision_id, sequence, content_hash, operation_id, idempotent_replay]
-      properties:
+          pattern: ^nov_[A-Za-z0-9]{5}$
         revision_id:
           type: string
-        sequence:
-          type: integer
-          minimum: 1
-        content_hash:
-          type: string
-        operation_id:
-          type: string
-        idempotent_replay:
-          type: boolean
-      additionalProperties: false
-    DetectorRunRequest:
-      type: object
-      required: [revision_id, revision_hash]
-      properties:
-        revision_id:
-          type: string
+          pattern: ^rev_[A-Za-z0-9]{5}$
         revision_hash:
           type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        from_block_id:
-          type: [string, "null"]
-        to_block_id:
-          type: [string, "null"]
-      additionalProperties: false
-    DetectorRunResponse:
-      type: object
-      required: [revision_id, revision_hash, rule_version, findings]
-      properties:
-        revision_id:
-          type: string
-        revision_hash:
-          type: string
-        rule_version:
-          type: string
-        findings:
+          pattern: ^sha256:[0-9a-f]{64}$
+        comparisons:
           type: array
           items:
+            $ref: '#/components/schemas/StyleComparisonItem'
+          minItems: 1
+      required:
+      - novel_id
+      - revision_id
+      - revision_hash
+      - comparisons
+      additionalProperties: false
+      title: StyleComparisonResponse
+      description: Fresh uncached comparison returned after background calculation; no
+        task identifier or polling.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java

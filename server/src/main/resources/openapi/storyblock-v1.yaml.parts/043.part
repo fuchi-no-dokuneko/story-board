@@ -1,0 +1,88 @@
+          type: string
+          format: date-time
+        retention_until:
+          type: string
+          format: date-time
+        snapshot:
+          $ref: "#/components/schemas/StyleAnalysisSnapshot"
+        status_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+      additionalProperties: false
+    StyleAnalysisSnapshot:
+      type: object
+      required: [blocks, masking_lexicon, novel_id, profile_version, revision_hash, revision_id]
+      properties:
+        blocks:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items:
+            $ref: "#/components/schemas/StyleAnalysisBlock"
+        masking_lexicon:
+          $ref: "#/components/schemas/StyleMaskingLexicon"
+        novel_id:
+          type: string
+          pattern: '^nov_[A-Za-z0-9]{5}$'
+        profile_version:
+          $ref: "#/components/schemas/StyleProfileVersion"
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        revision_id:
+          type: string
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+      additionalProperties: false
+    StyleAnalysisBlock:
+      type: object
+      required: [block, intentional_style_shift_reason, narrative_mode, pov, scene_id, speaker_id, stratum_kind]
+      properties:
+        block:
+          $ref: "#/components/schemas/StyleAnalysisNarrativeBlock"
+        intentional_style_shift_reason:
+          type: [string, "null"]
+          maxLength: 500
+        narrative_mode:
+          type: string
+          minLength: 1
+          maxLength: 128
+        pov:
+          type: string
+          minLength: 1
+          maxLength: 128
+        scene_id:
+          type: string
+          pattern: '^scn_[A-Za-z0-9]{5}$'
+        speaker_id:
+          type: [string, "null"]
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        stratum_kind:
+          type: string
+          enum: [narration, dialogue]
+      additionalProperties: false
+    StyleAnalysisNarrativeBlock:
+      type: object
+      required: [block_version_id, extensions, id, metadata, order_key, text]
+      properties:
+        block_version_id:
+          type: string
+          pattern: '^blv_[A-Za-z0-9]{5}$'
+        extensions:
+          type: object
+          additionalProperties: true
+        id:
+          type: string
+          pattern: '^blk_[A-Za-z0-9]{5}$'
+        metadata:
+          type: object
+          additionalProperties: true
+        order_key:
+          type: string
+          pattern: '^[0-9a-f]{32}$'
+        text:
+          type: string
+          minLength: 1
+      additionalProperties: false
+    WorkerResultRequest:
+      type: object
+      required: [lease_owner, attempt, snapshot_hash, profile_version_hash, analyzer_contract_hash, window_configuration_hash, summary, windows, trace, completed_at]

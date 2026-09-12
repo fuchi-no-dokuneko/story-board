@@ -1,0 +1,58 @@
+{
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "block_id": {
+      "type": "string",
+      "pattern": "^blk_[A-Za-z0-9]{5}$"
+    },
+    "block_version_id": {
+      "type": "string",
+      "pattern": "^blv_[A-Za-z0-9]{5}$"
+    },
+    "order_key": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    },
+    "meta": {
+      "type": "object"
+    },
+    "extensions": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "index",
+    "block_id",
+    "block_version_id",
+    "order_key",
+    "text",
+    "meta",
+    "extensions"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/BlockSliceItem.schema.json",
+  "title": "BlockSliceItem",
+  "description": "One live block at its scene-local index; successful response grants shared reading for 300 seconds.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+  ],
+  "examples": [
+    {
+      "index": 0,
+      "block_id": "blk_Cc345",
+      "block_version_id": "blv_Dd456",
+      "order_key": "a0",
+      "text": "清晨下雨。",
+      "meta": {},
+      "extensions": {}
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "contentType": "application/json",
+          "dto": "BlockSlice"
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+      ]
+    },
+    {
+      "id": "styles.list",
+      "method": "GET",
+      "path": "/v1/style/",
+      "summary": "Available server-side reference styles. Registry errors are explicit.",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [],
+      "pathParameters": [],
+      "queryParameters": [],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "contentType": "application/json",
+          "dto": "StyleList"
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+        "server/src/main/java/dev/storyblock/api/style"
+      ]
+    },
+    {
+      "id": "novels.style-comparisons.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/style-comparisons",
+      "summary": "Fresh uncached comparison returned after background calculation; no task identifier or polling.",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:propose"
+      ],
+      "roles": [],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[A-Za-z0-9]{5}$"
+          }
+        }
+      ],
+      "queryParameters": [],
+      "requestHeaders": [
+        {
+          "name": "Authorization",

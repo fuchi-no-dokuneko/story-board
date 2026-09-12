@@ -92,3 +92,7 @@
   "examples": [
     {
       "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "analyzer_contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "block_id": "blk_49pHt",

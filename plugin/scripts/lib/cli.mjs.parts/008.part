@@ -1,3 +1,18 @@
+      const persisted = await fetchNovel(clientFor(parsed, context.clientOverrides), novelId);
+      const report = verificationReport(manuscript, persisted);
+      if (!report.ok) throw new VerificationError(report);
+      return { value: report };
+    }
+    case "preview-edit":
+    case "commit": {
+      assertOptions(parsed, ["file", "novel-id"]);
+      expectPositionals(parsed, 0);
+      const novelId = requiredOption(parsed, "novel-id");
+      requireTypedId(novelId, "nov", "novel_id");
+      const body = await readJsonFile(requiredOption(parsed, "file"));
+      const dto = parsed.command === "commit" ? "CommitRequest" : "EditPreviewRequest";
+      await validateDto(dto, body);
+      if (body.operation.novel_id !== novelId) throw new PayloadValidationError(dto, [{ path: "#/operation/novel_id", message: "must equal --novel-id" }]);
       const pathname = parsed.command === "commit" ? "commits" : "edit-previews";
       const response = await clientFor(parsed, context.clientOverrides).request({
         method: "POST",
@@ -37,25 +52,3 @@
       const mediaType = imageMediaType(content);
       const client = clientFor(parsed, context.clientOverrides);
       const novel = await fetchNovel(client, novelId);
-      const idempotencyKey = parsed.options.get("idempotency-key")
-        ?? deriveIdempotencyKey("upload-image", {
-          novelId,
-          revision_id: novel.head.head_revision_id,
-          content_sha256: sha256(content),
-        });
-      const response = await client.request({
-        method: "POST",
-        pathname: `/v1/novels/${encodeURIComponent(novelId)}/images`,
-        headers: {
-          "Content-Type": mediaType,
-          "If-Match": quoted(novel.head.head_hash),
-          "Idempotency-Key": idempotencyKey,
-        },
-        body: content,
-      });
-      await validateDto("ImageUploadResponse", response.data);
-      let blockImage = null;
-      if (parsed.options.has("alt-text")) {
-        blockImage = {
-          artifact_id: response.data.artifact_id,
-          content_hash: response.data.content_hash,

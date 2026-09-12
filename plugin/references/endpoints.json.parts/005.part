@@ -91,3 +91,6 @@
         {
           "status": "default",
           "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],

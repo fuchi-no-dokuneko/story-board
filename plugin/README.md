@@ -1,10 +1,10 @@
 # StoryBlock Author
 
-EN: This standalone Node CLI bundles all 39 programmatic routes and 140 DTO schemas, with no runtime package dependencies. Run its local installer before first use. Online commands use IPv4 HTTPS and accept the local self-signed certificate; offline discovery and validation need no server.
+EN: This standalone Node CLI bundles all 44 programmatic routes and 152 DTO schemas, with no runtime package dependencies. Run its local installer before first use. Online commands use IPv4 HTTPS and accept the local self-signed certificate; offline discovery and validation need no server.
 
-繁體中文：此獨立 Node CLI 包含全部三十九個程式化路由與一百四十個 DTO 綱要，沒有執行期套件依賴。首次使用前執行本機安裝器。線上命令使用 IPv4 HTTPS 並接受本機自簽憑證；離線查詢與驗證不需伺服器。
+繁體中文：此獨立 Node CLI 包含全部四十四個程式化路由與一百五十二個 DTO 綱要，沒有執行期套件依賴。首次使用前執行本機安裝器。線上命令使用 IPv4 HTTPS 並接受本機自簽憑證；離線查詢與驗證不需伺服器。
 
-简体中文：此独立 Node CLI 包含全部三十九个程序化路由与一百四十个 DTO 纲要，没有运行期软件包依赖。首次使用前执行本机安装器。在线命令使用 IPv4 HTTPS 并接受本机自签证书；离线查询与验证不需服务器。
+简体中文：此独立 Node CLI 包含全部四十四个程序化路由与一百五十二个 DTO 纲要，没有运行期软件包依赖。首次使用前执行本机安装器。在线命令使用 IPv4 HTTPS 并接受本机自签证书；离线查询与验证不需服务器。
 
 ```bash
 ./install-local.sh

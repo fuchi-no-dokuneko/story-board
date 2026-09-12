@@ -93,3 +93,11 @@
       "target_block_id": "blk_49pHt",
       "neighbor_count": 1,
       "render_packet": {
+        "novel_id": "nov_EUubI",
+        "revision_id": "rev_mG1Ct",
+        "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "renderer_version": "example-1",
+        "range": {
+          "from_block_id": "example-1",
+          "to_block_id": "example-1"
+        },

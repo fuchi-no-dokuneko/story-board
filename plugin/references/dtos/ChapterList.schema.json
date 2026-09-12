@@ -1,0 +1,59 @@
+{
+  "type": "object",
+  "properties": {
+    "novel_id": {
+      "type": "string",
+      "pattern": "^nov_[A-Za-z0-9]{5}$"
+    },
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
+    },
+    "revision_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "chapter_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "$ref": "ChapterListItem.schema.json"
+      }
+    }
+  },
+  "required": [
+    "novel_id",
+    "revision_id",
+    "revision_hash",
+    "chapter_count",
+    "chapters"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/ChapterList.schema.json",
+  "title": "ChapterList",
+  "description": "All chapters at a fixed novel revision.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+  ],
+  "examples": [
+    {
+      "novel_id": "nov_Ab123",
+      "revision_id": "rev_Cd456",
+      "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "chapter_count": 1,
+      "chapters": [
+        {
+          "index": 0,
+          "chapter_id": "ch_Aa123",
+          "title": "第一章",
+          "scene_count": 1
+        }
+      ]
+    }
+  ]
+}

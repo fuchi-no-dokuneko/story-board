@@ -1,101 +1,102 @@
-          type: string
-        head_sequence:
-          type: integer
-          minimum: 0
-        head_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        revision_count:
-          type: integer
-          minimum: 1
-        operation_count:
-          type: integer
-          minimum: 0
-        artifact_count:
-          type: integer
-          minimum: 0
-      additionalProperties: false
-    CanonicalPackageRevision:
+      - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
+      examples:
+      - scene_id: scn_Bb234
+        index: 0
+        chapter_id: ch_Aa123
+        chapter_index: 0
+        title: 清晨
+        block_count: 1
+        block_slice:
+          start: 0
+          end: 1
+        total_text_graphemes: 5
+    SceneList:
       type: object
-      required: [sequence, document]
       properties:
-        sequence:
-          type: integer
-          minimum: 0
-        document:
-          $ref: "#/components/schemas/CanonicalRevision"
-      additionalProperties: false
-    CanonicalPackageOperation:
-      type: object
-      required: [sequence, operation_hash, operation, result_revision_id, result_hash, committed_at]
-      properties:
-        sequence:
-          type: integer
-          minimum: 1
-        operation_hash:
+        novel_id:
           type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        operation:
-          $ref: "#/components/schemas/OperationEnvelope"
-        result_revision_id:
-          type: string
-        result_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        committed_at:
-          type: string
-          format: date-time
-      additionalProperties: false
-    CanonicalPackageArtifact:
-      type: object
-      required: [artifact_id, revision_id, kind, media_type, codec, content_hash, size_bytes, created_at, content_base64]
-      properties:
-        artifact_id:
-          type: string
+          pattern: ^nov_[A-Za-z0-9]{5}$
         revision_id:
           type: string
-        kind:
+          pattern: ^rev_[A-Za-z0-9]{5}$
+        revision_hash:
           type: string
-        media_type:
-          type: string
-        codec:
-          type: string
-        content_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        size_bytes:
+          pattern: ^sha256:[0-9a-f]{64}$
+        chapter_slice:
+          $ref: '#/components/schemas/IndexSlice'
+        scenes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SceneListItem'
+      required:
+      - novel_id
+      - revision_id
+      - revision_hash
+      - chapter_slice
+      - scenes
+      additionalProperties: false
+      title: SceneList
+      description: Scenes selected by a half-open chapter index slice. No body text.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
+      examples:
+      - novel_id: nov_Ab123
+        revision_id: rev_Cd456
+        revision_hash: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+        chapter_slice:
+          start: 0
+          end: 1
+        scenes:
+        - scene_id: scn_Bb234
+          index: 0
+          chapter_id: ch_Aa123
+          chapter_index: 0
+          title: 清晨
+          block_count: 1
+          block_slice:
+            start: 0
+            end: 1
+          total_text_graphemes: 5
+    BlockSliceItem:
+      type: object
+      properties:
+        index:
           type: integer
           minimum: 0
-          maximum: 16777216
-        created_at:
+        block_id:
           type: string
-          format: date-time
-        content_base64:
+          pattern: ^blk_[A-Za-z0-9]{5}$
+        block_version_id:
           type: string
-          contentEncoding: base64
+          pattern: ^blv_[A-Za-z0-9]{5}$
+        order_key:
+          type: string
+        text:
+          type: string
+        meta:
+          type: object
+        extensions:
+          type: object
+      required:
+      - index
+      - block_id
+      - block_version_id
+      - order_key
+      - text
+      - meta
+      - extensions
       additionalProperties: false
-    RenderRequest:
-      type: object
-      required: [revision_id]
-      properties:
-        revision_id:
-          type: string
-        from_block_id:
-          type: [string, "null"]
-        to_block_id:
-          type: [string, "null"]
-      additionalProperties: false
-    PdfRenderRequest:
-      type: object
-      required: [revision_id]
-      properties:
-        revision_id:
-          type: string
-          pattern: '^rev_[0-9a-f-]{36}$'
-      additionalProperties: false
-    BlockImage:
-      type: object
-      required: [artifact_id, content_hash, media_type, width_px, height_px, alt_text]
-      properties:
-        artifact_id:
-          type: string
+      title: BlockSliceItem
+      description: One live block at its scene-local index; successful response grants
+        shared reading for 300 seconds.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
+      examples:
+      - index: 0
+        block_id: blk_Cc345
+        block_version_id: blv_Dd456
+        order_key: a0
+        text: 清晨下雨。
+        meta: {}

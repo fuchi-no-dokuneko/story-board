@@ -10,3 +10,9 @@ Current status: 加入多風格表格、公式靜態頁及 PDF／TXT 按鈕初�
 Issues: 待實際瀏覽器驗證下載、中文字型與錯誤呈現。
 affect scope: 小說管理網頁；TXT 依選取版本輸出。
 ---
+---12:58---ADR-298契約與技能
+category: api_schema_change
+Current status: 新增五條端點與十二項 DTO；獨立 CLI 支援切片與風格比較。
+Issues: 初次測試指出舊路由數量與 UUID 斷言須更新；其餘整合驗證待進行。
+affect scope: OpenAPI、Skill、CLI 及新靜態資源存取。
+---

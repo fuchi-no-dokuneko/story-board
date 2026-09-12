@@ -1,40 +1,86 @@
-              additionalProperties: true
-        completed_at:
-          type: string
-          format: date-time
+            $ref: "#/components/schemas/StyleFeatureVector"
       additionalProperties: false
-    CompressedStyleAnalysisTrace:
+    StyleWindowConfiguration:
       type: object
-      required: [codec, content_base64, content_hash, uncompressed_bytes]
+      required: [operational_graphemes, operational_stride_graphemes, micro_graphemes, micro_stride_graphemes, non_overlap_enabled]
       properties:
-        codec:
-          const: gzip
-        content_base64:
-          type: string
-          contentEncoding: base64
-        content_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        uncompressed_bytes:
+        operational_graphemes:
           type: integer
-          minimum: 2
-          maximum: 16777216
-      additionalProperties: false
-    WorkerResultResponse:
-      type: object
-      required: [analysis_id, idempotent_replay, job_id, result_hash, status]
-      properties:
-        analysis_id:
-          type: string
-          pattern: '^ana_[0-9a-f-]{36}$'
-        idempotent_replay:
+          minimum: 2000
+          maximum: 4000
+        operational_stride_graphemes:
+          type: integer
+          minimum: 1
+          maximum: 4000
+        micro_graphemes:
+          type: integer
+          minimum: 500
+          maximum: 1000
+        micro_stride_graphemes:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        non_overlap_enabled:
           type: boolean
-        job_id:
+      additionalProperties: false
+    StyleStratum:
+      type: object
+      required: [kind, speaker_id]
+      properties:
+        kind:
           type: string
-          pattern: '^job_[0-9a-f-]{36}$'
-        result_hash:
+          enum: [narration, dialogue]
+        speaker_id:
+          type: [string, "null"]
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+      additionalProperties: false
+    StyleWindow:
+      type: object
+      required: [window_id, kind, segment, requested_stratum, pov, narrative_mode, block_ids, grapheme_count, full_sized, intentional_style_shift_reason, localization_only, primary_decision_eligible, sustainment_eligible]
+      properties:
+        window_id:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        status:
-          const: succeeded
+        kind:
+          type: string
+          enum: [operational, micro, non_overlap]
+        segment:
+          type: integer
+          minimum: 0
+        requested_stratum:
+          $ref: "#/components/schemas/StyleStratum"
+        pov:
+          type: string
+        narrative_mode:
+          type: string
+        block_ids:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            pattern: '^blk_[A-Za-z0-9]{5}$'
+        grapheme_count:
+          type: integer
+          minimum: 1
+        full_sized:
+          type: boolean
+        intentional_style_shift_reason:
+          type: [string, "null"]
+          maxLength: 500
+        localization_only:
+          type: boolean
+          description: True only for micro windows, which cannot trigger rewrites.
+        primary_decision_eligible:
+          type: boolean
+          description: True only for full operational windows.
+        sustainment_eligible:
+          type: boolean
+          description: True only for full non-overlap windows.
       additionalProperties: false
+    StyleChannelCalibration:
+      type: object
+      required: [channel, channel_version, primary_metric, reference_distances, median, mad, q95, q99]
+      properties:
+        channel:
+          type: string

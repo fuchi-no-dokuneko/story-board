@@ -46,6 +46,19 @@
         "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
         "modules/style/src/main/java/dev/storyblock/style"
       ]
-    }
-  ]
-}
+    },
+    {
+      "name": "IndexSlice",
+      "file": "dtos/IndexSlice.schema.json",
+      "description": "Zero-based half-open index range [start,end).",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+      ]
+    },
+    {
+      "name": "ChapterListItem",
+      "file": "dtos/ChapterListItem.schema.json",
+      "description": "Chapter metadata; does not count as reading block text.",
+      "confidence": "confirmed-from-code",
+      "source": [

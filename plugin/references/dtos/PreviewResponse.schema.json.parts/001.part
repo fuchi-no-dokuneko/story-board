@@ -87,3 +87,18 @@
             {
               "id": "blk_49pHt",
               "text": "春風到了。",
+              "meta": {
+              }
+            }
+          ]
+        }
+      },
+      "candidate_hash": "example-1",
+      "diff": {
+        "blockChanges": [
+
+        ],
+        "sceneSeedChanges": [
+
+        ]
+      },

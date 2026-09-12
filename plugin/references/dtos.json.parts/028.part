@@ -1,0 +1,71 @@
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+      ]
+    },
+    {
+      "name": "ChapterList",
+      "file": "dtos/ChapterList.schema.json",
+      "description": "All chapters at a fixed novel revision.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+      ]
+    },
+    {
+      "name": "SceneListItem",
+      "file": "dtos/SceneListItem.schema.json",
+      "description": "Scene distribution; text length counts Unicode graphemes including punctuation.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+      ]
+    },
+    {
+      "name": "SceneList",
+      "file": "dtos/SceneList.schema.json",
+      "description": "Scenes selected by a half-open chapter index slice. No body text.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+      ]
+    },
+    {
+      "name": "BlockSliceItem",
+      "file": "dtos/BlockSliceItem.schema.json",
+      "description": "One live block at its scene-local index; successful response grants shared reading for 300 seconds.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+      ]
+    },
+    {
+      "name": "BlockSlice",
+      "file": "dtos/BlockSlice.schema.json",
+      "description": "Revision-bound scene block slice; [0,0) reads an empty scene.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+      ]
+    },
+    {
+      "name": "RegisteredStyle",
+      "file": "dtos/RegisteredStyle.schema.json",
+      "description": "Registered reference benchmark status. Sources stay on the server.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+        "server/src/main/java/dev/storyblock/api/style"
+      ]
+    },
+    {
+      "name": "StyleList",
+      "file": "dtos/StyleList.schema.json",
+      "description": "Available server-side reference styles. Registry errors are explicit.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+        "server/src/main/java/dev/storyblock/api/style"
+      ]
+    },
+    {
+      "name": "StyleComparisonRequest",
+      "file": "dtos/StyleComparisonRequest.schema.json",

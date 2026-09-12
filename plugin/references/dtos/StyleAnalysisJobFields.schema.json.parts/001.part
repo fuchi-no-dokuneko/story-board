@@ -100,3 +100,9 @@
   "x-source": [
     "server/src/main/java/dev/storyblock/api/http/StyleAnalysisController.java",
     "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
+    "modules/style/src/main/java/dev/storyblock/style"
+  ],
+  "examples": [
+    {
+      "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "attempt": 0,
