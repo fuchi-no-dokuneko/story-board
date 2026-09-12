@@ -21,17 +21,19 @@ public final class CommitController {
     final CommitService commits;
     final AccessKeyStore securityStore;
     final Clock clock;
+    final RecentReadGuard reads;
 
     public CommitController(
             CommitService commits,
             AccessKeyStore securityStore,
-            Clock clock
+            Clock clock, RecentReadGuard reads
     ) {
         this.commits = java.util.Objects.requireNonNull(commits, "commits");
         this.securityStore = java.util.Objects.requireNonNull(
                 securityStore, "securityStore"
         );
         this.clock = java.util.Objects.requireNonNull(clock, "clock");
+        this.reads = reads;
     }
 
     @PostMapping("/novels/{novelId}/commits")

@@ -11,3 +11,11 @@ Current status: 六類短識別與契約範例已更新；Java 初版編譯通�
 Issues: 資料庫跨重啟防碰撞與完整測試仍待修訂。
 affect scope: 領域、CLI、OpenAPI、schema 與固定測試資料。
 ---
+---12:34---ADR-298切片與閱讀
+category: api_schema_change
+Current status: 加入章節、場景、Block 切片與共用五分鐘閱讀檢查初版。
+Issues: 新端點契約、真實請求測試及併發驗證待後續階段。
+Apporch chosen: 只記錄已回傳正文的版本與位置；提交時檢查相關區塊。
+Assumption made to chose this approch: 閱讀不依身份；空場景以空切片登記。
+affect scope: API 查詢與提交；已有成功提交的重試保留冪等結果。
+---
