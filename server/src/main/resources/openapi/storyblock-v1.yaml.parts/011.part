@@ -1,0 +1,85 @@
+              schema:
+                type: string
+                format: binary
+            application/vnd.storyblock.revision+json:
+              schema:
+                type: string
+                format: binary
+            application/vnd.storyblock.style-trace+json:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/exports:
+    post:
+      operationId: startExport
+      summary: Submit a canonical JSON or package export job
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/JobAccepted"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/access-keys:
+    post:
+      operationId: createAccessKey
+      summary: Issue a scoped per-novel bearer credential
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessKeyRequest"
+      responses:
+        "201":
+          description: Credential issued; secret is returned only once
+          headers:
+            Cache-Control:
+              description: Prevent storage of the one-time credential response.
+              schema:
+                const: no-store
+            Pragma:
+              description: Legacy cache prevention for the one-time credential response.
+              schema:
+                const: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessKeyCreated"
+        default:
+          $ref: "#/components/responses/Problem"
+  /access-keys/{keyId}:
+    delete:
+      operationId: revokeAccessKey

@@ -1,0 +1,50 @@
+      for (const name of additional) issue(`contains unknown property ${name}`, `${context.path}/${name}`);
+    } else if (schema.additionalProperties && typeof schema.additionalProperties === "object") {
+      for (const name of additional) {
+        issues.push(...validateNode(value[name], schema.additionalProperties, { ...context, path: `${context.path}/${name}` }));
+      }
+    }
+    if (schema.maxProperties !== undefined && Object.keys(value).length > schema.maxProperties) issue(`must contain at most ${schema.maxProperties} properties`);
+    if (schema.minProperties !== undefined && Object.keys(value).length < schema.minProperties) issue(`must contain at least ${schema.minProperties} properties`);
+  }
+
+  return issues;
+}
+
+export function hanSequence(text) {
+  if (typeof text !== "string") return "";
+  return (text.normalize("NFC").match(/\p{Script=Han}/gu) ?? []).join("");
+}
+
+export function countHanCodePoints(text) {
+  return Array.from(hanSequence(text)).length;
+}
+
+function registrationIssues(value) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return [];
+  const issues = [];
+  const nonBlank = ["title", "language"];
+  for (const field of nonBlank) {
+    if (typeof value[field] === "string" && value[field].trim() === "") issues.push({ path: `#/${field}`, message: "must not be blank" });
+  }
+  if (Array.isArray(value.main_characters)) {
+    value.main_characters.forEach((name, index) => {
+      if (typeof name === "string" && name.trim() === "") issues.push({ path: `#/main_characters/${index}`, message: "must not be blank" });
+    });
+  }
+  if (Array.isArray(value.chapters)) {
+    value.chapters.forEach((chapter, index) => {
+      if (chapter && typeof chapter.title === "string" && chapter.title.trim() === "") issues.push({ path: `#/chapters/${index}/title`, message: "must not be blank" });
+      if (chapter && typeof chapter.text === "string" && chapter.text.trim() === "") issues.push({ path: `#/chapters/${index}/text`, message: "must not be blank" });
+      if (chapter && typeof chapter.text === "string") {
+        for (const sentence of registrationSentences(chapter.text)) {
+          if (graphemeLength(sentence) > 100) {
+            issues.push({ path: `#/chapters/${index}/text`, message: "contains a sentence longer than 100 grapheme clusters" });
+            break;
+          }
+        }
+      }
+    });
+    const complete = value.chapters.map((chapter) => typeof chapter?.text === "string" ? chapter.text : "").join("");
+    const actual = countHanCodePoints(complete);
+    if (Number.isSafeInteger(value.expected_han_characters) && actual !== value.expected_han_characters) {

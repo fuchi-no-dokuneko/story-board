@@ -1,0 +1,94 @@
+.novel-item span { margin-top: 6px; color: var(--muted); font-size: 12px; }
+.novel-item .catalog-id {
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pane-message,
+.reader-placeholder {
+  padding: 32px 22px;
+  color: var(--muted);
+  text-align: center;
+}
+.reader-placeholder {
+  display: grid;
+  min-height: 420px;
+  place-content: center;
+  gap: 7px;
+}
+.reader-placeholder h2 { color: var(--text); font-size: 18px; }
+.reader-placeholder p { font-size: 13px; }
+.pagination {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 12px;
+}
+.pagination button:last-child { justify-self: stretch; }
+.pagination span { min-width: 66px; text-align: center; }
+
+.reader-pane { min-width: 0; background: var(--surface); }
+#reader-content { padding: clamp(20px, 4vw, 48px); }
+.reader-heading {
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+.reader-heading h2 {
+  max-width: 900px;
+  margin-top: 4px;
+  font-family: Georgia, "Noto Serif CJK TC", "Noto Serif TC", serif;
+  font-size: clamp(24px, 3vw, 38px);
+  line-height: 1.2;
+}
+.eyebrow {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+.identifier {
+  margin-top: 9px;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+  font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.registration-state {
+  padding: 5px 9px;
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.registration-state.registered { background: var(--accent-soft); color: var(--accent); }
+
+.novel-stats {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(95px, 1fr));
+  margin: 28px 0 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.novel-stats div { padding: 14px 12px; border-right: 1px solid var(--border); }
+.novel-stats div:first-child { padding-left: 0; }
+.novel-stats div:last-child { border-right: 0; }
+.novel-stats dt { color: var(--muted); font-size: 11px; }
+.novel-stats dd { margin: 5px 0 0; font-size: 17px; font-weight: 750; }
+.character-strip { padding: 18px 0; border-bottom: 1px solid var(--border); }
+.character-strip h3 { margin-bottom: 8px; font-size: 12px; color: var(--muted); }
+.character-strip ul { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.character-strip li {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  font-size: 13px;
+}
+.reader-body {
+  display: grid;
+  grid-template-columns: minmax(150px, 210px) minmax(0, 760px);
+  gap: clamp(24px, 5vw, 72px);
+  align-items: start;

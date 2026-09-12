@@ -1,0 +1,135 @@
+          "items": {
+            "$ref": "#/$defs/scene"
+          }
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
+      }
+    },
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocks",
+        "chapter_id",
+        "id",
+        "order_key",
+        "transition_mode"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/sceneId"
+        },
+        "chapter_id": {
+          "$ref": "#/$defs/chapterId"
+        },
+        "order_key": {
+          "$ref": "#/$defs/orderKey"
+        },
+        "title": {
+          "type": "string"
+        },
+        "transition_mode": {
+          "enum": [
+            "opening",
+            "continuous",
+            "cut",
+            "time_skip",
+            "flashback",
+            "parallel"
+          ]
+        },
+        "initial_meta": {
+          "$ref": "#/$defs/initialMeta"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/block"
+          }
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
+      }
+    },
+    "initialMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+        },
+        "location": {
+        },
+        "weather": {
+        },
+        "present_character_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "block": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block_version_id",
+        "id",
+        "meta",
+        "order_key",
+        "text"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/blockId"
+        },
+        "block_version_id": {
+          "$ref": "#/$defs/blockVersionId"
+        },
+        "order_key": {
+          "$ref": "#/$defs/orderKey"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "x-storyblock-max-graphemes": 100,
+          "x-storyblock-sentence-count": [
+            1,
+            2
+          ]
+        },
+        "meta": {
+          "$ref": "#/$defs/blockMeta"
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
+      }
+    },
+    "blockMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "time": {
+        },
+        "location": {
+        },
+        "weather": {
+        },
+        "speech": {
+        },
+        "actions": {
+          "type": "array"
+        },
+        "presence_events": {
+          "type": "array"
+        },
+        "pov": {
+        },
+        "narrative_mode": {
+        },
+        "provenance": {

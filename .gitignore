@@ -7,6 +7,9 @@
 .mvn/timing.properties
 .tools/
 .local/
+.local-tool/
+**/.local-tool-app/*
+!**/.local-tool-app/install-local.sh
 .env
 .env.*
 !.env.example
@@ -21,3 +24,4 @@ backups/
 *.sqlite-shm
 *.sqlite-wal
 *.log
+/pom.xml

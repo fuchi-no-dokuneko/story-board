@@ -1,0 +1,65 @@
+      "name": "RenderOffset",
+      "file": "dtos/RenderOffset.schema.json",
+      "description": "Code-derived StoryBlock Render Offset JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+      ]
+    },
+    {
+      "name": "RenderPacket",
+      "file": "dtos/RenderPacket.schema.json",
+      "description": "Code-derived StoryBlock Render Packet JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+      ]
+    },
+    {
+      "name": "RenderRange",
+      "file": "dtos/RenderRange.schema.json",
+      "description": "Code-derived StoryBlock Render Range JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+      ]
+    },
+    {
+      "name": "RenderRequest",
+      "file": "dtos/RenderRequest.schema.json",
+      "description": "Code-derived StoryBlock Render Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+      ]
+    },
+    {
+      "name": "RenderedBlock",
+      "file": "dtos/RenderedBlock.schema.json",
+      "description": "Code-derived StoryBlock Rendered Block JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+      ]
+    },
+    {
+      "name": "ReplaceBlockRangeOperation",
+      "file": "dtos/ReplaceBlockRangeOperation.schema.json",
+      "description": "Code-derived StoryBlock Replace Block Range Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "ReplaceBlockRangePayload",
+      "file": "dtos/ReplaceBlockRangePayload.schema.json",
+      "description": "Code-derived StoryBlock Replace Block Range Payload JSON contract.",

@@ -50,7 +50,7 @@ public record OrderKey(String value) implements Comparable<OrderKey> {
         return new BigInteger(value, 16);
     }
 
-    private static OrderKey fromNumber(BigInteger number) {
+    static OrderKey fromNumber(BigInteger number) {
         String encoded = number.toString(16);
         return new OrderKey("0".repeat(WIDTH - encoded.length()) + encoded);
     }

@@ -1,0 +1,60 @@
+            ).orElseThrow();
+            ReplayService replay = new ReplayService(store);
+            ReplayResult materialized = replay.materialize(
+                    firstNovel.novel().id(), head.revisionId()
+            );
+            ReplayResult full = replay.materializeFull(
+                    firstNovel.novel().id(), head.revisionId()
+            );
+            ReplayVerificationReport report = replay.verifyAllHeads();
+
+            assertEquals(2, checkpoint.sequence());
+            assertEquals(GzipCheckpointCodec.NAME, checkpoint.codec());
+            assertArrayEquals(
+                    NarrativeCanonicalMapper.toCanonical(
+                            store.getRevisionAtSequence(firstNovel.novel().id(), 2).manifest()
+                    ).envelopeBytes(),
+                    store.decompressCheckpoint(checkpoint)
+            );
+            assertEquals(2, materialized.startingSequence());
+            assertEquals(1, materialized.replayedOperations());
+            assertEquals(head.contentHash(), materialized.contentHash());
+            assertEquals(0, full.startingSequence());
+            assertEquals(3, full.replayedOperations());
+            assertEquals(head.contentHash(), full.contentHash());
+            assertTrue(report.valid());
+            assertEquals(2, report.novels().size());
+        }
+    }
+
+    @Test
+    void replayPayloadThresholdCreatesCheckpointBeforeRevisionInterval() throws Exception {
+        Path path = temporaryDirectory.resolve("payload-threshold.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(
+                path, new CheckpointPolicy(100, 1)
+        )) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            new CommitService(store).commit(
+                    RevisionStoreTestFixture.replace(
+                            genesis, "payload-threshold", "第二句。"
+                    ),
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:01:00Z")
+            );
+
+            StoredCheckpoint checkpoint = store.loadCheckpoint(
+                    genesis.novel().id(), 1
+            ).orElseThrow();
+            assertEquals(1, checkpoint.sequence());
+        }
+    }
+
+    @Test
+    void malformedHeadIsReportedWithoutAbortingTheVerificationBatch() throws Exception {
+        Path path = temporaryDirectory.resolve("malformed-head.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+        }
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {

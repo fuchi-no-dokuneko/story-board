@@ -1,0 +1,39 @@
+CREATE TRIGGER IF NOT EXISTS access_keys_identity_immutable
+BEFORE UPDATE ON access_keys
+WHEN NEW.key_id IS NOT OLD.key_id
+  OR NEW.novel_id IS NOT OLD.novel_id
+  OR NEW.secret_digest IS NOT OLD.secret_digest
+  OR NEW.scopes_json IS NOT OLD.scopes_json
+  OR NEW.actor_id IS NOT OLD.actor_id
+  OR NEW.created_at IS NOT OLD.created_at
+  OR NEW.expires_at IS NOT OLD.expires_at
+  OR NEW.issue_idempotency_key IS NOT OLD.issue_idempotency_key
+  OR NEW.issue_request_hash IS NOT OLD.issue_request_hash
+BEGIN
+    SELECT RAISE(ABORT, 'access key identity is immutable');
+END;
+
+CREATE TRIGGER IF NOT EXISTS access_keys_revocation_monotonic
+BEFORE UPDATE ON access_keys
+WHEN OLD.revoked_at IS NOT NULL AND NEW.revoked_at IS NOT OLD.revoked_at
+BEGIN
+    SELECT RAISE(ABORT, 'access key revocation is permanent');
+END;
+
+CREATE TRIGGER IF NOT EXISTS access_keys_last_used_monotonic
+BEFORE UPDATE ON access_keys
+WHEN OLD.last_used_at IS NOT NULL
+ AND (NEW.last_used_at IS NULL OR NEW.last_used_at < OLD.last_used_at)
+BEGIN
+    SELECT RAISE(ABORT, 'access key last use is monotonic');
+END;
+
+CREATE TRIGGER IF NOT EXISTS access_keys_no_delete
+BEFORE DELETE ON access_keys BEGIN
+    SELECT RAISE(ABORT, 'access keys are retained for audit');
+END;
+
+CREATE TRIGGER IF NOT EXISTS audit_events_no_update
+BEFORE UPDATE ON audit_events BEGIN
+    SELECT RAISE(ABORT, 'audit events are append-only');
+END;

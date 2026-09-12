@@ -1,0 +1,40 @@
+available for diagnostics but report `LOW_CONFIDENCE`. Robust z scores use
+`abs(distance - median) / (1.4826 * MAD)`; a nonzero deviation with zero MAD is
+represented by a bounded sentinel rather than an infinite value.
+
+## Decision Policy
+
+The operational window controls the decision. Micro windows can only identify
+locations, and non-overlap windows can only establish sustainment.
+
+| State | Rule | Rewrite allowed |
+|---|---|---|
+| `normal` | Fewer than two independent channels exceed q95 | No |
+| `warning` | At least two independent channels exceed q95 | No |
+| `rewrite_candidate` | At least two channels exceed q99 and two full non-overlap windows repeat that condition | Yes |
+| `topic_shift_only` | Surface/token channel is the sole q95 breach | No |
+| `low_confidence` | Selected calibration is absent or has fewer than 30 windows | No |
+
+Optional embeddings are secondary evidence and do not count as an independent
+gate channel. Directional KL remains diagnostic-only. An intentional style
+shift lowers a candidate by one severity level, so it cannot directly trigger a
+rewrite. Every channel also reports deterministic Top-10 feature contributors.
+
+`StyleAnomalyDecision.can_trigger_rewrite` is true only for
+`rewrite_candidate`; constructors reject inconsistent low-confidence,
+topic-only, or unsustained rewrite decisions.
+The compact decision also persists the sorted identities of independently gated
+channels above q99, so a later rewrite gate can verify multi-channel evidence
+without loading or duplicating dense score traces.
+
+## Verification
+
+```bash
+./mvnw -o -pl modules/style -am test
+```
+
+Tests cover POV and intentional-shift segmentation, all three window kinds,
+speaker-specific and global dialogue selection, order-independent leave-one-out
+calibration, canonical round trips, empirical thresholds, sustained q99
+candidacy, and the low-confidence, topic-only, micro-only, and intentional-shift
+rewrite blocks.

@@ -1,0 +1,51 @@
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        byte[] crossNovelRegistration = CanonicalJson.bytes(Map.of(
+                "chapters", List.of(),
+                "created_at", "2026-08-21T12:00:00Z",
+                "expected_han_characters", 0,
+                "language", "zh-Hant",
+                "main_characters", List.of(),
+                "novel_id", secondNovel,
+                "title", "Cross novel attempt",
+                "tnt_cannon_count", 0,
+                "zombie_count", 0
+        ));
+        mvc.perform(post("/v1/agent/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(
+                                MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "cross-agent-registration"
+                        )
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(crossNovelRegistration))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        byte[] escalationBody = CanonicalJson.bytes(Map.of(
+                "actor_id", "escalated-worker",
+                "scopes", List.of("worker:execute"),
+                "expires_at", "2099-01-01T00:00:00Z"
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/access-keys", firstNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(escalationBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_DELEGATION_DENIED"));
+        byte[] expiryEscalationBody = CanonicalJson.bytes(Map.of(
+                "actor_id", "long-lived-reader",
+                "scopes", List.of("novel:read"),
+                "expires_at", "2100-01-01T00:00:00Z"
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/access-keys", firstNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "expiry-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(expiryEscalationBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EXPIRY_DELEGATION_DENIED"));

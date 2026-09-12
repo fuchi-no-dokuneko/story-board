@@ -18,6 +18,11 @@ public record NarrativeBlock(
         UnicodeText.validateBlock(text);
         Objects.requireNonNull(metadata, "metadata");
         extensions = CanonicalValues.freezeMap(extensions, "block.extensions");
+        BlockImage.fromExtensions(extensions);
+    }
+
+    public java.util.Optional<BlockImage> image() {
+        return BlockImage.fromExtensions(extensions);
     }
 
     public static NarrativeBlock create(

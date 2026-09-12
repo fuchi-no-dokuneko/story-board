@@ -1,0 +1,30 @@
+        "new_block": {
+          "id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+          "text": "春風到了。",
+          "meta": {
+          }
+        },
+        "provenance_mapping": [
+          {
+            "source": {
+              "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+              "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001"
+            },
+            "result_block_ids": [
+              "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+            ]
+          },
+          {
+            "source": {
+              "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+              "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001"
+            },
+            "result_block_ids": [
+              "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

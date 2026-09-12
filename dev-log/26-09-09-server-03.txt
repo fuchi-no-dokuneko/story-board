@@ -1,0 +1,23 @@
+---02:47---PDF 媒體錯誤修正
+category: bug_discovery
+Current status: 已修正；不相容 Accept 標頭回傳 406 與既有問題結構。
+Issues: Servlet 錯誤轉派曾誤回 401，導致可連線客戶端被要求密鑰。
+affect scope: 全部 182 項 Java 測試通過；真實 HTTPS 重現與修正驗證通過。
+---
+---02:47---封裝与部署驗證
+category: refactor
+Current status: 圖片、預覽、冪等提交、PDF、跨資料庫封裝轉移及備份還原均通過。
+Issues: GUI 原測試假設只有一部作品；已修正為依指定 ID 選取，多作品書庫驗收通過。
+affect scope: 重複安裝、併發啟動、PID 保護、loopback／public／現有 tailscale0 監聽；未變更網路設定。
+---
+---02:47---容器執行限制
+category: devenv_change
+Current status: 此電腦沒有 Docker，使用者命名空間探測回報 Operation not permitted。
+Issues: 未執行管理員安裝腳本，也未變更系統權限；容器僅完成架構與靜態檢查。
+affect scope: 容器實際建置／啟動未驗證，已列入 todo.txt；本機安裝已驗證。
+---
+---02:45---紀錄時間校正
+category: decision_make
+Current status: 本檔前三筆與里程碑後兩筆的 02:47 為手動誤記；實際寫入時間為 02:42（UTC+8）。
+affect scope: 僅校正紀錄時間；測試結果與既有追加記錄均保留。
+---

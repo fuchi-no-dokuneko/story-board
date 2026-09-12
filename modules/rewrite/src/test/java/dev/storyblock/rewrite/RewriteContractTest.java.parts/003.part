@@ -1,0 +1,45 @@
+                        block("At dawn, the shutters opened again.", false)
+                ),
+                new RewriteConstraints(
+                        1,
+                        100,
+                        List.of(
+                                "Use a steadier sentence rhythm.",
+                                "Reduce repeated surface phrasing."
+                        )
+                )
+        );
+    }
+
+    private static RewriteWorkerInput withBlocks(
+            RewriteWorkerInput source,
+            List<RewriteSourceBlock> blocks,
+            RewriteConstraints constraints
+    ) {
+        return new RewriteWorkerInput(
+                source.proposalId(),
+                source.analysisId(),
+                source.novelId(),
+                source.revisionId(),
+                source.revisionHash(),
+                source.profileVersionId(),
+                source.profileVersionHash(),
+                source.analyzerContractHash(),
+                source.windowConfigurationHash(),
+                source.findingIds(),
+                blocks,
+                constraints
+        );
+    }
+
+    private static RewriteSourceBlock block(String text, boolean editable) {
+        return RewriteSourceBlock.create(
+                Ids.BlockId.create(), Ids.BlockVersionId.create(), text, editable
+        );
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> object(byte[] value) {
+        return CanonicalJson.mapper().readValue(value, Map.class);
+    }
+}

@@ -1,0 +1,32 @@
+---01:37---部署與來源分段
+category: refactor
+Current status: 完成；完整 Java 測試通過。
+Issues: 容器曾要求人工密鑰且資料離開儲存庫；已修正。
+Apporch chosen: 容器使用專案掛載，自動初始化；大型契約與既有測試於安裝時組合。
+Assumption made to chose this approch: 指南明訂安裝產生檔案不受三千位元組限制。
+affect scope: 容器、工作程式、來源組合；HTTP 與資料庫契約不變。
+---
+---01:54---真實流程回歸
+category: bug_discovery
+Current status: 已修正啟動器舊日誌誤判、提案跨作品讀取缺口，以及 CI 測試路徑。
+Issues: 工作程式曾容許明文 HTTP、預設要求密鑰；現採自簽 HTTPS 與選填密鑰。
+affect scope: 全 Java、173 項作者工具測試；另驗證併發啟動、重啟保存、連接埠衝突與 PID 保護。
+---
+---01:55---遠端推送逾時
+category: devenv_change
+Current status: 第五次提交後的 GitHub 推送遭五秒限制終止，結束碼 124。
+Issues: 外部網路未及完成推送；未重試、未變更任何網路設定。
+affect scope: 本機分支與提交完整保留；遠端同步未確認。
+---
+---02:35---文件與作者工具
+category: refactor
+Current status: Markdown 已整理為英繁簡三語；大型歷史記錄保存在可組合文字分段。
+Issues: 未新增版本標記；現行安裝文件優先於歷史部署記錄。
+affect scope: 39 個端點、140 個 DTO 的小型目錄頁與獨立作者工具；173 項測試通過。
+---
+---02:42---備份與執行設定
+category: refactor
+Current status: 安裝重跑成功；啟動設定與日誌內容設定分離，應用啟動入口完整。
+Issues: 併發備份可能覆寫同秒產物；以目錄鎖及自動金鑰鎖修正。
+affect scope: 真實 SQLite 併發備份均可還原；金鑰與資料全部留在儲存庫。
+---

@@ -1,0 +1,68 @@
+            assertEquals(input.blocks().get(1).blockVersionId(),
+                    proposal.candidates().getFirst().sourceBlockVersionId());
+            assertEquals(input.blocks().get(1).textHash(),
+                    proposal.candidates().getFirst().sourceTextHash());
+            assertEquals(NOW, proposal.createdAt());
+            assertEquals(1, invocations.get());
+            assertNull(handlerFailure.get());
+            assertFalse(settings.toString().contains(TOKEN));
+            assertTrue(settings.toString().contains("<redacted>"));
+            assertEquals(
+                    List.of(
+                            "candidates", "created_at", "input", "input_hash",
+                            "model_id", "model_response_hash", "proposal_hash",
+                            "proposal_id", "schema_version"
+                    ),
+                    proposal.canonicalValue().keySet().stream().sorted().toList()
+            );
+            assertTrue(capturedRequest.get() != null);
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void rejectsToolCallsWrongBindingsAndReadOnlyTargets() {
+        RewriteWorkerInput input = input();
+        Map<String, Object> toolCall = new LinkedHashMap<>(object(response(
+                input,
+                input.blocks().get(1).blockId(),
+                "The rain settled into a measured hush."
+        )));
+        toolCall.put("tool_calls", List.of(Map.of("name", "commit_preview")));
+        RewriteProposalGenerator toolGenerator = generator(toolCall);
+        assertThrows(
+                LlmWorkerProtocolException.class,
+                () -> toolGenerator.generate(input, NOW)
+        );
+
+        Map<String, Object> wrongHash = object(response(
+                input,
+                input.blocks().get(1).blockId(),
+                "The rain settled into a measured hush."
+        ));
+        map(wrongHash.get("output")).put(
+                "input_hash", CanonicalJson.hash("another-input")
+        );
+        assertThrows(
+                LlmWorkerProtocolException.class,
+                () -> generator(wrongHash).generate(input, NOW)
+        );
+
+        Map<String, Object> contextTarget = object(response(
+                input,
+                input.blocks().getFirst().blockId(),
+                "The harbor clouds thinned before dawn."
+        ));
+        assertThrows(
+                LlmWorkerProtocolException.class,
+                () -> generator(contextTarget).generate(input, NOW)
+        );
+    }
+
+    @Test
+    void transportRejectsCredentialReflectionAndOversizedResponses() throws Exception {
+        RewriteWorkerInput input = input();
+        HttpServer reflection = server();
+        reflection.createContext("/invoke", exchange -> respond(
+                exchange,

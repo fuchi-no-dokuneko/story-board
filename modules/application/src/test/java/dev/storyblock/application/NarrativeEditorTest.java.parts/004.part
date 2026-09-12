@@ -1,0 +1,63 @@
+                        BlockVersionRef.from(block),
+                        corrected
+                ),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );
+        NarrativeBlock correctedBlock = firstScene(metadataRevision).blocks().getFirst();
+        assertEquals(block.id(), correctedBlock.id());
+        assertNotEquals(block.versionId(), correctedBlock.versionId());
+        assertEquals(corrected, correctedBlock.metadata());
+
+        SceneSeed seed = new SceneSeed(Map.of("present_character_ids", List.of("char_new")));
+        RevisionManifest seedRevision = editorWithoutRestores().apply(
+                base,
+                new EditOperation.SetSceneInitialMeta(
+                        context(base, "seed"), scene.id(), SceneBoundaryContract.capture(scene), seed
+                ),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );
+        assertEquals(seed, firstScene(seedRevision).initialMeta());
+        assertSame(block, firstScene(seedRevision).blocks().getFirst());
+    }
+
+    @Test
+    void restoreCreatesANewRevisionUsingTheExactHistoricalSelection() {
+        RevisionManifest historical = fixture();
+        NarrativeScene scene = firstScene(historical);
+        RevisionManifest current = editorWithoutRestores().apply(
+                historical,
+                new EditOperation.DeleteBlockRange(
+                        context(historical, "prepare-current"),
+                        BlockRangeGuard.capture(scene, scene.blocks().getLast().id(), scene.blocks().getLast().id())
+                ),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );
+        String historicalHash = NarrativeCanonicalMapper.toCanonical(historical).contentHash();
+        NarrativeEditor editor = new NarrativeEditor(id -> {
+            if (!id.equals(historical.id())) {
+                throw new IllegalArgumentException("Unknown revision");
+            }
+            return historical;
+        });
+
+        RevisionManifest restored = editor.apply(
+                current,
+                new EditOperation.RestoreRevisionContent(
+                        context(current, "restore"), historical.id(), historicalHash
+                ),
+                Ids.RevisionId.create(),
+                Instant.parse("2026-08-21T12:02:00Z")
+        );
+
+        assertEquals(current.id(), restored.parentId());
+        assertEquals(historical.selectedBlockVersions(), restored.selectedBlockVersions());
+        assertNotEquals(historical.id(), restored.id());
+    }
+
+    @Test
+    void staleVersionNonAdjacentRangeAndHeadHashAreRejected() {
+        RevisionManifest base = fixture();
+        NarrativeScene scene = firstScene(base);

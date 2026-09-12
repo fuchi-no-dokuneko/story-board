@@ -1,0 +1,79 @@
+        assertEquals(EditInvariantException.Code.REVISION_CONFLICT, headFailure.code());
+    }
+
+    private static NarrativeEditor editorWithoutRestores() {
+        return new NarrativeEditor(id -> {
+            throw new IllegalArgumentException("No restore revision configured: " + id.value());
+        });
+    }
+
+    private static EditContext context(RevisionManifest base, String idempotencyKey) {
+        return new EditContext(
+                Ids.OperationId.create(),
+                idempotencyKey,
+                base.novel().id(),
+                base.id(),
+                NarrativeCanonicalMapper.toCanonical(base).contentHash()
+        );
+    }
+
+    private static RevisionManifest fixture() {
+        Ids.NovelId novelId = Ids.NovelId.create();
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        NarrativeScene first = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.rebalanced(0, 2),
+                "First scene",
+                TransitionMode.OPENING,
+                SceneSeed.empty(),
+                List.of(
+                        block(0, 3, "第一句。"),
+                        block(1, 3, "第二句。第三句。"),
+                        block(2, 3, "第四句。")
+                ),
+                Map.of()
+        );
+        NarrativeScene second = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.rebalanced(1, 2),
+                "Second scene",
+                TransitionMode.CUT,
+                SceneSeed.empty(),
+                List.of(block(0, 1, "另一幕。")),
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId,
+                OrderKey.initial(),
+                "Chapter",
+                List.of(first, second),
+                Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(novelId, List.of(chapter), Map.of())
+        );
+    }
+
+    private static NarrativeBlock block(int index, int total, String text) {
+        return NarrativeBlock.create(
+                Ids.BlockId.create(),
+                OrderKey.rebalanced(index, total),
+                text,
+                BlockMetadata.empty(),
+                Map.of()
+        );
+    }
+
+    private static NarrativeScene firstScene(RevisionManifest revision) {
+        return revision.novel().chapters().getFirst().scenes().getFirst();
+    }
+
+    private static NarrativeScene secondScene(RevisionManifest revision) {
+        return revision.novel().chapters().getFirst().scenes().get(1);
+    }
+}

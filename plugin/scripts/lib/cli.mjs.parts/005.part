@@ -1,0 +1,62 @@
+        if (!result.valid) throw new PayloadValidationError(`${endpoint.id}:${descriptor.name}`, result.issues);
+      }
+    }
+  }
+  const headers = params.headers ?? {};
+  for (const descriptor of endpoint.requestHeaders) {
+    const value = caseInsensitiveHeader(headers, descriptor.name);
+    if (value === undefined) continue;
+    const result = await validateInline(value, descriptor.schema);
+    if (!result.valid) throw new PayloadValidationError(`${endpoint.id}:${descriptor.name}`, result.issues);
+  }
+}
+
+async function execute(parsed, context) {
+  if (parsed.command === "help" || parsed.options.get("help") === true) return { value: HELP, kind: "text" };
+
+  switch (parsed.command) {
+    case "endpoints": {
+      assertOptions(parsed);
+      expectPositionals(parsed, 0);
+      const endpoints = await listEndpoints();
+      if (parsed.options.get("json")) return { value: await loadEndpointManifest() };
+      return { value: endpoints.map((entry) => `${entry.id}\t${entry.method}\t${entry.path}\t${entry.summary}`).join("\n"), kind: "text" };
+    }
+    case "describe": {
+      assertOptions(parsed);
+      expectPositionals(parsed, 1, "endpoint id");
+      return { value: await getEndpoint(parsed.positionals[0]) };
+    }
+    case "dtos": {
+      assertOptions(parsed);
+      expectPositionals(parsed, 0);
+      const dtos = await listDtos();
+      if (parsed.options.get("json")) return { value: { count: dtos.length, dtos } };
+      return { value: dtos.map((entry) => `${entry.name}\t${entry.confidence}\t${entry.description}`).join("\n"), kind: "text" };
+    }
+    case "validate": {
+      assertOptions(parsed, ["dto", "file"]);
+      expectPositionals(parsed, 0);
+      const dto = requiredOption(parsed, "dto");
+      await getSchema(dto);
+      const file = requiredOption(parsed, "file");
+      const value = await readJsonFile(file);
+      const result = await validateDto(dto, value);
+      return { value: { ...result, file } };
+    }
+    case "id": {
+      assertOptions(parsed, ["prefix"]);
+      expectPositionals(parsed, 0);
+      const prefix = requiredOption(parsed, "prefix");
+      if (!ID_PREFIXES.includes(prefix)) throw new UsageError(`--prefix must be one of: ${ID_PREFIXES.join(", ")}`);
+      return { value: { prefix, id: createTypedId(prefix) } };
+    }
+    case "call": {
+      assertOptions(parsed, ["body", "params"]);
+      expectPositionals(parsed, 1, "endpoint id");
+      const endpoint = await getEndpoint(parsed.positionals[0]);
+      if (endpoint.requestBody?.binary === true) {
+        throw new UsageError(`${endpoint.id} uses a binary body; use upload-image`);
+      }
+      const params = parsed.options.has("params") ? await readJsonFile(parsed.options.get("params")) : {};
+      await validateCallParameters(endpoint, params);

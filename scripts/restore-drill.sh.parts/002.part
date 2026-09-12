@@ -1,0 +1,19 @@
+  echo "Restored schema or canonical counts do not match the backup manifest" >&2
+  exit 1
+fi
+
+finished=$(date +%s%3N)
+rto_ms=$((finished - started))
+jq -n \
+  --arg artifact "$(basename "$artifact")" \
+  --arg checked_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --arg source_migration_version "$source_migration_version" \
+  --arg restored_migration_version "$migration_version" \
+  --argjson revision_count "$revision_count" \
+  --argjson operation_count "$operation_count" \
+  --argjson artifact_count "$artifact_count" \
+  --argjson missing_artifacts "$missing_artifacts" \
+  --argjson rto_ms "$rto_ms" \
+  '{artifact:$artifact,checked_at:$checked_at,quick_check:"ok",integrity_check:"ok",source_migration_version:$source_migration_version,restored_migration_version:$restored_migration_version,revision_count:$revision_count,operation_count:$operation_count,artifact_count:$artifact_count,missing_artifacts:$missing_artifacts,replay_report:"replay-report.json",rto_ms:$rto_ms}' \
+  > "$report"
+echo "$report"

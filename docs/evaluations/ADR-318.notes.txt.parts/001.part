@@ -1,0 +1,29 @@
+# ADR-318 initial SLO qualification
+
+Measured locally on 2026-08-23 with `scripts/run-slo-qualification.sh`.
+
+Hardware: Linux 6.8.0-137-generic, amd64, 6 available processors, OpenJDK
+21.0.11, 4,194,304,000-byte JVM maximum heap.
+
+| ID | Measurement | Target | Result |
+|---|---:|---:|---|
+| NFR-001 | 10.226 ms render p95 | < 500 ms | Pass |
+| NFR-002 | 3.776 ms detector p95 | < 1,000 ms | Pass |
+| NFR-003 | 75.968 ms transaction p95 | < 100 ms | Pass |
+| NFR-004 | 114.192 ms commit-service p95 | < 250 ms | Pass |
+| NFR-005 | 44.424 commits/s; 100/100 rows | >= 2 commits/s | Pass |
+| NFR-006 | 8/8 injected process-crash stages atomic | No partial commit | Pass |
+| NFR-007 | 6/6 cross-novel HTTP cases denied | 100% | Pass |
+| NFR-008 | 2.364 s RTO; integrity/replay passed | RPO 1 h, RTO 4 h | Pass |
+| NFR-009 | 10/10 render-byte comparisons identical | Byte-identical | Pass |
+
+NFR-005 also runs a controlled lock-contention test that verifies the
+`sqlite_busy_total` metric. NFR-008 uses a newly encrypted live SQLite backup
+and isolated restore; the measured RPO is zero seconds for the qualification
+snapshot and no artifacts were missing.
+
+The command writes complete machine-readable evidence to
+`artifacts/slo/ADR-318.json`. It preserves each measured value, original target,
+and pass/fail boolean, and exits nonzero when any criterion fails. Re-run on the
+production hardware before launch; these numbers qualify only the hardware
+declared above.

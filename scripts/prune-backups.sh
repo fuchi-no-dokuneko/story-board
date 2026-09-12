@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
+source "$(dirname -- "${BASH_SOURCE[0]}")/backup-environment.sh"
 
 if [[ $# -lt 1 || $# -gt 2 ]]; then
   echo "Usage: scripts/prune-backups.sh <backup-directory> [--apply]" >&2
   exit 2
 fi
 
-directory=$(realpath "$1")
+directory=$(repository_path "$1")
 apply=${2:-}
 if [[ "$apply" != "" && "$apply" != "--apply" ]]; then
   echo "Second argument must be --apply" >&2
@@ -15,7 +16,7 @@ fi
 
 mapfile -t artifacts < <(
   find "$directory" -maxdepth 1 -type f \
-    -name 'storyblock-????????T??????Z.db.zst.enc' -printf '%f\n' | sort -r
+    -name 'storyblock-????????T??????Z.db.zst' -printf '%f\n' | sort -r
 )
 
 declare -A keep=()
@@ -26,7 +27,7 @@ now=$(date -u +%s)
 for index in "${!artifacts[@]}"; do
   artifact=${artifacts[$index]}
   stamp=${artifact#storyblock-}
-  stamp=${stamp%.db.zst.enc}
+  stamp=${stamp%.db.zst}
   epoch=$(date -u -d "${stamp:0:8} ${stamp:9:2}:${stamp:11:2}:${stamp:13:2}" +%s)
   age_days=$(((now - epoch) / 86400))
 

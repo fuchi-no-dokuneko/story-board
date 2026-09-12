@@ -1,0 +1,55 @@
+                .andExpect(jsonPath("$.revoked").value(true));
+        mvc.perform(get("/v1/jobs/{jobId}", ownJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_BEARER_CREDENTIAL"));
+
+    }
+
+    @Test
+    void realBearerCommitAndReplayWriteCompleteAuditEvents() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "commit-audit-import");
+        Map<String, Object> key = issueAsOwner(
+                revision, "commit-audit-issue", List.of("novel:commit")
+        );
+        String token = stringField(key, "secret");
+        String keyId = stringField(key, "key_id");
+        String operationId = Ids.OperationId.create().value();
+        String idempotencyKey = "http-commit-audit";
+        Map<String, Object> operation = Map.of(
+                "operation_id", operationId,
+                "idempotency_key", idempotencyKey,
+                "novel_id", novelId,
+                "base_revision_id", revisionId,
+                "expected_head_hash", revision.contentHash(),
+                "type", "restore_revision_content",
+                "payload", Map.of(
+                        "restore_revision_id", revisionId,
+                        "expected_restore_hash", revision.contentHash()
+                )
+        );
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "operation", operation,
+                "candidate_revision_id", Ids.RevisionId.create().value(),
+                "candidate_created_at", "2026-08-21T12:01:00Z"
+        ));
+        MockHttpServletRequestBuilder request = post(
+                        "/v1/novels/{novelId}/commits", novelId
+                )
+                .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
+                .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                .header(ApiRequestMetadata.REQUEST_ID_HEADER, "req_http_commit_first")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body);
+        MvcResult first = mvc.perform(request)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.operation_id").value(operationId))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        String committedRevision = stringField(object(first), "revision_id");
+
+        mvc.perform(post("/v1/novels/{novelId}/commits", novelId)

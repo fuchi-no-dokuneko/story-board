@@ -1,0 +1,52 @@
+When("I resize the browser to {int} by {int}", async function (width, height) {
+  await runtime.setViewport(this, width, height);
+});
+
+When("I select only the monitor key from environment variable {string}", async function (name) {
+  await runtime.selectOnlyCheckboxByLabel(this, name);
+});
+
+When("I deselect every monitor key", async function () {
+  await runtime.deselectAllMonitorKeys(this);
+});
+
+When("I remember resource requests containing {string} as {string}", async function (fragment, name) {
+  await runtime.rememberResourceCount(this, fragment, name);
+});
+
+Then("resource requests containing {string} eventually increase from {string}", async function (fragment, name) {
+  await runtime.waitResourceCountIncrease(this, fragment, name);
+});
+
+Then("JavaScript expression {string} returns true", async function (expression) {
+  assert.equal(await (await runtime.ensureBrowser(this)).executeScript(`return Boolean(${expression});`), true);
+});
+
+Then("JavaScript expression {string} eventually returns true", async function (expression) {
+  await runtime.waitJavaScript(this, expression);
+});
+
+Then("local storage item {string} is present", async function (name) {
+  assert.ok(await (await runtime.ensureBrowser(this)).executeScript("return localStorage.getItem(arguments[0]);", name));
+});
+
+Then("local storage item {string} is absent", async function (name) {
+  assert.equal(await (await runtime.ensureBrowser(this)).executeScript("return localStorage.getItem(arguments[0]);", name), null);
+});
+
+Then("the monitor chart contains normal warning and critical colors", async function () {
+  const result = await (await runtime.ensureBrowser(this)).executeScript(`
+    const canvas = document.querySelector('.graph-container canvas');
+    if (!canvas) return false;
+    const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    let green = false, orange = false, red = false;
+    for (let index = 0; index < pixels.length; index += 4) {
+      const r = pixels[index], g = pixels[index + 1], b = pixels[index + 2], a = pixels[index + 3];
+      if (a && r < 30 && g >= 100 && b < 30) green = true;
+      if (a && r >= 220 && g >= 110 && g <= 190 && b < 40) orange = true;
+      if (a && r >= 220 && g < 40 && b < 40) red = true;
+    }
+    return green && orange && red;
+  `);
+  assert.equal(result, true, "Expected green, orange, and red chart points; verify the UAT fixture spans every range");
+});

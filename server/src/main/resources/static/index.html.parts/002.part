@@ -1,0 +1,60 @@
+          <input id="catalog-search" type="search" placeholder="Search novels" autocomplete="off">
+          <button id="catalog-refresh" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div class="library-layout">
+        <aside class="catalog-pane" aria-label="Novel catalog">
+          <div id="catalog-loading" class="pane-message">Loading novels...</div>
+          <div id="catalog-empty" class="pane-message" hidden>No novels found.</div>
+          <ol id="novel-list" class="novel-list"></ol>
+          <div class="pagination" aria-label="Catalog pagination">
+            <button id="page-previous" type="button">Previous</button>
+            <span id="page-label">Page 1</span>
+            <button id="page-next" type="button">Next</button>
+          </div>
+        </aside>
+
+        <article class="reader-pane" aria-live="polite">
+          <div id="reader-empty" class="reader-placeholder">
+            <h2>Select a novel</h2>
+            <p>Novel text and persisted metadata will appear here.</p>
+          </div>
+          <div id="reader-loading" class="reader-placeholder" hidden>
+            <h2>Loading novel...</h2>
+          </div>
+          <div id="reader-content" hidden>
+            <div class="reader-heading">
+              <div>
+                <p id="reader-language" class="eyebrow"></p>
+                <h2 id="reader-title"></h2>
+                <p id="reader-id" class="identifier"></p>
+              </div>
+              <span id="reader-registration" class="registration-state"></span>
+            </div>
+
+            <dl class="novel-stats">
+              <div><dt>Han characters</dt><dd id="stat-han">0</dd></div>
+              <div><dt>Chapters</dt><dd id="stat-chapters">0</dd></div>
+              <div><dt>Scenes</dt><dd id="stat-scenes">0</dd></div>
+              <div><dt>Blocks</dt><dd id="stat-blocks">0</dd></div>
+              <div><dt>Zombies</dt><dd id="stat-zombies">0</dd></div>
+              <div><dt>TNT cannons</dt><dd id="stat-cannons">0</dd></div>
+            </dl>
+
+            <div class="character-strip">
+              <h3>Main characters</h3>
+              <ul id="character-list"></ul>
+            </div>
+
+            <div class="reader-body">
+              <nav id="chapter-nav" class="chapter-nav" aria-label="Chapters"></nav>
+              <div id="chapter-content" class="chapter-content"></div>
+            </div>
+
+            <details class="revision-details">
+              <summary>Revision metadata</summary>
+              <dl>
+                <div><dt>Revision</dt><dd id="meta-revision"></dd></div>
+                <div><dt>Updated</dt><dd id="meta-updated"></dd></div>
+                <div><dt>Content hash</dt><dd id="meta-hash"></dd></div>

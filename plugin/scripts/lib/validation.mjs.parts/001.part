@@ -1,0 +1,67 @@
+import { getSchema, loadSchemas } from "./dtos.mjs";
+import { stableStringify } from "./json.mjs";
+import { EXIT_CODES } from "./problem.mjs";
+import { isCanonicalInstant } from "./time.mjs";
+
+const SENTENCE_TERMINATOR = String.raw`(?:[。！？!?]+|(?<!\d)\.{1,3}(?!\d)|…{1,2})`;
+const CLOSING_MARKS = String.raw`[」』”’"'）)】》〉〕］}]*`;
+const REGISTRATION_SENTENCE = /\s*(.*?(?:[。！？!?]+|…{1,2})[」』”’"'）)】》〉〕］}]*?)/gsuy;
+
+export class PayloadValidationError extends Error {
+  constructor(dto, issues) {
+    super(`${dto} validation failed with ${issues.length} issue${issues.length === 1 ? "" : "s"}`);
+    this.name = "PayloadValidationError";
+    this.dto = dto;
+    this.issues = issues;
+    this.exitCode = EXIT_CODES.VALIDATION;
+  }
+}
+
+function resolvePointer(root, reference) {
+  if (!reference.startsWith("#/")) throw new TypeError(`not a local reference: ${reference}`);
+  return reference.slice(2).split("/").reduce((value, token) => {
+    const key = token.replaceAll("~1", "/").replaceAll("~0", "~");
+    if (value === null || typeof value !== "object" || !(key in value)) {
+      throw new TypeError(`unresolved schema reference ${reference}`);
+    }
+    return value[key];
+  }, root);
+}
+
+function resolveReference(reference, root, schemas) {
+  if (reference.startsWith("#/")) return { schema: resolvePointer(root, reference), root };
+  const name = reference.replace(/\.schema\.json$/u, "");
+  const schema = schemas.get(name);
+  if (schema === undefined) throw new TypeError(`unresolved schema reference ${reference}`);
+  return { schema, root: schema };
+}
+
+function typeMatches(value, type) {
+  switch (type) {
+    case "null": return value === null;
+    case "array": return Array.isArray(value);
+    case "object": return value !== null && typeof value === "object" && !Array.isArray(value);
+    case "integer": return Number.isSafeInteger(value);
+    case "number": return typeof value === "number" && Number.isFinite(value);
+    case "string": return typeof value === "string";
+    case "boolean": return typeof value === "boolean";
+    default: return true;
+  }
+}
+
+function codePointLength(text) {
+  return Array.from(text).length;
+}
+
+function graphemeLength(text) {
+  const segmenter = new Intl.Segmenter("und", { granularity: "grapheme" });
+  return [...segmenter.segment(text.normalize("NFC"))]
+    .filter(({ segment }) => !["\n", "\r", "\r\n"].includes(segment)).length;
+}
+
+function sentenceShape(text) {
+  const normalized = text.normalize("NFC");
+  const sentenceEnd = new RegExp(`${SENTENCE_TERMINATOR}${CLOSING_MARKS}`, "gu");
+  const completeEnd = new RegExp(`${SENTENCE_TERMINATOR}${CLOSING_MARKS}\\s*$`, "u");
+  return {
+    count: [...normalized.matchAll(sentenceEnd)].length,

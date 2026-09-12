@@ -1,0 +1,48 @@
+                <div><dt>Han text SHA-256</dt><dd id="meta-han-hash"></dd></div>
+              </dl>
+            </details>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="console-view" class="view console-view" aria-labelledby="console-heading" hidden>
+      <div class="console-heading">
+        <div>
+          <h2 id="console-heading">API console</h2>
+          <p class="muted">Direct requests to this StoryBlock instance</p>
+        </div>
+        <div class="quick-requests" aria-label="Quick requests">
+          <button type="button" data-method="GET" data-path="/actuator/health">Health</button>
+          <button type="button" data-method="GET" data-path="/v1/openapi.yaml">OpenAPI</button>
+          <button type="button" data-method="GET" data-path="/v1/admin/novels">Novels</button>
+        </div>
+      </div>
+
+      <div class="console-grid">
+        <section class="request-panel" aria-labelledby="request-title">
+          <h3 id="request-title">Request</h3>
+          <div class="request-line">
+            <select id="method" aria-label="HTTP method">
+              <option>GET</option>
+            </select>
+            <input id="path" value="/actuator/health" aria-label="Request path" spellcheck="false">
+            <button id="send" type="button">Send</button>
+          </div>
+          <p class="console-auth-note">Requests connect directly to this server.</p>
+        </section>
+        <section class="response-panel" aria-labelledby="response-title">
+          <div class="response-heading">
+            <h3 id="response-title">Response</h3>
+            <output id="response-status"></output>
+          </div>
+          <pre id="response">Ready.</pre>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/auth.js" defer></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>

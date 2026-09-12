@@ -1,6 +1,3 @@
 #!/usr/bin/env sh
 set -eu
-
-cd "$(dirname "$0")"
-export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--dns-result-order=ipv4first"
-timeout 60s npm ci --ignore-scripts --no-audit --no-fund
+exec "$(dirname "$0")/install-local.sh" "$@"

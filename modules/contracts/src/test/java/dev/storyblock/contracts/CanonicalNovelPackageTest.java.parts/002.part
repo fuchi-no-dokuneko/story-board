@@ -1,0 +1,61 @@
+        ).getBytes(StandardCharsets.UTF_8);
+        byte[] duplicate = canonical.replaceFirst(
+                "\\{",
+                "{\"package_version\":\"1.0.0\","
+        ).getBytes(StandardCharsets.UTF_8);
+
+        assertThrows(CanonicalPackageException.class, () -> CanonicalNovelPackage.parse(unsupported));
+        assertThrows(CanonicalPackageException.class, () -> CanonicalNovelPackage.parse(unknown));
+        assertThrows(CanonicalPackageException.class, () -> CanonicalNovelPackage.parse(duplicate));
+    }
+
+    @Test
+    void manifestAndArtifactTamperingAreRejected() {
+        CanonicalRevision revision = genesis();
+        byte[] content = "trace".getBytes(StandardCharsets.UTF_8);
+        CanonicalNovelPackage value = CanonicalNovelPackage.assemble(
+                List.of(new CanonicalNovelPackage.RevisionEntry(0, revision)),
+                List.of(),
+                List.of(new CanonicalNovelPackage.ArtifactEntry(
+                        Ids.ArtifactId.create(),
+                        NarrativeCanonicalMapper.fromCanonical(revision).id(),
+                        "trace-data",
+                        "application/json",
+                        "identity",
+                        CanonicalJson.hashBytes(content),
+                        content,
+                        Instant.parse("2026-08-21T12:01:00Z")
+                ))
+        );
+        String canonical = new String(value.bytes(), StandardCharsets.UTF_8);
+        byte[] wrongCount = canonical.replace(
+                "\"artifact_count\":1",
+                "\"artifact_count\":2"
+        ).getBytes(StandardCharsets.UTF_8);
+        byte[] wrongSize = canonical.replace(
+                "\"size_bytes\":5",
+                "\"size_bytes\":6"
+        ).getBytes(StandardCharsets.UTF_8);
+        byte[] wrongContent = canonical.replace(
+                "\"content_base64\":\"dHJhY2U=\"",
+                "\"content_base64\":\"dHJhY2Y=\""
+        ).getBytes(StandardCharsets.UTF_8);
+
+        assertThrows(CanonicalPackageException.class, () -> CanonicalNovelPackage.parse(wrongCount));
+        assertThrows(CanonicalPackageException.class, () -> CanonicalNovelPackage.parse(wrongSize));
+        assertThrows(CanonicalPackageException.class, () -> CanonicalNovelPackage.parse(wrongContent));
+    }
+
+    @Test
+    void standaloneRevisionMustBeGenesis() {
+        CanonicalRevision genesis = genesis();
+        RevisionManifest original = NarrativeCanonicalMapper.fromCanonical(genesis);
+        RevisionManifest child = new RevisionManifest(
+                Ids.RevisionId.create(),
+                original.id(),
+                Instant.parse("2026-08-21T12:01:00Z"),
+                original.novel()
+        );
+
+        assertThrows(
+                CanonicalPackageException.class,

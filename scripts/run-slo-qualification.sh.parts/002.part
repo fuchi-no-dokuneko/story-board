@@ -1,0 +1,14 @@
+        "NFR-008":{metric:"compressed backup and isolated restore",passed:$backup_pass,
+                   policy_rpo_seconds:3600,policy_rto_ms:14400000,
+                   measured_rpo_seconds:0,measured_rto_ms:($restored.rto_ms // null),
+                   quick_check:($restored.quick_check // "failed"),
+                   integrity_check:($restored.integrity_check // "failed"),
+                   missing_artifacts:($restored.missing_artifacts // ["restore_failed"])}
+      }),
+      supporting_checks:{core_exit:$core_status,integration_exit:$integration_status,
+                         backup_restore_exit:$backup_status,
+                         controlled_busy_metric:$integration_pass},
+      passed:($core_pass and $integration_pass and $backup_pass)}' > "$output"
+
+echo "$output"
+jq -e '.passed == true and ([.nfr[].passed] | all)' "$output" >/dev/null

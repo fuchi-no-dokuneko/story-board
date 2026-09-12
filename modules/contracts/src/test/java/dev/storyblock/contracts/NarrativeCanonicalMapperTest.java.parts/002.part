@@ -1,0 +1,38 @@
+                Ids.BlockId.create(),
+                OrderKey.rebalanced(0, 2),
+                "第一句。",
+                new BlockMetadata(Map.of("narrative_mode", "narration")),
+                Map.of("example.test", Map.of("source", "fixture"))
+        );
+        NarrativeBlock second = NarrativeBlock.create(
+                Ids.BlockId.create(),
+                OrderKey.rebalanced(1, 2),
+                "第二句。",
+                BlockMetadata.empty(),
+                Map.of()
+        );
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "Opening",
+                TransitionMode.OPENING,
+                new SceneSeed(Map.of("present_character_ids", List.of("char_one"))),
+                List.of(first, second),
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId,
+                OrderKey.initial(),
+                "Chapter 1",
+                List.of(scene),
+                Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(novelId, List.of(chapter), Map.of())
+        );
+    }
+}

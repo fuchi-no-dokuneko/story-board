@@ -1,0 +1,73 @@
+    private static RevisionManifest fieldChange(String field, boolean staleEvidence) {
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        Map<String, Object> seed = new java.util.LinkedHashMap<>();
+        seed.put("present_character_ids", List.of());
+        if (!"pov".equals(field)) {
+            seed.put(field, explicit("old"));
+        }
+
+        Map<String, Object> firstMeta = "pov".equals(field)
+                ? Map.of(field, explicit("old")) : Map.of();
+        Map<String, Object> changed = new java.util.LinkedHashMap<>(explicit("new"));
+        if (staleEvidence) {
+            changed.put("evidence", Map.of(
+                    "start_grapheme", 0,
+                    "end_grapheme", 1,
+                    "quote", "Wrong",
+                    "quote_hash", "sha256:" + "0".repeat(64)
+            ));
+        }
+        List<NarrativeBlock> blocks = List.of(
+                block(0, 3, "Opening sentence.", new BlockMetadata(firstMeta)),
+                block(1, 3, "Middle sentence.", new BlockMetadata(Map.of(field, changed))),
+                block(2, 3, "Closing sentence.", BlockMetadata.empty())
+        );
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "Single scene",
+                TransitionMode.OPENING,
+                new SceneSeed(seed),
+                blocks,
+                Map.of()
+        );
+        return revision(chapterId, List.of(scene));
+    }
+
+    private static RevisionManifest boundary(
+            TransitionMode mode,
+            List<String> beforeCharacters,
+            List<String> afterCharacters
+    ) {
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        NarrativeScene first = scene(
+                chapterId,
+                0,
+                TransitionMode.OPENING,
+                beforeCharacters,
+                "Before boundary."
+        );
+        NarrativeScene second = scene(
+                chapterId,
+                1,
+                mode,
+                afterCharacters,
+                "After boundary."
+        );
+        return revision(chapterId, List.of(first, second));
+    }
+
+    private static RevisionManifest weatherBoundary(Object before, Object after) {
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        NarrativeScene first = sceneWithSeed(
+                chapterId,
+                0,
+                TransitionMode.OPENING,
+                Map.of("weather", before, "present_character_ids", List.of()),
+                "Before weather."
+        );
+        NarrativeScene second = sceneWithSeed(
+                chapterId,
+                1,
+                TransitionMode.CONTINUOUS,

@@ -1,0 +1,12 @@
+          "channel_version": "example-1",
+          "primary_metric": "jensen_shannon_distance",
+          "primary_distance": 0,
+          "independent_gate_evidence": true,
+          "diagnostics": {
+          }
+        }
+      ],
+      "token_kl_diagnostic_only": true
+    }
+  ]
+}

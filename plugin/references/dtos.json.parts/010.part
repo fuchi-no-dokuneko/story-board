@@ -1,0 +1,59 @@
+      "name": "InsertBlocksOperation",
+      "file": "dtos/InsertBlocksOperation.schema.json",
+      "description": "Code-derived StoryBlock Insert Blocks Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "InsertBlocksPayload",
+      "file": "dtos/InsertBlocksPayload.schema.json",
+      "description": "Code-derived StoryBlock Insert Blocks Payload JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "InsertionPoint",
+      "file": "dtos/InsertionPoint.schema.json",
+      "description": "Code-derived StoryBlock Insertion Point JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "Job",
+      "file": "dtos/Job.schema.json",
+      "description": "Code-derived StoryBlock Job JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "name": "JobAccepted",
+      "file": "dtos/JobAccepted.schema.json",
+      "description": "Code-derived StoryBlock Job Accepted JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "MergeBlocksOperation",

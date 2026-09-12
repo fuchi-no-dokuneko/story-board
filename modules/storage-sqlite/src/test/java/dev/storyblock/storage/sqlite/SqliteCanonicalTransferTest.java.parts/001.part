@@ -1,0 +1,68 @@
+package dev.storyblock.storage.sqlite;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import dev.storyblock.application.CanonicalTransferService;
+import dev.storyblock.application.CommitService;
+import dev.storyblock.application.ReplayService;
+import dev.storyblock.contracts.CanonicalExportFormat;
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.contracts.CanonicalNovelPackage;
+import dev.storyblock.contracts.CanonicalPackageException;
+import dev.storyblock.contracts.CanonicalRevision;
+import dev.storyblock.contracts.EditOperationCanonicalMapper;
+import dev.storyblock.contracts.NarrativeCanonicalMapper;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeChapter;
+import dev.storyblock.domain.NarrativeNovel;
+import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.storage.ExportJobRequest;
+import dev.storyblock.storage.IdempotencyConflictException;
+import dev.storyblock.storage.MissingArtifactException;
+import dev.storyblock.storage.StoredArtifact;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+class SqliteCanonicalTransferTest {
+    private static final Instant IMPORTED_AT = Instant.parse("2026-08-21T13:00:00Z");
+    private static final List<String> IMPORT_TABLES = List.of(
+            "novels",
+            "revisions",
+            "operations",
+            "artifacts",
+            "import_receipts",
+            "checkpoints",
+            "head_block_projection",
+            "block_tombstones"
+    );
+
+    @TempDir
+    Path temporaryDirectory;
+
+    @Test
+    void completePackageRoundTripsWithHistoryArtifactTombstoneAndHeadHash()
+            throws Exception {
+        CanonicalNovelPackage sourceDocument = packageWithHistoryAndArtifact(
+                temporaryDirectory.resolve("source.db")
+        );
+        Path targetPath = temporaryDirectory.resolve("target.db");
+        try (SqliteRevisionStore target = SqliteRevisionStore.open(targetPath)) {
+            CanonicalTransferService transfers = new CanonicalTransferService(target);
+
+            var imported = transfers.importDocument(
+                    CanonicalExportFormat.PACKAGE,
+                    sourceDocument.bytes(),
+                    "import-complete",
+                    IMPORTED_AT
+            );

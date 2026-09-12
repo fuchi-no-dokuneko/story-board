@@ -1,0 +1,61 @@
+        PreviewResponse repeated = service.preview(base, operation, candidateId, CANDIDATE_TIME);
+
+        assertEquals(base.id(), first.baseRevisionId());
+        assertEquals(NarrativeCanonicalMapper.toCanonical(base).contentHash(), first.baseHash());
+        assertEquals("replace_block_range", first.normalizedOperation().get("type"));
+        assertNotNull(first.candidateHash());
+        assertEquals(64 + "sha256:".length(), first.candidateHash().length());
+        assertEquals(1, first.diff().blockChanges().size());
+        assertEquals(BlockChange.Type.MODIFIED, first.diff().blockChanges().getFirst().type());
+        assertNotNull(first.renderPacket());
+        assertEquals(candidateId, first.renderPacket().revisionId());
+        assertTrue(first.violations().isEmpty());
+        assertTrue(first.warnings().isEmpty());
+        assertTrue(first.committable());
+        assertEquals(Set.of(
+                "base_revision_id",
+                "base_hash",
+                "normalized_operation",
+                "candidate_hash",
+                "diff",
+                "render_packet",
+                "violations",
+                "warnings",
+                "committable"
+        ), first.contractFields().keySet());
+        assertEquals(first.candidateHash(), repeated.candidateHash());
+        assertArrayEquals(
+                CanonicalJson.bytes(first.renderPacket()),
+                CanonicalJson.bytes(repeated.renderPacket())
+        );
+
+        assertEquals(base.id(), head.get());
+        assertEquals(baseSelections, base.selectedBlockVersions());
+        assertArrayEquals(baseBytes, NarrativeCanonicalMapper.toCanonical(base).canonicalBytes());
+    }
+
+    @Test
+    void invalidDraftTextReturnsStructuredNonCanonicalPreviewWithoutCreatingARevision() {
+        RevisionManifest base = revision();
+        NarrativeBlock original = base.liveBlocks().getFirst();
+        EditOperation operation = new EditOperation.ReplaceBlockRange(
+                context(base, "invalid-text"),
+                BlockRangeGuard.capture(firstScene(base), original.id(), original.id()),
+                List.of(new BlockDraft(
+                        original.id(), "未完成", original.metadata(), original.extensions()
+                ))
+        );
+
+        PreviewResponse preview = service().preview(
+                base, operation, Ids.RevisionId.create(), CANDIDATE_TIME
+        );
+
+        assertFalse(preview.committable());
+        assertTrue(preview.violations().stream()
+                .anyMatch(issue -> issue.code() == ValidationCode.INVALID_SENTENCE_COUNT));
+        assertNotNull(preview.candidateHash());
+        assertTrue(preview.diff().blockChanges().isEmpty());
+        assertNull(preview.renderPacket());
+    }
+
+    @Test

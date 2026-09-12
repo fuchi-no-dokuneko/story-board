@@ -36,7 +36,7 @@ public final class StyleStratumSelector {
         );
     }
 
-    private static StyleProfileSelection selection(
+    static StyleProfileSelection selection(
             StyleStratum requested,
             StyleStratum selected,
             Optional<StyleStratumCalibration> calibration,

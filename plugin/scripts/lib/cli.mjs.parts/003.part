@@ -1,0 +1,67 @@
+function responseReport(response) {
+  return { status: response.status, headers: response.headers, body: response.data };
+}
+
+async function fetchNovel(client, novelId) {
+  requireTypedId(novelId, "nov", "novel_id");
+  const headResponse = await client.request({ pathname: `/v1/novels/${encodeURIComponent(novelId)}` });
+  await validateDto("NovelHead", headResponse.data);
+  const revisionId = headResponse.data.head_revision_id;
+  const revisionResponse = await client.request({
+    pathname: `/v1/novels/${encodeURIComponent(novelId)}/revisions/${encodeURIComponent(revisionId)}`,
+  });
+  await validateDto("CanonicalRevision", revisionResponse.data);
+  return {
+    head: headResponse.data,
+    head_headers: headResponse.headers,
+    revision: revisionResponse.data,
+    revision_headers: revisionResponse.headers,
+  };
+}
+
+async function fetchRevision(client, novelId, revisionId) {
+  requireTypedId(novelId, "nov", "novel_id");
+  requireTypedId(revisionId, "rev", "revision_id");
+  const response = await client.request({
+    pathname: `/v1/novels/${encodeURIComponent(novelId)}/revisions/${encodeURIComponent(revisionId)}`,
+  });
+  await validateDto("CanonicalRevision", response.data);
+  return response;
+}
+
+function manuscriptAnalysis(manuscript) {
+  const text = manuscript.chapters.map((chapter) => chapter.text).join("");
+  const sequence = hanSequence(text);
+  return {
+    sequence,
+    count: countHanCodePoints(text),
+    hash: `sha256:${sha256(sequence)}`,
+  };
+}
+
+function persistedText(revision) {
+  return revision.chapters.flatMap((chapter) => chapter.scenes)
+    .flatMap((scene) => scene.blocks)
+    .map((block) => block.text)
+    .join("");
+}
+
+function verificationReport(source, persisted) {
+  const expected = manuscriptAnalysis(source);
+  const actualSequence = hanSequence(persistedText(persisted.revision));
+  const actual = {
+    sequence: actualSequence,
+    count: Array.from(actualSequence).length,
+    hash: `sha256:${sha256(actualSequence)}`,
+  };
+  const extensions = persisted.revision.extensions ?? {};
+  const checks = {
+    novel_id: persisted.revision.novel_id === source.novel_id,
+    created_at: persisted.revision.created_at === source.created_at,
+    han_sequence: actual.sequence === expected.sequence,
+    han_count: actual.count === expected.count && extensions["han-character-count"] === expected.count,
+    han_sha256: actual.hash === expected.hash && extensions["han-text-sha256"] === expected.hash,
+    title: extensions.title === source.title,
+    language: extensions.language === source.language,
+    main_characters: stableStringify(extensions["main-characters"]) === stableStringify(source.main_characters),
+    zombie_count: extensions["zombie-count"] === source.zombie_count,

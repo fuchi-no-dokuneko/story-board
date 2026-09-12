@@ -1,0 +1,67 @@
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #181c1f;
+    --surface-subtle: #13171a;
+    --border: #373e44;
+    --border-strong: #56616a;
+    --text: #eceff1;
+    --muted: #aab2b9;
+    --accent: #5ec994;
+    --accent-soft: #153d2b;
+    --warning: #f1bd72;
+    --warning-soft: #452d13;
+    --header: #101316;
+  }
+  body { background: #0e1113; }
+  .story-block { color: #e5e8ea; }
+}
+
+@media (max-width: 980px) {
+  .operator-form { grid-template-columns: 1fr 1.5fr; }
+  .operator-status { grid-column: 1 / -1; text-align: left; }
+  .library-layout { grid-template-columns: minmax(230px, 290px) minmax(0, 1fr); }
+  .novel-stats { grid-template-columns: repeat(3, minmax(90px, 1fr)); }
+  .novel-stats div:nth-child(3) { border-right: 0; }
+  .novel-stats div:nth-child(-n+3) { border-bottom: 1px solid var(--border); }
+  .reader-body { grid-template-columns: 1fr; gap: 22px; }
+  .chapter-nav { position: static; display: flex; gap: 6px; overflow-x: auto; }
+  .chapter-link { width: auto; min-width: max-content; border: 1px solid var(--border); border-radius: 4px; }
+  .console-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 720px) {
+  .app-header { align-items: flex-start; }
+  .header-state { flex-direction: column; align-items: flex-end; gap: 7px; }
+  .view-tabs { gap: 20px; }
+  .operator-form { grid-template-columns: 1fr; }
+  .operator-controls { grid-template-columns: minmax(0, 1fr) auto; }
+  #operator-token { grid-column: 1 / -1; }
+  .operator-status { grid-column: auto; }
+  .view { padding-inline: 12px; }
+  .library-toolbar { align-items: flex-start; flex-direction: column; padding: 18px 0; }
+  .search-controls { width: 100%; }
+  .search-controls input { width: 100%; min-width: 0; }
+  .library-layout { display: block; min-height: auto; }
+  .catalog-pane { max-height: 370px; border-right: 0; border-bottom: 1px solid var(--border); }
+  .novel-list { max-height: 280px; }
+  #reader-content { padding: 24px 16px 32px; }
+  .reader-heading { flex-direction: column; gap: 12px; }
+  .novel-stats { grid-template-columns: repeat(2, minmax(90px, 1fr)); }
+  .novel-stats div:nth-child(3) { border-right: 1px solid var(--border); }
+  .novel-stats div:nth-child(even) { border-right: 0; }
+  .novel-stats div:nth-child(-n+4) { border-bottom: 1px solid var(--border); }
+  .story-block { font-size: 16px; }
+  .revision-details dl div { grid-template-columns: 1fr; gap: 3px; }
+  .console-heading { align-items: flex-start; flex-direction: column; }
+  .quick-requests { flex-wrap: wrap; }
+  .request-line { grid-template-columns: 88px minmax(0, 1fr); }
+  #send { grid-column: 1 / -1; }
+}

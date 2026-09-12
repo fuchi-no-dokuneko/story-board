@@ -1,0 +1,62 @@
+            "POST /imports",
+            "POST /style-profiles",
+            "POST /internal/jobs/claims"
+    );
+
+    private static Map<String, Object> document;
+    private static List<Operation> operations;
+
+    @BeforeAll
+    static void loadDocument() throws IOException {
+        try (InputStream stream = OpenApiContractTest.class.getResourceAsStream(
+                "/openapi/storyblock-v1.yaml"
+        )) {
+            assertNotNull(stream, "OpenAPI document must be packaged with the API");
+            document = map(new Yaml().load(stream));
+        }
+        operations = collectOperations(document);
+    }
+
+    @Test
+    void documentsExactlyTheRequiredV1Operations() {
+        Set<String> actual = new HashSet<>();
+        Set<String> operationIds = new HashSet<>();
+
+        for (Operation operation : operations) {
+            assertTrue(actual.add(operation.key()), "duplicate route " + operation.key());
+            String operationId = string(operation.contract().get("operationId"));
+            assertFalse(operationId.isBlank(), "missing operationId for " + operation.key());
+            assertTrue(operationIds.add(operationId), "duplicate operationId " + operationId);
+            assertFalse(
+                    string(operation.contract().get("summary")).isBlank(),
+                    "missing summary for " + operation.key()
+            );
+            boolean hasScopes = !list(
+                    operation.contract().get("x-required-scopes")
+            ).isEmpty();
+            Object requiredRole = operation.contract().get("x-required-role");
+            boolean hasRole = requiredRole instanceof String role && !role.isBlank();
+            assertTrue(
+                    hasScopes || hasRole,
+                    "missing authorization for " + operation.key()
+            );
+
+            Map<String, Object> responses = map(operation.contract().get("responses"));
+            assertEquals(
+                    "#/components/responses/Problem",
+                    map(responses.get("default")).get("$ref"),
+                    "default response for " + operation.key()
+            );
+            assertTrue(
+                    responses.keySet().stream().anyMatch(status -> status.startsWith("2")),
+                    "missing success response for " + operation.key()
+            );
+
+            if (!"GET".equals(operation.method())) {
+                Set<String> parameterRefs = parameterRefs(operation.contract());
+                String expectedIfMatch = WILDCARD_CREATION_OPERATIONS.contains(
+                        operation.key()
+                )
+                        ? "#/components/parameters/IfMatchForCreation"
+                        : "#/components/parameters/IfMatch";
+                assertTrue(

@@ -1,0 +1,71 @@
+                    new AuditContext("req_proposal", "monitor-worker", null, NOW)
+            );
+
+            assertTrue(submitted.status().run().output()
+                    instanceof MonitorProposedOperation);
+            assertEquals(1, store.revisionCount(genesis.novel().id()));
+            assertEquals(0, store.operationCount(genesis.novel().id()));
+            assertEquals(genesis.id(), store.getHead(genesis.novel().id()).revisionId());
+
+            EditOperation restore = RevisionStoreTestFixture.restore(
+                    genesis, genesis, "forbidden-restore-proposal"
+            );
+            assertThrows(IllegalArgumentException.class, () -> service.submit(
+                    genesis.novel().id(),
+                    genesis.id(),
+                    hash,
+                    block.id(),
+                    1,
+                    MonitorModule.RULE_VERSION,
+                    List.of(block.id()),
+                    new MonitorProposedOperation(restore, List.of(evidence(block))),
+                    "restore-submission",
+                    new AuditContext("req_restore", "monitor-worker", null, NOW)
+            ));
+        }
+
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {
+            assertEquals(1, count(database, "monitor_runs"));
+            assertEquals(0, count(database, "monitor_issues"));
+            assertEquals(1, count(database, "monitor_proposed_operations"));
+        }
+    }
+
+    private static StoredMonitorRun findingRun(
+            RevisionManifest revision,
+            String idempotencyKey,
+            String code
+    ) {
+        return findingRun(
+                revision, idempotencyKey, code, MonitorModule.RULE_VERSION
+        );
+    }
+
+    private static StoredMonitorRun findingRun(
+            RevisionManifest revision,
+            String idempotencyKey,
+            String code,
+            String ruleVersion
+    ) {
+        NarrativeBlock block = revision.liveBlocks().getFirst();
+        String revisionHash = RevisionStoreTestFixture.hash(revision);
+        MonitorFinding finding = new MonitorFinding(
+                code, "info", "A local monitor note.", List.of(evidence(block))
+        );
+        List<MonitorBlockFingerprint> affected = List.of(
+                MonitorBlockFingerprint.from(block)
+        );
+        String requestHash = StoredMonitorRun.requestHash(
+                revision.novel().id(),
+                revision.id(),
+                revisionHash,
+                block.id(),
+                1,
+                MonitorModule.VERSION,
+                ruleVersion,
+                affected,
+                finding
+        );
+        return new StoredMonitorRun(
+                Ids.MonitorRunId.create(),
+                Ids.MonitorIssueId.create(),

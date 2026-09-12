@@ -1,0 +1,101 @@
+          type: string
+        head_sequence:
+          type: integer
+          minimum: 0
+        head_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        revision_count:
+          type: integer
+          minimum: 1
+        operation_count:
+          type: integer
+          minimum: 0
+        artifact_count:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    CanonicalPackageRevision:
+      type: object
+      required: [sequence, document]
+      properties:
+        sequence:
+          type: integer
+          minimum: 0
+        document:
+          $ref: "#/components/schemas/CanonicalRevision"
+      additionalProperties: false
+    CanonicalPackageOperation:
+      type: object
+      required: [sequence, operation_hash, operation, result_revision_id, result_hash, committed_at]
+      properties:
+        sequence:
+          type: integer
+          minimum: 1
+        operation_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        result_revision_id:
+          type: string
+        result_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        committed_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    CanonicalPackageArtifact:
+      type: object
+      required: [artifact_id, revision_id, kind, media_type, codec, content_hash, size_bytes, created_at, content_base64]
+      properties:
+        artifact_id:
+          type: string
+        revision_id:
+          type: string
+        kind:
+          type: string
+        media_type:
+          type: string
+        codec:
+          type: string
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        size_bytes:
+          type: integer
+          minimum: 0
+          maximum: 16777216
+        created_at:
+          type: string
+          format: date-time
+        content_base64:
+          type: string
+          contentEncoding: base64
+      additionalProperties: false
+    RenderRequest:
+      type: object
+      required: [revision_id]
+      properties:
+        revision_id:
+          type: string
+        from_block_id:
+          type: [string, "null"]
+        to_block_id:
+          type: [string, "null"]
+      additionalProperties: false
+    PdfRenderRequest:
+      type: object
+      required: [revision_id]
+      properties:
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+      additionalProperties: false
+    BlockImage:
+      type: object
+      required: [artifact_id, content_hash, media_type, width_px, height_px, alt_text]
+      properties:
+        artifact_id:
+          type: string

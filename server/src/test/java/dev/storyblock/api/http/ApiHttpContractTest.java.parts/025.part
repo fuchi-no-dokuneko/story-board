@@ -1,0 +1,54 @@
+                                "reason", "Attempt without confirmation",
+                                "confirm_generated_corpus_promotion", false
+                        ))))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("STYLE_LIFECYCLE_CONFLICT"));
+
+        MvcResult ready = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}/transitions",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-ready-confirmed")
+                        .header(HttpHeaders.IF_MATCH,
+                                calibrating.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "target_state", "ready",
+                                "reason", "Human approved generated baseline",
+                                "confirm_generated_corpus_promotion", true
+                        ))))
+                .andExpect(status().isOk())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(jsonPath("$.state").value("ready"))
+                .andExpect(jsonPath("$.approved_by").value("security-test-actor"))
+                .andExpect(jsonPath("$.can_gate_rewrites").value(true))
+                .andReturn();
+
+        mvc.perform(get(
+                        "/v1/style-profiles/{profileId}/versions/{versionId}",
+                        profileId, versionId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG,
+                        ready.getResponse().getHeader(HttpHeaders.ETAG)
+                ))
+                .andExpect(jsonPath("$.state").value("ready"));
+
+        CanonicalRevision otherRevision = genesis();
+        importAsOwner(otherRevision, "style-http-other-import");
+        String otherToken = stringField(issueAsOwner(
+                otherRevision,
+                "style-http-other-key",
+                List.of("novel:read", "style:admin")
+        ), "secret");
+        mvc.perform(get("/v1/style-profiles/{profileId}", profileId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(otherToken)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+    }
+
+    @Test

@@ -1,0 +1,20 @@
+    ? `<failure message="UAT checklist failed">${escapeXml(failures.map((step) => `${step.keyword} ${step.name}: ${step.error || step.status}`).join("\n"))}</failure>`
+    : "";
+  return `<testCase name="${escapeXml(check.name)}" duration="${check.durationMs}">${failure}</testCase>`;
+}).join("");
+const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<testExecutions version="1"><file path="acceptance/features/${escapeXml(suite)}.feature">${testCases}</file></testExecutions>\n`;
+writeFileSync(path.join(output, "sonar-test-execution.xml"), xml);
+
+const passedCount = checks.filter((check) => check.passed).length;
+const summary = [
+  `# ${project.repository}: ${suite}`,
+  "",
+  `EN: ${passedCount}/${checks.length} scenarios passed. Full results: [JSON](checklist.json).`,
+  "",
+  `繁體中文：${checks.length} 個情境中 ${passedCount} 個通過。完整結果：[JSON](checklist.json)。`,
+  "",
+  `简体中文：${checks.length} 个场景中 ${passedCount} 个通过。完整结果：[JSON](checklist.json)。`,
+  "",
+].join("\n");
+writeFileSync(path.join(output, "summary.md"), summary);
+process.stdout.write(`${project.repository} ${suite}: ${passedCount}/${checks.length} scenarios passed\n`);

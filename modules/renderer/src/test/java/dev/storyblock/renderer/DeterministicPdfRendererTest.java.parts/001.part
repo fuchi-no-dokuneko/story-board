@@ -1,0 +1,73 @@
+package dev.storyblock.renderer;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.domain.BlockImage;
+import dev.storyblock.domain.BlockMetadata;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeChapter;
+import dev.storyblock.domain.NarrativeNovel;
+import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.OrderKey;
+import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.domain.SceneSeed;
+import dev.storyblock.domain.TransitionMode;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import javax.imageio.ImageIO;
+import org.junit.jupiter.api.Test;
+
+class DeterministicPdfRendererTest {
+    private static final String REVISION_HASH = "sha256:" + "a".repeat(64);
+
+    @Test
+    void sameRevisionAndImageProduceByteIdenticalValidPdf() throws IOException {
+        byte[] png = png();
+        RevisionManifest revision = revision(png);
+        DeterministicPdfRenderer renderer = new DeterministicPdfRenderer();
+
+        PdfRenderResult first = renderer.render(revision, REVISION_HASH, ignored -> png);
+        PdfRenderResult second = renderer.render(revision, REVISION_HASH, ignored -> png);
+
+        assertArrayEquals(first.content(), second.content());
+        assertTrue(new String(
+                first.content(), 0, 8, StandardCharsets.US_ASCII
+        ).startsWith("%PDF-1.4"));
+        assertTrue(new String(
+                first.content(),
+                first.content().length - 7,
+                7,
+                StandardCharsets.US_ASCII
+        ).contains("%%EOF"));
+        assertTrue(first.pageCount() >= 2);
+        assertEquals(1, first.imageCount());
+        assertEquals(DeterministicPdfRenderer.VERSION, first.rendererVersion());
+    }
+
+    @Test
+    void resolverBytesMustMatchDescriptorHash() throws IOException {
+        byte[] png = png();
+        RevisionManifest revision = revision(png);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new DeterministicPdfRenderer().render(
+                        revision, REVISION_HASH, ignored -> new byte[] {1, 2, 3}
+                )
+        );
+    }
+
+    private static RevisionManifest revision(byte[] png) {
+        Ids.ChapterId chapterId = Ids.ChapterId.create();

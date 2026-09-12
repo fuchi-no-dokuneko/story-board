@@ -1,0 +1,42 @@
+| Surface | Masked character 2-4 grams and tokens | Jensen-Shannon distance |
+| Grammar | Function words and deterministic token-shape bigrams | Jensen-Shannon distance |
+| Rhythm | Sentence/clause/paragraph lengths and punctuation | Wasserstein distance, JSD diagnostic |
+| Narrative | Dialogue/action/description, POV, mode, speaker turns | Robust-calibration input distance |
+| Lexical | Diversity, repeated trigrams, token lengths | Robust-calibration input distance |
+| Optional embedding | Content-reduced numeric vector | Cosine distance, secondary evidence only |
+
+Names, places, and numbers are masked in the surface channel. Top-K retention,
+`OTHER`, additive smoothing, vocabulary hash, and normalizer identity are part
+of the versioned contract. Feature sets with different contract hashes cannot
+be compared.
+
+Jensen-Shannon distance is the primary distribution metric. Both directional
+smoothed KL values are emitted only as surface diagnostics. No KL metric can be
+constructed as a primary gate in `StyleChannelDistance`, and optional embedding
+evidence is never independent gate evidence.
+
+## HTTP Resources
+
+```text
+POST /v1/style-profiles
+GET  /v1/style-profiles/{profileId}
+POST /v1/style-profiles/{profileId}/versions
+GET  /v1/style-profiles/{profileId}/versions/{versionId}
+POST /v1/style-profiles/{profileId}/versions/{versionId}/transitions
+```
+
+Profile and version creation return `201`, or `200` for an idempotent replay.
+All responses are `no-store`; resource responses carry a strong ETag. Profile
+mutations require `style:admin`, while reads require `novel:read` and always
+apply the profile's stored novel boundary.
+
+## Verification
+
+```bash
+./mvnw -o -pl modules/style,modules/storage-sqlite,server -am test
+```
+
+Tests cover deterministic extraction, every required channel and distance,
+diagnostic-only KL, generated-corpus confirmation, lifecycle ordering, stale
+ETags, idempotency conflicts, single READY promotion, rewrite-gate rejection,
+SQLite immutability, real bearer authorization, and cross-novel denial.

@@ -1,0 +1,66 @@
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "Room",
+                TransitionMode.OPENING,
+                new SceneSeed(Map.of(
+                        "weather", Map.of("mode", "explicit", "value", "rain"),
+                        "present_character_ids", List.of("char_a")
+                )),
+                List.of(first, second),
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId, OrderKey.initial(), "Chapter", List.of(scene), Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(Ids.NovelId.create(), List.of(chapter), Map.of())
+        );
+    }
+
+    private static RevisionManifest goldenRevision() {
+        NarrativeBlock first = new NarrativeBlock(
+                GOLDEN_BLOCK_ONE,
+                GOLDEN_VERSION_ONE,
+                OrderKey.rebalanced(0, 2),
+                "Kai waits.",
+                new BlockMetadata(Map.of(
+                        "location", Map.of("mode", "inherited"),
+                        "weather", Map.of("mode", "inherited")
+                )),
+                Map.of()
+        );
+        NarrativeBlock second = new NarrativeBlock(
+                GOLDEN_BLOCK_TWO,
+                GOLDEN_VERSION_TWO,
+                OrderKey.rebalanced(1, 2),
+                "Min enters.",
+                new BlockMetadata(Map.of(
+                        "weather", Map.of("mode", "explicit", "value", "rain"),
+                        "pov", Map.of("mode", "explicit", "character_id", "char_min"),
+                        "presence_events", List.of(Map.of(
+                                "type", "enter",
+                                "character_id", "char_min",
+                                "evidence", Map.of(
+                                        "start_grapheme", 0,
+                                        "end_grapheme", 10,
+                                        "quote", "Min enters",
+                                        "quote_hash", MIN_ENTERS_HASH
+                                )
+                        ))
+                )),
+                Map.of()
+        );
+        NarrativeScene firstScene = new NarrativeScene(
+                GOLDEN_SCENE_ONE,
+                GOLDEN_CHAPTER,
+                OrderKey.rebalanced(0, 2),
+                "Alley",
+                TransitionMode.OPENING,
+                new SceneSeed(Map.of(
+                        "time", Map.of("mode", "explicit", "value", "night"),
+                        "location", Map.of(

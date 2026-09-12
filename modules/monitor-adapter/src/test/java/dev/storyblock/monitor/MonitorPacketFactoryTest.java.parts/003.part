@@ -1,0 +1,17 @@
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId,
+                OrderKey.initial(),
+                "Monitor chapter",
+                List.of(scene),
+                Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(Ids.NovelId.create(), List.of(chapter), Map.of())
+        );
+    }
+}

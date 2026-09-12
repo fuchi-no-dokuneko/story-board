@@ -1,0 +1,52 @@
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(post("/v1/internal/jobs/job_test/results")
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-result")
+                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(get("/v1/style-analyses/analysis_test")
+                        .with(userWithScope("style:analyze")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+        mvc.perform(get("/v1/style-analyses/analysis_test/windows")
+                        .with(userWithScope("style:analyze")))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+    }
+
+    @Test
+    void importsAndExportsCanonicalContentThroughDurableHttpResources() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        byte[] importBody = CanonicalJson.bytes(Map.of(
+                "format", CanonicalExportFormat.REVISION.canonicalName(),
+                "document", revision.envelope()
+        ));
+
+        MockHttpServletRequestBuilder importRequest = post("/v1/imports")
+                .with(userWithScope("novel:admin"))
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "http-import-1")
+                .header(HttpHeaders.IF_MATCH, "*")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(importBody);
+        mvc.perform(importRequest)
+                .andExpect(status().isCreated())
+                .andExpect(header().string(HttpHeaders.LOCATION, "/v1/novels/" + novelId))
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ))
+                .andExpect(jsonPath("$.novel_id").value(novelId))
+                .andExpect(jsonPath("$.head_revision_id").value(revisionId))
+                .andExpect(jsonPath("$.head_sequence").value(0))
+                .andExpect(jsonPath("$.head_hash").value(revision.contentHash()));
+
+        mvc.perform(importRequest)
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ));
+

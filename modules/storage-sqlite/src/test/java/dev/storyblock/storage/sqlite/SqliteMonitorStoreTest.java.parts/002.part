@@ -1,0 +1,60 @@
+            assertEquals(1, count(database, "monitor_issues"));
+            assertEquals(0, count(database, "monitor_proposed_operations"));
+            SQLException update = assertThrows(SQLException.class, () ->
+                    database.write(connection -> {
+                        connection.createStatement().executeUpdate(
+                                "UPDATE monitor_runs SET rule_version = 'changed'"
+                        );
+                        return null;
+                    })
+            );
+            assertTrue(update.getMessage().contains("append-only"));
+            SQLException delete = assertThrows(SQLException.class, () ->
+                    database.write(connection -> {
+                        connection.createStatement().executeUpdate(
+                                "DELETE FROM monitor_issues"
+                        );
+                        return null;
+                    })
+            );
+            assertTrue(delete.getMessage().contains("append-only"));
+        }
+    }
+
+    @Test
+    void relevantHeadAndBlockChangesMarkRunStaleWithoutRebase() throws Exception {
+        Path path = temporaryDirectory.resolve("stale-monitor.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        String hash = RevisionStoreTestFixture.hash(genesis);
+        NarrativeBlock block = genesis.liveBlocks().getFirst();
+
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, hash);
+            MonitorService service = new MonitorService(store, store);
+            MonitorEvidence evidence = evidence(block);
+            var submitted = service.submit(
+                    genesis.novel().id(),
+                    genesis.id(),
+                    hash,
+                    block.id(),
+                    1,
+                    MonitorModule.RULE_VERSION,
+                    List.of(block.id()),
+                    new MonitorFinding(
+                            "LOCAL_NOTE", "info", "Check the opening.", List.of(evidence)
+                    ),
+                    "service-monitor-request",
+                    new AuditContext("req_monitor", "monitor-worker", null, NOW)
+            );
+            assertEquals(MonitorRunState.CURRENT, submitted.status().state());
+            assertFalse((Boolean) submitted.status().canonicalValue().get("rebase_allowed"));
+
+            EditOperation replacement = RevisionStoreTestFixture.replace(
+                    genesis, "replace-after-monitor", "更新句。"
+            );
+            var commit = RevisionStoreTestFixture.request(
+                    genesis, replacement, Ids.RevisionId.create(), NOW.plusSeconds(1)
+            );
+            store.commitCas(commit);
+
+            var stale = service.getStatus(

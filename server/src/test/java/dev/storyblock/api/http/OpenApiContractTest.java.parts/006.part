@@ -1,0 +1,62 @@
+        Map<String, Object> createdProperties = map(
+                map(schemas.get("AccessKeyCreated")).get("properties")
+        );
+        Map<String, Object> secret = map(createdProperties.get("secret"));
+        assertEquals(Boolean.TRUE, secret.get("readOnly"));
+        assertEquals(
+                "^nv_key_[0-9a-f-]{36}\\.[A-Za-z0-9_-]{43}$",
+                secret.get("pattern")
+        );
+
+        Map<String, Object> parameters = map(components.get("parameters"));
+        assertEquals(
+                "^key_[0-9a-f-]{36}$",
+                map(map(parameters.get("KeyId")).get("schema")).get("pattern")
+        );
+    }
+
+    @Test
+    void renderPacketDocumentsDeterministicTextOffsetsAndSceneState() {
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        Map<String, Object> packet = map(schemas.get("RenderPacket"));
+        Set<String> required = strings(packet.get("required"));
+
+        assertEquals(Set.of(
+                "novel_id", "revision_id", "revision_hash", "renderer_version",
+                "range", "rendered_text", "blocks", "resolved_meta",
+                "offset_map", "scene_boundaries"
+        ), required);
+        assertEquals(
+                "#/components/schemas/RenderRange",
+                map(map(packet.get("properties")).get("range")).get("$ref")
+        );
+        assertEquals(
+                "#/components/schemas/ResolvedSceneBoundary",
+                map(map(map(packet.get("properties")).get("scene_boundaries")).get("items"))
+                        .get("$ref")
+        );
+
+        Map<String, Object> state = map(schemas.get("ResolvedMetadataState"));
+        assertEquals(Set.of(
+                "time", "location", "weather", "pov", "present_character_ids"
+        ), strings(state.get("required")));
+    }
+
+    @Test
+    void detectorContractDocumentsStableFindingsAndEveryRuleCode() {
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        Map<String, Object> response = map(schemas.get("DetectorRunResponse"));
+        Map<String, Object> finding = map(schemas.get("DetectorFinding"));
+        Map<String, Object> properties = map(finding.get("properties"));
+
+        assertEquals(Set.of(
+                "finding_id", "code", "severity", "revision_id", "revision_hash",
+                "rule_version", "affected_block_ids", "affected_scene_ids",
+                "context_block_ids", "evidence"
+        ), strings(finding.get("required")));
+        assertEquals(Set.of(
+                "LOCATION_CHANGED_WITHOUT_TRANSITION",
+                "CHARACTER_APPEARED_WITHOUT_ENTER",
+                "CHARACTER_DISAPPEARED_WITHOUT_EXIT",
+                "WEATHER_CHANGED_WITHOUT_EVIDENCE",
+                "TIME_DISCONTINUITY",

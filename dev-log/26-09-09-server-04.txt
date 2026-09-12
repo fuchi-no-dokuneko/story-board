@@ -1,0 +1,18 @@
+---08:04---移除備份金鑰
+category: refactor
+Current status: 依使用者要求移除備份金鑰產生、設定、加密與輪替；時間採 UTC+8。
+Issues: 備份改為未加密 .db.zst，監測、還原、保留策略與驗收腳本已同步更新。
+affect scope: HTTP 端點、DTO、資料庫與 TLS 憑證流程維持原狀；文件及 CI 已更新。
+---
+---08:04---備份資料轉換驗證
+category: refactor
+Current status: 四份先前的加密測試備份已轉換，全部通過完整性與正式歷史重播驗證。
+Issues: 確認可還原後移除舊加密測試產物、兩份備份金鑰及一份鎖檔。
+affect scope: 183 項 Java 測試、無金鑰併發備份、還原、損壞拒絕、保留策略與 SLO 均通過。
+---
+---08:04---遠端同步維持暫停
+category: devenv_change
+Current status: 先前第五次提交後 GitHub 推送已因五秒限制逾時。
+Issues: 依使用者禁止網路失敗後重試的規則，本次不重試推送、不變更網路。
+affect scope: 變更與提交保留於本機分支。
+---

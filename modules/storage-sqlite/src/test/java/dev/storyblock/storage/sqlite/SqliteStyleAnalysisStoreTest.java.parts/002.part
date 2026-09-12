@@ -1,0 +1,63 @@
+                            dev.storyblock.style.StyleCorpusSourceKind.OWNER
+                    ),
+                    profile.profile().resourceHash(),
+                    "analysis-version",
+                    audit(1, "version")
+            ).view().profileVersion();
+            NarrativeScene scene = genesis.novel().chapters().getFirst()
+                    .scenes().getFirst();
+            StyleAnalysisSnapshot snapshot = new StyleAnalysisSnapshot(
+                    novelId,
+                    genesis.id(),
+                    revisionHash,
+                    version,
+                    StyleMaskingLexicon.empty(),
+                    scene.blocks().stream()
+                            .map(block -> StyleAnalysisBlock.from(scene, block))
+                            .toList()
+            );
+            AuditContext requested = audit(2, "analysis");
+            StyleAnalysisJob queued = StyleAnalysisJob.queued(
+                    Ids.JobId.create(),
+                    Ids.StyleAnalysisId.create(),
+                    snapshot,
+                    3,
+                    "analysis-create",
+                    CanonicalJson.hash("analysis-request"),
+                    requested,
+                    requested.occurredAt().plus(Duration.ofDays(30)),
+                    requested.occurredAt()
+            );
+
+            var created = store.createStyleAnalysisJob(queued);
+            var replay = store.createStyleAnalysisJob(queued);
+            assertFalse(created.idempotentReplay());
+            assertTrue(replay.idempotentReplay());
+
+            var firstLease = claim(
+                    store,
+                    novelId,
+                    "worker-a",
+                    "claim-a",
+                    NOW.plusSeconds(2).plusMillis(100)
+            );
+            var claimReplay = claim(
+                    store, novelId, "worker-a", "claim-a", NOW.plusSeconds(4)
+            );
+            assertEquals(firstLease.jobId(), claimReplay.jobId());
+            assertEquals(firstLease.attempt(), claimReplay.attempt());
+            assertTrue(claimReplay.idempotentReplay());
+
+            var reclaimed = claim(
+                    store, novelId, "worker-b", "claim-b", NOW.plusSeconds(40)
+            );
+            assertEquals(2, reclaimed.attempt());
+            assertThrows(StyleAnalysisLeaseConflictException.class, () ->
+                    store.completeStyleAnalysis(completion(
+                            firstLease, "late-first-worker", NOW.plusSeconds(41), "first"
+                    ))
+            );
+            assertThrows(StyleAnalysisLeaseConflictException.class, () ->
+                    store.completeStyleAnalysis(completion(
+                            reclaimed,
+                            "exact-expiry",

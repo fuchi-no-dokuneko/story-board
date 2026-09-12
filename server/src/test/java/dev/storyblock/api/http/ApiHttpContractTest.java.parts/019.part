@@ -1,0 +1,50 @@
+        mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-route-denied")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        Map<String, Object> ownExport = startExport(
+                first, bearer, "security-export-first"
+        );
+        String ownJobId = stringField(ownExport, "job_id");
+        mvc.perform(get("/v1/jobs/{jobId}", ownJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.novel_id").value(firstNovel));
+
+        mvc.perform(get("/v1/novels/{novelId}", secondNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(jsonPath("$.detail")
+                        .value("The requested resource does not exist."));
+
+        mvc.perform(post("/v1/novels/{novelId}/style-analyses", secondNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "cross-analysis")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(second.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        byte[] rewriteBody = CanonicalJson.bytes(Map.of(
+                "analysis_id", Ids.StyleAnalysisId.create().value(),
+                "novel_id", secondNovel,
+                "revision_id", secondRevision,
+                "revision_hash", second.contentHash(),
+                "finding_ids", List.of("finding_test")
+        ));
+        mvc.perform(post("/v1/rewrite-proposals")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "cross-rewrite")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(second.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(rewriteBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+

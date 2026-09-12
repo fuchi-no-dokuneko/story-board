@@ -1,0 +1,62 @@
+                        ))))
+                .andExpect(status().isOk());
+        return new ReadyStyleProfile(profileId, versionId);
+    }
+
+    private record ReadyStyleProfile(String profileId, String versionId) {
+    }
+
+    private static CanonicalRevision genesis() {
+        String novelId = Ids.NovelId.create().value();
+        String chapterId = Ids.ChapterId.create().value();
+        Map<String, Object> block = Map.of(
+                "id", Ids.BlockId.create().value(),
+                "block_version_id", Ids.BlockVersionId.create().value(),
+                "order_key", OrderKey.initial().value(),
+                "text", "First sentence.",
+                "meta", Map.of()
+        );
+        Map<String, Object> scene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "Opening",
+                "transition_mode", "opening",
+                "blocks", List.of(block)
+        );
+        Map<String, Object> chapter = Map.of(
+                "id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "Chapter",
+                "scenes", List.of(scene)
+        );
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
+        document.put("novel_id", novelId);
+        document.put("revision_id", Ids.RevisionId.create().value());
+        document.put("parent_revision_id", null);
+        document.put("chapters", List.of(chapter));
+        document.put("created_at", Instant.parse("2026-08-21T12:00:00Z").toString());
+        return CanonicalRevision.of(document);
+    }
+
+    private static CanonicalRevision thousandBlockRevision() {
+        String novelId = Ids.NovelId.create().value();
+        String chapterId = Ids.ChapterId.create().value();
+        List<Map<String, Object>> blocks = new ArrayList<>();
+        for (int index = 0; index < 1_000; index++) {
+            blocks.add(Map.of(
+                    "id", Ids.BlockId.create().value(),
+                    "block_version_id", Ids.BlockVersionId.create().value(),
+                    "order_key", OrderKey.rebalanced(index, 1_000).value(),
+                    "text", "Block %04d contains stable narrative prose with measured cadence."
+                            .formatted(index),
+                    "meta", Map.of()
+            ));
+        }
+        Map<String, Object> scene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "Durability fixture",
+                "transition_mode", "opening",

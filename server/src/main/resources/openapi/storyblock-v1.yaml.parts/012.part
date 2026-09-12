@@ -1,0 +1,87 @@
+      summary: Revoke a scoped bearer credential
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/KeyId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Key is revoked or was already revoked idempotently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RevokeResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /internal/jobs/claims:
+    post:
+      operationId: claimWorkerJob
+      summary: Claim one available or expired durable worker lease
+      x-required-scopes: ["worker:execute"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkerClaimRequest"
+      responses:
+        "200":
+          description: Claimed style analysis lease and immutable execution snapshot
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerClaimResponse"
+        "204":
+          description: No queued or expired style analysis job is available
+        default:
+          $ref: "#/components/responses/Problem"
+  /internal/jobs/{jobId}/results:
+    post:
+      operationId: submitWorkerResult
+      summary: Submit an idempotent version-bound worker result
+      x-required-scopes: ["worker:execute"]
+      parameters:
+        - $ref: "#/components/parameters/JobId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkerResultRequest"
+      responses:
+        "200":
+          description: Result accepted or returned idempotently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerResultResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: nv_<public-key-id>.<256-bit-secret>
+  parameters:
+    NovelId:
+      name: novelId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^nov_[0-9a-f-]{36}$'
+    RevisionId:
+      name: revisionId
+      in: path
+      required: true
+      schema:
+        type: string

@@ -1,9 +1,7 @@
 package dev.storyblock.storage.sqlite;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Locale;
 import org.sqlite.SQLiteConnection;
 
@@ -23,11 +21,11 @@ public record SqlitePragmas(
         boolean firstStatementExecuted = sqliteConnection.isFirstStatementExecuted();
         try {
             return new SqlitePragmas(
-                    textPragma(connection, "journal_mode").toLowerCase(Locale.ROOT),
-                    intPragma(connection, "synchronous"),
-                    intPragma(connection, "foreign_keys") == 1,
-                    intPragma(connection, "busy_timeout"),
-                    intPragma(connection, "query_only") == 1,
+                    SqlitePragmasTextPragma.textPragma(connection, "journal_mode").toLowerCase(Locale.ROOT),
+                    SqlitePragmasIntPragma.intPragma(connection, "synchronous"),
+                    SqlitePragmasIntPragma.intPragma(connection, "foreign_keys") == 1,
+                    SqlitePragmasIntPragma.intPragma(connection, "busy_timeout"),
+                    SqlitePragmasIntPragma.intPragma(connection, "query_only") == 1,
                     sqliteConnection.getDatabase().getConfig().isExplicitReadOnly(),
                     sqliteConnection.getDatabase().getConfig().isEnabledLoadExtension()
             );
@@ -61,23 +59,4 @@ public record SqlitePragmas(
         }
     }
 
-    private static String textPragma(Connection connection, String name) throws SQLException {
-        try (Statement statement = connection.createStatement();
-             ResultSet result = statement.executeQuery("PRAGMA " + name)) {
-            if (!result.next()) {
-                throw new SQLException("PRAGMA " + name + " returned no row");
-            }
-            return result.getString(1);
-        }
-    }
-
-    private static int intPragma(Connection connection, String name) throws SQLException {
-        try (Statement statement = connection.createStatement();
-             ResultSet result = statement.executeQuery("PRAGMA " + name)) {
-            if (!result.next()) {
-                throw new SQLException("PRAGMA " + name + " returned no row");
-            }
-            return result.getInt(1);
-        }
-    }
 }

@@ -1,0 +1,69 @@
+        DetectorRun second = detector.detect(revision, HASH, RenderRange.all());
+        byte[] canonicalAfter = NarrativeCanonicalMapper.toCanonical(revision).canonicalBytes();
+
+        assertArrayEquals(canonicalBefore, canonicalAfter);
+        assertArrayEquals(
+                CanonicalJson.bytes(first.canonicalValue()),
+                CanonicalJson.bytes(second.canonicalValue())
+        );
+        DetectorFinding location = finding(
+                first, FindingCode.LOCATION_CHANGED_WITHOUT_TRANSITION
+        );
+        assertEquals(3, location.contextBlockIds().size());
+        assertEquals(
+                first.findings().stream().map(DetectorFinding::findingId).toList(),
+                second.findings().stream().map(DetectorFinding::findingId).toList()
+        );
+    }
+
+    @Test
+    void continuousBoundaryRequiresCompatibleState() {
+        DetectorRun appeared = detect(boundary(
+                TransitionMode.CONTINUOUS,
+                List.of("char_a"),
+                List.of("char_a", "char_b")
+        ));
+        DetectorRun disappeared = detect(boundary(
+                TransitionMode.CONTINUOUS,
+                List.of("char_a"),
+                List.of()
+        ));
+        DetectorRun compatible = detect(boundary(
+                TransitionMode.CONTINUOUS,
+                List.of("char_a"),
+                List.of("char_a")
+        ));
+
+        assertTrue(has(appeared, FindingCode.CHARACTER_APPEARED_WITHOUT_ENTER));
+        assertTrue(has(disappeared, FindingCode.CHARACTER_DISAPPEARED_WITHOUT_EXIT));
+        assertEquals(List.of(), compatible.findings());
+    }
+
+    @Test
+    void everyResetModeSuppressesPerCharacterTransitionErrors() {
+        for (TransitionMode mode : List.of(
+                TransitionMode.OPENING,
+                TransitionMode.CUT,
+                TransitionMode.TIME_SKIP,
+                TransitionMode.FLASHBACK,
+                TransitionMode.PARALLEL
+        )) {
+            DetectorRun run = detect(boundary(
+                    mode, List.of("char_a"), List.of("char_b")
+            ));
+
+            assertTrue(has(run, FindingCode.INTENTIONAL_SCENE_RESET), mode.name());
+            assertFalse(has(run, FindingCode.CHARACTER_APPEARED_WITHOUT_ENTER), mode.name());
+            assertFalse(has(run, FindingCode.CHARACTER_DISAPPEARED_WITHOUT_EXIT), mode.name());
+            assertEquals(
+                    mode.canonicalName(),
+                    finding(run, FindingCode.INTENTIONAL_SCENE_RESET)
+                            .evidence().get("transition_mode")
+            );
+        }
+    }
+
+    @Test
+    void unknownAndNotApplicableBoundaryValuesAreNotCompared() {
+        RevisionManifest revision = weatherBoundary(
+                Map.of("mode", "explicit", "value", "rain"),

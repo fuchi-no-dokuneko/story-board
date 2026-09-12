@@ -1,0 +1,62 @@
+                            reclaimed.leaseUntil(),
+                            "expired"
+                    ))
+            );
+
+            StyleAnalysisCompletionCommand completion = completion(
+                    reclaimed, "complete-b", NOW.plusSeconds(42), "canonical"
+            );
+            var completed = store.completeStyleAnalysis(completion);
+            assertFalse(completed.idempotentReplay());
+            assertEquals(StyleAnalysisJobStatus.SUCCEEDED, completed.job().status());
+            assertEquals(completion.resultHash(), completed.result().resultHash());
+            assertTrue(store.completeStyleAnalysis(completion).idempotentReplay());
+            assertThrows(StyleAnalysisResultConflictException.class, () ->
+                    store.completeStyleAnalysis(completion(
+                            reclaimed,
+                            "different-result",
+                            NOW.plusSeconds(42),
+                            "different"
+                    ))
+            );
+            assertEquals(
+                    completed.result(),
+                    store.findStyleAnalysisResult(queued.analysisId()).orElseThrow()
+            );
+            assertTrue(store.listStyleAnalysisWindows(
+                    queued.analysisId(), -1, 20
+            ).items().isEmpty());
+            assertEquals(
+                    queued.retentionUntil(),
+                    store.findStyleArtifactExpiry(
+                            completed.result().traceArtifactId()
+                    ).orElseThrow()
+            );
+        }
+
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {
+            assertEquals(1, count(database, "analysis_jobs"));
+            assertEquals(2, count(database, "analysis_claim_receipts"));
+            assertEquals(1, count(database, "analysis_runs"));
+            assertEquals(0, count(database, "analysis_window_findings"));
+            assertEquals(1, count(database, "analysis_artifacts"));
+            assertEquals(1, countWhere(
+                    database, "artifacts", "kind = 'style-analysis-trace'"
+            ));
+            SQLException terminalUpdate = assertThrows(SQLException.class, () ->
+                    database.write(connection -> {
+                        connection.createStatement().executeUpdate(
+                                "UPDATE analysis_jobs SET updated_at = updated_at"
+                        );
+                        return null;
+                    })
+            );
+            assertTrue(terminalUpdate.getMessage().contains("terminal"));
+        }
+    }
+
+    private static dev.storyblock.style.StyleAnalysisLease claim(
+            SqliteRevisionStore store,
+            Ids.NovelId novelId,
+            String owner,
+            String key,

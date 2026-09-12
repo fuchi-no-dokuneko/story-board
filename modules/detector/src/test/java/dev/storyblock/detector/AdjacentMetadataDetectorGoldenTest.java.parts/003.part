@@ -1,0 +1,68 @@
+                Map.of("mode", "not_applicable")
+        );
+
+        DetectorRun run = detect(revision);
+
+        assertFalse(has(run, FindingCode.WEATHER_CHANGED_WITHOUT_EVIDENCE));
+        assertFalse(has(run, FindingCode.INTENTIONAL_SCENE_RESET));
+    }
+
+    @Test
+    void rangeUsesAdjacentContextAndOnlyItsEnteringBoundary() {
+        RevisionManifest revision = boundary(
+                TransitionMode.CONTINUOUS,
+                List.of("char_a"),
+                List.of("char_a", "char_b")
+        );
+        NarrativeScene first = revision.novel().chapters().getFirst().scenes().getFirst();
+        NarrativeScene second = revision.novel().chapters().getFirst().scenes().getLast();
+
+        DetectorRun firstOnly = new AdjacentMetadataDetector().detect(
+                revision,
+                HASH,
+                RenderRange.inclusive(
+                        first.blocks().getFirst().id(), first.blocks().getFirst().id()
+                )
+        );
+        DetectorRun secondOnly = new AdjacentMetadataDetector().detect(
+                revision,
+                HASH,
+                RenderRange.inclusive(
+                        second.blocks().getFirst().id(), second.blocks().getFirst().id()
+                )
+        );
+
+        assertFalse(has(firstOnly, FindingCode.CHARACTER_APPEARED_WITHOUT_ENTER));
+        assertTrue(has(secondOnly, FindingCode.CHARACTER_APPEARED_WITHOUT_ENTER));
+    }
+
+    private static DetectorRun execute(String scenario) {
+        return switch (scenario) {
+            case "location_change" -> detect(fieldChange("location", false));
+            case "character_appeared" -> detect(boundary(
+                    TransitionMode.CONTINUOUS,
+                    List.of("char_a"),
+                    List.of("char_a", "char_b")
+            ));
+            case "character_disappeared" -> detect(boundary(
+                    TransitionMode.CONTINUOUS,
+                    List.of("char_a"),
+                    List.of()
+            ));
+            case "weather_change" -> detect(fieldChange("weather", false));
+            case "time_change" -> detect(fieldChange("time", false));
+            case "pov_change" -> detect(fieldChange("pov", false));
+            case "metadata_mismatch" -> detect(fieldChange("location", true));
+            case "intentional_reset" -> detect(boundary(
+                    TransitionMode.CUT,
+                    List.of("char_a"),
+                    List.of("char_b")
+            ));
+            default -> throw new IllegalArgumentException("Unknown golden scenario " + scenario);
+        };
+    }
+
+    private static DetectorRun detect(RevisionManifest revision) {
+        return new AdjacentMetadataDetector().detect(revision, HASH, RenderRange.all());
+    }
+

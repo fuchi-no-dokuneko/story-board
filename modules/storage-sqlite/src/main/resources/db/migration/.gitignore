@@ -1,0 +1,6 @@
+/V001__immutable_revision_store.sql
+/V003__access_keys_and_audit.sql
+/V004__monitor_runs.sql
+/V005__style_profiles.sql
+/V006__style_analysis_jobs.sql
+/V008__detector_and_rewrite_records.sql

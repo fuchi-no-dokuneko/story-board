@@ -1,0 +1,45 @@
+`GET /v1/style-analyses/{analysisId}` returns state and result metadata. `GET
+/v1/style-analyses/{analysisId}/windows` pages compact findings with an opaque,
+analysis-bound cursor. `GET /v1/artifacts/{artifactId}` returns the gzip bytes
+with `X-Artifact-Codec: gzip`; after `retention_until`, it returns `410`.
+Result, receipt, window, and artifact metadata rows are immutable. Repeating the
+same canonical result returns the original result; a different result for the
+same completed job returns `409`.
+
+## Running The Worker
+
+Build the executable worker JAR offline after dependencies are installed:
+
+```bash
+./mvnw -o -pl client-style-worker -am package
+```
+
+Configure it with Spring properties or their environment equivalents. The
+bearer token needs `worker:execute` for exactly one novel and is never logged.
+
+```text
+STORYBLOCK_WORKER_ENABLED=true
+STORYBLOCK_WORKER_API_BASE_URL=https://127.0.0.1:8443/
+STORYBLOCK_WORKER_TOKEN=<opaque novel-bound token>
+STORYBLOCK_WORKER_NOVEL_ID=nov_<uuid>
+STORYBLOCK_WORKER_ID=style-worker-1
+STORYBLOCK_WORKER_LEASE_SECONDS=300
+STORYBLOCK_WORKER_POLL_INTERVAL=PT5S
+STORYBLOCK_WORKER_RUN_ONCE=false
+```
+
+The runtime forces the IPv4 stack, rejects IPv6 API origins and redirects, and
+does not include the credential in settings output or protocol errors. The
+container profile mounts the public trust store generated for the API's
+self-signed leaf; it never mounts the API private key.
+
+## Verification
+
+```bash
+./mvnw -o -pl modules/storage-sqlite,server,client-style-worker -am test
+```
+
+Tests cover expired-lease reclamation, stale-owner rejection, exact-expiry
+rejection, duplicate completion, immutable result storage, trace hash and gzip
+validation, worker credential redaction, cursor paging, and completion of an
+exact 1,000-block analysis through the HTTP API.

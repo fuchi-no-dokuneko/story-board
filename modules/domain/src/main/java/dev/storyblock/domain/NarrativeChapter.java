@@ -25,7 +25,7 @@ public record NarrativeChapter(
         return new NarrativeChapter(id, orderKey, title, newScenes, extensions);
     }
 
-    private static void validateScenes(Ids.ChapterId chapterId, List<NarrativeScene> scenes) {
+    static void validateScenes(Ids.ChapterId chapterId, List<NarrativeScene> scenes) {
         Set<Ids.SceneId> ids = new HashSet<>();
         OrderKey previous = null;
         for (NarrativeScene scene : scenes) {

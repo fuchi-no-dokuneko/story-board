@@ -1,0 +1,44 @@
+    And JavaScript expression "(() => { const han = new RegExp(String.fromCharCode(92) + 'p{Script=Han}', 'u'); return Array.from(Array.from(document.querySelectorAll('.story-block')).map((item) => item.textContent).join('')).filter((character) => han.test(character)).length === 10000; })()" returns true
+    And JavaScript expression "document.getElementById('meta-han-hash').textContent.startsWith('sha256:')" returns true
+
+  Scenario: Search the catalog by a main-character name
+    Given I open the web application at path "/"
+    When I replace CSS "#catalog-search" with environment variable "STORYBLOCK_UAT_CHARACTER"
+    Then at least 1 elements match CSS ".novel-item"
+    When I select the registered acceptance novel
+    Then CSS "#reader-title" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+
+  Scenario: Navigate between persisted chapters
+    Given I open the web application at path "/"
+    When I replace CSS "#catalog-search" with environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+    And I select the registered acceptance novel
+    Then CSS "#reader-content" is visible
+    And JavaScript expression "document.getElementById('reader-empty').offsetParent === null && document.getElementById('reader-loading').offsetParent === null" returns true
+    And at least 2 elements match CSS "#chapter-nav .chapter-link"
+    When I click CSS "#chapter-nav .chapter-link:nth-child(2)"
+    Then CSS "#chapter-2" is visible
+    And JavaScript expression "document.querySelector('#chapter-2 .story-block').textContent.length > 0" returns true
+
+  Scenario: Use the read-only API diagnostics
+    Given I open the web application at path "/"
+    When I click CSS "#console-tab"
+    Then CSS "#console-view" is visible
+    And exactly 1 elements match CSS "#method option"
+    And CSS "#method" has value "GET"
+    When I click CSS ".quick-requests button[data-path='/actuator/health']"
+    Then CSS "#response-status" eventually contains text "200"
+    And CSS "#response" eventually contains text "\"status\": \"UP\""
+    When I click CSS ".quick-requests button[data-path='/v1/openapi.yaml']"
+    Then CSS "#response" eventually contains text "openapi:"
+    And CSS "#response" contains text "/admin/novels:"
+
+  Scenario: Distinguish degraded and unavailable service states
+    Given the next page load reports degraded API health
+    When I open the web application at path "/"
+    Then CSS "#status-text" eventually contains text "Service degraded"
+    And CSS "#status-dot" has attribute "class" equal to "down"
+
+  Scenario: Recover diagnostics after a temporary browser network failure
+    Given I open the web application at path "/"
+    Then CSS "#status-text" eventually contains text "Service online"
+    When I click CSS "#console-tab"

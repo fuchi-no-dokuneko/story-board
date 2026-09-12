@@ -1,0 +1,67 @@
+                ),
+                new EditOperation.ReplaceBlockRange(
+                        context(novelId, baseId, "replace"), one, List.of(firstDraft)
+                ),
+                new EditOperation.DeleteBlockRange(
+                        context(novelId, baseId, "delete"), one
+                ),
+                new EditOperation.SplitBlock(
+                        context(novelId, baseId, "split"),
+                        one,
+                        3,
+                        List.of(firstDraft, secondDraft)
+                ),
+                new EditOperation.MergeBlocks(
+                        context(novelId, baseId, "merge"), two, firstDraft
+                ),
+                new EditOperation.ExtendBlock(
+                        context(novelId, baseId, "extend"),
+                        one,
+                        EditOperation.ExtensionPosition.AFTER,
+                        firstDraft
+                ),
+                new EditOperation.MoveBlockRange(
+                        context(novelId, baseId, "move"),
+                        two,
+                        InsertionPoint.endOf(destinationScene),
+                        sourceBoundary,
+                        destinationBoundary
+                ),
+                new EditOperation.CorrectBlockMeta(
+                        context(novelId, baseId, "meta"),
+                        sourceScene,
+                        first,
+                        new BlockMetadata(Map.of("narrative_mode", "dialogue"))
+                ),
+                new EditOperation.SetSceneInitialMeta(
+                        context(novelId, baseId, "scene-meta"),
+                        sourceScene,
+                        sourceBoundary,
+                        new SceneSeed(Map.of("present_character_ids", List.of("char_a")))
+                ),
+                new EditOperation.RestoreRevisionContent(
+                        context(novelId, baseId, "restore"),
+                        Ids.RevisionId.create(),
+                        HASH_B
+                )
+        );
+
+        for (EditOperation operation : operations) {
+            Map<String, Object> canonical = EditOperationCanonicalMapper.toCanonical(operation);
+            EditOperation decoded = EditOperationCanonicalMapper.fromCanonical(
+                    CanonicalJson.bytes(canonical)
+            );
+
+            assertArrayEquals(
+                    CanonicalJson.bytes(canonical),
+                    CanonicalJson.bytes(EditOperationCanonicalMapper.toCanonical(decoded))
+            );
+            assertEquals(
+                    EditOperationCanonicalMapper.hash(operation),
+                    EditOperationCanonicalMapper.hash(decoded)
+            );
+        }
+    }
+
+    @Test
+    void unknownEnvelopeFieldsAreRejected() {

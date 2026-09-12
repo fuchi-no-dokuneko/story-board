@@ -1,0 +1,120 @@
+        pattern: '^rev_[0-9a-f-]{36}$'
+    AnalysisId:
+      name: analysisId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^ana_[0-9a-f-]{36}$'
+    ProposalId:
+      name: proposalId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^prp_[0-9a-f-]{36}$'
+    MonitorRunId:
+      name: monitorRunId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^mrun_[0-9a-f-]{36}$'
+    ProfileId:
+      name: profileId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^spf_[0-9a-f-]{36}$'
+    ProfileVersionId:
+      name: versionId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^spv_[0-9a-f-]{36}$'
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^job_[0-9a-f-]{36}$'
+    KeyId:
+      name: keyId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^key_[0-9a-f-]{36}$'
+    ArtifactId:
+      name: artifactId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^art_[0-9a-f-]{36}$'
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 256
+    PageLimit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    IfMatch:
+      name: If-Match
+      in: header
+      required: true
+      description: A single quoted strong canonical SHA-256 ETag.
+      schema:
+        type: string
+        pattern: '^"sha256:[0-9a-f]{64}"$'
+    IfMatchForCreation:
+      name: If-Match
+      in: header
+      required: true
+      description: Wildcard precondition for creation in a collection.
+      schema:
+        const: '*'
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 200
+  headers:
+    StrongEtag:
+      description: Quoted strong ETag of the canonical revision or immutable resource view.
+      required: true
+      schema:
+        type: string
+        pattern: '^"sha256:[0-9a-f]{64}"$'
+    Location:
+      description: Absolute or origin-relative durable resource URI.
+      required: true
+      schema:
+        type: string
+        format: uri-reference
+    ArtifactCodec:
+      description: Storage encoding applied to the returned bytes.
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9.-]{1,63}$'
+    ContentDisposition:
+      description: Attachment filename for offline use.
+      required: true
+      schema:

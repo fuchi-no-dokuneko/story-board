@@ -1,0 +1,54 @@
+    void thousandBlockStyleAnalysisCompletesThroughAsyncApiWithCompressedTrace()
+            throws Exception {
+        CanonicalRevision revision = thousandBlockRevision();
+        importAsOwner(revision, "analysis-http-import");
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        String token = stringField(issueAsOwner(
+                revision,
+                "analysis-http-key",
+                List.of(
+                        "novel:read",
+                        "style:admin",
+                        "style:analyze",
+                        "worker:execute"
+                )
+        ), "secret");
+        ReadyStyleProfile profile = createReadyStyleProfile(
+                revision, token, "analysis-http"
+        );
+        byte[] requestBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "profile_id", profile.profileId(),
+                "profile_version_id", profile.versionId(),
+                "max_attempts", 3,
+                "retention_days", 1
+        ));
+
+        MvcResult requested = mvc.perform(post(
+                        "/v1/novels/{novelId}/style-analyses", novelId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-create")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.status").value("queued"))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        Map<String, Object> requestView = object(requested);
+        String jobId = stringField(requestView, "job_id");
+        String analysisId = stringField(requestView, "analysis_id");
+
+        mvc.perform(post("/v1/novels/{novelId}/style-analyses", novelId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-create")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())

@@ -58,7 +58,7 @@ public record MonitorEvidence(
         ), "monitor_evidence");
     }
 
-    private static String string(Map<String, Object> value, String field) {
+    static String string(Map<String, Object> value, String field) {
         Object raw = value.get(field);
         if (!(raw instanceof String text)) {
             throw new IllegalArgumentException("Monitor evidence " + field + " must be a string");
@@ -66,7 +66,7 @@ public record MonitorEvidence(
         return text;
     }
 
-    private static int exactInt(Object value, String field) {
+    static int exactInt(Object value, String field) {
         if (!(value instanceof Number number)) {
             throw new IllegalArgumentException("Monitor evidence " + field + " must be an integer");
         }

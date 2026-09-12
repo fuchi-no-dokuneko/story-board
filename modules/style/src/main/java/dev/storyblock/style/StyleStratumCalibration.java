@@ -1,8 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.CanonicalValues;
 import java.util.EnumSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +11,7 @@ public record StyleStratumCalibration(
         int windowCount,
         List<StyleChannelCalibration> channels
 ) {
-    private static final Set<String> FIELDS = Set.of(
+    static final Set<String> FIELDS = Set.of(
             "stratum", "window_count", "confidence", "channels"
     );
 
@@ -49,28 +47,7 @@ public record StyleStratumCalibration(
     }
 
     public static StyleStratumCalibration fromCanonical(Map<String, Object> value) {
-        StyleCanonical.requireKeys(value, FIELDS, "style_stratum_calibration");
-        StyleStratumCalibration result = new StyleStratumCalibration(
-                StyleStratum.fromCanonical(StyleCanonical.object(
-                        value.get("stratum"), "style_stratum_calibration.stratum"
-                )),
-                StyleCanonical.integer(
-                        value, "window_count", "style_stratum_calibration"
-                ),
-                StyleCanonical.objects(
-                        value.get("channels"), "style_stratum_calibration.channels"
-                ).stream().map(StyleChannelCalibration::fromCanonical).toList()
-        );
-        StyleCalibrationConfidence supplied = StyleCalibrationConfidence
-                .fromCanonicalName(StyleCanonical.string(
-                        value, "confidence", "style_stratum_calibration"
-                ));
-        if (supplied != result.confidence()) {
-            throw new IllegalArgumentException(
-                    "Style calibration confidence does not match sample count"
-            );
-        }
-        return result;
+        return StyleStratumCalibrationFromCanonicalFactory.fromCanonical(value);
     }
 
     public StyleCalibrationConfidence confidence() {
@@ -89,12 +66,6 @@ public record StyleStratumCalibration(
     }
 
     public Map<String, Object> canonicalValue() {
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("channels", channels.stream()
-                .map(StyleChannelCalibration::canonicalValue).toList());
-        value.put("confidence", confidence().canonicalName());
-        value.put("stratum", stratum.canonicalValue());
-        value.put("window_count", windowCount);
-        return CanonicalValues.freezeMap(value, "style_stratum_calibration");
+        return StyleStratumCalibrationCanonicalValueAction.canonicalValue(this);
     }
 }

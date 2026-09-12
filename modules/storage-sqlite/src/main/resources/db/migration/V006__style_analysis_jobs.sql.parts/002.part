@@ -1,0 +1,61 @@
+    updated_at TEXT NOT NULL CHECK (julianday(updated_at) IS NOT NULL),
+    UNIQUE (novel_id, idempotency_key),
+    FOREIGN KEY (novel_id) REFERENCES novels(novel_id),
+    FOREIGN KEY (revision_id) REFERENCES revisions(revision_id),
+    FOREIGN KEY (profile_id, profile_version_id)
+        REFERENCES style_profile_versions(profile_id, version_id),
+    FOREIGN KEY (result_artifact_id) REFERENCES artifacts(artifact_id)
+        DEFERRABLE INITIALLY DEFERRED,
+    FOREIGN KEY (actor_key_id) REFERENCES access_keys(key_id),
+    CHECK (attempt <= max_attempts),
+    CHECK (julianday(retention_until) > julianday(created_at)),
+    CHECK (julianday(updated_at) >= julianday(created_at)),
+    CHECK (
+        (status = 'queued' AND lease_owner IS NULL AND lease_until IS NULL
+            AND attempt = 0 AND result_artifact_id IS NULL AND result_hash IS NULL
+            AND failure_code IS NULL)
+        OR
+        (status = 'running' AND lease_owner IS NOT NULL AND lease_until IS NOT NULL
+            AND attempt > 0 AND result_artifact_id IS NULL AND result_hash IS NULL
+            AND failure_code IS NULL)
+        OR
+        (status = 'succeeded' AND lease_owner IS NULL AND lease_until IS NULL
+            AND attempt > 0 AND result_artifact_id IS NOT NULL AND result_hash IS NOT NULL
+            AND failure_code IS NULL)
+        OR
+        (status = 'failed' AND lease_owner IS NULL AND lease_until IS NULL
+            AND attempt > 0 AND result_artifact_id IS NULL AND result_hash IS NULL
+            AND failure_code IS NOT NULL)
+    )
+);
+
+CREATE TABLE IF NOT EXISTS analysis_claim_receipts (
+    novel_id TEXT NOT NULL,
+    idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) BETWEEN 1 AND 200),
+    request_hash TEXT NOT NULL CHECK (
+        length(request_hash) = 71
+        AND substr(request_hash, 1, 7) = 'sha256:'
+        AND substr(request_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    job_id TEXT,
+    lease_owner TEXT NOT NULL CHECK (length(lease_owner) BETWEEN 1 AND 128),
+    attempt INTEGER,
+    lease_until TEXT CHECK (
+        lease_until IS NULL OR julianday(lease_until) IS NOT NULL
+    ),
+    claimed_status_hash TEXT,
+    claimed_at TEXT NOT NULL CHECK (julianday(claimed_at) IS NOT NULL),
+    PRIMARY KEY (novel_id, idempotency_key),
+    FOREIGN KEY (novel_id) REFERENCES novels(novel_id),
+    FOREIGN KEY (job_id) REFERENCES analysis_jobs(job_id),
+    CHECK (
+        (job_id IS NULL AND attempt IS NULL AND lease_until IS NULL
+            AND claimed_status_hash IS NULL)
+        OR
+        (job_id IS NOT NULL AND attempt > 0 AND lease_until IS NOT NULL
+            AND length(claimed_status_hash) = 71
+            AND substr(claimed_status_hash, 1, 7) = 'sha256:'
+            AND substr(claimed_status_hash, 8) NOT GLOB '*[^0-9a-f]*')
+    )
+);
+

@@ -1,0 +1,82 @@
+  padding-top: 30px;
+}
+.chapter-nav { position: sticky; top: 16px; }
+.chapter-link {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 0;
+  border-left: 3px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  font-size: 12px;
+}
+.chapter-link:hover { color: var(--text); }
+.chapter-content { min-width: 0; }
+.chapter-section { margin-bottom: 48px; scroll-margin-top: 20px; }
+.chapter-section h3 {
+  margin-bottom: 20px;
+  font-family: Georgia, "Noto Serif CJK TC", "Noto Serif TC", serif;
+  font-size: 22px;
+}
+.story-block {
+  margin: 0 0 15px;
+  color: #252a2f;
+  font-family: Georgia, "Noto Serif CJK TC", "Noto Serif TC", serif;
+  font-size: 17px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.revision-details { margin-top: 8px; padding-top: 18px; border-top: 1px solid var(--border); }
+.revision-details summary { cursor: pointer; font-size: 13px; font-weight: 700; }
+.revision-details dl { margin: 14px 0 0; }
+.revision-details dl div {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.revision-details dt { color: var(--muted); }
+.revision-details dd { margin: 0; overflow-wrap: anywhere; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+
+.console-view { max-width: 1500px; margin: 0 auto; padding-top: 28px; }
+.console-heading { justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+.quick-requests { display: flex; gap: 7px; }
+.console-grid { display: grid; grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr); gap: 24px; }
+.request-panel,
+.response-panel { min-width: 0; padding-top: 18px; border-top: 1px solid var(--border); }
+.request-panel h3,
+.response-panel h3 { margin-bottom: 13px; font-size: 14px; }
+.request-line { display: grid; grid-template-columns: 100px minmax(0, 1fr) 72px; gap: 8px; }
+select,
+input { min-height: 38px; padding: 7px 10px; }
+textarea { width: 100%; }
+.console-auth-note { margin-top: 12px; color: var(--muted); font-size: 12px; }
+textarea,
+pre { font: 13px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
+textarea { padding: 10px; resize: vertical; }
+#send { min-width: 72px; border-color: var(--accent); background: var(--accent); color: #fff; }
+.response-heading { justify-content: space-between; align-items: baseline; }
+#response-status { font: 700 12px ui-monospace, monospace; }
+pre {
+  min-height: 320px;
+  max-height: 65vh;
+  margin: 0;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--surface);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;

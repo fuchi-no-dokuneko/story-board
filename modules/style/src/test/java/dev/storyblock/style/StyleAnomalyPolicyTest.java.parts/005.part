@@ -1,0 +1,76 @@
+                List.of(Ids.BlockId.create(), Ids.BlockId.create()),
+                shiftReason
+        );
+    }
+
+    private static StyleWindow window(
+            StyleWindowKind kind,
+            List<Ids.BlockId> blockIds,
+            String shiftReason
+    ) {
+        return StyleWindow.create(
+                kind,
+                0,
+                StyleStratum.narration(),
+                "unknown",
+                "narration",
+                blockIds,
+                kind == StyleWindowKind.MICRO ? 750 : 3_000,
+                true,
+                shiftReason
+        );
+    }
+
+    private static StyleDistanceReport highReport() {
+        return report(Map.of(
+                StyleFeatureChannel.SURFACE, new BigDecimal("0.2"),
+                StyleFeatureChannel.GRAMMAR, new BigDecimal("0.2"),
+                StyleFeatureChannel.RHYTHM, new BigDecimal("0.05"),
+                StyleFeatureChannel.NARRATIVE, new BigDecimal("0.05"),
+                StyleFeatureChannel.LEXICAL, new BigDecimal("0.05")
+        ));
+    }
+
+    private static StyleDistanceReport topicOnlyReport() {
+        return report(Map.of(
+                StyleFeatureChannel.SURFACE, new BigDecimal("0.2"),
+                StyleFeatureChannel.GRAMMAR, new BigDecimal("0.05"),
+                StyleFeatureChannel.RHYTHM, new BigDecimal("0.05"),
+                StyleFeatureChannel.NARRATIVE, new BigDecimal("0.05"),
+                StyleFeatureChannel.LEXICAL, new BigDecimal("0.05")
+        ));
+    }
+
+    private static StyleDistanceReport normalReport() {
+        return report(Map.of(
+                StyleFeatureChannel.SURFACE, new BigDecimal("0.05"),
+                StyleFeatureChannel.GRAMMAR, new BigDecimal("0.05"),
+                StyleFeatureChannel.RHYTHM, new BigDecimal("0.05"),
+                StyleFeatureChannel.NARRATIVE, new BigDecimal("0.05"),
+                StyleFeatureChannel.LEXICAL, new BigDecimal("0.05")
+        ));
+    }
+
+    private static StyleDistanceReport report(
+            Map<StyleFeatureChannel, BigDecimal> distances
+    ) {
+        List<StyleChannelDistance> channels = new ArrayList<>();
+        for (StyleFeatureChannel channel : StyleFeatureChannel.values()) {
+            if (channel.required()) {
+                channels.add(new StyleChannelDistance(
+                        channel,
+                        channel.featureVersion(),
+                        channel.primaryMetric(),
+                        distances.get(channel),
+                        true,
+                        Map.of()
+                ));
+            }
+        }
+        return new StyleDistanceReport(
+                CONTRACT_HASH,
+                CanonicalJson.hash("target"),
+                CanonicalJson.hash("current"),
+                channels,
+                true
+        );

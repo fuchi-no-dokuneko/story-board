@@ -1,0 +1,69 @@
+                request("/v1/status/409"), failure
+        );
+        try (InputStream input = getClass().getResourceAsStream(
+                "/golden/api-problem-details.json"
+        )) {
+            String expected = new String(
+                    input.readAllBytes(), StandardCharsets.UTF_8
+            ).trim();
+            assertEquals(expected, CanonicalJson.string(actual));
+        }
+    }
+
+    @Test
+    void rejectsSuccessStatusesAndReservedProblemExtensions() {
+        MockHttpServletRequest request = request("/v1/test");
+        assertThrows(IllegalArgumentException.class, () -> new ApiFailureException(
+                HttpStatus.OK,
+                "NOT_AN_ERROR",
+                "Not an error",
+                "not-an-error",
+                "Success is not a problem.",
+                Map.of(),
+                null
+        ));
+
+        ApiFailureException collision = new ApiFailureException(
+                HttpStatus.CONFLICT,
+                "TEST_CONFLICT",
+                "Conflict",
+                "test-conflict",
+                "Reserved extension collision.",
+                Map.of("status", 999),
+                null
+        );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ApiProblemFactory.create(request, collision)
+        );
+    }
+
+    @Test
+    void crossNovelErrorsHonorTheConfiguredDisclosurePolicy() {
+        var hidden = new ApiExceptionHandler(true).crossNovel(
+                new CrossNovelAccessException(), request("/v1/novels/hidden")
+        );
+        assertEquals(404, hidden.getStatusCode().value());
+        assertEquals("RESOURCE_NOT_FOUND", hidden.getBody().get("code"));
+        assertEquals(
+                "The requested resource does not exist.",
+                hidden.getBody().get("detail")
+        );
+
+        var disclosed = new ApiExceptionHandler(false).crossNovel(
+                new CrossNovelAccessException(), request("/v1/novels/disclosed")
+        );
+        assertEquals(403, disclosed.getStatusCode().value());
+        assertEquals("NOVEL_ACCESS_DENIED", disclosed.getBody().get("code"));
+    }
+
+    private static MockHttpServletRequest request(String uri) {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", uri);
+        request.setRequestURI(uri);
+        request.setAttribute(
+                ApiRequestMetadata.REQUEST_ID_ATTRIBUTE,
+                "req_status_test"
+        );
+        return request;
+    }
+}

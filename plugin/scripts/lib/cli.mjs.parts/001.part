@@ -1,0 +1,60 @@
+import { chmod, readFile, writeFile } from "node:fs/promises";
+
+import { StoryBlockClient } from "./api-client.mjs";
+import { getSchema, listDtos } from "./dtos.mjs";
+import { getEndpoint, listEndpoints, loadEndpointManifest, materializeEndpoint } from "./endpoints.mjs";
+import { createTypedId, ID_PREFIXES, requireTypedId } from "./ids.mjs";
+import { deriveIdempotencyKey, readJsonFile, sha256, stableStringify } from "./json.mjs";
+import {
+  ApiResponseError,
+  EXIT_CODES,
+  NetworkError,
+  UsageError,
+  problemReport,
+} from "./problem.mjs";
+import { PayloadValidationError, countHanCodePoints, hanSequence, validateDto, validateInline } from "./validation.mjs";
+
+const BOOLEAN_OPTIONS = new Set(["force", "help", "json"]);
+const GLOBAL_OPTIONS = new Set(["access-key", "base-url", "help", "json", "timeout-ms", "user-agent"]);
+
+const HELP = `Usage: storyblock-author <command> [options]
+
+Discovery (offline):
+  endpoints [--json]
+  describe <endpoint-id> [--json]
+  dtos [--json]
+  validate --dto <DtoName> --file <payload.json> [--json]
+  call <endpoint-id> [--params <params.json>] [--body <body.json>] [--json]
+  id --prefix <nov|rev|op|blk|...> [--json]
+
+Authoring and reads:
+  health [--json]
+  register --source <manuscript.json> [--idempotency-key <key>] [--json]
+  verify --source <manuscript.json> [--novel-id <id>] [--json]
+  list [--page 0] [--size 25] [--query <text>] [--json]
+  read --novel-id <id> [--json]
+  preview-edit --novel-id <id> --file <request.json> [--json]
+  commit --novel-id <id> --file <request.json> [--json]
+  render --novel-id <id> --file <request.json> [--json]
+  upload-image --novel-id <id> --file <image.png|image.jpg> [--alt-text <text>] [--idempotency-key <key>] [--json]
+  render-pdf --novel-id <id> --file <request.json> --output <novel.pdf> [--idempotency-key <key>] [--force] [--json]
+  export --novel-id <id> [--revision-id <id>] [--format canonical-revision|canonical-package] [--json]
+  job --job-id <id> [--json]
+  artifact --artifact-id <id> [--output <file>] [--force] [--json]
+
+Connection options may appear after the command:
+  --base-url <https-url>       STORYBLOCK_BASE_URL (default https://127.0.0.1:8443)
+  --access-key <secret>        STORYBLOCK_ACCESS_KEY (optional in trusted-LAN mode)
+  --timeout-ms <milliseconds>  STORYBLOCK_TIMEOUT_MS
+  --user-agent <value>         STORYBLOCK_USER_AGENT
+
+Generic call params JSON:
+  {"path":{"novelId":"..."},"query":{"limit":50},"headers":{"If-Match":"\"sha256:...\"","Idempotency-Key":"..."}}
+`;
+
+export function parseCliArgs(argv) {
+  if (!Array.isArray(argv)) throw new UsageError("CLI arguments must be an array");
+  const command = argv[0];
+  if (command === undefined || command === "-h" || command === "--help") {
+    return { command: "help", options: new Map(), positionals: [] };
+  }

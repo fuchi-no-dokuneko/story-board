@@ -1,0 +1,58 @@
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "ResolvedBlockMetadata",
+      "file": "dtos/ResolvedBlockMetadata.schema.json",
+      "description": "Code-derived StoryBlock Resolved Block Metadata JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+      ]
+    },
+    {
+      "name": "ResolvedMetadataState",
+      "file": "dtos/ResolvedMetadataState.schema.json",
+      "description": "Code-derived StoryBlock Resolved Metadata State JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RenderController.java",
+        "modules/renderer/src/main/java/dev/storyblock/renderer/RenderPacket.java"
+      ]
+    },
+    {
+      "name": "ResolvedSceneBoundary",
+      "file": "dtos/ResolvedSceneBoundary.schema.json",
+      "description": "Code-derived StoryBlock Resolved Scene Boundary JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "RestoreRevisionContentOperation",
+      "file": "dtos/RestoreRevisionContentOperation.schema.json",
+      "description": "Code-derived StoryBlock Restore Revision Content Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "RestoreRevisionContentPayload",
+      "file": "dtos/RestoreRevisionContentPayload.schema.json",
+      "description": "Code-derived StoryBlock Restore Revision Content Payload JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [

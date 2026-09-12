@@ -1,0 +1,61 @@
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          },
+          {
+            "channel": "surface",
+            "channel_version": "example-1",
+            "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "distribution": {
+            },
+            "measurements": {
+            },
+            "embedding": [
+
+            ]
+          }
+        ]
+      },
+      "window_configuration": {
+        "operational_graphemes": 2000,
+        "operational_stride_graphemes": 1,
+        "micro_graphemes": 500,
+        "micro_stride_graphemes": 1,
+        "non_overlap_enabled": true
+      },
+      "calibration_statistics": {
+      }
+    }
+  ]
+}

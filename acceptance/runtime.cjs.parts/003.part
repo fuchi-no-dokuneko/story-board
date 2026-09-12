@@ -1,0 +1,67 @@
+  if (!["degraded", "unavailable"].includes(mode)) throw new Error(`Unknown health mode: ${mode}`);
+  const driver = await ensureBrowser(world);
+  const source = mode === "degraded"
+    ? `
+      const nativeFetch = window.fetch.bind(window);
+      window.fetch = (input, options) => {
+        const target = typeof input === 'string' ? input : input.url;
+        if (target === '/actuator/health') {
+          return Promise.resolve(new Response(JSON.stringify({ status: 'DOWN' }), {
+            status: 200,
+            statusText: 'OK',
+            headers: { 'Content-Type': 'application/json' },
+          }));
+        }
+        return nativeFetch(input, options);
+      };
+    `
+    : `
+      const nativeFetch = window.fetch.bind(window);
+      window.fetch = (input, options) => {
+        const target = typeof input === 'string' ? input : input.url;
+        if (target === '/actuator/health') return Promise.reject(new TypeError('Failed to fetch'));
+        return nativeFetch(input, options);
+      };
+    `;
+  await driver.sendDevToolsCommand("Page.addScriptToEvaluateOnNewDocument", { source });
+}
+
+async function selectOnlyCheckboxByLabel(world, environmentName) {
+  const value = process.env[environmentName];
+  if (!value) throw new Error(`Required environment variable is missing: ${environmentName}`);
+  const driver = await ensureBrowser(world);
+  const selected = await driver.executeScript(`
+    const wanted = String(arguments[0]);
+    const boxes = [...document.querySelectorAll('.keys-checkboxes input[type="checkbox"]')];
+    const target = boxes.find((box) => box.closest('label')?.textContent.trim() === wanted);
+    if (!target) return false;
+    for (const box of boxes) if (box.checked !== (box === target)) box.click();
+    return true;
+  `, value);
+  if (!selected) throw new Error(`Monitor key was not found: ${value}`);
+}
+
+async function deselectAllMonitorKeys(world) {
+  const driver = await ensureBrowser(world);
+  await driver.executeScript(`
+    for (const box of document.querySelectorAll('.keys-checkboxes input[type="checkbox"]')) {
+      if (box.checked) box.click();
+    }
+  `);
+}
+
+async function rememberResourceCount(world, fragment, name) {
+  const driver = await ensureBrowser(world);
+  const count = await driver.executeScript(
+    "return performance.getEntriesByType('resource').filter((entry) => entry.name.includes(arguments[0])).length;",
+    fragment,
+  );
+  world.memory.set(name, count);
+}
+
+async function waitResourceCountIncrease(world, fragment, name) {
+  if (!world.memory.has(name)) throw new Error(`No remembered value named ${name}`);
+  const before = world.memory.get(name);
+  const driver = await ensureBrowser(world);
+  await driver.wait(async () => {
+    const count = await driver.executeScript(

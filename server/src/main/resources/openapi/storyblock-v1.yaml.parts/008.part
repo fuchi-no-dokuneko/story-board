@@ -1,0 +1,80 @@
+                $ref: "#/components/schemas/StyleAnalysisView"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-analyses/{analysisId}/windows:
+    get:
+      operationId: listStyleAnalysisWindows
+      summary: Page canonical window findings for a completed style analysis
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/AnalysisId"
+        - $ref: "#/components/parameters/Cursor"
+        - $ref: "#/components/parameters/PageLimit"
+      responses:
+        "200":
+          description: One stable cursor page of operational window findings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleAnalysisWindowPage"
+        default:
+          $ref: "#/components/responses/Problem"
+  /rewrite-proposals:
+    post:
+      operationId: startRewriteProposal
+      summary: Submit a durable LLM rewrite proposal job
+      x-required-scopes: ["rewrite:propose"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RewriteProposalRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/JobAccepted"
+        default:
+          $ref: "#/components/responses/Problem"
+  /rewrite-proposals/{proposalId}:
+    get:
+      operationId: getRewriteProposal
+      summary: Get an immutable rewrite proposal and its validation results
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/ProposalId"
+      responses:
+        "200":
+          description: Rewrite proposal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewriteProposal"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-profiles:
+    post:
+      operationId: createStyleProfile
+      summary: Create an immutable novel-scoped style profile
+      x-required-scopes: ["style:admin"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StyleProfileRequest"
+      responses:
+        "200":
+          description: Idempotent replay of the style profile creation
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:

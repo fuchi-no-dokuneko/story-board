@@ -41,7 +41,7 @@ public record SceneSeed(Map<String, Object> fields) {
         ));
     }
 
-    private static void validatePresentCharacters(Object value) {
+    static void validatePresentCharacters(Object value) {
         if (value == null) {
             return;
         }

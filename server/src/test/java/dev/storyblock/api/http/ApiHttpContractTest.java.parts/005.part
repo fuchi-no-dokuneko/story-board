@@ -1,0 +1,58 @@
+                .andExpect(jsonPath("$.code").value("IF_MATCH_REQUIRED"));
+    }
+
+    @Test
+    void rejectsWeakOrMalformedEtags() throws Exception {
+        mvc.perform(post("/v1/novels")
+                        .with(userWithScope("novel:admin"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
+                        .header(HttpHeaders.IF_MATCH, "W/" + VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("INVALID_IF_MATCH"));
+    }
+
+    @Test
+    void rejectsWildcardEtagsOutsideCollectionCreation() throws Exception {
+        mvc.perform(post("/v1/novels/nov_test/commits")
+                        .with(userWithScope("novel:commit"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.code").value("INVALID_IF_MATCH"));
+    }
+
+    @Test
+    void rejectsOversizedIdempotencyKeys() throws Exception {
+        mvc.perform(post("/v1/novels")
+                        .with(userWithScope("novel:admin"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "x".repeat(201))
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_IDEMPOTENCY_KEY"));
+    }
+
+    @Test
+    void rejectsDeclaredBodiesOverTheConfiguredLimit() throws Exception {
+        byte[] body = new byte[(int) MutationPreconditionFilter.MAX_REQUEST_BYTES + 1];
+        mvc.perform(post("/v1/novels")
+                        .with(userWithScope("novel:admin"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "request-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isContentTooLarge())
+                .andExpect(jsonPath("$.status").value(413))
+                .andExpect(jsonPath("$.code").value("REQUEST_TOO_LARGE"))
+                .andExpect(jsonPath("$.limit_bytes")
+                        .value(MutationPreconditionFilter.MAX_REQUEST_BYTES));
+    }
+
+    @Test

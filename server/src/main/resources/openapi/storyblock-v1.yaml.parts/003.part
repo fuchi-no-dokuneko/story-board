@@ -1,0 +1,86 @@
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
+        "201":
+          description: Canonical package imported atomically
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}:
+    get:
+      operationId: getNovelHead
+      summary: Get current novel head metadata
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+      responses:
+        "200":
+          description: Current head metadata
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/revisions/{revisionId}:
+    get:
+      operationId: getRevision
+      summary: Get an immutable canonical revision
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/RevisionId"
+      responses:
+        "200":
+          description: Canonical revision
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CanonicalRevision"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/renders:
+    post:
+      operationId: renderRevision
+      summary: Render a revision range with resolved metadata
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/NovelId"
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RenderRequest"
+      responses:
+        "200":
+          description: Deterministic render packet
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RenderPacket"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/pdf-renders:
+    post:
+      operationId: renderRevisionPdf
+      summary: Render a complete immutable revision as a deterministic PDF
+      x-required-scopes: ["novel:read"]
+      parameters:

@@ -1,0 +1,46 @@
+                        dev.storyblock.style.StyleFeatureChannel.requiredChannels().stream()
+                                .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                                .map(channel -> StyleChannelCalibration.fromDistances(
+                                        channel, referenceDistances
+                                )).toList()
+                ))
+        );
+        return new StyleProfileVersionContent(
+                scope,
+                List.of(new StyleCorpusSource(
+                        "corpus-" + kind.canonicalName(),
+                        features.sourceHash(),
+                        kind,
+                        "Test corpus",
+                        "owner-test-license",
+                        "test-owner"
+                )),
+                features,
+                windows,
+                calibration.canonicalValue()
+        );
+    }
+
+    static AuditContext audit(int seconds, String request) {
+        return new AuditContext(
+                "req_" + request, "style-owner", null, NOW.plusSeconds(seconds)
+        );
+    }
+
+    private static long count(SqliteDatabase database, String table) throws SQLException {
+        if (!List.of(
+                "style_profiles",
+                "style_profile_versions",
+                "style_profile_lifecycle_events"
+        ).contains(table)) {
+            throw new IllegalArgumentException("Unexpected style table " + table);
+        }
+        return database.readOnly(connection -> {
+            try (var statement = connection.createStatement();
+                 var result = statement.executeQuery("SELECT COUNT(*) FROM " + table)) {
+                result.next();
+                return result.getLong(1);
+            }
+        });
+    }
+}

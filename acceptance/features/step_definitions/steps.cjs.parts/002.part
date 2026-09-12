@@ -1,0 +1,74 @@
+Then("CSS {string} contains environment variable {string}", async function (selector, name) {
+  const expected = process.env[name];
+  assert.ok(expected, `Required environment variable is missing: ${name}`);
+  assert.ok((await (await runtime.cssElement(this, selector)).getText()).includes(expected));
+});
+
+Then("CSS {string} has value {string}", async function (selector, expected) {
+  assert.equal(await (await runtime.cssElement(this, selector, false)).getAttribute("value"), expected);
+});
+
+Then("CSS {string} has attribute {string} equal to {string}", async function (selector, attribute, expected) {
+  assert.equal(await (await runtime.cssElement(this, selector, false)).getAttribute(attribute), expected);
+});
+
+Then("at least {int} elements match CSS {string}", async function (minimum, selector) {
+  await runtime.waitCssCount(this, selector, minimum, false);
+});
+
+Then("exactly {int} elements match CSS {string}", async function (expected, selector) {
+  await runtime.waitCssCount(this, selector, expected, true);
+});
+
+Then("no elements match CSS {string}", async function (selector) {
+  await runtime.waitCssCount(this, selector, 0, true);
+});
+
+When("I click CSS {string}", async function (selector) {
+  await runtime.clickCss(this, selector);
+});
+
+When("I replace CSS {string} with {string}", async function (selector, value) {
+  await runtime.replaceCss(this, selector, value);
+});
+
+When("I replace CSS {string} with:", async function (selector, value) {
+  await runtime.replaceCss(this, selector, value);
+});
+
+When("I replace CSS {string} with environment variable {string}", async function (selector, name) {
+  const value = process.env[name];
+  assert.ok(value, `Required environment variable is missing: ${name}`);
+  await runtime.replaceCss(this, selector, value);
+});
+
+When("I choose value {string} in CSS {string}", async function (value, selector) {
+  await runtime.chooseValue(this, selector, value);
+});
+
+When("I choose value from environment variable {string} in CSS {string}", async function (name, selector) {
+  const value = process.env[name];
+  assert.ok(value, `Required environment variable is missing: ${name}`);
+  await runtime.chooseValue(this, selector, value);
+});
+
+When("I reload the web page", async function () {
+  await (await runtime.ensureBrowser(this)).navigate().refresh();
+});
+
+When("I set the browser network offline", async function () {
+  await runtime.setNetworkOffline(this, true);
+});
+
+When("I restore the browser network", async function () {
+  await runtime.setNetworkOffline(this, false);
+});
+
+When("I block browser requests matching {string}", async function (pattern) {
+  await runtime.setBlockedUrls(this, [pattern]);
+});
+
+When("I unblock all browser requests", async function () {
+  await runtime.setBlockedUrls(this, []);
+});
+

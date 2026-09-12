@@ -1,0 +1,46 @@
+Other mutations must identify the exact current resource version. An owning
+service maps a stale but valid ETag to `412` and returns the current revision ID
+and hash, or the current style resource ETag for a style lifecycle conflict.
+Request bodies are limited to 2 MiB for both fixed-length and chunked requests.
+The image upload route has a narrower 1,500,000-byte content limit and returns
+`413 REQUEST_TOO_LARGE` when it is exceeded. It accepts raw PNG or JPEG bytes,
+not JSON or Base64, and rejects dimensions above 8192 pixels or 40 million total
+pixels.
+Style workers submit large canonical traces as a hash-verified gzip/base64
+envelope so the expanded trace does not consume that request budget.
+
+## Response Contracts
+
+Revision-bearing responses use a strong `ETag`. Durable style analysis,
+rewrite, and export submissions return `202` with a `Location` status URI.
+Large style-analysis results use an opaque cursor. Errors use RFC problem JSON
+with stable `code` and `request_id` fields.
+
+`POST /v1/imports` returns `201` for a new atomic import and `200` when the same
+idempotency key and canonical request are replayed. `POST
+/v1/novels/{novelId}/exports` creates an immutable completed export and returns
+its durable job URI. `GET /v1/jobs/{jobId}` exposes the result artifact URI, and
+`GET /v1/artifacts/{artifactId}` returns offline-downloadable canonical bytes.
+See [`../transfer/canonical-import-export.md`](../transfer/canonical-import-export.md).
+
+`POST /v1/novels/{novelId}/renders` requires the requested immutable revision's
+hash in `If-Match`, returns that hash as its response `ETag`, and emits the
+canonical packet described in
+[`../rendering/deterministic-renderer.md`](../rendering/deterministic-renderer.md).
+
+`POST /v1/novels/{novelId}/images` requires `novel:commit`, the current head
+hash, and a stable idempotency key. A new portable artifact returns `201`; an
+identical replay returns `200`. The response descriptor supplies the artifact
+ID, SHA-256, detected media type, and decoded dimensions needed by an image
+block. A commit verifies that every referenced image is portable, belongs to
+the same novel, and matches that descriptor.
+
+`POST /v1/novels/{novelId}/pdf-renders` requires `novel:read` and the exact
+requested revision hash. It synchronously returns `application/pdf`, the
+revision `ETag`, attachment filename, and `X-PDF-Renderer-Version`,
+`X-PDF-Page-Count`, and `X-PDF-Image-Count` headers. Identical revision and
+artifact bytes produce byte-identical A4 PDF output.
+
+`POST /v1/novels/{novelId}/detector-runs` additionally requires
+`revision_hash` in the request body to equal `If-Match`. It returns stable,
+revision-bound findings and the analyzed hash as `ETag`; see

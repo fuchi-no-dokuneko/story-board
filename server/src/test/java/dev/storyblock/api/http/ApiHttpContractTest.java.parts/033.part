@@ -1,0 +1,61 @@
+                "blocks", List.copyOf(blocks)
+        );
+        Map<String, Object> chapter = Map.of(
+                "id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "One thousand blocks",
+                "scenes", List.of(scene)
+        );
+        Map<String, Object> document = new LinkedHashMap<>();
+        document.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
+        document.put("novel_id", novelId);
+        document.put("revision_id", Ids.RevisionId.create().value());
+        document.put("parent_revision_id", null);
+        document.put("chapters", List.of(chapter));
+        document.put("created_at", Instant.parse("2026-08-21T12:00:00Z").toString());
+        return CanonicalRevision.of(document);
+    }
+
+    private static CanonicalRevision detectorRevision() {
+        String novelId = Ids.NovelId.create().value();
+        String chapterId = Ids.ChapterId.create().value();
+        Map<String, Object> firstBlock = Map.of(
+                "id", Ids.BlockId.create().value(),
+                "block_version_id", Ids.BlockVersionId.create().value(),
+                "order_key", OrderKey.initial().value(),
+                "text", "The story starts here.",
+                "meta", Map.of()
+        );
+        Map<String, Object> secondBlock = Map.of(
+                "id", Ids.BlockId.create().value(),
+                "block_version_id", Ids.BlockVersionId.create().value(),
+                "order_key", OrderKey.initial().value(),
+                "text", "The story continues here.",
+                "meta", Map.of()
+        );
+        Map<String, Object> firstScene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.rebalanced(0, 2).value(),
+                "title", "First",
+                "transition_mode", "opening",
+                "initial_meta", Map.of(
+                        "location", Map.of("mode", "explicit", "value", "room_a"),
+                        "present_character_ids", List.of()
+                ),
+                "blocks", List.of(firstBlock)
+        );
+        Map<String, Object> secondScene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.rebalanced(1, 2).value(),
+                "title", "Second",
+                "transition_mode", "continuous",
+                "initial_meta", Map.of(
+                        "location", Map.of("mode", "explicit", "value", "room_b"),
+                        "present_character_ids", List.of()
+                ),
+                "blocks", List.of(secondBlock)
+        );
+        Map<String, Object> chapter = Map.of(
+                "id", chapterId,

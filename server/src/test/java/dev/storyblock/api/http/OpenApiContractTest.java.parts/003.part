@@ -1,0 +1,62 @@
+                        parameterRefs.contains(expectedIfMatch),
+                        "missing If-Match for " + operation.key()
+                );
+                assertTrue(
+                        parameterRefs.contains("#/components/parameters/IdempotencyKey"),
+                        "missing Idempotency-Key for " + operation.key()
+                );
+            }
+            if ("POST".equals(operation.method())) {
+                assertNotNull(
+                        operation.contract().get("requestBody"),
+                        "missing request body for " + operation.key()
+                );
+            }
+        }
+
+        assertEquals(REQUIRED_OPERATIONS, actual);
+    }
+
+    @Test
+    void documentsStatusPolicyAsyncLocationsEtagsAndCursors() {
+        Map<String, Object> statusPolicy = map(document.get("x-http-status-policy"));
+        Map<Integer, String> documentedStatuses = new HashMap<>();
+        statusPolicy.forEach((status, use) -> {
+            documentedStatuses.put(Integer.parseInt(status), string(use));
+        });
+        assertEquals(ApiHttpStatusPolicy.contract(), documentedStatuses);
+
+        for (String operationKey : ASYNC_OPERATIONS) {
+            Map<String, Object> responses = map(operation(operationKey).get("responses"));
+            assertEquals(
+                    "#/components/responses/JobAccepted",
+                    map(responses.get("202")).get("$ref"),
+                    operationKey
+            );
+        }
+        Map<String, Object> accepted = map(resolve("#/components/responses/JobAccepted"));
+        assertEquals(
+                "#/components/headers/Location",
+                map(map(accepted.get("headers")).get("Location")).get("$ref")
+        );
+        Map<String, Object> analysisAccepted = map(map(operation(
+                "POST /novels/{novelId}/style-analyses"
+        ).get("responses")).get("202"));
+        assertEquals(
+                "#/components/headers/Location",
+                map(map(analysisAccepted.get("headers")).get("Location")).get("$ref")
+        );
+        assertEquals(
+                "#/components/schemas/StyleAnalysisAccepted",
+                map(map(map(analysisAccepted.get("content")).get("application/json"))
+                        .get("schema")).get("$ref")
+        );
+
+        assertStrongEtag("GET /novels/{novelId}", "200");
+        assertStrongEtag("GET /admin/novels/{novelId}", "200");
+        assertStrongEtag("POST /agent/novels", "200");
+        assertStrongEtag("POST /agent/novels", "201");
+        assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
+        assertStrongEtag("POST /novels", "201");
+        assertStrongEtag("POST /imports", "201");
+        assertStrongEtag("POST /imports", "200");

@@ -1,0 +1,73 @@
+                    BlockVersionRef.from(scene.blocks().getFirst()),
+                    BlockVersionRef.from(scene.blocks().getLast())
+            );
+            guard = new BlockRangeGuard(
+                    scene.id(), references, null, null, BlockSequenceHash.ofReferences(references)
+            );
+        } else {
+            guard = BlockRangeGuard.capture(
+                    scene, scene.blocks().getFirst().id(), scene.blocks().get(1).id()
+            );
+        }
+        EditContext context = new EditContext(
+                Ids.OperationId.create(),
+                "golden-operation",
+                base.novel().id(),
+                base.id(),
+                staleRevision ? "sha256:" + "0".repeat(64) : baseHash
+        );
+        return validator.validateOperation(
+                base,
+                baseHash,
+                new EditOperation.DeleteBlockRange(context, guard)
+        );
+    }
+
+    private DeterministicValidator.BlockValidation validateBlock(
+            String text,
+            BlockMetadata metadata,
+            Set<String> present,
+            BlockMetadata baseline
+    ) {
+        return validator.validateBlock(Ids.BlockId.create(), text, metadata, present, baseline);
+    }
+
+    private static ValidationReport report(DeterministicValidator.BlockValidation validation) {
+        return new ValidationReport(validation.issues(), List.of());
+    }
+
+    private static ValidationIssue issue(
+            DeterministicValidator.BlockValidation validation,
+            ValidationCode code
+    ) {
+        return validation.issues().stream()
+                .filter(candidate -> candidate.code() == code)
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private static Map<String, Object> event(String type, boolean currentEvidence) {
+        return Map.of(
+                "type", type,
+                "character_id", "char_ming",
+                "evidence", evidence("阿明進入房間。", currentEvidence)
+        );
+    }
+
+    private static Map<String, Object> evidence(String text, boolean current) {
+        return Map.of(
+                "start_grapheme", 0,
+                "end_grapheme", UnicodeText.graphemeCount(text),
+                "quote", text,
+                "quote_hash", current ? EvidenceSpans.quoteHash(text) : "sha256:" + "0".repeat(64)
+        );
+    }
+
+    private static RevisionManifest revision() {
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        List<NarrativeBlock> blocks = new ArrayList<>();
+        for (int index = 0; index < 3; index++) {
+            blocks.add(NarrativeBlock.create(
+                    Ids.BlockId.create(),
+                    OrderKey.rebalanced(index, 3),
+                    "第" + (index + 1) + "句。",

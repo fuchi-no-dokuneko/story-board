@@ -1,0 +1,61 @@
+package dev.storyblock.api.http;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import dev.storyblock.contracts.CanonicalJson;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+
+@SpringBootTest(properties = "storyblock.trusted-lan.enabled=true")
+@AutoConfigureMockMvc
+class TrustedLanAdminHttpTest {
+    private static final String NOVEL_ID =
+            "nov_018f0f5e-7b4a-7c00-8000-000000000111";
+    private static final String TEXT = "春夏秋冬東西南北天地。";
+    private static final Path DATABASE_PATH = Path.of(
+            "target", "trusted-lan-admin-" + UUID.randomUUID() + ".db"
+    );
+
+    @DynamicPropertySource
+    static void configureDatabase(DynamicPropertyRegistry registry) {
+        registry.add("storyblock.database.path", DATABASE_PATH::toString);
+        registry.add(
+                "storyblock.security.pepper",
+                () -> "trusted-lan-test-pepper-material-32-bytes"
+        );
+    }
+
+    @Autowired
+    private MockMvc mvc;
+
+    @Test
+    void registersListsAndReadsPersistedNovelWithoutCredentials() throws Exception {
+        byte[] request = registration(10);
+
+        mvc.perform(post("/v1/agent/novels")
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "trusted-e2e-1")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/v1/admin/novels/" + NOVEL_ID))
+                .andExpect(header().exists(HttpHeaders.ETAG))

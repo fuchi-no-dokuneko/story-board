@@ -1,0 +1,54 @@
+# Secure self-signed deployment
+
+StoryBlock terminates HTTPS in the API process. There is no reverse proxy,
+certificate upload, ACME flow, or external certificate issuer. The first start
+generates a self-signed server leaf with `CA=false`; its private key never leaves
+the local repository installation or the private container volume.
+
+The standalone default bind is `0.0.0.0:8443`. Select the policy and port with
+launcher arguments; no environment variables are required:
+
+```text
+./scripts/local-server.sh start --policy public --port 8443
+```
+
+Use `--policy local` to bind loopback and an SSH tunnel for remote access.
+The API generates its own certificate and private key. Browsers show a
+self-signed certificate warning; no certificate or key upload is required.
+
+## Repository-local installation
+
+The supported non-container installation writes only below
+`.local/storyblock/` in the repository. It also redirects Maven, temporary, and
+cache files into that directory.
+
+```bash
+./install.sh
+./scripts/local-server.sh start
+./scripts/local-server.sh status
+./scripts/local-server.sh stop
+```
+
+The only host prerequisite is Java 21 with `java` and `keytool`. The installer
+does not invoke `sudo`, require root, write to system directories, or upload TLS
+material. The owner credential is generated at
+`.local/storyblock/secrets/owner-token` and is never printed.
+
+## Container installation
+
+Run `./install.sh` once to create repository-local secret files, then use a
+rootless container runtime if containers are desired:
+
+```bash
+docker compose build
+docker compose up -d api
+```
+
+The API generates its private key in `storyblock-tls-private`. Workers receive
+only a separate public trust store from `storyblock-tls-public`; they cannot read
+the API private key. The API is the only application service with the
+`storyblock-data` volume. Worker profiles do not mount the database or container
+socket. The LLM worker has neither canonical storage nor API commit credentials.
+
+Backups are unencrypted compressed snapshots kept inside this repository.
+The backup workflow has no key generation or rotation; see `backup-and-restore.md`.

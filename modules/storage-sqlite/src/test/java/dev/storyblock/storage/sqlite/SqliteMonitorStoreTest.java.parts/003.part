@@ -1,0 +1,62 @@
+                    genesis.novel().id(), submitted.status().run().runId()
+            );
+            assertEquals(MonitorRunState.STALE, stale.state());
+            assertTrue(stale.staleReasons().contains(MonitorStaleReason.HEAD_CHANGED));
+            assertTrue(stale.staleReasons().contains(
+                    MonitorStaleReason.AFFECTED_BLOCK_CHANGED
+            ));
+            assertFalse((Boolean) stale.canonicalValue().get("rebase_allowed"));
+            assertEquals(genesis.id(), stale.run().revisionId());
+        }
+    }
+
+    @Test
+    void ruleVersionChangeInvalidatesWithoutChangingTheStoredFinding() throws Exception {
+        Path path = temporaryDirectory.resolve("rule-stale-monitor.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        StoredMonitorRun oldRule = findingRun(
+                genesis, "old-rule-monitor", "LOCAL_NOTE", "monitor-rules-0.9.0"
+        );
+
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            store.saveMonitorRun(oldRule);
+
+            var status = new MonitorService(store, store).getStatus(
+                    genesis.novel().id(), oldRule.runId()
+            );
+
+            assertEquals(MonitorRunState.STALE, status.state());
+            assertEquals(
+                    List.of(MonitorStaleReason.RULE_VERSION_CHANGED),
+                    status.staleReasons()
+            );
+            assertEquals(oldRule, status.run());
+            assertFalse((Boolean) status.canonicalValue().get("rebase_allowed"));
+        }
+    }
+
+    @Test
+    void proposedOperationIsPersistedButNeverExecuted() throws Exception {
+        Path path = temporaryDirectory.resolve("monitor-proposal.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        NarrativeBlock block = genesis.liveBlocks().getFirst();
+        String hash = RevisionStoreTestFixture.hash(genesis);
+        EditOperation proposal = RevisionStoreTestFixture.replace(
+                genesis, "inert-proposal", "建議句。"
+        );
+
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, hash);
+            MonitorService service = new MonitorService(store, store);
+
+            var submitted = service.submit(
+                    genesis.novel().id(),
+                    genesis.id(),
+                    hash,
+                    block.id(),
+                    1,
+                    MonitorModule.RULE_VERSION,
+                    List.of(block.id()),
+                    new MonitorProposedOperation(proposal, List.of(evidence(block))),
+                    "proposal-submission",

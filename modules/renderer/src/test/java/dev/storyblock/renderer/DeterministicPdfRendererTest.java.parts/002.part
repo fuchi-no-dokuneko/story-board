@@ -1,0 +1,59 @@
+        Ids.ArtifactId artifactId = Ids.ArtifactId.create();
+        BlockImage image = new BlockImage(
+                artifactId,
+                CanonicalJson.hashBytes(png),
+                "image/png",
+                120,
+                80,
+                "白色背景上的角色立繪。"
+        );
+        NarrativeBlock text = NarrativeBlock.create(
+                Ids.BlockId.create(),
+                OrderKey.rebalanced(0, 2),
+                "逆潮越過港牆，燈塔仍在霧裏發亮。",
+                BlockMetadata.empty(),
+                Map.of()
+        );
+        NarrativeBlock illustration = NarrativeBlock.create(
+                Ids.BlockId.create(),
+                OrderKey.rebalanced(1, 2),
+                "岑霧握着黃銅鑰匙站在白色背景前。",
+                BlockMetadata.empty(),
+                image.attachTo(Map.of())
+        );
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "潮門",
+                TransitionMode.OPENING,
+                SceneSeed.empty(),
+                List.of(text, illustration),
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId, OrderKey.initial(), "第一章　逆潮", List.of(scene), Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-29T00:00:00Z"),
+                new NarrativeNovel(
+                        Ids.NovelId.create(), List.of(chapter), Map.of("title", "逆潮燈塔")
+                )
+        );
+    }
+
+    private static byte[] png() throws IOException {
+        BufferedImage image = new BufferedImage(120, 80, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, 120, 80);
+        graphics.setColor(new Color(25, 80, 120));
+        graphics.fillOval(35, 10, 50, 60);
+        graphics.dispose();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        assertTrue(ImageIO.write(image, "png", output));
+        return output.toByteArray();
+    }
+}

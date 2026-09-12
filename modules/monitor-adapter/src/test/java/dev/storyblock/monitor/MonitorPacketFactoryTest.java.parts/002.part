@@ -1,0 +1,72 @@
+                first.renderPacket().sceneBoundaries().getFirst().stateOut()
+        );
+        assertArrayEquals(
+                CanonicalJson.bytes(first.canonicalValue()),
+                CanonicalJson.bytes(second.canonicalValue())
+        );
+        assertArrayEquals(
+                revisionBefore,
+                NarrativeCanonicalMapper.toCanonical(revision).canonicalBytes()
+        );
+    }
+
+    @Test
+    void outputParserRequiresStrictTextBoundEvidence() {
+        String quote = "Block";
+        Map<String, Object> evidence = Map.of(
+                "block_id", Ids.BlockId.create().value(),
+                "start_grapheme", 0,
+                "end_grapheme", 5,
+                "quote", quote,
+                "quote_hash", EvidenceSpans.quoteHash(quote)
+        );
+        Map<String, Object> value = Map.of(
+                "kind", "finding",
+                "code", "LOCAL_CONTRADICTION",
+                "severity", "warning",
+                "message", "The local text conflicts.",
+                "evidence", List.of(evidence)
+        );
+
+        MonitorFinding finding = (MonitorFinding) MonitorOutput.fromCanonical(value);
+
+        assertTrue(finding.evidence().getFirst().matches("Block text."));
+        Map<String, Object> withUnknownField = new java.util.LinkedHashMap<>(value);
+        withUnknownField.put("unexpected", true);
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> MonitorOutput.fromCanonical(withUnknownField)
+        );
+        assertThrows(IllegalArgumentException.class, () -> new MonitorEvidence(
+                finding.evidence().getFirst().blockId(),
+                0,
+                5,
+                quote,
+                "sha256:" + "0".repeat(64)
+        ));
+    }
+
+    private static RevisionManifest revision(int blockCount) {
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        List<NarrativeBlock> blocks = new ArrayList<>();
+        for (int index = 0; index < blockCount; index++) {
+            blocks.add(NarrativeBlock.create(
+                    Ids.BlockId.create(),
+                    OrderKey.rebalanced(index, blockCount),
+                    "Block " + index + " has one sentence.",
+                    new BlockMetadata(Map.of(
+                            "location", Map.of(
+                                    "mode", "explicit", "value", "room_" + index
+                            )
+                    )),
+                    Map.of()
+            ));
+        }
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "Monitor scene",
+                TransitionMode.OPENING,
+                SceneSeed.empty(),
+                blocks,

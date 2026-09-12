@@ -1,0 +1,61 @@
+    private CanonicalNovelPackage packageWithOneOperation(Path path) throws Exception {
+        try (SqliteRevisionStore source = SqliteRevisionStore.open(path)) {
+            RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+            source.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            new CommitService(source).commit(
+                    RevisionStoreTestFixture.replace(genesis, "one-replace", "第二句。"),
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:01:00Z")
+            );
+            return source.loadCanonicalPackage(genesis.novel().id());
+        }
+    }
+
+    private static CanonicalNovelPackage packageWithReplayDrift(
+            CanonicalNovelPackage valid
+    ) {
+        CanonicalNovelPackage.RevisionEntry originalResult = valid.revisions().get(1);
+        RevisionManifest result = NarrativeCanonicalMapper.fromCanonical(originalResult.revision());
+        NarrativeChapter chapter = result.novel().chapters().getFirst();
+        NarrativeScene scene = chapter.scenes().getFirst();
+        NarrativeBlock block = scene.blocks().getFirst();
+        NarrativeBlock driftedBlock = block.revise(
+                "第三句。",
+                block.metadata(),
+                block.extensions(),
+                Ids.BlockVersionId.create()
+        );
+        NarrativeChapter driftedChapter = chapter.withScenes(List.of(
+                scene.withBlocks(List.of(driftedBlock))
+        ));
+        RevisionManifest driftedManifest = new RevisionManifest(
+                result.id(),
+                result.parentId(),
+                result.createdAt(),
+                new NarrativeNovel(
+                        result.novel().id(),
+                        List.of(driftedChapter),
+                        result.novel().extensions()
+                )
+        );
+        CanonicalRevision driftedRevision = NarrativeCanonicalMapper.toCanonical(
+                driftedManifest
+        );
+        var originalOperation = valid.operations().getFirst();
+        var driftedOperation = new CanonicalNovelPackage.OperationEntry(
+                originalOperation.sequence(),
+                EditOperationCanonicalMapper.hash(originalOperation.operation()),
+                originalOperation.operation(),
+                driftedManifest.id(),
+                driftedRevision.contentHash(),
+                originalOperation.committedAt()
+        );
+        return CanonicalNovelPackage.assemble(
+                List.of(valid.revisions().getFirst(), new CanonicalNovelPackage.RevisionEntry(
+                        1, driftedRevision
+                )),
+                List.of(driftedOperation),
+                List.of()
+        );
+    }
+

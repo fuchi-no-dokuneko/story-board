@@ -1,0 +1,72 @@
+import { startupConfig } from "./startup-config.mjs";
+import { request as httpsRequest } from "node:https";
+
+import { parseJsonStrict, stableStringify } from "./json.mjs";
+import { ApiResponseError, NetworkError } from "./problem.mjs";
+
+const startup = startupConfig();
+export const DEFAULT_BASE_URL = startup.base_url;
+export const DEFAULT_TIMEOUT_MS = Number(startup.timeout_ms);
+export const DEFAULT_USER_AGENT = startup.user_agent;
+const MAX_RESPONSE_BYTES = 128 * 1024 * 1024;
+
+function normalizedHeaders(headers) {
+  return Object.fromEntries(Object.entries(headers ?? {}).map(([name, value]) => [
+    name.toLowerCase(),
+    Array.isArray(value) ? value.join(", ") : value === undefined ? "" : String(value),
+  ]));
+}
+
+function hasHeader(headers, name) {
+  return Object.keys(headers).some((candidate) => candidate.toLowerCase() === name.toLowerCase());
+}
+
+export function connectionPolicy(baseUrl) {
+  let url;
+  try {
+    url = new URL(baseUrl);
+  } catch (error) {
+    throw new TypeError(`Invalid STORYBLOCK_BASE_URL: ${baseUrl}`, { cause: error });
+  }
+  if (url.protocol !== "https:") throw new TypeError("StoryBlock base URL must use HTTPS");
+  if (url.username !== "" || url.password !== "") throw new TypeError("StoryBlock base URL must not contain credentials");
+  if (url.hostname.includes(":")) throw new TypeError("StoryBlock author supports IPv4 endpoints only");
+  return Object.freeze({ origin: url.origin, rejectUnauthorized: false, family: 4 });
+}
+
+function defaultTransport({ url, method, headers, body, timeoutMs }) {
+  return new Promise((resolve, reject) => {
+    const request = httpsRequest(url, {
+      method,
+      headers,
+      family: 4,
+      rejectUnauthorized: false,
+    }, (response) => {
+      const chunks = [];
+      let total = 0;
+      response.on("data", (chunk) => {
+        total += chunk.length;
+        if (total > MAX_RESPONSE_BYTES) {
+          request.destroy(new Error(`response exceeds ${MAX_RESPONSE_BYTES} bytes`));
+          return;
+        }
+        chunks.push(chunk);
+      });
+      response.on("end", () => resolve({
+        status: response.statusCode ?? 0,
+        headers: normalizedHeaders(response.headers),
+        body: Buffer.concat(chunks),
+      }));
+    });
+    request.setTimeout(timeoutMs, () => request.destroy(new Error(`request timed out after ${timeoutMs}ms`)));
+    request.on("error", reject);
+    if (body !== undefined) request.write(body);
+    request.end();
+  });
+}
+
+function responseData(body, headers, responseType) {
+  if (responseType === "buffer") return body;
+  if (body.length === 0) return null;
+  const contentType = headers["content-type"] ?? "";
+  const shouldParse = responseType === "json" || contentType.includes("json") || contentType.includes("problem+");

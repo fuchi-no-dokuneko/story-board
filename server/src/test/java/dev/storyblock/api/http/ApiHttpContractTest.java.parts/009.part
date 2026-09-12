@@ -1,0 +1,47 @@
+                artifactResult.getResponse().getHeader(HttpHeaders.ETAG)
+        );
+    }
+
+    @Test
+    void rendersStoredRevisionAsARepeatableCanonicalPacket() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "render-import");
+        byte[] body = CanonicalJson.bytes(Map.of("revision_id", revisionId));
+
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("style:admin"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult first = mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-first")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ))
+                .andExpect(jsonPath("$.novel_id").value(novelId))
+                .andExpect(jsonPath("$.revision_id").value(revisionId))
+                .andExpect(jsonPath("$.revision_hash").value(revision.contentHash()))
+                .andExpect(jsonPath("$.rendered_text").value("First sentence."))
+                .andExpect(jsonPath("$.offset_map[0].rendered_start").value(0))
+                .andExpect(jsonPath("$.offset_map[0].rendered_end").value(15))
+                .andExpect(jsonPath("$.resolved_meta[0].before.weather.mode")
+                        .value("unknown"))
+                .andExpect(jsonPath("$.scene_boundaries[0].state_out.weather.mode")
+                        .value("unknown"))
+                .andReturn();
+
+        MvcResult second = mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-second")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))

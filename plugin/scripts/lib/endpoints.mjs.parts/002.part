@@ -1,0 +1,13 @@
+    for (const entry of values) search.append(parameter.name, String(entry));
+  }
+  const query = search.toString();
+  return {
+    method: endpoint.method,
+    pathname: query === "" ? pathname : `${pathname}?${query}`,
+    headers: Object.fromEntries(Object.entries(headerValues).map(([name, value]) => [name, String(value)])),
+  };
+}
+
+export function resetEndpointCacheForTests() {
+  manifestCache = undefined;
+}

@@ -1,0 +1,47 @@
+                "revision_hash", revision.contentHash()
+        ));
+
+        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult first = mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-first")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(header().string(
+                        HttpHeaders.ETAG, quotedEtag(revision.contentHash())
+                ))
+                .andExpect(jsonPath("$.revision_id").value(revisionId))
+                .andExpect(jsonPath("$.revision_hash").value(revision.contentHash()))
+                .andExpect(jsonPath("$.rule_version").value("detector-1.0.0"))
+                .andExpect(jsonPath("$.findings[0].finding_id").isString())
+                .andExpect(jsonPath("$.findings[0].code")
+                        .value("LOCATION_CHANGED_WITHOUT_TRANSITION"))
+                .andExpect(jsonPath("$.findings[0].severity").value("warning"))
+                .andExpect(jsonPath("$.findings[0].affected_scene_ids.length()")
+                        .value(2))
+                .andExpect(jsonPath("$.findings[0].context_block_ids.length()")
+                        .value(2))
+                .andExpect(jsonPath("$.findings[0].evidence.kind")
+                        .value("scene_boundary"))
+                .andReturn();
+
+        MvcResult second = mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-second")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertArrayEquals(
+                first.getResponse().getContentAsByteArray(),

@@ -1,0 +1,3 @@
+spring.main.banner-mode: "off"
+storyblock.worker.enabled: true
+storyblock.worker.api-base-url: "https://127.0.0.1:8443/"

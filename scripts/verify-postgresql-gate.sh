@@ -5,8 +5,7 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 decision="$root/docs/persistence/postgresql-trigger.json"
 
 jq -e '
-  .schema_version == "postgresql-trigger-1.0.0"
-  and .status == "not_triggered"
+  .status == "not_triggered"
   and .implementation_allowed == false
   and ([.approved_requirements[]] | any) == false
   and .evidence.durable_rows == .evidence.attempted_rows

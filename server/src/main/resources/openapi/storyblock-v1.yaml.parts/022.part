@@ -1,0 +1,91 @@
+          minimum: 1
+          maximum: 2
+        render_packet:
+          $ref: "#/components/schemas/RenderPacket"
+        detector_findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetectorFinding"
+        local_invariants:
+          $ref: "#/components/schemas/MonitorLocalInvariants"
+        allowed_tools:
+          type: array
+          minItems: 2
+          maxItems: 2
+          prefixItems:
+            - const: submit_finding
+            - const: submit_proposed_operation
+      additionalProperties: false
+    MonitorLocalInvariants:
+      type: object
+      required: [affected_ids_must_be_within_window, evidence_required, max_block_graphemes, max_direct_speakers, max_sentences, min_sentences, target_block_version_id, target_scene_id, window_blocks]
+      properties:
+        affected_ids_must_be_within_window:
+          const: true
+        evidence_required:
+          const: true
+        max_block_graphemes:
+          const: 100
+        max_direct_speakers:
+          const: 1
+        max_sentences:
+          const: 2
+        min_sentences:
+          const: 1
+        target_block_version_id:
+          type: string
+          pattern: '^blv_[0-9a-f-]{36}$'
+        target_scene_id:
+          type: string
+          pattern: '^scn_[0-9a-f-]{36}$'
+        window_blocks:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/MonitorBlockFingerprint"
+      additionalProperties: false
+    MonitorBlockFingerprint:
+      type: object
+      required: [block_id, block_version_id, content_hash]
+      properties:
+        block_id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        block_version_id:
+          type: string
+          pattern: '^blv_[0-9a-f-]{36}$'
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+      additionalProperties: false
+    MonitorSubmissionRequest:
+      type: object
+      required: [revision_id, revision_hash, target_block_id, neighbor_count, rule_version, affected_block_ids, output]
+      properties:
+        revision_id:
+          type: string
+          pattern: '^rev_[0-9a-f-]{36}$'
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        target_block_id:
+          type: string
+          pattern: '^blk_[0-9a-f-]{36}$'
+        neighbor_count:
+          type: integer
+          minimum: 1
+          maximum: 2
+        rule_version:
+          type: string
+        affected_block_ids:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          contains:
+            type: string
+          items:
+            type: string
+            pattern: '^blk_[0-9a-f-]{36}$'

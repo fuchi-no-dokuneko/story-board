@@ -1,0 +1,74 @@
+                connection.createStatement().executeUpdate("DELETE FROM audit_events");
+                return null;
+            });
+            assertEquals(0, count(database, "audit_events"));
+            assertEquals(2, count(database, "access_keys"));
+        }
+    }
+
+    private static AccessKeyService service(SqliteRevisionStore store) {
+        return new AccessKeyService(store, pepper());
+    }
+
+    private static IssueAccessKeyCommand command(
+            RevisionManifest genesis,
+            String idempotencyKey,
+            Set<AccessScope> scopes,
+            Instant expiresAt
+    ) {
+        return new IssueAccessKeyCommand(
+                genesis.novel().id(),
+                "test-actor",
+                scopes,
+                expiresAt,
+                idempotencyKey,
+                new AuditContext("req_" + idempotencyKey, "owner", null, NOW)
+        );
+    }
+
+    private static long count(SqliteDatabase database, String table) throws SQLException {
+        if (!Set.of("access_keys", "audit_events").contains(table)) {
+            throw new IllegalArgumentException("Unexpected test table " + table);
+        }
+        return database.readOnly(connection -> {
+            try (var statement = connection.createStatement();
+                 var result = statement.executeQuery("SELECT COUNT(*) FROM " + table)) {
+                result.next();
+                return result.getLong(1);
+            }
+        });
+    }
+
+    private static Set<String> columns(SqliteDatabase database, String table)
+            throws SQLException {
+        if (!Set.of("access_keys", "audit_events").contains(table)) {
+            throw new IllegalArgumentException("Unexpected test table " + table);
+        }
+        return database.readOnly(connection -> {
+            Set<String> result = new LinkedHashSet<>();
+            try (var statement = connection.createStatement();
+                 var rows = statement.executeQuery("PRAGMA table_info(" + table + ")")) {
+                while (rows.next()) {
+                    result.add(rows.getString("name"));
+                }
+            }
+            return Set.copyOf(result);
+        });
+    }
+
+    private static byte[] hmac(byte[] secret) throws Exception {
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(pepper(), "HmacSHA256"));
+        return mac.doFinal(secret);
+    }
+
+    private static byte[] pepper() {
+        byte[] pepper = new byte[32];
+        Arrays.fill(pepper, (byte) 0x5a);
+        return pepper;
+    }
+
+    private static boolean contains(byte[] haystack, byte[] needle) {
+        outer:
+        for (int offset = 0; offset <= haystack.length - needle.length; offset++) {
+            for (int index = 0; index < needle.length; index++) {

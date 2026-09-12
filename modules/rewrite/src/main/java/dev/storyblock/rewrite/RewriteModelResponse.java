@@ -1,8 +1,6 @@
 package dev.storyblock.rewrite;
 
-import dev.storyblock.domain.CanonicalValues;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,12 +11,12 @@ public record RewriteModelResponse(
         String inputHash,
         List<RewriteModelReplacement> replacements
 ) {
-    private static final Pattern MODEL_ID = Pattern.compile("[A-Za-z0-9._:/-]{1,128}");
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
-    private static final Set<String> FIELDS = Set.of(
+    static final Pattern MODEL_ID = Pattern.compile("[A-Za-z0-9._:/-]{1,128}");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Set<String> FIELDS = Set.of(
             "model", "output", "protocol_version"
     );
-    private static final Set<String> OUTPUT_FIELDS = Set.of(
+    static final Set<String> OUTPUT_FIELDS = Set.of(
             "input_hash", "replacements"
     );
 
@@ -65,14 +63,6 @@ public record RewriteModelResponse(
     }
 
     public Map<String, Object> canonicalValue() {
-        Map<String, Object> output = new LinkedHashMap<>();
-        output.put("input_hash", inputHash);
-        output.put("replacements", replacements.stream()
-                .map(RewriteModelReplacement::canonicalValue).toList());
-        Map<String, Object> value = new LinkedHashMap<>();
-        value.put("model", modelId);
-        value.put("output", output);
-        value.put("protocol_version", RewriteModule.MODEL_PROTOCOL_VERSION);
-        return CanonicalValues.freezeMap(value, "rewrite_model_response");
+        return RewriteModelResponseCanonicalValueAction.canonicalValue(this);
     }
 }

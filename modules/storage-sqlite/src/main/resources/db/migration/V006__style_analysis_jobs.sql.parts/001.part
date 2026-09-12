@@ -1,0 +1,66 @@
+CREATE TABLE IF NOT EXISTS analysis_jobs (
+    job_id TEXT PRIMARY KEY,
+    analysis_id TEXT NOT NULL UNIQUE,
+    novel_id TEXT NOT NULL,
+    revision_id TEXT NOT NULL,
+    revision_hash TEXT NOT NULL CHECK (
+        length(revision_hash) = 71
+        AND substr(revision_hash, 1, 7) = 'sha256:'
+        AND substr(revision_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    profile_id TEXT NOT NULL,
+    profile_version_id TEXT NOT NULL,
+    profile_version_hash TEXT NOT NULL CHECK (
+        length(profile_version_hash) = 71
+        AND substr(profile_version_hash, 1, 7) = 'sha256:'
+        AND substr(profile_version_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    analyzer_contract_hash TEXT NOT NULL CHECK (
+        length(analyzer_contract_hash) = 71
+        AND substr(analyzer_contract_hash, 1, 7) = 'sha256:'
+        AND substr(analyzer_contract_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    window_configuration_hash TEXT NOT NULL CHECK (
+        length(window_configuration_hash) = 71
+        AND substr(window_configuration_hash, 1, 7) = 'sha256:'
+        AND substr(window_configuration_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    snapshot_hash TEXT NOT NULL CHECK (
+        length(snapshot_hash) = 71
+        AND substr(snapshot_hash, 1, 7) = 'sha256:'
+        AND substr(snapshot_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    snapshot_json TEXT NOT NULL CHECK (
+        json_valid(snapshot_json) AND json_type(snapshot_json) = 'object'
+    ),
+    status TEXT NOT NULL CHECK (
+        status IN ('queued', 'running', 'succeeded', 'failed')
+    ),
+    lease_owner TEXT CHECK (
+        lease_owner IS NULL OR length(lease_owner) BETWEEN 1 AND 128
+    ),
+    lease_until TEXT CHECK (
+        lease_until IS NULL OR julianday(lease_until) IS NOT NULL
+    ),
+    attempt INTEGER NOT NULL CHECK (attempt BETWEEN 0 AND 20),
+    max_attempts INTEGER NOT NULL CHECK (max_attempts BETWEEN 1 AND 20),
+    idempotency_key TEXT NOT NULL CHECK (length(idempotency_key) BETWEEN 1 AND 200),
+    request_hash TEXT NOT NULL CHECK (
+        length(request_hash) = 71
+        AND substr(request_hash, 1, 7) = 'sha256:'
+        AND substr(request_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    result_artifact_id TEXT,
+    result_hash TEXT CHECK (
+        result_hash IS NULL OR (
+            length(result_hash) = 71
+            AND substr(result_hash, 1, 7) = 'sha256:'
+            AND substr(result_hash, 8) NOT GLOB '*[^0-9a-f]*'
+        )
+    ),
+    failure_code TEXT,
+    request_id TEXT NOT NULL CHECK (length(request_id) BETWEEN 1 AND 128),
+    actor_id TEXT NOT NULL CHECK (length(actor_id) BETWEEN 1 AND 128),
+    actor_key_id TEXT,
+    retention_until TEXT NOT NULL CHECK (julianday(retention_until) IS NOT NULL),
+    created_at TEXT NOT NULL CHECK (julianday(created_at) IS NOT NULL),

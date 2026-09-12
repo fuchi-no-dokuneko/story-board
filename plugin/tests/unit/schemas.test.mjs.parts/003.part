@@ -1,0 +1,2 @@
+  assert.ok(background.issues.some(({ path, message }) => path.endsWith("/background") && message.includes("plain")));
+});

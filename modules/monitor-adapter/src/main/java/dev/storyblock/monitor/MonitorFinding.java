@@ -62,7 +62,7 @@ public record MonitorFinding(
         ), "monitor_finding");
     }
 
-    private static String string(Map<String, Object> value, String field) {
+    static String string(Map<String, Object> value, String field) {
         Object raw = value.get(field);
         if (!(raw instanceof String text)) {
             throw new IllegalArgumentException("Monitor finding." + field + " must be a string");

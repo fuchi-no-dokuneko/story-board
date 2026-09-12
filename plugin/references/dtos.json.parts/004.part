@@ -1,0 +1,58 @@
+        "server/src/main/java/dev/storyblock/api/http/ApiExceptionHandler.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiProblemFactory.java",
+        "server/src/main/java/dev/storyblock/api/http/ApiProblemWriter.java",
+        "server/src/test/resources/golden/api-problem-details.json"
+      ]
+    },
+    {
+      "name": "ArtifactResponse",
+      "file": "dtos/ArtifactResponse.schema.json",
+      "description": "Opaque artifact bytes. Interpret Content-Type, X-Artifact-Codec, ETag, and Content-Disposition response headers.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+        "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+      ]
+    },
+    {
+      "name": "BlockDraft",
+      "file": "dtos/BlockDraft.schema.json",
+      "description": "Code-derived StoryBlock Block Draft JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "BlockMetadata",
+      "file": "dtos/BlockMetadata.schema.json",
+      "description": "Code-derived StoryBlock Block Metadata JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "name": "BlockRangeGuard",
+      "file": "dtos/BlockRangeGuard.schema.json",
+      "description": "Code-derived StoryBlock Block Range Guard JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "BlockVersionRef",
+      "file": "dtos/BlockVersionRef.schema.json",
+      "description": "Code-derived StoryBlock Block Version Ref JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [

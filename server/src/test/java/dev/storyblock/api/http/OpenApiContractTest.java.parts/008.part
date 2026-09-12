@@ -1,0 +1,60 @@
+        Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
+        Map<String, Object> transition = map(schemas.get("StyleProfileTransitionRequest"));
+        assertTrue(strings(transition.get("required"))
+                .contains("confirm_generated_corpus_promotion"));
+
+        Map<String, Object> featureSet = map(schemas.get("StyleFeatureSet"));
+        assertEquals(5, map(map(featureSet.get("properties")).get("channels"))
+                .get("minItems"));
+        Map<String, Object> report = map(schemas.get("StyleDistanceReport"));
+        assertEquals(
+                Boolean.TRUE,
+                map(map(report.get("properties")).get("token_kl_diagnostic_only"))
+                        .get("const")
+        );
+        Object primaryMetrics = map(map(map(
+                schemas.get("StyleChannelDistance")
+        ).get("properties")).get("primary_metric")).get("enum");
+        assertTrue(strings(primaryMetrics).stream().noneMatch(metric ->
+                metric.contains("kl")
+        ));
+        assertTrue(schemas.containsKey("StyleWindow"));
+        assertTrue(schemas.containsKey("StyleCalibrationProfile"));
+        assertTrue(schemas.containsKey("StyleWindowScore"));
+        Map<String, Object> decision = map(schemas.get("StyleAnomalyDecision"));
+        assertEquals(Set.of(
+                "normal", "warning", "rewrite_candidate", "topic_shift_only",
+                "low_confidence"
+        ), strings(map(map(decision.get("properties")).get("state")).get("enum")));
+        assertTrue(string(map(map(decision.get("properties"))
+                .get("localized_micro_window_ids")).get("description"))
+                .contains("never sufficient"));
+        assertEquals(5, map(map(decision.get("properties"))
+                .get("independent_q99_channels")).get("maxItems"));
+    }
+
+    @Test
+    void everyLocalReferenceResolves() {
+        walkReferences(document, "#");
+    }
+
+    private static void assertStrongEtag(String operationKey, String status) {
+        Map<String, Object> response = map(map(operation(operationKey).get("responses"))
+                .get(status));
+        assertEquals(
+                "#/components/headers/StrongEtag",
+                map(map(response.get("headers")).get("ETag")).get("$ref"),
+                operationKey + " " + status
+        );
+    }
+
+    private static Map<String, Object> operation(String key) {
+        return operations.stream()
+                .filter(operation -> operation.key().equals(key))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("missing operation " + key))
+                .contract();
+    }
+
+    private static Set<String> parameterRefs(Map<String, Object> operation) {
+        Set<String> refs = new HashSet<>();

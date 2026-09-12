@@ -1,0 +1,59 @@
+                            ))
+                    )),
+                    Set.of(),
+                    null
+            ));
+            case "missing_presence_event" -> report(validateBlock(
+                    "阿明進入房間。", BlockMetadata.empty(), Set.of(), null
+            ));
+            case "current_evidence" -> report(validateBlock(
+                    "完整一句。",
+                    new BlockMetadata(Map.of(
+                            "provenance", Map.of("evidence", List.of(evidence("完整一句。", true)))
+                    )),
+                    Set.of(),
+                    null
+            ));
+            case "stale_evidence" -> report(validateBlock(
+                    "完整一句。",
+                    new BlockMetadata(Map.of(
+                            "provenance", Map.of("evidence", List.of(evidence("完整一句。", false)))
+                    )),
+                    Set.of(),
+                    null
+            ));
+            case "evidenced_unknown_upgrade" -> report(validateBlock(
+                    "完整一句。",
+                    new BlockMetadata(Map.of(
+                            "weather", Map.of(
+                                    "mode", "explicit",
+                                    "value", "rain",
+                                    "evidence", evidence("完整一句。", true)
+                            )
+                    )),
+                    Set.of(),
+                    new BlockMetadata(Map.of("weather", Map.of("mode", "unknown")))
+            ));
+            case "invented_unknown_upgrade" -> report(validateBlock(
+                    "完整一句。",
+                    new BlockMetadata(Map.of(
+                            "weather", Map.of("mode", "explicit", "value", "rain")
+                    )),
+                    Set.of(),
+                    new BlockMetadata(Map.of("weather", Map.of("mode", "unknown")))
+            ));
+            case "adjacent_range" -> operationReport(false, false);
+            case "non_adjacent_range" -> operationReport(true, false);
+            case "matching_revision" -> operationReport(false, false);
+            case "stale_revision" -> operationReport(false, true);
+            default -> throw new IllegalArgumentException("Unknown golden scenario " + scenario);
+        };
+    }
+
+    private ValidationReport operationReport(boolean nonAdjacent, boolean staleRevision) {
+        RevisionManifest base = revision();
+        NarrativeScene scene = base.novel().chapters().getFirst().scenes().getFirst();
+        String baseHash = NarrativeCanonicalMapper.toCanonical(base).contentHash();
+        BlockRangeGuard guard;
+        if (nonAdjacent) {
+            List<BlockVersionRef> references = List.of(

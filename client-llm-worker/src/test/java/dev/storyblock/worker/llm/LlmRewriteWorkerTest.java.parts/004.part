@@ -1,0 +1,72 @@
+                200,
+                response(input, input.blocks().get(1).blockId(), TOKEN + ".")
+        ));
+        reflection.start();
+        try {
+            LlmWorkerSettings settings = settings(reflection, 64 * 1024);
+            LlmWorkerProtocolException failure = assertThrows(
+                    LlmWorkerProtocolException.class,
+                    () -> new HttpLlmModelTransport(
+                            noRedirectClient(), settings
+                    ).invoke(CanonicalJson.bytes(Map.of("safe", true)))
+            );
+            assertFalse(failure.getMessage().contains(TOKEN));
+        } finally {
+            reflection.stop(0);
+        }
+
+        HttpServer oversized = server();
+        oversized.createContext("/invoke", exchange -> respond(
+                exchange, 200, new byte[2048]
+        ));
+        oversized.start();
+        try {
+            assertThrows(
+                    LlmWorkerProtocolException.class,
+                    () -> new HttpLlmModelTransport(
+                            noRedirectClient(), settings(oversized, 1024)
+                    ).invoke(CanonicalJson.bytes(Map.of("safe", true)))
+            );
+        } finally {
+            oversized.stop(0);
+        }
+    }
+
+    @Test
+    void transportDoesNotFollowRedirectsAndSettingsRejectIpv6() throws Exception {
+        AtomicInteger redirectedRequests = new AtomicInteger();
+        HttpServer destination = server();
+        destination.createContext("/invoke", exchange -> {
+            redirectedRequests.incrementAndGet();
+            respond(exchange, 200, CanonicalJson.bytes(Map.of("unexpected", true)));
+        });
+        destination.start();
+        HttpServer redirect = server();
+        redirect.createContext("/invoke", exchange -> {
+            exchange.getResponseHeaders().add(
+                    "Location",
+                    "https://127.0.0.1:" + destination.getAddress().getPort()
+                            + "/invoke"
+            );
+            exchange.sendResponseHeaders(302, -1);
+            exchange.close();
+        });
+        redirect.start();
+        try {
+            assertThrows(
+                    LlmWorkerProtocolException.class,
+                    () -> new HttpLlmModelTransport(
+                            noRedirectClient(), settings(redirect, 64 * 1024)
+                    ).invoke(CanonicalJson.bytes(Map.of("safe", true)))
+            );
+            assertEquals(0, redirectedRequests.get());
+        } finally {
+            redirect.stop(0);
+            destination.stop(0);
+        }
+
+        assertThrows(IllegalArgumentException.class, () -> new LlmWorkerSettings(
+                URI.create("http://[::1]/invoke"),
+                TOKEN,
+                MODEL,
+                Duration.ofSeconds(5),

@@ -1,0 +1,61 @@
+        assertEquals(2, firstScene(merged).blocks().size());
+
+        NarrativeBlock original = scene.blocks().getFirst();
+        BlockRangeGuard extendRange = BlockRangeGuard.capture(scene, original.id(), original.id());
+        RevisionManifest extended = editor.apply(
+                base,
+                new EditOperation.ExtendBlock(
+                        context(base, "extend"),
+                        extendRange,
+                        EditOperation.ExtensionPosition.AFTER,
+                        new BlockDraft(
+                                original.id(),
+                                original.text() + "補充一句。",
+                                original.metadata(),
+                                original.extensions()
+                        )
+                ),
+                Ids.RevisionId.create(),
+                NEXT_REVISION_TIME
+        );
+        NarrativeBlock extendedBlock = firstScene(extended).blocks().getFirst();
+        assertEquals(original.id(), extendedBlock.id());
+        assertNotEquals(original.versionId(), extendedBlock.versionId());
+    }
+
+    @Test
+    void movePreservesStableAndVersionIdentityAcrossScenes() {
+        RevisionManifest base = fixture();
+        NarrativeScene source = firstScene(base);
+        NarrativeScene destination = secondScene(base);
+        NarrativeBlock moving = source.blocks().getFirst();
+        EditOperation.MoveBlockRange operation = new EditOperation.MoveBlockRange(
+                context(base, "move"),
+                BlockRangeGuard.capture(source, moving.id(), moving.id()),
+                InsertionPoint.endOf(destination.id()),
+                SceneBoundaryContract.capture(source),
+                SceneBoundaryContract.capture(destination)
+        );
+
+        RevisionManifest moved = editorWithoutRestores().apply(
+                base, operation, Ids.RevisionId.create(), NEXT_REVISION_TIME
+        );
+        NarrativeBlock movedBlock = secondScene(moved).blocks().getLast();
+
+        assertEquals(moving.id(), movedBlock.id());
+        assertEquals(moving.versionId(), movedBlock.versionId());
+        assertEquals(2, firstScene(moved).blocks().size());
+        assertEquals(2, secondScene(moved).blocks().size());
+    }
+
+    @Test
+    void metadataAndSceneSeedCorrectionsAreTypedAndCreateExpectedVersions() {
+        RevisionManifest base = fixture();
+        NarrativeScene scene = firstScene(base);
+        NarrativeBlock block = scene.blocks().getFirst();
+        BlockMetadata corrected = new BlockMetadata(Map.of("narrative_mode", "action"));
+        RevisionManifest metadataRevision = editorWithoutRestores().apply(
+                base,
+                new EditOperation.CorrectBlockMeta(
+                        context(base, "meta"),
+                        scene.id(),

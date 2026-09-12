@@ -1,59 +1,9 @@
-# Secure self-signed deployment
+# Local HTTPS deployment
 
-StoryBlock terminates HTTPS in the API process. There is no reverse proxy,
-certificate upload, ACME flow, or external certificate issuer. The first start
-generates a self-signed server leaf with `CA=false`; its private key never leaves
-the local repository installation or the private container volume.
+EN: Run ./install.sh, then ./scripts/local-server.sh start. The installer is unprivileged and repository-local. HTTPS terminates inside the API with an automatically generated CA=false leaf. The standalone default is 0.0.0.0:8443. Use start --policy local for loopback with a private tunnel. See the installation and port guides.
 
-The default bind is `127.0.0.1:8443`. Keep that default and use an SSH tunnel for
-remote access. A private-interface deployment may set all three values together:
+繁體中文：執行 ./install.sh，再執行 ./scripts/local-server.sh start。安裝不需特權，所有寫入留在儲存庫。HTTPS 由 API 內部終止，憑證自動產生且 CA=false。獨立啟動預設為 0.0.0.0:8443；使用 start --policy local 限定 loopback 並搭配私有通道。請參閱安裝與連接埠指南。
 
-```text
-STORYBLOCK_BIND_ADDRESS=192.168.1.20
-STORYBLOCK_HTTPS_PORT=8443
-STORYBLOCK_TLS_HOST=192.168.1.20
-```
+简体中文：执行 ./install.sh，再执行 ./scripts/local-server.sh start。安装不需特权，所有写入留在仓库。HTTPS 由 API 内部终止，证书自动生成且 CA=false。独立启动默认为 0.0.0.0:8443；使用 start --policy local 限定 loopback 并配合私有通道。请参阅安装与端口指南。
 
-Changing `STORYBLOCK_TLS_HOST` regenerates the self-signed leaf with a matching
-DNS or IPv4 subject alternative name. No certificate or key needs to be supplied
-by the operator. Browsers will show an untrusted-certificate warning because the
-leaf has no issuer; this is expected. Never expose this deployment directly to
-the public internet.
-
-## Repository-local installation
-
-The supported non-container installation writes only below
-`.local/storyblock/` in the repository. It also redirects Maven, temporary, and
-cache files into that directory.
-
-```bash
-./install.sh
-./scripts/local-server.sh start
-./scripts/local-server.sh status
-./scripts/local-server.sh stop
-```
-
-The only host prerequisite is Java 21 with `java` and `keytool`. The installer
-does not invoke `sudo`, require root, write to system directories, or upload TLS
-material. The owner credential is generated at
-`.local/storyblock/secrets/owner-token` and is never printed.
-
-## Container installation
-
-Run `./install.sh` once to create repository-local secret files, then use a
-rootless container runtime if containers are desired:
-
-```bash
-docker compose build
-docker compose up -d api
-```
-
-The API generates its private key in `storyblock-tls-private`. Workers receive
-only a separate public trust store from `storyblock-tls-public`; they cannot read
-the API private key. The API is the only application service with the
-`storyblock-data` volume. Worker profiles do not mount the database or container
-socket. The LLM worker has neither canonical storage nor API commit credentials.
-
-The encrypted backup destination must be an off-host versioned mount. Keep the
-backup encryption key outside both the SQLite volume and backup destination, as
-described in `backup-and-restore.md`.
+[Detailed notes / 詳細筆記 / 详细笔记](secure-deployment.notes.txt)

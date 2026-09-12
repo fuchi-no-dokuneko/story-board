@@ -64,7 +64,7 @@ public record BlockRangeGuard(
         );
     }
 
-    private static int indexOf(List<NarrativeBlock> blocks, Ids.BlockId blockId) {
+    static int indexOf(List<NarrativeBlock> blocks, Ids.BlockId blockId) {
         for (int index = 0; index < blocks.size(); index++) {
             if (blocks.get(index).id().equals(blockId)) {
                 return index;

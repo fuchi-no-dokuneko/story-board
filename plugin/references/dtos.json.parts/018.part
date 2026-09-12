@@ -1,0 +1,55 @@
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+        "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+      ]
+    },
+    {
+      "name": "RewriteProposalRequest",
+      "file": "dtos/RewriteProposalRequest.schema.json",
+      "description": "Code-derived StoryBlock Rewrite Proposal Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+        "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+      ]
+    },
+    {
+      "name": "RewriteProposalResponse",
+      "file": "dtos/RewriteProposalResponse.schema.json",
+      "description": "Code-derived StoryBlock Rewrite Proposal Response JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+        "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+      ]
+    },
+    {
+      "name": "RewriteSourceBlock",
+      "file": "dtos/RewriteSourceBlock.schema.json",
+      "description": "Code-derived StoryBlock Rewrite Source Block JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+        "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+      ]
+    },
+    {
+      "name": "RewriteWorkerInput",
+      "file": "dtos/RewriteWorkerInput.schema.json",
+      "description": "Code-derived StoryBlock Rewrite Worker Input JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/RewriteProposalController.java",
+        "modules/rewrite/src/main/java/dev/storyblock/rewrite/RewriteWorkerInput.java",
+        "modules/rewrite-policy/src/main/java/dev/storyblock/rewrite/policy/RewriteCandidateReservation.java"
+      ]
+    },
+    {
+      "name": "SceneBoundaryContract",
+      "file": "dtos/SceneBoundaryContract.schema.json",
+      "description": "Code-derived StoryBlock Scene Boundary Contract JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [

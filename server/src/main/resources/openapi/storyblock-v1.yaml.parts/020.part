@@ -1,0 +1,98 @@
+          $ref: "#/components/schemas/OperationEnvelope"
+        candidate_revision_id:
+          type: string
+        candidate_created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    CommitRequest:
+      allOf:
+        - $ref: "#/components/schemas/EditPreviewRequest"
+    UndoPreviewRequest:
+      type: object
+      required: [base_revision_id, restore_revision_id, expected_restore_hash, candidate_revision_id, candidate_created_at]
+      properties:
+        base_revision_id:
+          type: string
+        restore_revision_id:
+          type: string
+        expected_restore_hash:
+          type: string
+        candidate_revision_id:
+          type: string
+        candidate_created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    PreviewResponse:
+      type: object
+      required: [base_revision_id, base_hash, normalized_operation, candidate_hash, diff, render_packet, violations, warnings, committable]
+      properties:
+        base_revision_id:
+          type: string
+        base_hash:
+          type: string
+        normalized_operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        candidate_hash:
+          type: string
+        diff:
+          type: object
+        render_packet:
+          oneOf:
+            - $ref: "#/components/schemas/RenderPacket"
+            - type: "null"
+        violations:
+          type: array
+          items:
+            type: object
+        warnings:
+          type: array
+          items:
+            type: object
+        committable:
+          type: boolean
+      additionalProperties: false
+    CommitResponse:
+      type: object
+      required: [revision_id, sequence, content_hash, operation_id, idempotent_replay]
+      properties:
+        revision_id:
+          type: string
+        sequence:
+          type: integer
+          minimum: 1
+        content_hash:
+          type: string
+        operation_id:
+          type: string
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false
+    DetectorRunRequest:
+      type: object
+      required: [revision_id, revision_hash]
+      properties:
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        from_block_id:
+          type: [string, "null"]
+        to_block_id:
+          type: [string, "null"]
+      additionalProperties: false
+    DetectorRunResponse:
+      type: object
+      required: [revision_id, revision_hash, rule_version, findings]
+      properties:
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+        rule_version:
+          type: string
+        findings:
+          type: array
+          items:

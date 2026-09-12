@@ -1,0 +1,48 @@
+        byte[] exportBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "format", CanonicalExportFormat.PACKAGE.canonicalName()
+        ));
+        MvcResult acceptedResult = mvc.perform(post("/v1/novels/{novelId}/exports", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "http-export-1")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(exportBody))
+                .andExpect(status().isAccepted())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.status").value("queued"))
+                .andReturn();
+        Map<String, Object> accepted = object(acceptedResult);
+        String jobId = stringField(accepted, "job_id");
+
+        MvcResult jobResult = mvc.perform(get("/v1/jobs/{jobId}", jobId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.novel_id").value(novelId))
+                .andExpect(jsonPath("$.revision_id").value(revisionId))
+                .andExpect(jsonPath("$.status").value("succeeded"))
+                .andExpect(jsonPath("$.attempt").value(1))
+                .andReturn();
+        Map<String, Object> job = object(jobResult);
+        String artifactId = stringField(job, "result_artifact_id");
+        assertEquals("/v1/artifacts/" + artifactId, stringField(job, "result_uri"));
+
+        MvcResult artifactResult = mvc.perform(get("/v1/artifacts/{artifactId}", artifactId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(
+                        "application/vnd.storyblock.package+json"
+                ))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"))
+                .andExpect(header().string(
+                        CanonicalTransferController.ARTIFACT_CODEC_HEADER, "identity"
+                ))
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION, containsString("attachment")
+                ))
+                .andReturn();
+        byte[] artifactBytes = artifactResult.getResponse().getContentAsByteArray();
+        CanonicalNovelPackage exported = CanonicalNovelPackage.parse(artifactBytes);
+        assertEquals(revision.contentHash(), exported.manifest().headHash());
+        assertEquals(
+                quotedEtag(CanonicalJson.hashBytes(artifactBytes)),

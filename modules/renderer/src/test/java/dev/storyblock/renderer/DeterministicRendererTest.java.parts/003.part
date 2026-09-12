@@ -1,0 +1,64 @@
+    void unknownAndNotApplicableValuesAreNeverPromotedByInheritance() {
+        RenderPacket packet = new DeterministicRenderer().render(
+                goldenRevision(), HASH, RenderRange.all()
+        );
+
+        assertEquals(
+                Map.of("mode", "unknown"),
+                packet.resolvedMetadata().getFirst().after().get("weather")
+        );
+        assertEquals(
+                Map.of("mode", "unknown"),
+                packet.sceneBoundaries().getLast().stateOut().get("time")
+        );
+        assertEquals(
+                Map.of("mode", "not_applicable"),
+                packet.sceneBoundaries().getLast().stateOut().get("weather")
+        );
+    }
+
+    @Test
+    void canonicalProjectionUsesStableWireNamesAndScalarIds() {
+        RenderPacket packet = new DeterministicRenderer().render(
+                goldenRevision(), HASH, RenderRange.all()
+        );
+        Map<String, Object> canonical = packet.canonicalValue();
+
+        assertEquals(GOLDEN_NOVEL.value(), canonical.get("novel_id"));
+        assertEquals("Kai waits.\nMin enters.\nRain stops.", canonical.get("rendered_text"));
+        assertTrue(canonical.containsKey("resolved_meta"));
+        assertTrue(canonical.containsKey("scene_boundaries"));
+        assertTrue(canonical.containsKey("offset_map"));
+        assertEquals(CanonicalJson.hash(canonical), CanonicalJson.hash(packet.canonicalValue()));
+    }
+
+    @Test
+    void subrangeRetainsStateResolvedFromPrecedingBlocks() {
+        RevisionManifest revision = revision();
+        Ids.BlockId secondBlock = revision.liveBlocks().getLast().id();
+
+        RenderPacket packet = new DeterministicRenderer().render(
+                revision, HASH, RenderRange.inclusive(secondBlock, secondBlock)
+        );
+
+        assertEquals(1, packet.blocks().size());
+        assertEquals(List.of("char_a", "char_b"),
+                packet.resolvedMetadata().getFirst().before().get("present_character_ids"));
+        assertEquals("他坐下。", packet.renderedText());
+    }
+
+    @Test
+    void emptyRevisionProducesAnEmptyAllRangePacket() {
+        RevisionManifest populated = revision();
+        NarrativeScene original = populated.novel().chapters().getFirst().scenes().getFirst();
+        NarrativeScene emptyScene = original.withBlocks(List.of());
+        NarrativeChapter emptyChapter = new NarrativeChapter(
+                populated.novel().chapters().getFirst().id(),
+                populated.novel().chapters().getFirst().orderKey(),
+                populated.novel().chapters().getFirst().title(),
+                List.of(emptyScene),
+                populated.novel().chapters().getFirst().extensions()
+        );
+        RevisionManifest empty = new RevisionManifest(
+                Ids.RevisionId.create(),
+                populated.id(),

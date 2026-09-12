@@ -1,0 +1,58 @@
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(submissionBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
+
+        MvcResult created = mvc.perform(submit.with(userWithScope("monitor:submit")))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.output_kind").value("finding"))
+                .andExpect(jsonPath("$.state").value("current"))
+                .andExpect(jsonPath("$.stale_reasons.length()").value(0))
+                .andExpect(jsonPath("$.rebase_allowed").value(false))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        String runId = stringField(object(created), "monitor_run_id");
+
+        mvc.perform(submit.with(userWithScope("monitor:submit")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.monitor_run_id").value(runId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        mvc.perform(get("/v1/novels/{novelId}/monitor-runs/{runId}", novelId, runId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.monitor_run_id").value(runId))
+                .andExpect(jsonPath("$.state").value("current"))
+                .andExpect(jsonPath("$.rebase_allowed").value(false));
+    }
+
+    @Test
+    void realBearerCredentialsEnforceScopesNovelBoundariesAndRevocation()
+            throws Exception {
+        CanonicalRevision first = genesis();
+        CanonicalRevision second = genesis();
+        String firstNovel = stringField(first.canonicalContent(), "novel_id");
+        String secondNovel = stringField(second.canonicalContent(), "novel_id");
+        String secondRevision = stringField(second.canonicalContent(), "revision_id");
+        importAsOwner(first, "security-import-first");
+        importAsOwner(second, "security-import-second");
+
+        Map<String, Object> key = issueAsOwner(
+                first,
+                "security-issue-first",
+                List.of(
+                        "novel:read",
+                        "novel:analyze",
+                        "novel:admin",
+                        "novel:commit",
+                        "style:analyze",
+                        "rewrite:propose"
+                )
+        );
+        String bearer = stringField(key, "secret");
+        String keyId = stringField(key, "key_id");
+
+        mvc.perform(get("/v1/admin/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isForbidden())

@@ -1,0 +1,57 @@
+      "file": "dtos/MonitorFindingOutput.schema.json",
+      "description": "Code-derived StoryBlock Monitor Finding Output JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorLocalInvariants",
+      "file": "dtos/MonitorLocalInvariants.schema.json",
+      "description": "Code-derived StoryBlock Monitor Local Invariants JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorPacket",
+      "file": "dtos/MonitorPacket.schema.json",
+      "description": "Code-derived StoryBlock Monitor Packet JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorPacketRequest",
+      "file": "dtos/MonitorPacketRequest.schema.json",
+      "description": "Code-derived StoryBlock Monitor Packet Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorPacket.java",
+        "modules/monitor-adapter/src/main/java/dev/storyblock/monitor/MonitorRunStatus.java"
+      ]
+    },
+    {
+      "name": "MonitorProposedOperationOutput",
+      "file": "dtos/MonitorProposedOperationOutput.schema.json",
+      "description": "Code-derived StoryBlock Monitor Proposed Operation Output JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "MonitorRunStatus",
+      "file": "dtos/MonitorRunStatus.schema.json",

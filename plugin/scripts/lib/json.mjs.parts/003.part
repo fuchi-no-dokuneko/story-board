@@ -1,0 +1,12 @@
+export function sha256(value) {
+  const bytes = Buffer.isBuffer(value) ? value : Buffer.from(value, "utf8");
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+export function canonicalHash(value) {
+  return `sha256:${sha256(stableStringify(value))}`;
+}
+
+export function deriveIdempotencyKey(namespace, value) {
+  return `storyblock-${namespace}-${sha256(stableStringify(value))}`.slice(0, 200);
+}

@@ -1,0 +1,66 @@
+package dev.storyblock.contracts;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+
+class CanonicalRevisionTest {
+    @Test
+    void goldenCanonicalBytesAndHashAreRepeatable() throws IOException {
+        CanonicalRevision first = CanonicalRevision.of(baseContent());
+        CanonicalRevision second = CanonicalRevision.of(baseContent());
+
+        assertArrayEquals(readFixture("canonical-revision-content.json"), first.canonicalBytes());
+        assertArrayEquals(first.canonicalBytes(), second.canonicalBytes());
+        assertEquals(readFixtureText("canonical-revision-content.sha256"), first.contentHash());
+        assertEquals(first.contentHash(), second.contentHash());
+
+        CanonicalRevision parsed = CanonicalRevision.parseEnvelope(first.envelopeBytes());
+        assertArrayEquals(first.canonicalBytes(), parsed.canonicalBytes());
+    }
+
+    @Test
+    void derivedRenderAndCacheDataNeverAffectCanonicalBytesOrHash() {
+        CanonicalRevision first = CanonicalRevision.of(
+                baseContent(),
+                Map.of("render", Map.of("text", "first"), "cache", Map.of("hit", true))
+        );
+        CanonicalRevision second = CanonicalRevision.of(
+                baseContent(),
+                Map.of("render", Map.of("text", "second"), "cache", Map.of("hit", false))
+        );
+
+        assertArrayEquals(first.canonicalBytes(), second.canonicalBytes());
+        assertEquals(first.contentHash(), second.contentHash());
+        assertNotEquals(
+                new String(first.diagnosticExportBytes(), StandardCharsets.UTF_8),
+                new String(second.diagnosticExportBytes(), StandardCharsets.UTF_8)
+        );
+    }
+
+    @Test
+    void unknownRootAndNestedFieldsAreRejected() {
+        Map<String, Object> unknownRoot = baseContent();
+        unknownRoot.put("render_cache", Map.of());
+
+        Map<String, Object> unknownChapter = baseContent();
+        @SuppressWarnings("unchecked")
+        Map<String, Object> chapter = (Map<String, Object>) ((List<?>) unknownChapter.get("chapters")).getFirst();
+        chapter.put("unsafe", true);
+
+        assertThrows(IllegalArgumentException.class, () -> CanonicalRevision.of(unknownRoot));
+        assertThrows(IllegalArgumentException.class, () -> CanonicalRevision.of(unknownChapter));
+    }
+
+    @Test
+    void envelopeWithIncorrectDeclaredHashIsRejected() {

@@ -1,0 +1,9 @@
+                 var result = statement.executeQuery(
+                         "SELECT COUNT(*) FROM " + table + " WHERE " + predicate
+                 )) {
+                result.next();
+                return result.getLong(1);
+            }
+        });
+    }
+}

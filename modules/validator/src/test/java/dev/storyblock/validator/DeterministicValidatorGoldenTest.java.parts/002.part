@@ -1,0 +1,62 @@
+        DeterministicValidator.BlockValidation stale = validateBlock(
+                "阿明進入房間。",
+                new BlockMetadata(Map.of(
+                        "presence_events", List.of(event("enter", false))
+                )),
+                Set.of(),
+                null
+        );
+        ValidationIssue evidence = issue(stale, ValidationCode.EVIDENCE_SPAN_STALE);
+        assertEquals("presence_events[0].evidence", evidence.details().get("evidence_path"));
+    }
+
+    private ValidationReport execute(String scenario) {
+        return switch (scenario) {
+            case "valid_block" -> report(validateBlock(
+                    "完整一句。", BlockMetadata.empty(), Set.of(), null
+            ));
+            case "overlong_block" -> report(validateBlock(
+                    "字".repeat(100) + "。", BlockMetadata.empty(), Set.of(), null
+            ));
+            case "incomplete_block" -> report(validateBlock(
+                    "沒有完整句號", BlockMetadata.empty(), Set.of(), null
+            ));
+            case "single_speaker", "present_speaker" -> report(validateBlock(
+                    "阿明說話。",
+                    new BlockMetadata(Map.of(
+                            "speech", Map.of("direct_speaker_id", "char_ming")
+                    )),
+                    Set.of("char_ming"),
+                    null
+            ));
+            case "multiple_speakers" -> report(validateBlock(
+                    "兩人交談。",
+                    new BlockMetadata(Map.of(
+                            "speech", Map.of(
+                                    "direct_speaker_ids", List.of("char_ming", "char_kei")
+                            )
+                    )),
+                    Set.of("char_ming", "char_kei"),
+                    null
+            ));
+            case "absent_speaker" -> report(validateBlock(
+                    "阿明說話。",
+                    new BlockMetadata(Map.of(
+                            "speech", Map.of("direct_speaker_id", "char_ming")
+                    )),
+                    Set.of("char_kei"),
+                    null
+            ));
+            case "valid_presence_evidence" -> report(validateBlock(
+                    "阿明進入房間。",
+                    new BlockMetadata(Map.of(
+                            "presence_events", List.of(event("enter", true))
+                    )),
+                    Set.of(),
+                    null
+            ));
+            case "missing_presence_evidence" -> report(validateBlock(
+                    "阿明進入房間。",
+                    new BlockMetadata(Map.of(
+                            "presence_events", List.of(Map.of(
+                                    "type", "enter", "character_id", "char_ming"

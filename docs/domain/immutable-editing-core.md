@@ -1,25 +1,9 @@
-# Immutable editing core
+# Immutable editing
 
-ADR-295 implements the canonical `Novel -> Chapter -> Scene -> Block` hierarchy as
-immutable Java records. `RevisionManifest` rejects duplicate chapter, scene, block,
-and block-version identities and derives one selected block version for every live
-block. Scene boundaries remain derived data and are not serialized into canon.
+EN: Typed operations create new revisions; they never modify historical blocks. Range guards bind scene, ordered block/version identities, neighbors, and the existing range digest. Moving preserves identity; restore creates a new child revision with historical content.
 
-The public edit model is the sealed `EditOperation` interface. Its only permitted
-payloads are the ten operations in specification section 6.2; no generic JSON Patch
-or raw-path mutation type exists.
+繁體中文：型別化操作建立新修訂，不修改歷史區塊。範圍保護綁定場景、區塊與版本順序、鄰居及既有範圍摘要。移動保留身分；還原以歷史內容建立新子修訂。
 
-Range operations capture:
+简体中文：类型化操作创建新修订，不修改历史区块。范围保护绑定场景、区块与版本顺序、邻居及既有范围摘要。移动保留身份；还原以历史内容创建新子修订。
 
-- the scene ID and ordered block/version pairs;
-- the immediately preceding and following stable block IDs;
-- a SHA-256 hash over the length-prefixed ordered identity/version sequence.
-
-Validation checks all four values against the immutable base revision. Cross-scene
-moves additionally capture both complete scene boundary contracts. Split and merge
-operations expose source-version-to-result-block provenance mappings.
-
-`NarrativeEditor` applies a validated operation in memory and returns a new revision.
-Moves preserve block and version IDs. Text or canonical metadata changes materialize
-a new block version. Restore selects a historical manifest's exact content in a new
-child revision; it never mutates or deletes the historical revision.
+[Detailed notes / 詳細筆記 / 详细笔记](immutable-editing-core.notes.txt)

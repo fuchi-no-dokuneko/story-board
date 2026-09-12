@@ -1,17 +1,9 @@
-# Integration, concurrency, and security verification
+# Integration verification
 
-The automated suite uses real temporary SQLite databases and Spring MockMvc.
-It covers concurrent readers and writers, WAL checkpointing, stale head CAS,
-multi-novel isolation, scoped/expired/revoked credentials, idempotent retries,
-artifact authorization, durable worker lease recovery, and model prompt
-injection without commit capability.
+EN: Run ./mvnw verify for real SQLite, transaction crash recovery, concurrent writers, deterministic replay, MockMvc routes, and worker HTTPS tests. The author suite and browser tests are separate. The coverage inventory states which boundaries use mocks.
 
-`SqliteProcessCrashTest` launches a separate JVM and terminates it at every
-documented commit stage. Reopening the database must show only genesis: no
-operation, candidate revision, checkpoint, projection change, audit row, or
-head movement can survive a pre-commit process crash.
+繁體中文：執行 ./mvnw verify 可驗證真實 SQLite、交易崩潰回復、併發寫入、確定性重播、MockMvc 路由及工作程式 HTTPS。作者工具與瀏覽器測試分開執行。覆蓋清單列出使用替身的邊界。
 
-Authenticated `/v1` traffic is limited per identity in fixed UTC minute
-windows. The default is 600 requests per minute and can be set with
-`STORYBLOCK_SECURITY_RATE_LIMIT_PER_MINUTE`. Rejection uses the stable 429
-problem contract and a `Retry-After` header.
+简体中文：执行 ./mvnw verify 可验证真实 SQLite、事务崩溃恢复、并发写入、确定性重放、MockMvc 路由及工作程序 HTTPS。作者工具与浏览器测试分开执行。覆盖清单列出使用替身的边界。
+
+[Detailed notes / 詳細筆記 / 详细笔记](integration-security-tests.notes.txt)

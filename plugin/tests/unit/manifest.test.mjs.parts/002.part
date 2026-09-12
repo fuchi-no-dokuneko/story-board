@@ -1,0 +1,2 @@
+  assert.deepEqual(skillJson.runtime.dependencies, []);
+});

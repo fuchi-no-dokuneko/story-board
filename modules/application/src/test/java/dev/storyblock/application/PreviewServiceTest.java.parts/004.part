@@ -1,0 +1,31 @@
+                Ids.BlockId.create(),
+                OrderKey.initial(),
+                "第一句。",
+                BlockMetadata.empty(),
+                Map.of()
+        );
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "Scene",
+                TransitionMode.OPENING,
+                SceneSeed.empty(),
+                List.of(block),
+                Map.of()
+        );
+        NarrativeChapter chapter = new NarrativeChapter(
+                chapterId, OrderKey.initial(), "Chapter", List.of(scene), Map.of()
+        );
+        return new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(Ids.NovelId.create(), List.of(chapter), Map.of())
+        );
+    }
+
+    private static NarrativeScene firstScene(RevisionManifest revision) {
+        return revision.novel().chapters().getFirst().scenes().getFirst();
+    }
+}

@@ -1,0 +1,34 @@
+  if (state.page > 0) {
+    state.page -= 1;
+    loadCatalog({ preserveSelection: false });
+  }
+});
+elements['page-next'].addEventListener('click', () => {
+  if (state.page + 1 < state.totalPages) {
+    state.page += 1;
+    loadCatalog({ preserveSelection: false });
+  }
+});
+elements['library-tab'].addEventListener('click', () => switchView('library'));
+elements['console-tab'].addEventListener('click', () => switchView('console'));
+elements['operator-form'].addEventListener('submit', applyOperatorToken);
+elements['operator-clear'].addEventListener('click', clearOperatorToken);
+elements.send.addEventListener('click', sendConsoleRequest);
+document.querySelectorAll('.quick-requests button').forEach((button) => {
+  button.addEventListener('click', () => {
+    elements.method.value = button.dataset.method;
+    elements.path.value = button.dataset.path;
+    sendConsoleRequest();
+  });
+});
+
+fetch('/actuator/health', { headers: { Accept: 'application/json' } })
+  .then((response) => response.json())
+  .then((health) => {
+    const up = health.status === 'UP';
+    setServiceStatus(up ? 'up' : 'down', up ? 'Service online' : 'Service degraded');
+  })
+  .catch(() => setServiceStatus('down', 'Service unavailable'));
+
+state.selectedNovelId = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
+loadCatalog();

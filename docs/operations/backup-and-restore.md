@@ -1,81 +1,21 @@
-# Backup and restore
+# Local backup and restore / 本機備份還原 / 本机备份恢复
 
-Build the CLI, create a key outside the repository and database volume, then
-run the live backup command:
+EN: Backups are unencrypted Zstandard-compressed SQLite snapshots (`.db.zst`). No backup key, key configuration, or rotation is used. Files stay inside the repository with owner-only permissions. SHA-256 sidecars detect corruption. Restore checks database integrity, counts, and canonical replay in a separate directory.
 
-```bash
-./mvnw -q -pl apps/cli -am package -DskipTests
-umask 077
-openssl rand -base64 48 > /protected/storyblock-backup.key
-export STORYBLOCK_BACKUP_KEY_FILE=/protected/storyblock-backup.key
-scripts/backup.sh data/storyblock.db /offsite/storyblock
-```
+繁體中文：備份為未加密的 Zstandard 壓縮 SQLite 快照（`.db.zst`），不使用備份金鑰、金鑰設定或輪替。檔案留在儲存庫，僅擁有者可讀寫。SHA-256 附檔檢查損壞；還原在獨立目錄檢查資料庫完整性、數量與標準重播。
 
-`backup.sh` uses SQLite's online backup command, runs `integrity_check`,
-compresses the snapshot, encrypts it with a PBKDF2-derived AES-256 key, and
-writes a checksum plus a short manifest containing migration and canonical row
-counts. Publication is atomic. The destination must be a versioned off-host
-mount in production, and the script rejects a key stored beside either the live
-database or backup artifacts.
-
-Successful backups automatically apply the initial retention policy: the most
-recent 48 snapshots, one daily snapshot for 30 days, and one weekly snapshot
-for 12 weeks. Preview deletions without changing files with:
+简体中文：备份为未加密的 Zstandard 压缩 SQLite 快照（`.db.zst`），不使用备份密钥、密钥配置或轮换。文件保留在仓库，仅所有者可读写。SHA-256 附件检查损坏；恢复在独立目录检查数据库完整性、数量与标准重放。
 
 ```bash
-scripts/prune-backups.sh /offsite/storyblock
+./scripts/backup.sh .local/storyblock/data/storyblock.db .local/storyblock/backups
+./scripts/restore-drill.sh .local/storyblock/backups/storyblock-YYYYMMDDTHHMMSSZ.db.zst .local/restore-drill
+./scripts/prune-backups.sh .local/storyblock/backups
 ```
 
-Run an isolated restore drill without replacing the live database:
+EN: Retention keeps the newest 48 snapshots, one per day for 30 days, and one per week for 12 weeks. Pruning previews removals unless `--apply` is supplied. Concurrent backups are serialized and receive distinct filenames. The regression command is `./scripts/test-backup.sh <test-database>`.
 
-```bash
-scripts/restore-drill.sh \
-  /offsite/storyblock/storyblock-YYYYMMDDTHHMMSSZ.db.zst.enc \
-  artifacts/restore-drill
-```
+繁體中文：保留最新 48 份、30 天內每日一份及 12 週內每週一份。清理預設只預覽，指定 `--apply` 才刪除。併發備份依序執行並使用不同檔名。回歸命令為 `./scripts/test-backup.sh <測試資料庫>`。
 
-The drill decrypts into the chosen isolated directory, runs SQLite integrity
-verification, compares migration/revision/operation/artifact counts with the
-backup manifest, replays every novel, checks each head hash, records a
-deterministic full-head render hash, and records measured RTO plus missing
-artifacts in `restore-report.json`. Legacy backups without Flyway history are
-migrated offline and record both source and restored versions. A reused restore
-directory is rejected.
+简体中文：保留最新 48 份、30 天内每日一份及 12 周内每周一份。清理默认只预览，指定 `--apply` 才删除。并发备份依次执行并使用不同文件名。回归命令为 `./scripts/test-backup.sh <测试数据库>`。
 
-## Key rotation and token-pepper loss
-
-Rotate backup encryption without replacing the last known-good artifact:
-
-```bash
-export STORYBLOCK_BACKUP_KEY_FILE=/protected/storyblock-backup-old.key
-export STORYBLOCK_NEW_BACKUP_KEY_FILE=/protected/storyblock-backup-new.key
-scripts/rotate-backup-key.sh \
-  /offsite/storyblock/storyblock-old.db.zst.enc \
-  /offsite/storyblock/storyblock-rotated.db.zst.enc
-```
-
-The command validates the old checksum, decrypts and tests the compressed
-snapshot, encrypts it under a distinct key, decrypts it again for byte
-comparison, and publishes a new artifact with updated sidecars. Run
-`restore-drill.sh` with the new key before retiring the old artifact or key.
-
-The access-token server pepper is not recoverable from stored HMAC digests. If
-it is lost or suspected compromised: disable token issuance, install a new
-pepper in the secret manager, revoke every existing access-key record, record
-the incident and rotation identifier in the audit log, then issue replacement
-keys through the normal owner-authorized flow. There is deliberately no grace
-period in which digests under both peppers are accepted.
-
-## ADR-317 evaluation
-
-Run the labeled style/rewrite evaluation and produce a machine-readable report:
-
-```bash
-scripts/run-adr317-evaluation.sh
-```
-
-The report records the target-corpus train/calibration split, false positives
-and negatives, channel contributions, before/after percentiles, protected fact
-and speaker preservation, long n-gram findings, attempt bounds, and cooldown
-policy. The output is operational evidence under `artifacts/evaluations/` and
-is intentionally excluded from version control.
+[Detailed notes / 詳細筆記 / 详细笔记](backup-and-restore.notes.txt)

@@ -1,0 +1,77 @@
+          "maxLength": 200
+        },
+        "novel_id": {
+          "$ref": "#/$defs/novelId"
+        },
+        "base_revision_id": {
+          "$ref": "#/$defs/revisionId"
+        },
+        "expected_head_hash": {
+          "$ref": "#/$defs/hash"
+        },
+        "type": {
+          "enum": [
+            "correct_block_meta",
+            "delete_block_range",
+            "extend_block",
+            "insert_blocks",
+            "merge_blocks",
+            "move_block_range",
+            "replace_block_range",
+            "restore_revision_content",
+            "set_scene_initial_meta",
+            "split_block"
+          ]
+        },
+        "payload": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "description": "Code-derived StoryBlock Canonical Package JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
+    "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalRevision.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/CanonicalNovelPackage.java"
+  ],
+  "examples": [
+    {
+      "artifacts": [
+
+      ],
+      "manifest": {
+        "artifact_count": 0,
+        "head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "head_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "head_sequence": 0,
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "operation_count": 0,
+        "revision_count": 1,
+        "schema_version": "1.0.0"
+      },
+      "operations": [
+
+      ],
+      "package_version": "1.0.0",
+      "revisions": [
+        {
+          "document": {
+            "chapters": [
+
+            ],
+            "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "created_at": "2026-08-27T12:00:00Z",
+            "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+            "parent_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+            "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+            "schema_version": "1.0.0"
+          },
+          "sequence": 0
+        }
+      ]
+    }
+  ]
+}

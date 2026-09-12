@@ -1,0 +1,51 @@
+                second.getResponse().getContentAsByteArray()
+        );
+
+        String staleHash = "sha256:" + "0".repeat(64);
+        byte[] mismatchedBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", staleHash
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-mismatch")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mismatchedBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"));
+
+        mvc.perform(post("/v1/novels/{novelId}/detector-runs", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "detector-stale")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(staleHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mismatchedBody))
+                .andExpect(status().isPreconditionFailed())
+                .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
+                .andExpect(jsonPath("$.current_revision_id").value(revisionId))
+                .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
+    }
+
+    @Test
+    void monitorPacketsAndSubmissionsUseSeparateLeastPrivilegeScopes() throws Exception {
+        CanonicalRevision revision = detectorRevision();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        String blockId = firstBlockId(revision);
+        importAsOwner(revision, "monitor-import");
+        byte[] packetBody = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
+                "revision_hash", revision.contentHash(),
+                "target_block_id", blockId,
+                "neighbor_count", 1
+        ));
+
+        mvc.perform(post("/v1/novels/{novelId}/monitor-packets", novelId)
+                        .with(userWithScope("novel:analyze"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "packet-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(packetBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));

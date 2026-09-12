@@ -1,0 +1,71 @@
+        assertFalse(low.canTriggerRewrite());
+
+        StyleWindowScore micro = score(
+                window(StyleWindowKind.MICRO, null), highReport(), calibrated
+        );
+        StyleAnomalyDecision microOnly = policy.evaluate(
+                score(operationalWindow, normalReport(), calibrated),
+                List.of(),
+                List.of(micro)
+        );
+        assertEquals(StyleDecisionState.NORMAL, microOnly.state());
+        assertFalse(microOnly.canTriggerRewrite());
+        assertEquals(List.of(micro.window().windowId()),
+                microOnly.localizedMicroWindowIds());
+    }
+
+    @Test
+    void intentionalShiftDowngradesARewriteCandidate() {
+        StyleCalibrationProfile profile = calibratedProfile(30);
+        StyleWindowScore operational = score(
+                window(StyleWindowKind.OPERATIONAL, "Dream sequence"),
+                highReport(),
+                profile
+        );
+        List<StyleWindowScore> sustained = List.of(
+                score(window(
+                        StyleWindowKind.NON_OVERLAP, "Dream sequence"
+                ), highReport(), profile),
+                score(window(
+                        StyleWindowKind.NON_OVERLAP, "Dream sequence"
+                ), highReport(), profile)
+        );
+
+        StyleAnomalyDecision decision = policy.evaluate(
+                operational, sustained, List.of()
+        );
+
+        assertEquals(StyleDecisionState.WARNING, decision.state());
+        assertEquals(StyleDecisionReason.INTENTIONAL_STYLE_SHIFT, decision.reason());
+        assertTrue(decision.intentionalShiftAdjusted());
+        assertFalse(decision.canTriggerRewrite());
+    }
+
+    @Test
+    void overlappingNonOverlapWindowsCannotSustainARewrite() {
+        StyleCalibrationProfile profile = calibratedProfile(30);
+        StyleWindowScore operational = score(
+                window(StyleWindowKind.OPERATIONAL, null), highReport(), profile
+        );
+        Ids.BlockId shared = Ids.BlockId.create();
+        StyleWindowScore first = score(window(
+                StyleWindowKind.NON_OVERLAP,
+                List.of(Ids.BlockId.create(), shared),
+                null
+        ), highReport(), profile);
+        StyleWindowScore second = score(window(
+                StyleWindowKind.NON_OVERLAP,
+                List.of(shared, Ids.BlockId.create()),
+                null
+        ), highReport(), profile);
+
+        assertThrows(IllegalArgumentException.class, () -> policy.evaluate(
+                operational, List.of(first, second), List.of()
+        ));
+    }
+
+    @Test
+    void labeledCalibrationEvaluationReportsConfusionChannelsAndPercentiles()
+            throws Exception {
+        StyleCalibrationProfile profile = calibratedProfile(30);
+        List<EvaluationCase> corpus = List.of(

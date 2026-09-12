@@ -1,0 +1,67 @@
+package dev.storyblock.api.http;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.yaml.snakeyaml.Yaml;
+
+class OpenApiContractTest {
+    private static final Set<String> HTTP_METHODS = Set.of(
+            "get", "post", "put", "patch", "delete"
+    );
+    private static final Set<String> REQUIRED_OPERATIONS = Set.of(
+            "GET /admin/novels",
+            "GET /admin/novels/{novelId}",
+            "POST /agent/novels",
+            "POST /novels",
+            "POST /imports",
+            "GET /novels/{novelId}",
+            "GET /novels/{novelId}/revisions/{revisionId}",
+            "POST /novels/{novelId}/renders",
+            "POST /novels/{novelId}/pdf-renders",
+            "POST /novels/{novelId}/images",
+            "POST /novels/{novelId}/edit-previews",
+            "POST /novels/{novelId}/commits",
+            "POST /novels/{novelId}/undo-previews",
+            "POST /novels/{novelId}/detector-runs",
+            "POST /novels/{novelId}/monitor-packets",
+            "POST /novels/{novelId}/monitor-runs",
+            "GET /novels/{novelId}/monitor-runs/{monitorRunId}",
+            "POST /novels/{novelId}/style-analyses",
+            "GET /style-analyses/{analysisId}",
+            "GET /style-analyses/{analysisId}/windows",
+            "POST /rewrite-proposals",
+            "GET /rewrite-proposals/{proposalId}",
+            "POST /style-profiles",
+            "GET /style-profiles/{profileId}",
+            "POST /style-profiles/{profileId}/versions",
+            "GET /style-profiles/{profileId}/versions/{versionId}",
+            "POST /style-profiles/{profileId}/versions/{versionId}/transitions",
+            "GET /jobs/{jobId}",
+            "GET /artifacts/{artifactId}",
+            "POST /novels/{novelId}/exports",
+            "POST /novels/{novelId}/access-keys",
+            "DELETE /access-keys/{keyId}",
+            "POST /internal/jobs/claims",
+            "POST /internal/jobs/{jobId}/results"
+    );
+    private static final Set<String> ASYNC_OPERATIONS = Set.of(
+            "POST /rewrite-proposals",
+            "POST /novels/{novelId}/exports"
+    );
+    private static final Set<String> WILDCARD_CREATION_OPERATIONS = Set.of(
+            "POST /agent/novels",
+            "POST /novels",

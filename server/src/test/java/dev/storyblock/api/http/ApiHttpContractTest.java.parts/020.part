@@ -1,0 +1,50 @@
+        String mismatchKey = "cross-body-commit";
+        Map<String, Object> mismatchedOperation = Map.of(
+                "operation_id", Ids.OperationId.create().value(),
+                "idempotency_key", mismatchKey,
+                "novel_id", secondNovel,
+                "base_revision_id", secondRevision,
+                "expected_head_hash", second.contentHash(),
+                "type", "restore_revision_content",
+                "payload", Map.of(
+                        "restore_revision_id", secondRevision,
+                        "expected_restore_hash", second.contentHash()
+                )
+        );
+        byte[] mismatchBody = CanonicalJson.bytes(Map.of(
+                "operation", mismatchedOperation,
+                "candidate_revision_id", Ids.RevisionId.create().value(),
+                "candidate_created_at", "2026-08-21T12:10:00Z"
+        ));
+        mvc.perform(post("/v1/novels/{novelId}/commits", firstNovel)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, mismatchKey)
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mismatchBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
+        Map<String, Object> otherExport = startExport(
+                second, OWNER_TOKEN, "security-export-second"
+        );
+        String otherJobId = stringField(otherExport, "job_id");
+        MvcResult otherJobResult = mvc.perform(get("/v1/jobs/{jobId}", otherJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN)))
+                .andExpect(status().isOk())
+                .andReturn();
+        String otherArtifactId = stringField(
+                object(otherJobResult), "result_artifact_id"
+        );
+        mvc.perform(get("/v1/jobs/{jobId}", otherJobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isNotFound());
+        mvc.perform(get("/v1/artifacts/{artifactId}", otherArtifactId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isNotFound());
+
+        mvc.perform(delete("/v1/access-keys/{keyId}", keyId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "security-revoke")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash())))
+                .andExpect(status().isOk())

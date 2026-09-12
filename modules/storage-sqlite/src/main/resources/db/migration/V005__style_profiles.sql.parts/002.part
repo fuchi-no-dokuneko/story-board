@@ -1,0 +1,64 @@
+    request_hash TEXT NOT NULL CHECK (
+        length(request_hash) = 71
+        AND substr(request_hash, 1, 7) = 'sha256:'
+        AND substr(request_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    profile_id TEXT NOT NULL,
+    version_id TEXT,
+    event_id TEXT,
+    request_id TEXT NOT NULL CHECK (length(request_id) BETWEEN 1 AND 128),
+    actor_id TEXT NOT NULL CHECK (length(actor_id) BETWEEN 1 AND 128),
+    actor_key_id TEXT,
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (novel_id, idempotency_key),
+    FOREIGN KEY (novel_id) REFERENCES novels(novel_id),
+    FOREIGN KEY (profile_id) REFERENCES style_profiles(profile_id),
+    FOREIGN KEY (version_id) REFERENCES style_profile_versions(version_id),
+    FOREIGN KEY (event_id) REFERENCES style_profile_lifecycle_events(event_id),
+    FOREIGN KEY (actor_key_id) REFERENCES access_keys(key_id),
+    CHECK (
+        (mutation_kind = 'create_profile' AND version_id IS NULL AND event_id IS NULL)
+        OR
+        (mutation_kind = 'create_version' AND version_id IS NOT NULL AND event_id IS NOT NULL)
+        OR
+        (mutation_kind = 'transition' AND version_id IS NOT NULL AND event_id IS NOT NULL)
+    )
+);
+
+CREATE INDEX IF NOT EXISTS style_profiles_novel_idx
+    ON style_profiles(novel_id, profile_id);
+CREATE INDEX IF NOT EXISTS style_versions_profile_idx
+    ON style_profile_versions(profile_id, version, version_id);
+CREATE INDEX IF NOT EXISTS style_lifecycle_current_idx
+    ON style_profile_lifecycle_events(profile_id, version_id, sequence DESC);
+
+CREATE TRIGGER IF NOT EXISTS style_profiles_no_update
+BEFORE UPDATE ON style_profiles BEGIN
+    SELECT RAISE(ABORT, 'style profiles are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS style_profiles_no_delete
+BEFORE DELETE ON style_profiles BEGIN
+    SELECT RAISE(ABORT, 'style profiles are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS style_versions_no_update
+BEFORE UPDATE ON style_profile_versions BEGIN
+    SELECT RAISE(ABORT, 'style profile versions are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS style_versions_no_delete
+BEFORE DELETE ON style_profile_versions BEGIN
+    SELECT RAISE(ABORT, 'style profile versions are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS style_lifecycle_no_update
+BEFORE UPDATE ON style_profile_lifecycle_events BEGIN
+    SELECT RAISE(ABORT, 'style lifecycle events are append-only');
+END;
+CREATE TRIGGER IF NOT EXISTS style_lifecycle_no_delete
+BEFORE DELETE ON style_profile_lifecycle_events BEGIN
+    SELECT RAISE(ABORT, 'style lifecycle events are append-only');
+END;
+CREATE TRIGGER IF NOT EXISTS style_mutations_no_update
+BEFORE UPDATE ON style_profile_mutations BEGIN
+    SELECT RAISE(ABORT, 'style mutation records are append-only');
+END;
+CREATE TRIGGER IF NOT EXISTS style_mutations_no_delete
+BEFORE DELETE ON style_profile_mutations BEGIN

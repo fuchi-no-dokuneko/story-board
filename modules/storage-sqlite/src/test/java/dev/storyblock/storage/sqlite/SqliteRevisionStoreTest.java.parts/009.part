@@ -1,0 +1,18 @@
+    private static void assertAppendOnly(Path path, String table) throws Exception {
+        try (SqliteDatabase database = SqliteDatabase.open(path)) {
+            SQLException failure = assertThrows(SQLException.class, () ->
+                    database.write(connection -> {
+                        connection.createStatement().executeUpdate("DELETE FROM " + table);
+                        return null;
+                    })
+            );
+            assertTrue(failure.getMessage().contains("append-only"));
+        }
+    }
+
+    private static final class InjectedFailure extends RuntimeException {
+        private InjectedFailure(CommitStage stage) {
+            super(stage.name());
+        }
+    }
+}

@@ -1,0 +1,50 @@
+                        submittedTrace.compressedContent()
+                ),
+                "content_hash", submittedTrace.contentHash(),
+                "uncompressed_bytes", submittedTrace.uncompressedBytes()
+        ));
+        resultBody.put("completed_at", completedAt.toString());
+        byte[] canonicalResult = CanonicalJson.bytes(resultBody);
+        String claimedEtag = claimed.getResponse().getHeader(HttpHeaders.ETAG);
+
+        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-result")
+                        .header(HttpHeaders.IF_MATCH, claimedEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(canonicalResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("succeeded"))
+                .andExpect(jsonPath("$.idempotent_replay").value(false));
+        mvc.perform(post("/v1/internal/jobs/{jobId}/results", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "analysis-http-result")
+                        .header(HttpHeaders.IF_MATCH, claimedEtag)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(canonicalResult))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("succeeded"))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+
+        mvc.perform(get("/v1/jobs/{jobId}", jobId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.kind").value("style-analysis"))
+                .andExpect(jsonPath("$.status").value("succeeded"));
+        MvcResult analysis = mvc.perform(get(
+                        "/v1/style-analyses/{analysisId}", analysisId
+                )
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.summary.analyzed_block_count")
+                        .value(1000))
+                .andExpect(jsonPath("$.result.summary.operational_window_count")
+                        .value(execution.windows().size()))
+                .andReturn();
+
+        MvcResult firstPage = mvc.perform(get(
+                        "/v1/style-analyses/{analysisId}/windows", analysisId
+                )
+                        .param("limit", "1")

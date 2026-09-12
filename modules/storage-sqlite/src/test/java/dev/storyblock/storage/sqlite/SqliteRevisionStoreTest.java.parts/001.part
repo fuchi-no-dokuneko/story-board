@@ -1,0 +1,62 @@
+package dev.storyblock.storage.sqlite;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import dev.storyblock.application.CommitService;
+import dev.storyblock.application.CommitRejectedException;
+import dev.storyblock.application.ReplayResult;
+import dev.storyblock.application.ReplayService;
+import dev.storyblock.application.ReplayVerificationReport;
+import dev.storyblock.contracts.NarrativeCanonicalMapper;
+import dev.storyblock.domain.EditOperation;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.security.AccessKeyService;
+import dev.storyblock.security.AccessScope;
+import dev.storyblock.security.AuditAction;
+import dev.storyblock.security.AuditContext;
+import dev.storyblock.security.AuditEvent;
+import dev.storyblock.security.AuditResult;
+import dev.storyblock.security.IssueAccessKeyCommand;
+import dev.storyblock.storage.CommitRequest;
+import dev.storyblock.storage.CommitResult;
+import dev.storyblock.storage.IdempotencyConflictException;
+import dev.storyblock.storage.StaleHeadException;
+import dev.storyblock.storage.StoredCheckpoint;
+import java.nio.file.Path;
+import java.sql.SQLException;
+import java.time.Instant;
+import java.util.List;
+import java.util.Set;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+class SqliteRevisionStoreTest {
+    @TempDir
+    Path temporaryDirectory;
+
+    @Test
+    void staleHeadWritesNothingAndCarriesHttp412Semantics() throws Exception {
+        Path path = temporaryDirectory.resolve("stale.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            EditOperation first = RevisionStoreTestFixture.replace(
+                    genesis, "first", "第二句。"
+            );
+            new CommitService(store).commit(
+                    first, Ids.RevisionId.create(), Instant.parse("2026-08-21T12:01:00Z")
+            );
+            long revisions = store.revisionCount(genesis.novel().id());
+            long operations = store.operationCount(genesis.novel().id());
+            var head = store.getHead(genesis.novel().id());
+
+            StaleHeadException failure = assertThrows(
+                    StaleHeadException.class,
+                    () -> new CommitService(store).commit(

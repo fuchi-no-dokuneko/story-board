@@ -1,0 +1,40 @@
+        try (InputStream input = AdjacentMetadataDetectorGoldenTest.class.getResourceAsStream(
+                "/golden/detector-cases.json"
+        )) {
+            if (input == null) {
+                throw new IOException("Missing detector golden cases");
+            }
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> values = CanonicalJson.parse(
+                    input.readAllBytes(), List.class
+            );
+            List<GoldenCase> result = new ArrayList<>();
+            for (Map<String, Object> value : values) {
+                result.add(new GoldenCase(
+                        (String) value.get("name"),
+                        (String) value.get("scenario"),
+                        FindingCode.valueOf((String) value.get("code")),
+                        severity((String) value.get("severity"))
+                ));
+            }
+            return List.copyOf(result);
+        }
+    }
+
+    private static FindingSeverity severity(String value) {
+        for (FindingSeverity severity : FindingSeverity.values()) {
+            if (severity.canonicalName().equals(value)) {
+                return severity;
+            }
+        }
+        throw new IllegalArgumentException("Unknown finding severity " + value);
+    }
+
+    private record GoldenCase(
+            String name,
+            String scenario,
+            FindingCode code,
+            FindingSeverity severity
+    ) {
+    }
+}

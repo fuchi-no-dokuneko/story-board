@@ -1,0 +1,52 @@
+            assertEquals(2, commitEvents.size());
+            assertEquals(AuditResult.SUCCEEDED, commitEvents.get(0).result());
+            assertEquals(AuditResult.IDEMPOTENT, commitEvents.get(1).result());
+            assertEquals("req_commit_first", commitEvents.get(0).requestId());
+            assertEquals("req_commit_retry", commitEvents.get(1).requestId());
+            for (AuditEvent event : commitEvents) {
+                assertEquals("audit-actor", event.actorId());
+                assertEquals(issued.key().keyId(), event.actorKeyId());
+                assertEquals(genesis.novel().id(), event.novelId());
+                assertEquals(first.operationId(), event.operationId());
+                assertEquals(first.revision().revisionId(), event.revisionId());
+                assertEquals(71, event.operationHash().length());
+                assertEquals(71, event.contentHash().length());
+                assertEquals(71, event.eventHash().length());
+                assertFalse(event.toString().contains("Audit prose"));
+            }
+            assertTrue(retry.idempotentReplay());
+        }
+    }
+
+    @Test
+    void deterministicValidationFailureNeverEntersTheWriteTransaction() throws Exception {
+        Path path = temporaryDirectory.resolve("rejected.db");
+        RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+        try (SqliteRevisionStore store = SqliteRevisionStore.open(path)) {
+            store.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+
+            CommitRejectedException failure = assertThrows(
+                    CommitRejectedException.class,
+                    () -> new CommitService(store).commit(
+                            RevisionStoreTestFixture.replace(
+                                    genesis, "invalid", "未完成"
+                            ),
+                            Ids.RevisionId.create(),
+                            Instant.parse("2026-08-21T12:01:00Z")
+                    )
+            );
+
+            assertEquals(422, CommitRejectedException.HTTP_STATUS);
+            assertFalse(failure.preview().committable());
+            assertEquals(1, store.revisionCount(genesis.novel().id()));
+            assertEquals(0, store.operationCount(genesis.novel().id()));
+            assertEquals(genesis.id(), store.getHead(genesis.novel().id()).revisionId());
+        }
+    }
+
+    @Test
+    void everyInjectedCommitFailureRollsBackAllTablesAndHead() throws Exception {
+        for (CommitStage stage : CommitStage.values()) {
+            Path path = temporaryDirectory.resolve("rollback-" + stage + ".db");
+            RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+            EditOperation operation = RevisionStoreTestFixture.replace(

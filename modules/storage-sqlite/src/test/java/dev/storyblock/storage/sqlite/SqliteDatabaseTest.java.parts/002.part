@@ -1,0 +1,58 @@
+        Path databasePath = temporaryDirectory.resolve("pragmas.db");
+        try (SqliteDatabase database = SqliteDatabase.open(databasePath)) {
+            List<Connection> borrowed = new ArrayList<>();
+            try {
+                for (int index = 0; index < SqliteSettings.REQUIRED_MAXIMUM_POOL_SIZE; index++) {
+                    borrowed.add(database.borrowConnection());
+                }
+                for (Connection connection : borrowed) {
+                    SqlitePragmas state = SqlitePragmas.read(connection);
+                    assertEquals("wal", state.journalMode());
+                    assertEquals(2, state.synchronous());
+                    assertTrue(state.foreignKeys());
+                    assertEquals(5_000, state.busyTimeoutMillis());
+                    assertTrue(state.explicitReadOnly());
+                    assertFalse(state.loadExtensionsEnabled());
+                }
+            } finally {
+                for (Connection connection : borrowed) {
+                    connection.close();
+                }
+            }
+            assertEquals(4, database.metrics().connectionVerifications());
+        }
+    }
+
+    @Test
+    void explicitReadOnlyTransactionRejectsWritesAndPoolStateIsReset() throws Exception {
+        Path databasePath = temporaryDirectory.resolve("readonly.db");
+        try (SqliteDatabase database = SqliteDatabase.open(databasePath)) {
+            database.write(connection -> {
+                connection.createStatement().execute("CREATE TABLE notes (id INTEGER PRIMARY KEY)");
+                return null;
+            });
+
+            SQLException readOnlyFailure = assertThrows(SQLException.class, () ->
+                    database.readOnly(connection -> {
+                        connection.createStatement().executeUpdate("INSERT INTO notes(id) VALUES (1)");
+                        return null;
+                    })
+            );
+            assertFalse(SqliteMetrics.isBusy(readOnlyFailure));
+
+            database.write(connection -> {
+                connection.createStatement().executeUpdate("INSERT INTO notes(id) VALUES (2)");
+                return null;
+            });
+            assertFalse(database.inspectPragmas().queryOnly());
+            assertEquals(1L, countRows(database, "notes"));
+            assertEquals(1L, countRows(database, "notes"));
+        }
+    }
+
+    @Test
+    void controlledWriterContentionProducesObservableBusyMetric() throws Exception {
+        Path databasePath = temporaryDirectory.resolve("busy.db");
+        SqliteSettings probeSettings = new SqliteSettings(1, 25);
+        try (SqliteDatabase holder = SqliteDatabase.open(databasePath, probeSettings);
+             SqliteDatabase contender = SqliteDatabase.open(databasePath, probeSettings);

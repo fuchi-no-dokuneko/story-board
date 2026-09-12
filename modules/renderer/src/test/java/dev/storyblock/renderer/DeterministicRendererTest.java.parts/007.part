@@ -1,0 +1,14 @@
+        try (InputStream input = DeterministicRendererTest.class.getResourceAsStream(
+                "/golden/" + name
+        )) {
+            if (input == null) {
+                throw new IOException("Missing renderer fixture " + name);
+            }
+            return input.readAllBytes();
+        }
+    }
+
+    private static String id(String prefix, int suffix) {
+        return prefix + "_018f0f5e-7b4a-7c00-8000-" + "%012d".formatted(suffix);
+    }
+}

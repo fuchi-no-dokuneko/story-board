@@ -1,0 +1,63 @@
+          media_type: response.data.media_type,
+          width_px: response.data.width_px,
+          height_px: response.data.height_px,
+          alt_text: parsed.options.get("alt-text"),
+        };
+        await validateDto("BlockImage", blockImage);
+      }
+      return { value: {
+        command: "upload-image",
+        idempotency_key: idempotencyKey,
+        source_bytes: content.length,
+        source_sha256: `sha256:${sha256(content)}`,
+        block_image: blockImage,
+        http: responseReport(response),
+      } };
+    }
+    case "render-pdf": {
+      assertOptions(parsed, ["file", "force", "idempotency-key", "novel-id", "output"]);
+      expectPositionals(parsed, 0);
+      const novelId = requiredOption(parsed, "novel-id");
+      requireTypedId(novelId, "nov", "novel_id");
+      const body = await readJsonFile(requiredOption(parsed, "file"));
+      await validateDto("PdfRenderRequest", body);
+      const client = clientFor(parsed, context.clientOverrides);
+      const revision = await fetchRevision(client, novelId, body.revision_id);
+      const response = await client.request({
+        method: "POST",
+        pathname: `/v1/novels/${encodeURIComponent(novelId)}/pdf-renders`,
+        headers: {
+          Accept: "application/pdf, application/problem+json",
+          "If-Match": quoted(revision.data.content_hash),
+          "Idempotency-Key": parsed.options.get("idempotency-key")
+            ?? deriveIdempotencyKey("render-pdf", { novelId, body }),
+        },
+        body,
+        responseType: "buffer",
+      });
+      const output = requiredOption(parsed, "output");
+      await writePrivateOutput(output, response.data, parsed.options.get("force") === true);
+      return { value: {
+        command: "render-pdf",
+        status: response.status,
+        revision_id: body.revision_id,
+        bytes: response.data.length,
+        pages: Number(caseInsensitiveHeader(response.headers, "X-PDF-Page-Count")),
+        images: Number(caseInsensitiveHeader(response.headers, "X-PDF-Image-Count")),
+        renderer_version: caseInsensitiveHeader(response.headers, "X-PDF-Renderer-Version"),
+        output,
+      } };
+    }
+    case "export": {
+      assertOptions(parsed, ["format", "idempotency-key", "novel-id", "revision-id"]);
+      expectPositionals(parsed, 0);
+      const novelId = requiredOption(parsed, "novel-id");
+      const client = clientFor(parsed, context.clientOverrides);
+      let revisionId = parsed.options.get("revision-id");
+      let hash;
+      if (revisionId === undefined) {
+        const novel = await fetchNovel(client, novelId);
+        revisionId = novel.head.head_revision_id;
+        hash = novel.head.head_hash;
+      } else {
+        const revision = await fetchRevision(client, novelId, revisionId);

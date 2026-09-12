@@ -1,0 +1,67 @@
+                Ids.NovelId.create(),
+                Ids.RevisionId.create(),
+                "canonical-package",
+                "application/vnd.storyblock.package+json",
+                "identity",
+                hash,
+                content,
+                IMPORTED_AT,
+                false
+        );
+
+        assertEquals(content.length, generated.content().length);
+        assertThrows(
+                CanonicalPackageException.class,
+                () -> new StoredArtifact(
+                        Ids.ArtifactId.create(),
+                        Ids.NovelId.create(),
+                        Ids.RevisionId.create(),
+                        "portable-trace",
+                        "application/octet-stream",
+                        "identity",
+                        hash,
+                        content,
+                        IMPORTED_AT,
+                        true
+                )
+        );
+    }
+
+    private CanonicalNovelPackage packageWithHistoryAndArtifact(Path path) throws Exception {
+        CanonicalNovelPackage history;
+        try (SqliteRevisionStore source = SqliteRevisionStore.open(path)) {
+            RevisionManifest genesis = RevisionStoreTestFixture.genesis();
+            source.createNovel(genesis, RevisionStoreTestFixture.hash(genesis));
+            CommitService commits = new CommitService(source);
+            var replacement = commits.commit(
+                    RevisionStoreTestFixture.replace(genesis, "package-replace", "第二句。"),
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:01:00Z")
+            );
+            RevisionManifest revised = source.getRevision(
+                    genesis.novel().id(), replacement.revision().revisionId()
+            ).manifest();
+            commits.commit(
+                    RevisionStoreTestFixture.delete(revised, "package-delete"),
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T12:02:00Z")
+            );
+            history = source.loadCanonicalPackage(genesis.novel().id());
+        }
+        byte[] trace = "portable detector trace".getBytes(StandardCharsets.UTF_8);
+        return CanonicalNovelPackage.assemble(
+                history.revisions(),
+                history.operations(),
+                List.of(new CanonicalNovelPackage.ArtifactEntry(
+                        Ids.ArtifactId.create(),
+                        history.manifest().headRevisionId(),
+                        "detector-trace",
+                        "application/json",
+                        "identity",
+                        CanonicalJson.hashBytes(trace),
+                        trace,
+                        Instant.parse("2026-08-21T12:03:00Z")
+                ))
+        );
+    }
+

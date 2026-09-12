@@ -1,28 +1,9 @@
-# ADR 0007: Stateless Preview Commit Tokens
+# Preview and commit
 
-- Status: Accepted
-- Date: 2026-08-21
-- Owner: StoryBlock local implementation
+EN: Preview does not persist a revision. Commit resubmits the exact operation and candidate identity, validates the current head, and uses the existing compare-and-swap transaction. Identical idempotent retries return the original result; changed payloads conflict. The retained design note describes the earlier token proposal.
 
-## Decision
+繁體中文：預覽不會儲存修訂。提交重送相同操作與候選身分，驗證目前版本頭，並使用既有比較交換交易。同鍵相同內容重試回傳原結果，內容變更則衝突。保留筆記記錄早期權杖設計提案。
 
-A preview is not persisted. It returns the normalized operation, base revision
-and head hashes, candidate hash, expiry, actor/key identity, and an opaque HMAC
-token over a versioned canonical payload containing those fields, the novel ID,
-the normalized-operation hash, and a random nonce. The token carries a signing
-key ID so keys can rotate, but never contains the signing key. Commit resubmits
-the operation and token. The server authenticates the actor, checks the novel
-and key binding, verifies expiry and signature in constant time, reloads the
-immutable base, recomputes the candidate, and performs the normal head
-compare-and-swap transaction.
+简体中文：预览不会保存修订。提交重发相同操作与候选身份，验证当前版本头，并使用既有比较交换事务。同键相同内容重试返回原结果，内容变更则冲突。保留笔记记录早期令牌设计提案。
 
-An idempotency key is independent of the preview token. Reusing a key with the
-same operation hash returns the original result; reuse with another hash is a
-conflict.
-
-## Consequences
-
-A stolen token cannot be applied by another key, novel, operation, or head and
-cannot bypass validation. A candidate hash alone is never commit authority.
-Replay during the validity window is resolved only through the independent
-idempotency record; an expired or retired-key token must be previewed again.
+[Detailed notes / 詳細筆記 / 详细笔记](0007-stateless-preview-commit.notes.txt)

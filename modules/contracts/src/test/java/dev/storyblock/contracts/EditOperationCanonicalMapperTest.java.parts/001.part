@@ -1,0 +1,65 @@
+package dev.storyblock.contracts;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import dev.storyblock.domain.BlockDraft;
+import dev.storyblock.domain.BlockMetadata;
+import dev.storyblock.domain.BlockImage;
+import dev.storyblock.domain.BlockRangeGuard;
+import dev.storyblock.domain.BlockVersionRef;
+import dev.storyblock.domain.EditContext;
+import dev.storyblock.domain.EditOperation;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.domain.InsertionPoint;
+import dev.storyblock.domain.SceneBoundaryContract;
+import dev.storyblock.domain.SceneSeed;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import org.junit.jupiter.api.Test;
+
+class EditOperationCanonicalMapperTest {
+    private static final String HASH_A = "sha256:" + "a".repeat(64);
+    private static final String HASH_B = "sha256:" + "b".repeat(64);
+
+    @Test
+    void allTenTypedOperationsRoundTripWithoutCanonicalDrift() {
+        Ids.NovelId novelId = Ids.NovelId.create();
+        Ids.RevisionId baseId = Ids.RevisionId.create();
+        Ids.SceneId sourceScene = Ids.SceneId.create();
+        Ids.SceneId destinationScene = Ids.SceneId.create();
+        Ids.BlockId firstId = Ids.BlockId.create();
+        Ids.BlockId secondId = Ids.BlockId.create();
+        BlockVersionRef first = new BlockVersionRef(
+                firstId, Ids.BlockVersionId.create()
+        );
+        BlockVersionRef second = new BlockVersionRef(
+                secondId, Ids.BlockVersionId.create()
+        );
+        BlockRangeGuard one = new BlockRangeGuard(
+                sourceScene, List.of(first), null, secondId, HASH_A
+        );
+        BlockRangeGuard two = new BlockRangeGuard(
+                sourceScene, List.of(first, second), null, null, HASH_B
+        );
+        BlockDraft firstDraft = new BlockDraft(
+                firstId,
+                "第一句。",
+                new BlockMetadata(Map.of("narrative_mode", "action")),
+                Map.of("example.test", Map.of("rank", 1))
+        );
+        BlockDraft secondDraft = BlockDraft.create("第二句。", BlockMetadata.empty());
+        SceneBoundaryContract sourceBoundary = new SceneBoundaryContract(
+                sourceScene, firstId, secondId, HASH_A
+        );
+        SceneBoundaryContract destinationBoundary = new SceneBoundaryContract(
+                destinationScene, null, null, HASH_B
+        );
+
+        List<EditOperation> operations = List.of(
+                new EditOperation.InsertBlocks(
+                        context(novelId, baseId, "insert"),
+                        InsertionPoint.after(sourceScene, firstId),
+                        List.of(secondDraft)

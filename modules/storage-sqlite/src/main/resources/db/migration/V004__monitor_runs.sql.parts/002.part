@@ -1,0 +1,30 @@
+    WHERE revision_id = NEW.revision_id AND novel_id = NEW.novel_id
+)
+BEGIN
+    SELECT RAISE(ABORT, 'monitor revision does not belong to novel');
+END;
+
+CREATE TRIGGER IF NOT EXISTS monitor_runs_no_update
+BEFORE UPDATE ON monitor_runs BEGIN
+    SELECT RAISE(ABORT, 'monitor runs are append-only');
+END;
+CREATE TRIGGER IF NOT EXISTS monitor_runs_no_delete
+BEFORE DELETE ON monitor_runs BEGIN
+    SELECT RAISE(ABORT, 'monitor runs are append-only');
+END;
+CREATE TRIGGER IF NOT EXISTS monitor_issues_no_update
+BEFORE UPDATE ON monitor_issues BEGIN
+    SELECT RAISE(ABORT, 'monitor issues are append-only');
+END;
+CREATE TRIGGER IF NOT EXISTS monitor_issues_no_delete
+BEFORE DELETE ON monitor_issues BEGIN
+    SELECT RAISE(ABORT, 'monitor issues are append-only');
+END;
+CREATE TRIGGER IF NOT EXISTS monitor_proposals_no_update
+BEFORE UPDATE ON monitor_proposed_operations BEGIN
+    SELECT RAISE(ABORT, 'monitor proposals are append-only');
+END;
+CREATE TRIGGER IF NOT EXISTS monitor_proposals_no_delete
+BEFORE DELETE ON monitor_proposed_operations BEGIN
+    SELECT RAISE(ABORT, 'monitor proposals are append-only');
+END;

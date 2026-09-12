@@ -1,0 +1,48 @@
+              "meta": {
+              }
+            }
+          ]
+        }
+      },
+      "candidate_hash": "example-1",
+      "diff": {
+        "blockChanges": [
+
+        ],
+        "sceneSeedChanges": [
+
+        ]
+      },
+      "render_packet": {
+        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "renderer_version": "example-1",
+        "range": {
+          "from_block_id": "example-1",
+          "to_block_id": "example-1"
+        },
+        "rendered_text": "example-1",
+        "blocks": [
+
+        ],
+        "resolved_meta": [
+
+        ],
+        "offset_map": [
+
+        ],
+        "scene_boundaries": [
+
+        ]
+      },
+      "violations": [
+
+      ],
+      "warnings": [
+
+      ],
+      "committable": true
+    }
+  ]
+}

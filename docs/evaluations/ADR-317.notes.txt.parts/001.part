@@ -1,0 +1,24 @@
+# ADR-317 backup and policy evaluation
+
+Measured locally on 2026-08-23 with `scripts/run-adr317-evaluation.sh` and an
+isolated live backup/rotation/restore drill.
+
+| Check | Result |
+|---|---|
+| Labeled corpus split | 2 train, 2 calibration |
+| Style confusion | TP 1, TN 3, FP 0, FN 0 |
+| Channel contribution | surface and grammar reported for sustained drift |
+| Rewrite percentile | required channels reduced from 100 to 0 in fixture |
+| Protected values | name, number, negation, and speaker preserved |
+| Changed values | removed name, number, and negation detected |
+| Near-copy gate | 16-grapheme owner-corpus match classified manual-only |
+| Attempt bound | 1 to 20 attempts, enforced by `StyleAnalysisJob` |
+| Finding cooldown | 5 minutes to 30 days; default 24 hours |
+| Live backup | encrypted online snapshot passed integrity checks |
+| Key rotation | new artifact decrypted byte-identically; old key rejected |
+| Isolated restore | integrity, migration, counts, replay, and render hashes passed |
+
+The detailed machine-readable report is generated at
+`artifacts/evaluations/ADR-317.json`. Backup encryption-key rotation and the
+separate access-token pepper-loss/reissue procedure are documented in
+`docs/operations/backup-and-restore.md`.

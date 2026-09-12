@@ -1,0 +1,49 @@
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-text-render")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(renderBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.blocks[1].image.artifact_id").value(artifactId));
+
+        MvcResult firstPdf = mvc.perform(post(
+                        "/v1/novels/{novelId}/pdf-renders", novelId
+                )
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "pdf-render-one")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(renderBody))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PDF))
+                .andExpect(header().string("X-PDF-Renderer-Version", "pdf-renderer-1.0.0"))
+                .andExpect(header().string("X-PDF-Image-Count", "1"))
+                .andExpect(header().string(
+                        HttpHeaders.CONTENT_DISPOSITION, containsString(".pdf")
+                ))
+                .andReturn();
+        MvcResult secondPdf = mvc.perform(post(
+                        "/v1/novels/{novelId}/pdf-renders", novelId
+                )
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "pdf-render-two")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(resultHash))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(renderBody))
+                .andExpect(status().isOk())
+                .andReturn();
+        byte[] pdf = firstPdf.getResponse().getContentAsByteArray();
+        assertTrue(new String(pdf, 0, 8, java.nio.charset.StandardCharsets.US_ASCII)
+                .startsWith("%PDF-1.4"));
+        assertArrayEquals(pdf, secondPdf.getResponse().getContentAsByteArray());
+    }
+
+    @Test
+    void runsRevisionBoundDetectorWithStableFindingBytes() throws Exception {
+        CanonicalRevision revision = detectorRevision();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "detector-import");
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,

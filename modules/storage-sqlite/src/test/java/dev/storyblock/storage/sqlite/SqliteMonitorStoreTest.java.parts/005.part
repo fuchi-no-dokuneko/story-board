@@ -1,0 +1,38 @@
+                revision.novel().id(),
+                revision.id(),
+                revisionHash,
+                block.id(),
+                1,
+                MonitorModule.VERSION,
+                ruleVersion,
+                affected,
+                finding,
+                idempotencyKey,
+                requestHash,
+                new AuditContext("req_" + idempotencyKey, "monitor-worker", null, NOW),
+                NOW
+        );
+    }
+
+    private static MonitorEvidence evidence(NarrativeBlock block) {
+        String quote = block.text().substring(0, 1);
+        return new MonitorEvidence(
+                block.id(), 0, 1, quote, EvidenceSpans.quoteHash(quote)
+        );
+    }
+
+    private static long count(SqliteDatabase database, String table) throws SQLException {
+        if (!List.of(
+                "monitor_runs", "monitor_issues", "monitor_proposed_operations"
+        ).contains(table)) {
+            throw new IllegalArgumentException("Unexpected monitor table " + table);
+        }
+        return database.readOnly(connection -> {
+            try (var statement = connection.createStatement();
+                 var result = statement.executeQuery("SELECT COUNT(*) FROM " + table)) {
+                result.next();
+                return result.getLong(1);
+            }
+        });
+    }
+}

@@ -1,0 +1,33 @@
+      issues.push({ path: "#/expected_han_characters", message: `declares ${value.expected_han_characters}, but chapter text contains ${actual} Han code points` });
+    }
+  }
+  return issues;
+}
+
+function operationIssues(value) {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) return [];
+  const range = value.payload?.range ?? value.payload?.block;
+  if (!range || !Array.isArray(range.expected_blocks) || range.expected_blocks.length === 0) return [];
+  const issues = [];
+  const first = range.expected_blocks[0]?.block_id;
+  const last = range.expected_blocks.at(-1)?.block_id;
+  if (first !== range.first_block_id) issues.push({ path: "#/payload/range/first_block_id", message: "must match the first expected_blocks block_id" });
+  if (last !== range.last_block_id) issues.push({ path: "#/payload/range/last_block_id", message: "must match the last expected_blocks block_id" });
+  return issues;
+}
+
+export async function validateDto(name, value, { throwOnError = true } = {}) {
+  const schema = await getSchema(name);
+  const schemas = await loadSchemas();
+  const issues = validateNode(value, schema, { root: schema, schemas, path: "#" });
+  if (name === "AgentNovelRegistrationRequest") issues.push(...registrationIssues(value));
+  if (name === "OperationEnvelope" || name.endsWith("Operation")) issues.push(...operationIssues(value));
+  if (issues.length > 0 && throwOnError) throw new PayloadValidationError(name, issues);
+  return { valid: issues.length === 0, dto: name, issues };
+}
+
+export async function validateInline(value, schema) {
+  const schemas = await loadSchemas();
+  const issues = validateNode(value, schema, { root: schema, schemas, path: "#" });
+  return { valid: issues.length === 0, issues };
+}

@@ -4,6 +4,8 @@ set -euo pipefail
 output=${1:-artifacts/evaluations/ADR-317.json}
 root=$(cd "$(dirname "$0")/.." && pwd)
 cd "$root"
+source "$root/scripts/build-environment.sh"
+output=$(repository_path "$output")
 
 timeout 60s ./mvnw -q \
   -pl modules/style,modules/rewrite-policy -am test \

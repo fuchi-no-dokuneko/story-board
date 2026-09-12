@@ -1,0 +1,54 @@
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andReturn();
+        assertArrayEquals(
+                first.getResponse().getContentAsByteArray(),
+                second.getResponse().getContentAsByteArray()
+        );
+
+        mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
+                        .with(userWithScope("novel:read"))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "render-stale")
+                        .header(HttpHeaders.IF_MATCH, VALID_ETAG)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isPreconditionFailed())
+                .andExpect(jsonPath("$.code").value("REVISION_CONFLICT"))
+                .andExpect(jsonPath("$.current_revision_id").value(revisionId))
+                .andExpect(jsonPath("$.current_etag").value(revision.contentHash()));
+    }
+
+    @Test
+    void uploadsImageCommitsImageBlockAndRendersDeterministicPdf() throws Exception {
+        CanonicalRevision revision = genesis();
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        String revisionId = stringField(revision.canonicalContent(), "revision_id");
+        importAsOwner(revision, "image-pdf-import");
+        byte[] png = imagePng();
+
+        MockHttpServletRequestBuilder upload = post(
+                "/v1/novels/{novelId}/images", novelId
+        )
+                .with(userWithScope("novel:commit"))
+                .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-upload-http")
+                .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                .contentType(MediaType.IMAGE_PNG)
+                .content(png);
+        MvcResult uploaded = mvc.perform(upload)
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.media_type").value("image/png"))
+                .andExpect(jsonPath("$.width_px").value(120))
+                .andExpect(jsonPath("$.height_px").value(80))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        Map<String, Object> uploadBody = object(uploaded);
+        String artifactId = stringField(uploadBody, "artifact_id");
+
+        mvc.perform(upload)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.artifact_id").value(artifactId))
+                .andExpect(jsonPath("$.idempotent_replay").value(true));
+        mvc.perform(post("/v1/novels/{novelId}/images", novelId)
+                        .with(userWithScope("novel:commit"))

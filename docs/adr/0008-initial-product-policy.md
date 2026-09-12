@@ -1,30 +1,15 @@
-# ADR 0008: Initial product and operating policy
+# Product policy
 
-- Status: Accepted
-- Owner: fuchi-no-dokuneko
-- Decision date: 2026-08-22
-- Policy version: product-policy-1.0.0
+EN: The original ten product decisions remain recorded in the notes. Generated rewrites remain proposals until an explicit commit; client connection itself needs no human approval. Existing canonical history, corpus provenance, and deterministic text rules are preserved. Development changes are tracked in Git.
 
-| ID | Owner | Date | Decision | Rationale | Affected version |
-|---|---|---|---|---|---|
-| O-01 | fuchi-no-dokuneko | 2026-08-22 | The product name is StoryBlock Engine. | Keeps API and package naming stable for v1. | product-policy-1.0.0 |
-| O-02 | fuchi-no-dokuneko | 2026-08-22 | Every LLM rewrite requires explicit human approval before commit. | A generated proposal cannot silently become canon. | rewrite-policy-1.0.0 |
-| O-03 | fuchi-no-dokuneko | 2026-08-22 | Chinese quotes and ellipses use the versioned deterministic boundary parser; ambiguous splits require an explicit anchor. | Keeps replay deterministic. | sentence-boundary-1.0.0 |
-| O-04 | fuchi-no-dokuneko | 2026-08-22 | The first style worker is Java. | It shares exact contracts with the API and can be replaced behind the worker protocol. | rewrite-model-1.0.0 |
-| O-05 | fuchi-no-dokuneko | 2026-08-22 | Target corpora must be owner-authored, licensed, or public domain with source hash and provenance. | Enables enforceable near-copy policy. | style-features-1.0.0; long-ngram-1.0.0 |
-| O-06 | fuchi-no-dokuneko | 2026-08-22 | Initial RPO is one hour and RTO is four hours. | Appropriate for the first private deployment and measurable by restore drills. | backup-policy-1.0.0 |
-| O-07 | fuchi-no-dokuneko | 2026-08-22 | v1 relies on encrypted disks and separately keyed encrypted backups. | Per-novel field encryption is deferred until required. | backup-policy-1.0.0 |
-| O-08 | fuchi-no-dokuneko | 2026-08-22 | v1 uses immutable revisions and head CAS; branches and merges are v2 work. | Avoids premature merge semantics. | canonical-revision-1.0.0 |
-| O-09 | fuchi-no-dokuneko | 2026-08-22 | Explicit scene resets are informational; unsupported continuous-boundary changes remain warnings or errors. | Preserves intentional transitions. | detector-1.0.0 |
-| O-10 | fuchi-no-dokuneko | 2026-08-22 | Full analysis artifacts expire after 30 days; compact summaries remain durable. | Bounds storage without losing decisions. | style-analysis-1.0.0 |
+繁體中文：原有十項產品決策保留於筆記。生成式改寫維持提案，直到明確提交；客戶端連線本身不需人工核准。正式歷史、語料來源及確定性文字規則均保留。開發變更由 Git 追蹤。
 
-## Version impact
+简体中文：原有十项产品决策保留于笔记。生成式改写保持提案，直到明确提交；客户端连接本身不需人工批准。正式历史、语料来源及确定性文字规则均保留。开发变更由 Git 跟踪。
 
-This ADR introduces `product-policy-1.0.0` and `backup-policy-1.0.0`. It
-ratifies the listed v1 wire and analysis contracts without changing their
-fields or semantics, so those contract versions remain at 1.0.0. Any change to
-an O-01 through O-10 decision requires a successor ADR and an increment to the
-affected version listed above.
+[Detailed notes / 詳細筆記 / 详细笔记](0008-initial-product-policy.notes.txt)
 
-Changes to these decisions require a new ADR and the relevant contract or
-policy version increment.
+EN: The user's later decision removes backup encryption and backup keys. Current backups are unencrypted compressed snapshots; the historical O-07 wording is superseded for this feature.
+
+繁體中文：使用者後續決定移除備份加密與金鑰。目前備份為未加密壓縮快照，此功能以新決定取代歷史 O-07 的描述。
+
+简体中文：用户后续决定移除备份加密与密钥。目前备份为未加密压缩快照，此功能以新决定取代历史 O-07 的描述。

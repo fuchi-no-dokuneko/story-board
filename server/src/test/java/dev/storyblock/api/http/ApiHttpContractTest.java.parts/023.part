@@ -1,0 +1,55 @@
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(profileBody))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists(HttpHeaders.ETAG))
+                .andExpect(header().exists(HttpHeaders.LOCATION))
+                .andExpect(jsonPath("$.scope.novel_id").value(novelId))
+                .andReturn();
+        Map<String, Object> profile = object(profileResult);
+        String profileId = stringField(profile, "profile_id");
+        String profileEtag = profileResult.getResponse().getHeader(HttpHeaders.ETAG);
+
+        var manifest = NarrativeCanonicalMapper.fromCanonical(revision);
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                manifest.liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
+        List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
+                30, new BigDecimal("0.1")
+        );
+        StyleCalibrationProfile calibration = new StyleCalibrationProfile(
+                dev.storyblock.style.StyleModule.CALIBRATION_SCHEMA_VERSION,
+                features.sourceHash(),
+                features.contract().contractHash(),
+                windows.configurationHash(),
+                List.of(new StyleStratumCalibration(
+                        StyleStratum.narration(),
+                        30,
+                        StyleFeatureChannel.requiredChannels().stream()
+                                .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                                .map(channel -> StyleChannelCalibration.fromDistances(
+                                        channel, referenceDistances
+                                )).toList()
+                ))
+        );
+        StyleProfileVersionContent versionContent = new StyleProfileVersionContent(
+                scope,
+                List.of(new StyleCorpusSource(
+                        "generated-http-corpus",
+                        features.sourceHash(),
+                        StyleCorpusSourceKind.GENERATED,
+                        "HTTP integration fixture",
+                        "test-only",
+                        "test-owner"
+                )),
+                features,
+                windows,
+                calibration.canonicalValue()
+        );
+        MvcResult versionResult = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions", profileId
+                )

@@ -1,0 +1,72 @@
+        Map<String, Object> report = new LinkedHashMap<>();
+        report.put("block_count", BLOCK_COUNT);
+        report.put("database_path", databasePath.toString());
+        report.put("hardware", hardware());
+        report.put("nfr", results);
+        report.put("passed", passed);
+        report.put("schema_version", "adr-318-core-slo-1");
+        Files.write(outputDirectory.resolve("core.json"), CanonicalJson.bytes(report));
+
+        assertTrue(passed, "Core SLO failure is recorded in target/slo/core.json");
+    }
+
+    private static Map<String, Object> latencyResult(
+            String metric,
+            long measuredMicros,
+            long targetMicros
+    ) {
+        return Map.of(
+                "measured_p95_us", measuredMicros,
+                "metric", metric,
+                "passed", measuredMicros < targetMicros,
+                "samples", metric.startsWith("1000-block deterministic") ? 20 :
+                        metric.startsWith("1000-block range") ? 30 : 20,
+                "target_p95_us", targetMicros
+        );
+    }
+
+    private static Map<String, Object> hardware() {
+        Runtime runtime = Runtime.getRuntime();
+        return Map.of(
+                "available_processors", runtime.availableProcessors(),
+                "java_runtime", System.getProperty("java.runtime.version"),
+                "jvm_max_heap_bytes", runtime.maxMemory(),
+                "os_arch", System.getProperty("os.arch"),
+                "os_name", System.getProperty("os.name"),
+                "os_version", System.getProperty("os.version")
+        );
+    }
+
+    private static long measureP95Micros(int samples, CheckedRunnable operation)
+            throws Exception {
+        List<Long> values = new ArrayList<>();
+        for (int sample = 0; sample < samples; sample++) {
+            long started = System.nanoTime();
+            operation.run();
+            values.add(elapsedMicros(started));
+        }
+        return p95(values);
+    }
+
+    private static long elapsedMicros(long started) {
+        return TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - started);
+    }
+
+    private static long p95(List<Long> samples) {
+        List<Long> sorted = samples.stream().sorted().toList();
+        int index = (int) StrictMath.ceil(sorted.size() * 0.95d) - 1;
+        return sorted.get(Math.max(0, index));
+    }
+
+    private static RevisionManifest head(
+            SqliteRevisionStore store,
+            Ids.NovelId novelId
+    ) {
+        RevisionRef head = store.getHead(novelId);
+        return store.getRevision(novelId, head.revisionId()).manifest();
+    }
+
+    private static EditOperation metadataOperation(
+            RevisionManifest base,
+            String idempotencyKey
+    ) {

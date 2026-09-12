@@ -1,0 +1,69 @@
+                BlockMetadata.empty(),
+                image.attachTo(Map.of())
+        );
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "信號",
+                TransitionMode.OPENING,
+                SceneSeed.empty(),
+                List.of(block),
+                Map.of()
+        );
+        RevisionManifest manifest = new RevisionManifest(
+                revisionId,
+                null,
+                CREATED_AT,
+                new NarrativeNovel(
+                        novelId,
+                        List.of(new NarrativeChapter(
+                                chapterId,
+                                OrderKey.initial(),
+                                "第一章",
+                                List.of(scene),
+                                Map.of()
+                        )),
+                        Map.of("title", "圖像測試")
+                )
+        );
+        var canonical = NarrativeCanonicalMapper.toCanonical(manifest);
+        var artifact = new CanonicalNovelPackage.ArtifactEntry(
+                artifactId,
+                revisionId,
+                "narrative-image",
+                "image/png",
+                "identity",
+                hash,
+                png,
+                CREATED_AT
+        );
+        return new Fixture(
+                canonical,
+                CanonicalNovelPackage.assemble(
+                        List.of(new CanonicalNovelPackage.RevisionEntry(0, canonical)),
+                        List.of(),
+                        List.of(artifact)
+                )
+        );
+    }
+
+    private static byte[] png() throws IOException {
+        BufferedImage image = new BufferedImage(120, 80, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setColor(Color.WHITE);
+        graphics.fillRect(0, 0, 120, 80);
+        graphics.setColor(Color.BLUE);
+        graphics.fillOval(35, 10, 50, 60);
+        graphics.dispose();
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", output);
+        return output.toByteArray();
+    }
+
+    private record Fixture(
+            dev.storyblock.contracts.CanonicalRevision revision,
+            CanonicalNovelPackage document
+    ) {
+    }
+}

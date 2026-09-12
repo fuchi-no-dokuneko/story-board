@@ -1,0 +1,69 @@
+CREATE TABLE IF NOT EXISTS analysis_runs (
+    analysis_id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL UNIQUE,
+    summary_json TEXT NOT NULL CHECK (
+        json_valid(summary_json) AND json_type(summary_json) = 'object'
+    ),
+    result_hash TEXT NOT NULL CHECK (
+        length(result_hash) = 71
+        AND substr(result_hash, 1, 7) = 'sha256:'
+        AND substr(result_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    result_artifact_id TEXT NOT NULL,
+    trace_content_hash TEXT NOT NULL CHECK (
+        length(trace_content_hash) = 71
+        AND substr(trace_content_hash, 1, 7) = 'sha256:'
+        AND substr(trace_content_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    trace_uncompressed_bytes INTEGER NOT NULL CHECK (
+        trace_uncompressed_bytes BETWEEN 2 AND 16777216
+    ),
+    trace_expires_at TEXT NOT NULL CHECK (julianday(trace_expires_at) IS NOT NULL),
+    submission_idempotency_key TEXT NOT NULL CHECK (
+        length(submission_idempotency_key) BETWEEN 1 AND 200
+    ),
+    submission_request_hash TEXT NOT NULL CHECK (
+        length(submission_request_hash) = 71
+        AND substr(submission_request_hash, 1, 7) = 'sha256:'
+        AND substr(submission_request_hash, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    completed_at TEXT NOT NULL CHECK (julianday(completed_at) IS NOT NULL),
+    FOREIGN KEY (job_id) REFERENCES analysis_jobs(job_id),
+    FOREIGN KEY (result_artifact_id) REFERENCES artifacts(artifact_id)
+);
+
+CREATE TABLE IF NOT EXISTS analysis_window_findings (
+    analysis_id TEXT NOT NULL,
+    ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+    window_id TEXT NOT NULL CHECK (
+        length(window_id) = 71
+        AND substr(window_id, 1, 7) = 'sha256:'
+        AND substr(window_id, 8) NOT GLOB '*[^0-9a-f]*'
+    ),
+    decision_state TEXT NOT NULL CHECK (
+        decision_state IN (
+            'normal', 'warning', 'rewrite_candidate',
+            'topic_shift_only', 'low_confidence'
+        )
+    ),
+    can_trigger_rewrite INTEGER NOT NULL CHECK (can_trigger_rewrite IN (0, 1)),
+    payload_json TEXT NOT NULL CHECK (
+        json_valid(payload_json) AND json_type(payload_json) = 'object'
+    ),
+    PRIMARY KEY (analysis_id, ordinal),
+    UNIQUE (analysis_id, window_id),
+    FOREIGN KEY (analysis_id) REFERENCES analysis_runs(analysis_id)
+);
+
+CREATE TABLE IF NOT EXISTS analysis_artifacts (
+    artifact_id TEXT PRIMARY KEY,
+    analysis_id TEXT NOT NULL UNIQUE,
+    expires_at TEXT NOT NULL CHECK (julianday(expires_at) IS NOT NULL),
+    uncompressed_bytes INTEGER NOT NULL CHECK (
+        uncompressed_bytes BETWEEN 2 AND 16777216
+    ),
+    FOREIGN KEY (artifact_id) REFERENCES artifacts(artifact_id),
+    FOREIGN KEY (analysis_id) REFERENCES analysis_runs(analysis_id)
+        DEFERRABLE INITIALLY DEFERRED
+);
+

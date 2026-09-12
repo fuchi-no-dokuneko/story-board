@@ -1,0 +1,83 @@
+      summary: Validate and register a complete agent-authored manuscript
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgentNovelRegistrationRequest"
+      responses:
+        "200":
+          description: Existing idempotent registration result
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentNovelRegistrationResponse"
+        "201":
+          description: Agent manuscript registered as a canonical novel
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentNovelRegistrationResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels:
+    post:
+      operationId: createNovel
+      summary: Create a novel from an initial canonical revision
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateNovelRequest"
+      responses:
+        "201":
+          description: Novel created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
+        default:
+          $ref: "#/components/responses/Problem"
+  /imports:
+    post:
+      operationId: importCanonicalPackage
+      summary: Import a versioned canonical JSON document or package
+      x-required-scopes: ["novel:admin"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportRequest"
+      responses:
+        "200":
+          description: Existing idempotent import result
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:

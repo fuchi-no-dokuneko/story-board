@@ -1,0 +1,46 @@
+# Backup and restore
+
+Build the CLI and create an unencrypted, compressed backup inside the repository:
+
+```bash
+./mvnw -q -pl client-cli -am package -DskipTests
+scripts/backup.sh .local/storyblock/data/storyblock.db .local/storyblock/backups
+```
+
+The online SQLite snapshot is checked for integrity, compressed with Zstandard,
+and atomically published as `.db.zst`. The `.sha256` sidecar and manifest `sha256`
+field cover the compressed bytes. No backup keys or encryption are used.
+The manifest retains migration and canonical row counts. Permissions are 0600.
+
+Retention keeps the newest 48 snapshots, one per day for 30 days, and one per
+week for 12 weeks. Run `scripts/prune-backups.sh <repository-backup-directory>`
+to preview deletions; `--apply` removes the selected archive and both sidecars.
+
+Restore with `scripts/restore-drill.sh <backup.db.zst> <repository-work-directory>`.
+It verifies the checksum before decompression, runs SQLite integrity checks,
+checks migration and canonical row counts, and replays every novel through the
+CLI. The restore report includes RTO and replay evidence. Existing restored.db
+files are rejected so a live or earlier restored database cannot be replaced.
+
+## Access-token server pepper
+
+The access-token server pepper is not recoverable from stored HMAC digests. If
+it is lost or suspected compromised: disable token issuance, install a new
+pepper in the secret manager, revoke every existing access-key record, record
+the incident and rotation identifier in the audit log, then issue replacement
+keys through the normal owner-authorized flow. There is deliberately no grace
+period in which digests under both peppers are accepted.
+
+## ADR-317 evaluation
+
+Run the labeled style/rewrite evaluation and produce a machine-readable report:
+
+```bash
+scripts/run-adr317-evaluation.sh
+```
+
+The report records the target-corpus train/calibration split, false positives
+and negatives, channel contributions, before/after percentiles, protected fact
+and speaker preservation, long n-gram findings, attempt bounds, and cooldown
+policy. The output is operational evidence under `artifacts/evaluations/` and
+is intentionally excluded from version control.

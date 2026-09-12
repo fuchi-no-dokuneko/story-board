@@ -1,0 +1,57 @@
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "SceneSeed",
+      "file": "dtos/SceneSeed.schema.json",
+      "description": "Code-derived StoryBlock Scene Seed JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "name": "SetSceneInitialMetaOperation",
+      "file": "dtos/SetSceneInitialMetaOperation.schema.json",
+      "description": "Code-derived StoryBlock Set Scene Initial Meta Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "SetSceneInitialMetaPayload",
+      "file": "dtos/SetSceneInitialMetaPayload.schema.json",
+      "description": "Code-derived StoryBlock Set Scene Initial Meta Payload JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "SplitBlockOperation",
+      "file": "dtos/SplitBlockOperation.schema.json",
+      "description": "Code-derived StoryBlock Split Block Operation JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+        "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+        "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+        "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+      ]
+    },
+    {
+      "name": "SplitBlockPayload",
+      "file": "dtos/SplitBlockPayload.schema.json",
+      "description": "Code-derived StoryBlock Split Block Payload JSON contract.",
+      "confidence": "confirmed-from-code",

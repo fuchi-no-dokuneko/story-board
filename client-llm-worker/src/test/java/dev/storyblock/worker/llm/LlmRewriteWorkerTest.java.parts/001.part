@@ -1,0 +1,63 @@
+package dev.storyblock.worker.llm;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.rewrite.RewriteConstraints;
+import dev.storyblock.rewrite.RewriteModule;
+import dev.storyblock.rewrite.RewriteSourceBlock;
+import dev.storyblock.rewrite.RewriteTextProposal;
+import dev.storyblock.rewrite.RewriteWorkerInput;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.Test;
+
+class LlmRewriteWorkerTest {
+    private static final Instant NOW = Instant.parse("2026-08-22T02:00:00Z");
+    private static final String MODEL = "fixture-model-v1";
+    private static final String TOKEN = "test-transport-key-0000000000000001";
+
+    @Test
+    void invokesOneToolFreeModelOriginAndEmitsOnlyBoundProposal() throws Exception {
+        RewriteWorkerInput input = input();
+        AtomicReference<Throwable> handlerFailure = new AtomicReference<>();
+        AtomicReference<Map<String, Object>> capturedRequest = new AtomicReference<>();
+        AtomicInteger invocations = new AtomicInteger();
+        HttpServer server = server();
+        server.createContext("/invoke", exchange -> handle(
+                exchange,
+                handlerFailure,
+                () -> {
+                    invocations.incrementAndGet();
+                    assertEquals("POST", exchange.getRequestMethod());
+                    assertEquals(
+                            "Bearer " + TOKEN,
+                            exchange.getRequestHeaders().getFirst("Authorization")
+                    );
+                    byte[] body = exchange.getRequestBody().readAllBytes();
+                    assertFalse(new String(body, StandardCharsets.UTF_8).contains(TOKEN));
+                    Map<String, Object> request = object(body);
+                    capturedRequest.set(request);

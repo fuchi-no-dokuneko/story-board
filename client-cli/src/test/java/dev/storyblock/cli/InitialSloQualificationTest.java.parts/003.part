@@ -1,0 +1,61 @@
+                transactionSamples.add(elapsedMicros(started));
+            }
+            commitTransactionP95 = p95(transactionSamples);
+
+            CommitService service = new CommitService(store);
+            List<Long> totalSamples = new ArrayList<>();
+            for (int index = 0; index < 20; index++) {
+                RevisionManifest base = head(store, fixture.novel().id());
+                EditOperation operation = metadataOperation(base, "total-" + index);
+                Instant at = fixture.createdAt().plusSeconds(100L + index);
+                long started = System.nanoTime();
+                service.commit(operation, Ids.RevisionId.create(), at);
+                totalSamples.add(elapsedMicros(started));
+            }
+            commitTotalP95 = p95(totalSamples);
+        }
+
+        SqliteWalSpike.Report load = SqliteWalSpike.runMultiProcess(
+                walPath, 2, 2, 50, 200
+        );
+        long throughputMilliPerSecond = load.elapsedMillis() == 0
+                ? Long.MAX_VALUE
+                : load.writes() * 1_000_000L / load.elapsedMillis();
+        boolean writesPass = load.writes() == 100
+                && load.finalRows() == 100
+                && throughputMilliPerSecond >= 2_000;
+
+        Map<String, Object> results = new LinkedHashMap<>();
+        results.put(NFR_001, latencyResult(
+                "1000-block range render p95", renderP95, 500_000
+        ));
+        results.put(NFR_002, latencyResult(
+                "1000-block deterministic detector p95", detectorP95, 1_000_000
+        ));
+        results.put(NFR_003, latencyResult(
+                "short SQLite commit transaction p95", commitTransactionP95, 100_000
+        ));
+        results.put(NFR_004, latencyResult(
+                "commit service total p95 excluding network and LLM",
+                commitTotalP95,
+                250_000
+        ));
+        results.put(NFR_005, Map.of(
+                "busy_total", load.busyTotal(),
+                "elapsed_ms", load.elapsedMillis(),
+                "final_rows", load.finalRows(),
+                "metric", "multi-process sustained writes",
+                "passed", writesPass,
+                "target_milli_commits_per_second", 2_000,
+                "throughput_milli_commits_per_second", throughputMilliPerSecond,
+                "writes", load.writes()
+        ));
+        results.put(NFR_009, Map.of(
+                "comparisons", 10,
+                "metric", "same-version render bytes",
+                "output_sha256", CanonicalJson.hashBytes(firstRender),
+                "passed", deterministic
+        ));
+        boolean passed = results.values().stream()
+                .map(value -> (Map<?, ?>) value)
+                .allMatch(value -> Boolean.TRUE.equals(value.get("passed")));

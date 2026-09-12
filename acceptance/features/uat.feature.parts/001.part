@@ -1,0 +1,45 @@
+@daily @uat @web
+Feature: Daily acceptance of the StoryBlock read-only novel library
+  A human or browser agent verifies persisted novel text and metadata through
+  the trusted-LAN admin UI without changing stored content.
+
+  Scenario: Load the read-only library and observe the live service
+    Given I open the web application at path "/"
+    Then the web page title contains "StoryBlock Library"
+    And CSS ".brand h1" has text "StoryBlock"
+    And CSS ".brand p" has text "Novel library"
+    And CSS ".readonly-badge" has text "Read only"
+    And CSS "#status-text" eventually contains text "Service online"
+    And CSS "#catalog-total" eventually contains text "persisted novel"
+    And no elements match CSS "#library-view textarea"
+    And no elements match CSS "#library-view [contenteditable='true']"
+    And no elements match CSS "button[data-method='POST'], button[data-method='DELETE']"
+
+  Scenario: Expose one shared non-persistent operator credential control
+    Given I open the web application at path "/"
+    When I click CSS "details.operator-bar summary"
+    Then CSS "#operator-token" is visible
+    And CSS "#operator-connect" has text "Use token"
+    And CSS "#operator-status" eventually contains text "access active"
+    And local storage item "storyblock.operatorToken" is absent
+    And JavaScript expression "sessionStorage.getItem('storyblock.operatorToken') === null" returns true
+    When I click CSS "#console-tab"
+    Then CSS ".console-auth-note" contains text "connect directly"
+
+  Scenario: Read and count the independently registered novel
+    Given I open the web application at path "/"
+    When I replace CSS "#catalog-search" with environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+    Then exactly 1 elements match CSS ".novel-item"
+    When I click CSS ".novel-item"
+    Then CSS "#reader-content" is visible
+    And JavaScript expression "document.getElementById('reader-empty').offsetParent === null && document.getElementById('reader-loading').offsetParent === null && document.getElementById('reader-content').offsetParent !== null" returns true
+    And CSS "#reader-title" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
+    And CSS "#reader-id" contains environment variable "STORYBLOCK_UAT_NOVEL_ID"
+    And CSS "#reader-registration" has text "Agent write registered"
+    And CSS "#stat-han" has text "10,000"
+    And CSS "#stat-zombies" has text "1,000"
+    And CSS "#stat-cannons" has text "1,000"
+    And exactly 5 elements match CSS "#character-list li"
+    And at least 2 elements match CSS "#chapter-nav .chapter-link"
+    And at least 100 elements match CSS ".story-block"
+    And CSS "#chapter-content" contains environment variable "STORYBLOCK_UAT_TEXT_MARKER"

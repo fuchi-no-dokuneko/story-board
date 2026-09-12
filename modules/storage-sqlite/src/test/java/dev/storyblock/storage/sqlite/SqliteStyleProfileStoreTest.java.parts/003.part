@@ -1,0 +1,61 @@
+                    "Explicitly approved generated baseline",
+                    true,
+                    calibrating.view().statusHash(),
+                    "promote-generated-version",
+                    audit(6, "promote-generated-version")
+            );
+            assertTrue(readyGenerated.view().canGateRewrites());
+            assertEquals("style-owner", readyGenerated.view().approvedBy());
+            assertEquals(
+                    readyGenerated.view(),
+                    service.requireRewriteGate(
+                            created.profile().profileId(),
+                            generated.view().profileVersion().versionId()
+                    )
+            );
+
+            var ownerVersion = service.createVersion(
+                    created.profile().profileId(),
+                    content(genesis, scope, StyleCorpusSourceKind.OWNER),
+                    created.profile().resourceHash(),
+                    "create-owner-version",
+                    audit(7, "create-owner-version")
+            );
+            var ownerCalibrating = service.transition(
+                    created.profile().profileId(),
+                    ownerVersion.view().profileVersion().versionId(),
+                    StyleProfileState.CALIBRATING,
+                    "Calibration complete",
+                    false,
+                    ownerVersion.view().statusHash(),
+                    "calibrate-owner-version",
+                    audit(8, "calibrate-owner-version")
+            );
+            var ownerReady = service.transition(
+                    created.profile().profileId(),
+                    ownerVersion.view().profileVersion().versionId(),
+                    StyleProfileState.READY,
+                    "Owner baseline approved",
+                    false,
+                    ownerCalibrating.view().statusHash(),
+                    "promote-owner-version",
+                    audit(9, "promote-owner-version")
+            );
+
+            assertTrue(ownerReady.view().canGateRewrites());
+            assertEquals(
+                    StyleProfileState.DEPRECATED,
+                    service.getVersion(
+                            created.profile().profileId(),
+                            generated.view().profileVersion().versionId()
+                    ).state()
+            );
+            assertThrows(StyleLifecycleConflictException.class, () ->
+                    service.requireRewriteGate(
+                            created.profile().profileId(),
+                            generated.view().profileVersion().versionId()
+                    )
+            );
+            assertThrows(StyleStatusPreconditionException.class, () ->
+                    service.transition(
+                            created.profile().profileId(),

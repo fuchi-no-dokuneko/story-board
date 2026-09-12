@@ -1,0 +1,54 @@
+                new Ids.NovelId(novelId), StyleScopeKind.NOVEL, null
+        );
+        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                keyPrefix + "-profile")
+                        .header(HttpHeaders.IF_MATCH, "*")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "name", "Durable analysis baseline",
+                                "scope", scope.canonicalValue(),
+                                "provenance", "Generated HTTP durability fixture"
+                        ))))
+                .andExpect(status().isCreated())
+                .andReturn();
+        String profileId = stringField(object(profileResult), "profile_id");
+
+        StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
+        var features = new StyleFeatureAnalyzer().extract(
+                NarrativeCanonicalMapper.fromCanonical(revision).liveBlocks(),
+                lexicon,
+                StyleFeatureContract.defaults(lexicon.vocabularyHash())
+        );
+        StyleWindowConfiguration windows = StyleWindowConfiguration.defaults();
+        List<BigDecimal> referenceDistances = java.util.Collections.nCopies(
+                30, new BigDecimal("0.1")
+        );
+        StyleCalibrationProfile calibration = new StyleCalibrationProfile(
+                dev.storyblock.style.StyleModule.CALIBRATION_SCHEMA_VERSION,
+                features.sourceHash(),
+                features.contract().contractHash(),
+                windows.configurationHash(),
+                List.of(new StyleStratumCalibration(
+                        StyleStratum.narration(),
+                        30,
+                        StyleFeatureChannel.requiredChannels().stream()
+                                .sorted(java.util.Comparator.comparing(Enum::ordinal))
+                                .map(channel -> StyleChannelCalibration.fromDistances(
+                                        channel, referenceDistances
+                                )).toList()
+                ))
+        );
+        StyleProfileVersionContent versionContent = new StyleProfileVersionContent(
+                scope,
+                List.of(new StyleCorpusSource(
+                        "generated-durable-corpus",
+                        features.sourceHash(),
+                        StyleCorpusSourceKind.GENERATED,
+                        "Durable job HTTP fixture",
+                        "test-only",
+                        "test-owner"
+                )),
+                features,
+                windows,

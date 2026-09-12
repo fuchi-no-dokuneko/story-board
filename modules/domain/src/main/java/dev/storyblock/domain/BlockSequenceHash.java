@@ -29,7 +29,7 @@ public final class BlockSequenceHash {
         }
     }
 
-    private static void updateLengthPrefixed(MessageDigest digest, String value) {
+    static void updateLengthPrefixed(MessageDigest digest, String value) {
         byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
         digest.update(ByteBuffer.allocate(Integer.BYTES).putInt(bytes.length).array());
         digest.update(bytes);

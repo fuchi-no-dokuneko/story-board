@@ -1,0 +1,2 @@
+spring.main.banner-mode: "off"
+storyblock.llm-worker.enabled: true

@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "required": [
+    "blockChanges",
+    "sceneSeedChanges"
+  ],
+  "properties": {
+    "blockChanges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "sceneSeedChanges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/RevisionDiff.schema.json",
+  "title": "RevisionDiff",
+  "description": "Code-derived StoryBlock Revision Diff JSON contract.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/PreviewController.java",
+    "server/src/main/java/dev/storyblock/api/http/CommitController.java",
+    "modules/contracts/src/main/java/dev/storyblock/contracts/EditOperationCanonicalMapper.java",
+    "modules/domain/src/main/java/dev/storyblock/domain/EditOperation.java"
+  ],
+  "examples": [
+    {
+      "blockChanges": [
+
+      ],
+      "sceneSeedChanges": [
+
+      ]
+    }
+  ]
+}

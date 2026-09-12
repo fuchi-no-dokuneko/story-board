@@ -1,0 +1,57 @@
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+      ]
+    },
+    {
+      "name": "AdminNovelSummary",
+      "file": "dtos/AdminNovelSummary.schema.json",
+      "description": "Code-derived StoryBlock Admin Novel Summary JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+      ]
+    },
+    {
+      "name": "AgentNovelRegistrationChapter",
+      "file": "dtos/AgentNovelRegistrationChapter.schema.json",
+      "description": "Code-derived StoryBlock Agent Novel Registration Chapter JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+      ]
+    },
+    {
+      "name": "AgentNovelRegistrationRequest",
+      "file": "dtos/AgentNovelRegistrationRequest.schema.json",
+      "description": "Code-derived StoryBlock Agent Novel Registration Request JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+      ]
+    },
+    {
+      "name": "AgentNovelRegistrationResponse",
+      "file": "dtos/AgentNovelRegistrationResponse.schema.json",
+      "description": "Code-derived StoryBlock Agent Novel Registration Response JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/AgentNovelController.java",
+        "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
+        "modules/application/src/main/java/dev/storyblock/application/AgentNovelRegistrationService.java"
+      ]
+    },
+    {
+      "name": "ApiProblem",
+      "file": "dtos/ApiProblem.schema.json",
+      "description": "Code-derived StoryBlock Api Problem JSON contract.",
+      "confidence": "confirmed-from-code",
+      "source": [

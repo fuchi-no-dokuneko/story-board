@@ -1,0 +1,45 @@
+                () -> CanonicalNovelPackage.genesis(
+                        NarrativeCanonicalMapper.toCanonical(child)
+                )
+        );
+    }
+
+    private static CanonicalRevision genesis() {
+        Ids.NovelId novelId = Ids.NovelId.create();
+        Ids.ChapterId chapterId = Ids.ChapterId.create();
+        NarrativeBlock block = NarrativeBlock.create(
+                Ids.BlockId.create(),
+                OrderKey.initial(),
+                "第一句。",
+                BlockMetadata.empty(),
+                Map.of()
+        );
+        NarrativeScene scene = new NarrativeScene(
+                Ids.SceneId.create(),
+                chapterId,
+                OrderKey.initial(),
+                "Opening",
+                TransitionMode.OPENING,
+                SceneSeed.empty(),
+                List.of(block),
+                Map.of()
+        );
+        RevisionManifest manifest = new RevisionManifest(
+                Ids.RevisionId.create(),
+                null,
+                Instant.parse("2026-08-21T12:00:00Z"),
+                new NarrativeNovel(
+                        novelId,
+                        List.of(new NarrativeChapter(
+                                chapterId,
+                                OrderKey.initial(),
+                                "Chapter",
+                                List.of(scene),
+                                Map.of()
+                        )),
+                        Map.of()
+                )
+        );
+        return NarrativeCanonicalMapper.toCanonical(manifest);
+    }
+}

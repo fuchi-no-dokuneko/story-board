@@ -14,8 +14,8 @@ public record StyleFeatureSet(
         StyleFeatureContract contract,
         List<StyleFeatureVector> channels
 ) {
-    private static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
-    private static final Set<String> FIELDS = Set.of("source_hash", "contract", "channels");
+    static final Pattern HASH = Pattern.compile("sha256:[0-9a-f]{64}");
+    static final Set<String> FIELDS = Set.of("source_hash", "contract", "channels");
 
     public StyleFeatureSet {
         if (sourceHash == null || !HASH.matcher(sourceHash).matches()) {
@@ -38,15 +38,7 @@ public record StyleFeatureSet(
     }
 
     public static StyleFeatureSet fromCanonical(Map<String, Object> value) {
-        StyleCanonical.requireKeys(value, FIELDS, "style_feature_set");
-        return new StyleFeatureSet(
-                StyleCanonical.string(value, "source_hash", "style_feature_set"),
-                StyleFeatureContract.fromCanonical(StyleCanonical.object(
-                        value.get("contract"), "style_feature_set.contract"
-                )),
-                StyleCanonical.objects(value.get("channels"), "style_feature_set.channels")
-                        .stream().map(StyleFeatureVector::fromCanonical).toList()
-        );
+        return StyleFeatureSetFromCanonicalFactory.fromCanonical(value);
     }
 
     public StyleFeatureVector require(StyleFeatureChannel channel) {

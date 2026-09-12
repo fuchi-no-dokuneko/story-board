@@ -1,0 +1,64 @@
+            var head = target.getHead(first.manifest().novelId());
+            var exported = transfers.requestExport(
+                    first.manifest().novelId(),
+                    head.revisionId(),
+                    head.contentHash(),
+                    CanonicalExportFormat.PACKAGE,
+                    "same-export-key",
+                    Instant.parse("2026-08-21T14:00:00Z")
+            );
+            var retry = transfers.requestExport(
+                    first.manifest().novelId(),
+                    head.revisionId(),
+                    head.contentHash(),
+                    CanonicalExportFormat.PACKAGE,
+                    "same-export-key",
+                    Instant.parse("2026-08-21T14:01:00Z")
+            );
+
+            assertFalse(exported.idempotentReplay());
+            assertTrue(retry.idempotentReplay());
+            assertEquals(exported.job(), retry.job());
+            assertArrayEquals(
+                    first.bytes(),
+                    transfers.getArtifact(exported.job().resultArtifactId()).content()
+            );
+            assertArrayEquals(first.bytes(), transfers.exportPackage(first.manifest().novelId()));
+            assertThrows(
+                    IdempotencyConflictException.class,
+                    () -> transfers.requestExport(
+                            first.manifest().novelId(),
+                            head.revisionId(),
+                            head.contentHash(),
+                            CanonicalExportFormat.REVISION,
+                            "same-export-key",
+                            Instant.parse("2026-08-21T14:02:00Z")
+                    )
+            );
+
+            RevisionManifest importedHead = target.getRevision(
+                    imported.novelId(), imported.head().revisionId()
+            ).manifest();
+            var advanced = new CommitService(target).commit(
+                    RevisionStoreTestFixture.replace(
+                            importedHead, "after-import", "第三句。"
+                    ),
+                    Ids.RevisionId.create(),
+                    Instant.parse("2026-08-21T14:03:00Z")
+            );
+            var importRetry = transfers.importDocument(
+                    CanonicalExportFormat.PACKAGE,
+                    first.bytes(),
+                    "same-import-key",
+                    Instant.parse("2026-08-21T14:04:00Z")
+            );
+
+            assertTrue(importRetry.idempotentReplay());
+            assertEquals(imported.head(), importRetry.head());
+            assertFalse(importRetry.head().equals(advanced.revision()));
+        }
+    }
+
+    @Test
+    void failedJobInsertRollsBackItsGeneratedArtifact() throws Exception {
+        CanonicalNovelPackage document = packageWithOneOperation(

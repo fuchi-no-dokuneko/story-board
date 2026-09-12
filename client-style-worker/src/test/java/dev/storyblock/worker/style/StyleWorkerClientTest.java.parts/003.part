@@ -1,0 +1,64 @@
+                            "idempotent_replay", false,
+                            "job_id", lease.jobId().value(),
+                            "result_hash", completion.resultHash(),
+                            "status", "succeeded"
+                    )));
+                })
+        );
+        server.start();
+
+        try {
+            StyleWorkerSettings settings = new StyleWorkerSettings(
+                    URI.create("https://127.0.0.1:" + server.getAddress().getPort()),
+                    TOKEN,
+                    lease.snapshot().novelId(),
+                    lease.leaseOwner(),
+                    Duration.ofMinutes(5),
+                    Duration.ofSeconds(1),
+                    true
+            );
+            StyleWorkerClient client = new StyleWorkerClient(
+                    HttpClient.newBuilder().sslContext(LocalSelfSignedTls.context()).build(),
+                    settings,
+                    Clock.fixed(NOW, ZoneOffset.UTC),
+                    new dev.storyblock.style.StyleAnalysisExecutor(),
+                    () -> "fixed-claim-key"
+            );
+
+            assertEquals(StyleWorkerClient.Outcome.COMPLETED, client.runOnce());
+            assertEquals(2, claimRequests.get());
+            assertNull(handlerFailure.get());
+            Map<String, Object> trace = map(submittedResult.get().get("trace"));
+            assertEquals("gzip", trace.get("codec"));
+            assertTrue(((String) trace.get("content_base64")).length() > 2);
+            assertFalse(settings.toString().contains(TOKEN));
+            assertTrue(settings.toString().contains("<redacted>"));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    private static StyleAnalysisCompletionCommand completion(
+            StyleAnalysisLease lease,
+            Map<String, Object> body
+    ) {
+        Map<String, Object> traceEnvelope = map(body.get("trace"));
+        Instant completedAt = Instant.parse((String) body.get("completed_at"));
+        StyleAnalysisTrace trace = StyleAnalysisTrace.fromCompressed(
+                lease.analysisId(),
+                (String) traceEnvelope.get("content_hash"),
+                Base64.getDecoder().decode(
+                        (String) traceEnvelope.get("content_base64")
+                ),
+                ((Number) traceEnvelope.get("uncompressed_bytes")).intValue(),
+                completedAt,
+                lease.retentionUntil()
+        );
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> windows = (List<Map<String, Object>>) body.get(
+                "windows"
+        );
+        return new StyleAnalysisCompletionCommand(
+                lease.jobId(),
+                (String) body.get("lease_owner"),
+                ((Number) body.get("attempt")).intValue(),
