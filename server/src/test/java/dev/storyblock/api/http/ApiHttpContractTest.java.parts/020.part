@@ -1,5 +1,3 @@
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(rewriteBody))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
 
@@ -50,3 +48,4 @@
 
         mvc.perform(delete("/v1/access-keys/{keyId}", keyId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "security-revoke")

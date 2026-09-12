@@ -12,9 +12,7 @@
                 "language", "zh-Hant",
                 "main_characters", List.of(),
                 "novel_id", secondNovel,
-                "title", "Cross novel attempt",
-                "tnt_cannon_count", 0,
-                "zombie_count", 0
+                "title", "Cross novel attempt"
         ));
         mvc.perform(post("/v1/agent/novels")
                         .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
@@ -50,3 +48,5 @@
                         .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "expiry-denied")
                         .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(expiryEscalationBody))

@@ -2,15 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://storyblock.local/plugin/dtos/CharacterImageReferenceConfig.schema.json",
   "title": "CharacterImageReferenceConfig",
-  "description": "Five-character visual identity lock with one initial image and at least two plain-background variants each.",
+  "description": "Character visual identity references with one initial image and at least two plain-background variants each.",
   "type": "object",
   "required": ["schema_version", "characters"],
   "properties": {
     "schema_version": {"const": "character-image-references-1.0.0"},
     "characters": {
       "type": "array",
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 1,
       "uniqueItems": true,
       "items": {"$ref": "#/$defs/character"}
     }

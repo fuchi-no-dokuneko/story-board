@@ -66,8 +66,6 @@ test('the shared token authenticates library and console requests and can be cle
               chapter_count: 0,
               scene_count: 0,
               block_count: 0,
-              zombie_count: 0,
-              tnt_cannon_count: 0,
               head_revision_id: 'rev_test',
               updated_at: '2026-08-27T00:00:00Z',
               head_hash: 'sha256:test',
@@ -83,3 +81,5 @@ test('the shared token authenticates library and console requests and can be cle
           total: 1,
           items: [{
             novel_id: 'nov_test',
+            title: 'Authenticated novel',
+            language: 'en',

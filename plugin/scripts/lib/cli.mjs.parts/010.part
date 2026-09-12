@@ -60,4 +60,3 @@
       throw new UsageError(`Unknown command: ${parsed.command}`);
   }
 }
-

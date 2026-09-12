@@ -1,3 +1,4 @@
+
 function writeValue(io, value, { json = false, kind } = {}) {
   if (kind === "text") {
     io.stdout(value.endsWith("\n") ? value : `${value}\n`);

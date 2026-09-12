@@ -1,4 +1,3 @@
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "security-revoke")
                         .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.revoked").value(true));
@@ -51,3 +50,5 @@
         mvc.perform(get("/v1/novels/{novelId}/revisions/{revisionId}", novelId, revisionId)
                         .with(userWithScope("novel:read")))
                 .andExpect(status().isOk());
+        MvcResult first = mvc.perform(request)
+                .andExpect(status().isCreated())

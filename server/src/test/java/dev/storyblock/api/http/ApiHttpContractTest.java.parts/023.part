@@ -1,4 +1,3 @@
-                "scope", scope.canonicalValue(),
                 "provenance", "Generated fixture requiring explicit approval"
         ));
 
@@ -51,3 +50,4 @@
                         features.sourceHash(),
                         StyleCorpusSourceKind.GENERATED,
                         "HTTP integration fixture",
+                        "test-only",

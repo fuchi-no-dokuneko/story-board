@@ -14,7 +14,7 @@ final class AgentNovelRegistrationServiceBlocks {
         List<String> sentences = new ArrayList<>();
         int consumed = 0;
         while (matcher.find()) {
-            String sentence = matcher.group(1).strip();
+            String sentence = matcher.group(1).stripTrailing();
             if (!sentence.isEmpty()) {
                 sentences.add(sentence);
             }
@@ -37,7 +37,7 @@ final class AgentNovelRegistrationServiceBlocks {
         }
         List<String> result = new ArrayList<>();
         for (int index = 0; index < sentences.size();) {
-            String block = sentences.get(index++);
+            String block = sentences.get(index++).strip();
             if (index < sentences.size()) {
                 String candidate = block + sentences.get(index);
                 if (UnicodeText.graphemeCount(candidate) <= UnicodeText.MAX_BLOCK_GRAPHEMES) {

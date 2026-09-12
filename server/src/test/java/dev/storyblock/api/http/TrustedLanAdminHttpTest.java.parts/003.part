@@ -7,15 +7,37 @@
                 )));
     }
 
+    @Test
+    void ordinaryNovelsAllowDifferentCastSizesAndTextWithoutHanCharacters() throws Exception {
+        for (var characters : List.of(List.<String>of(), List.of("Mina"),
+                List.of("Mina", "Sam", "Jo", "Lee", "Pat", "Alex"))) {
+            Map<String, Object> body = new LinkedHashMap<>(CanonicalJson.parse(registration(0), Map.class));
+            String novel = dev.storyblock.domain.ShortIds.generate("nov");
+            body.put("novel_id", novel);
+            body.put("language", "en");
+            body.put("main_characters", characters);
+            body.put("chapters", List.of(Map.of("title", "Rain", "text", "Rain taps the roof. Mina opens the door.")));
+            mvc.perform(post("/v1/agent/novels").header(HttpHeaders.IF_MATCH, "*")
+                            .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "ordinary-" + novel)
+                            .contentType(MediaType.APPLICATION_JSON).content(CanonicalJson.bytes(body)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.novel.main_characters", hasSize(characters.size())))
+                    .andExpect(jsonPath("$.novel.han_character_count").value(0))
+                    .andExpect(jsonPath("$.novel.zombie_count").doesNotExist())
+                    .andExpect(jsonPath("$.novel.tnt_cannon_count").doesNotExist());
+            mvc.perform(get("/v1/admin/novels/" + novel)).andExpect(status().isOk())
+                    .andExpect(jsonPath("$.revision.chapters[0].scenes[0].blocks[0].text")
+                            .value("Rain taps the roof. Mina opens the door."));
+        }
+    }
+
     private static byte[] registration(int expectedHanCharacters) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("novel_id", NOVEL_ID);
         body.put("created_at", "2026-08-24T12:00:00Z");
-        body.put("title", "方塊村防線");
+        body.put("title", "雨後的信");
         body.put("language", "zh-Hant");
-        body.put("main_characters", List.of("阿青", "小石", "米婭", "老鐵", "雲舟"));
-        body.put("zombie_count", 1000);
-        body.put("tnt_cannon_count", 1000);
+        body.put("main_characters", List.of("阿青", "米婭"));
         body.put("expected_han_characters", expectedHanCharacters);
         body.put("chapters", List.of(Map.of("title", "第一章", "text", TEXT)));
         return CanonicalJson.bytes(body);

@@ -12,4 +12,9 @@ class RegistrationSentenceTest {
         assertEquals(text, String.join("", blocks));
         assertTrue(blocks.stream().noneMatch(block -> block.startsWith("」")));
     }
+    @Test void periodBoundariesRetainEnglishWordSpacingAndDecimalNumbers() {
+        String text = "Rain taps the roof. Mina opens the door. The meter reads 3.14 units.";
+        assertEquals(List.of("Rain taps the roof. Mina opens the door.", "The meter reads 3.14 units."),
+                AgentNovelRegistrationServiceBlocks.blocks(text, 0));
+    }
 }
