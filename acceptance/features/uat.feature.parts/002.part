@@ -1,7 +1,3 @@
-    And JavaScript expression "(() => { const han = new RegExp(String.fromCharCode(92) + 'p{Script=Han}', 'u'); return Array.from(Array.from(document.querySelectorAll('.story-block')).map((item) => item.textContent).join('')).filter((character) => han.test(character)).length === 10000; })()" returns true
-    And JavaScript expression "document.getElementById('meta-han-hash').textContent.startsWith('sha256:')" returns true
-
-  Scenario: Search the catalog by a main-character name
     Given I open the web application at path "/"
     When I replace CSS "#catalog-search" with environment variable "STORYBLOCK_UAT_CHARACTER"
     Then at least 1 elements match CSS ".novel-item"
@@ -42,3 +38,12 @@
     Given I open the web application at path "/"
     Then CSS "#status-text" eventually contains text "Service online"
     When I click CSS "#console-tab"
+    And I set the browser network offline
+    And I click CSS ".quick-requests button[data-path='/actuator/health']"
+    Then CSS "#response-status" eventually contains text "Network error"
+    When I restore the browser network
+    And I click CSS ".quick-requests button[data-path='/actuator/health']"
+    Then CSS "#response-status" eventually contains text "200"
+    And CSS "#response" eventually contains text "\"status\": \"UP\""
+
+  Scenario: Keep the reader usable on a narrow mobile viewport

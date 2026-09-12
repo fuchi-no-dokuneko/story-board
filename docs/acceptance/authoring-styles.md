@@ -1,10 +1,10 @@
 # Authoring verification / 撰寫驗收 / 编写验收
 
-EN: Verified 2026-09-12 using the installed HTTPS build. All 13 requirements are implemented for fresh installation. VPS untouched.
+EN: Initial feature-run record, 2026-09-12; VPS untouched. Demo assumptions escaped these checks. Use the later [product review](product-review.md) for current evidence.
 
-繁體中文：2026-09-12 已對安裝後的 HTTPS 版本完成 13 項撰寫／風格需求驗收。採全新安裝，不提供舊資料遷移；未部署或修改既有 VPS。
+繁體中文：此為初次功能測試紀錄，當時未查出示範限制；最新證據見後續產品驗收。未部署 VPS。
 
-简体中文：2026-09-12 已对安装后的 HTTPS 版本完成 13 项编写／风格需求验收。采用全新安装，不提供旧数据迁移；未部署或修改现有 VPS。
+简体中文：此为初次功能测试记录，当时未查出示范限制；最新证据见后续产品验收。未部署 VPS。
 
 | Scope / 範圍 / 范围 | Evidence / 證據 / 证据 |
 |---|---|

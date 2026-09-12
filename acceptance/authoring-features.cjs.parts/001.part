@@ -17,23 +17,23 @@ const { CdpDriver } = require('./cdp-driver.cjs');
     await driver.get(`${target.origin}/#${novel}`);
     await driver.wait(() => driver.evaluate("!document.getElementById('reader-content').hidden"));
     await driver.wait(() => driver.evaluate("document.querySelectorAll('#style-choices input:checked').length>=2"));
-    const [compare] = await driver.findElements('#compare-styles'); await compare.click();
+    const [compare] = await driver.findElements('#compare-styles');
+    const inputs = await driver.findElements('#style-choices input:not(:disabled)');
+    for (const input of inputs.slice(1)) await input.click();
+    await compare.click();
+    await driver.wait(() => driver.evaluate("document.querySelectorAll('#style-score-rows tr').length===1"));
+    await inputs[1].click(); await compare.click();
     await driver.wait(() => driver.evaluate("document.querySelectorAll('#style-score-rows tr').length>=2"));
     const table = await driver.evaluate("document.getElementById('style-score-rows').innerText");
     const title = await driver.evaluate("document.getElementById('reader-title').innerText");
+    const expected = await driver.evaluate(`({
+      stats: [...document.querySelectorAll('.novel-stats dt')].map(node => node.textContent),
+      rows: [...document.querySelectorAll('#style-score-rows tr')].map(row =>
+        [...row.querySelectorAll('td')].map(cell => Number(cell.textContent))),
+    })`);
+    assert.deepEqual(expected.stats, ['Han characters', 'Chapters', 'Scenes', 'Blocks']);
+    assert.equal(expected.rows.length, 2);
+    assert.ok(expected.rows.every(row => row.length === 5 && row.every(Number.isFinite)));
+    const canonicalText = await driver.evaluate(`window.StoryBlockFeatures.selected.revision.chapters
+      .map(chapter => [chapter.title || '', ...chapter.scenes.flatMap(scene => scene.blocks.map(block => block.text))].join('\\n')).join('\\n')`);
     await fs.writeFile(path.join(output, 'comparison.png'), Buffer.from(await driver.takeScreenshot(), 'base64'));
-    for (const format of ['txt', 'pdf']) {
-      const [button] = await driver.findElements('#download-' + format); await button.click();
-      await driver.wait(async () => (await fs.readdir(output)).some(file => file.endsWith('.' + format)));
-    }
-    const files = await fs.readdir(output);
-    const pdf = await fs.readFile(path.join(output, files.find(file => file.endsWith('.pdf'))));
-    assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
-    const txt = await fs.readFile(path.join(output, files.find(file => file.endsWith('.txt'))));
-    assert.ok(new TextDecoder('utf-8', { fatal: true }).decode(txt).length);
-    await driver.get(`${target.origin}/style-math.html`);
-    assert.match(await driver.evaluate('document.body.innerText'), /Jensen|JSD/);
-    await fs.writeFile(path.join(output, 'formulas.png'), Buffer.from(await driver.takeScreenshot(), 'base64'));
-    const result = { title, table, output, pdfBytes: pdf.length, txtBytes: txt.length, formulas: true };
-    await fs.writeFile(path.join(output, 'result.json'), JSON.stringify(result, null, 2));
-    console.log(JSON.stringify(result, null, 2));

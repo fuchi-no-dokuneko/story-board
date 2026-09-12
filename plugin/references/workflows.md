@@ -25,3 +25,5 @@ node scripts/storyblock-author.mjs commit --novel-id nov_Ab123 --file edit.json 
 ```
 
 [DTOs / 綱要 / 纲要](dtos.md) · [Images / 圖片 / 图片](images-pdf.md)
+
+[Edit validation / 編輯驗證 / 编辑验证](edit-validation.md)

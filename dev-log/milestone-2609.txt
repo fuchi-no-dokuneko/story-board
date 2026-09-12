@@ -34,3 +34,10 @@ Time used (min) : 3
 真實 Chromium 下載 PDF／UTF-8 TXT；四頁 PDF 內附中文字型可讀，已查看正文頁。
 證據：.local/authoring-work/regression-browser.log、final-browser.json 及 server/data/uat/authoring-Y01PgG。
 ---
+---15:06---普通小說介面及換頁驗收
+milestone-type : success-test
+Time used (min) : 1
+新稿以真實 Chromium 通過 9 情境、81 步驟；全文逐字比對，桌面與手機無示範統計欄位。
+最後安裝版重測單一／兩種風格五欄比較、公式及 PDF／TXT；三頁 PDF 逐頁查看，換頁字體正常。
+證據：.local/product-review/ 及 server/data/uat/product-review/authoring-GPK0qO。
+---

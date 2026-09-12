@@ -16,3 +16,9 @@ Current status: 查看普通小說 PDF 發現換頁後段落縮字；新頁重�
 Issues: 兩項像素回歸先重現失敗，修正後 Java 全套 203 項通過；重建下載三頁逐頁確認。
 affect scope: PDF 渲染；本機證據 .local/product-review/，未部署 VPS。
 ---
+---15:06---ADR-311普通小說產品驗收
+category: refactor
+Current status: 新稿 nov_x2Zx6 共 535 漢字、兩角色、兩章、14 區塊；完整原文比對及閱讀限制編輯通過。
+Issues: Java 203、Node 188、介面資源 4 項通過；真實 GUI 9 情境 81 步驟，另查風格、公式及下載。
+affect scope: 驗收稿、瀏覽器斷言、skill 編輯指引及文件；先前全數驗收表述改為歷史測試紀錄。
+---

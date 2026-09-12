@@ -13,12 +13,10 @@ Feature: English introduction to the StoryBlock novel library
     And CSS "#reader-content" is visible
     When I narrate in "en-US" for at least 9 seconds:
       """
-      The catalog opens the current revision directly. The reader shows the title, five main characters, chapter navigation, and the exact persisted story blocks in a focused long-form layout.
+      The catalog opens the current revision directly. The reader shows the title, main characters, chapter navigation, and the exact persisted story blocks in a focused long-form layout.
       """
     Then CSS "#reader-title" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
-    And CSS "#stat-han" has text "10,000"
-    And CSS "#stat-zombies" has text "1,000"
-    And CSS "#stat-cannons" has text "1,000"
+    And the reader matches the registered manuscript
     When I narrate in "en-US" for at least 8 seconds:
       """
       Counts and hashes come from the stored canonical revision, so the administrator can audit what was actually saved rather than trusting an authoring response.

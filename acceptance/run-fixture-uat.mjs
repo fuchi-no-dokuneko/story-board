@@ -7,7 +7,8 @@ const child = spawnSync('./acceptance/run-uat.sh',
       ...process.env, STORYBLOCK_UAT_NOVEL_ID: source.novel_id,
       STORYBLOCK_UAT_NOVEL_TITLE: source.title,
       STORYBLOCK_UAT_CHARACTER: source.main_characters[0],
-      STORYBLOCK_UAT_TEXT_MARKER: '艾爾維亞',
+      STORYBLOCK_UAT_TEXT_MARKER: source.chapters[0].text.slice(0, 10),
+      STORYBLOCK_UAT_SOURCE: '.local/refactor-evidence/gui/manuscript.json',
     },
   });
 if (child.error) throw child.error;

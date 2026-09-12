@@ -1,7 +1,11 @@
 ADR-311 product review / 產品重新驗收
 
-Pending / 待完成:
-1. Remove demo-only metadata from UI, registration, catalog and Skill contracts. 移除介面、登錄、書庫及技能的示範專用欄位。
-2. Review general-novel registration constraints and examples. 檢查一般小說登錄限制與範例。
-3. Verify ordinary-novel registration, context edits, style comparisons and downloads in real GUI. 以一般小說驗證登錄、上下文編輯、風格比較與下載。
-4. Update coverage, evidence and push the completed branch. 更新覆蓋、證據並推送分支。
+Completed / 已完成:
+1. Removed Zombies/TNT from UI, registration, catalog and Skill contracts. 已移除示範專用欄位。
+2. Removed fixed cast/Han restrictions; corrected English spacing and unrelated edit validation. 已解除固定角色／漢字限制，修正英文空格及無關編輯阻擋。
+3. Verified one ordinary novel through real GUI, guarded edits, styles and fresh PDF/TXT downloads. 已用一部普通小說完成真實介面、閱讀限制、風格及匯出驗證。
+4. Fixed PDF page-break fonts; updated coverage and product-review evidence. 已修正換頁字體並更新覆蓋與驗收證據。
+
+Pending implementation/verification: none for this review. 此次產品驗收無待完成實作或驗證。
+Delivery branch / 交付分支: tickets/ADR-311-remove-demo-metadata
+Installed build verified locally; VPS deployment is outside this review. 已驗證本機安裝版；此次未部署 VPS。
