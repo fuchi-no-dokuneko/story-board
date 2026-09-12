@@ -14,7 +14,7 @@ run_lifecycle_cases() {
     verify --source "$repo_dir/plugin/examples/minimal-novel.json" --json >"$work/verification.json"
   "$launcher" stop
   # A stale success line cannot make an occupied-port startup succeed.
-  printf '\nStarted StoryBlockApiApplication (old run)\n' >>"$work/.local/storyblock/logs/server.log"
+  printf '\nStarted StoryBlockApiApplication (old run)\n' >>"$work/server/data/logs/server.log"
   python3 -u - "$work/port-ready" <<'PY' &
 import pathlib, socket, sys, time
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:

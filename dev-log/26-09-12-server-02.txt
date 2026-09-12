@@ -1,0 +1,6 @@
+---12:50---ADR-310資料目錄
+category: refactor
+Current status: 執行資料與預設資料庫集中 server/data；允許該目錄的使用者連結。
+Issues: 安裝與容器路徑整合驗證待完成；未搬移既有資料。
+affect scope: Java 啟動、安裝脚本、Compose 與部署說明。
+---

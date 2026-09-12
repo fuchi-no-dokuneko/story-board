@@ -10,9 +10,9 @@ services:
       POLICY: public
       PORT: 8443
       STORYBLOCK_TRUSTED_LAN_ENABLED: "true"
-      STORYBLOCK_DATABASE_PATH: /workspace/.local/storyblock/data/storyblock.db
+      STORYBLOCK_DATABASE_PATH: /workspace/server/data/storyblock.db
     volumes:
-      - ./.local/container/api:/workspace/.local
+      - ./server/data:/workspace/server/data
     networks: [internal]
     read_only: true
     restart: unless-stopped
@@ -30,7 +30,7 @@ services:
       STORYBLOCK_WORKER_NOVEL_ID: ${STORYBLOCK_WORKER_NOVEL_ID:-}
       STORYBLOCK_WORKER_ID: ${STORYBLOCK_WORKER_ID:-style-worker-1}
     volumes:
-      - ./.local/container/style-worker:/workspace/.local
+      - ./client-style-worker/data:/workspace/client-style-worker/data
     networks: [internal]
     read_only: true
     restart: unless-stopped
@@ -46,7 +46,7 @@ services:
       STORYBLOCK_LLM_WORKER_MODEL_ENDPOINT: ${STORYBLOCK_LLM_MODEL_ENDPOINT:-}
       STORYBLOCK_LLM_WORKER_MODEL_ID: ${STORYBLOCK_LLM_MODEL_ID:-}
     volumes:
-      - ./.local/container/llm-worker:/workspace/.local
+      - ./client-llm-worker/data:/workspace/client-llm-worker/data
     networks: [worker-egress]
     read_only: true
     stdin_open: true

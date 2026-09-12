@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class ApiStorageConfiguration {
   @Bean(destroyMethod = "close")
   SqliteRevisionStore revisionStore(
-      @Value("${storyblock.database.path:data/storyblock.db}") String databasePath
+      @Value("${storyblock.database.path:server/data/storyblock.db}") String databasePath
   ) throws IOException {
     if (databasePath.isBlank()) {
       throw new IllegalArgumentException("storyblock.database.path cannot be blank");

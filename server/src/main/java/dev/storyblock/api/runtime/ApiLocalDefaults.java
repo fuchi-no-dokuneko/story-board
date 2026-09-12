@@ -28,7 +28,7 @@ public final class ApiLocalDefaults {
             return Map.of(
                     "storyblock.trusted-lan.enabled", true,
                     "storyblock.security.pepper", Files.readString(pepper).strip(),
-                    "storyblock.database.path", LocalRuntime.directory("data").resolve("storyblock.db").toString());
+                    "storyblock.database.path", LocalRuntime.directory("").resolve("storyblock.db").toString());
         } catch (Exception failure) {
             throw new IllegalStateException("Cannot initialize repository-local defaults", failure);
         }

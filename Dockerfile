@@ -6,16 +6,17 @@ RUN ./mvnw --batch-mode -DskipTests package
 FROM eclipse-temurin:21-jre AS runtime
 WORKDIR /workspace
 RUN useradd --no-create-home --uid 10001 storyblock \
-    && mkdir -p /workspace/.local \
+    && mkdir -p /workspace/server/data /workspace/client-style-worker/data /workspace/client-llm-worker/data \
     && chown -R storyblock:storyblock /workspace
 COPY --chmod=555 scripts/container-entrypoint.sh /workspace/entrypoint.sh
 USER storyblock
-ENV JAVA_TOOL_OPTIONS="-Djava.net.preferIPv4Stack=true -Djava.io.tmpdir=/workspace/.local/tmp -Dstoryblock.root=/workspace"
+ENV JAVA_TOOL_OPTIONS="-Djava.net.preferIPv4Stack=true -Dstoryblock.root=/workspace"
 ENTRYPOINT ["/workspace/entrypoint.sh"]
 
 FROM runtime AS api
 COPY --from=build /workspace/server/target/storyblock-api-*.jar /workspace/application.jar
 COPY server/config /workspace/server/config
+COPY server/style-references /workspace/server/style-references
 ENV STORYBLOCK_CONTAINER_APP=api
 EXPOSE 8443
 

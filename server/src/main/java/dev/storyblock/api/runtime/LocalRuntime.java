@@ -9,7 +9,7 @@ final class LocalRuntime {
 
     static Path directory(String relative) throws IOException {
         Path root = Path.of(System.getProperty("storyblock.root", ".")).toRealPath();
-        Path directory = contained(root.resolve(".local/storyblock").resolve(relative));
+        Path directory = contained(root.resolve("server/data").resolve(relative));
         Files.createDirectories(directory);
         return directory;
     }
@@ -17,6 +17,7 @@ final class LocalRuntime {
     static Path contained(Path candidate) throws IOException {
         Path root = Path.of(System.getProperty("storyblock.root", ".")).toRealPath();
         Path directory = candidate.toAbsolutePath().normalize();
+        if (directory.startsWith(root.resolve("server/data"))) return directory;
         Path existing = directory;
         while (!Files.exists(existing)) existing = existing.getParent();
         if (!directory.startsWith(root) || !existing.toRealPath().startsWith(root)) {

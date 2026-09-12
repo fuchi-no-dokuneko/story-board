@@ -42,7 +42,7 @@ jobs:
           ./scripts/local-server.sh start
           trap './scripts/local-server.sh stop || true' EXIT
           curl -4 --fail --silent --show-error \
-            --cacert .local/storyblock/tls/public/storyblock.crt \
+            --cacert server/data/tls/public/storyblock.crt \
             https://127.0.0.1:8443/actuator/health
           ./scripts/local-server.sh stop
           trap - EXIT

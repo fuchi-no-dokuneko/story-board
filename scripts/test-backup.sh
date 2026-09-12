@@ -29,7 +29,7 @@ for backup in "$first" "$second"; do
   report=$(scripts/restore-drill.sh "$backup" "$fixture/restore-$(basename "$backup")")
   jq -e '.quick_check == "ok" and .integrity_check == "ok" and .missing_artifacts == []' "$report" >/dev/null
 done
-[[ ! -e .local/storyblock/secrets ]]
+[[ ! -e server/data/secrets ]]
 if scripts/restore-drill.sh "$first" "$fixture/restore-$(basename "$first")" >reuse.log 2>&1; then
   echo 'Reused restore directory was accepted' >&2; exit 1
 fi

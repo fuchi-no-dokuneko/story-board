@@ -11,7 +11,7 @@ class LocalInstallationPolicyTest {
                 + Files.readString(ROOT.resolve("scripts/build-environment.sh"))
                 + Files.readString(ROOT.resolve("install-local-build.sh"));
 
-        assertTrue(installer.contains("local_dir=$repo_dir/.local/storyblock"));
+        assertTrue(installer.contains("local_dir=$repo_dir/server/data"));
         assertTrue(installer.contains("scripts/generate-self-signed-tls.sh"));
         assertTrue(installer.contains("install -m 500 --"));
         assertTrue(installer.contains("mv -f -- \"$staged_jar\" \"$installed_jar\""));

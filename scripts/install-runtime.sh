@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 install_runtime() {
-  for directory in data logs run runtime secrets server tls/private tls/public tmp; do
+  for directory in logs run runtime secrets server tls/private tls/public tmp; do
     repository_path "$local_dir/$directory" >/dev/null
     mkdir -p "$local_dir/$directory"
   done

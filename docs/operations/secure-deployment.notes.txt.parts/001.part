@@ -19,7 +19,7 @@ self-signed certificate warning; no certificate or key upload is required.
 ## Repository-local installation
 
 The supported non-container installation writes only below
-`.local/storyblock/` in the repository. It also redirects Maven, temporary, and
+`server/data/` in the repository. It also redirects Maven, temporary, and
 cache files into that directory.
 
 ```bash
@@ -32,7 +32,7 @@ cache files into that directory.
 The only host prerequisite is Java 21 with `java` and `keytool`. The installer
 does not invoke `sudo`, require root, write to system directories, or upload TLS
 material. The owner credential is generated at
-`.local/storyblock/secrets/owner-token` and is never printed.
+`server/data/secrets/owner-token` and is never printed.
 
 ## Container installation
 
