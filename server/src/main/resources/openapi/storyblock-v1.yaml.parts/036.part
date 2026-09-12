@@ -1,3 +1,10 @@
+        name:
+          type: string
+        scope:
+          $ref: "#/components/schemas/StyleProfileScope"
+        provenance:
+          type: string
+        created_by:
           type: string
           pattern: '^[A-Za-z0-9._:@-]{1,128}$'
         created_at:
@@ -89,9 +96,3 @@
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
         contract:
-          $ref: "#/components/schemas/StyleFeatureContract"
-        channels:
-          type: array
-          minItems: 5
-          maxItems: 6
-          items:

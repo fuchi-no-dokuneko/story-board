@@ -1,3 +1,7 @@
+              maxProperties: 0
+            - $ref: "#/components/schemas/StyleCalibrationProfile"
+      additionalProperties: false
+    StyleProfileVersion:
       type: object
       required: [version_id, profile_id, version, content, created_by, created_at]
       properties:
@@ -82,8 +86,3 @@
         can_gate_rewrites:
           type: boolean
       additionalProperties: false
-    StyleProfileTransitionRequest:
-      type: object
-      required: [target_state, reason, confirm_generated_corpus_promotion]
-      properties:
-        target_state:

@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 final class ApiReadAndCreationRoutes {
   static void configure(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routes) {
     routes
+            .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC).permitAll()
             .requestMatchers(
                 "/",
                 "/index.html",

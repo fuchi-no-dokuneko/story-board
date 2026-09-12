@@ -1,3 +1,7 @@
+      description: Scene distribution; text length counts Unicode graphemes including
+        punctuation.
+      x-confidence: confirmed-from-code
+      x-source:
       - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
       examples:
       - scene_id: scn_Bb234
@@ -94,9 +98,3 @@
       x-source:
       - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
       examples:
-      - index: 0
-        block_id: blk_Cc345
-        block_version_id: blv_Dd456
-        order_key: a0
-        text: 清晨下雨。
-        meta: {}

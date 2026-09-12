@@ -1,3 +1,4 @@
+          type: string
           pattern: ^rev_[A-Za-z0-9]{5}$
         in: query
       responses:
@@ -12,6 +13,7 @@
   /novels/{novelId}/scenes:
     get:
       operationId: novels_scenes_list
+      x-required-scopes: ["novel:read"]
       summary: Scenes selected by a half-open chapter index slice. No body text.
       parameters:
       - name: novelId
@@ -49,6 +51,7 @@
   /novels/{novelId}/scenes/{sceneId}/blocks:
     get:
       operationId: novels_blocks_slice
+      x-required-scopes: ["novel:read"]
       summary: Revision-bound scene block slice; [0,0) reads an empty scene.
       parameters:
       - name: novelId
@@ -89,11 +92,8 @@
   /style/:
     get:
       operationId: styles_list
+      x-required-scopes: ["novel:read"]
       summary: Available server-side reference styles. Registry errors are explicit.
       parameters: []
       responses:
         '200':
-          description: Available server-side reference styles. Registry errors are
-            explicit.
-          content:
-            application/json:

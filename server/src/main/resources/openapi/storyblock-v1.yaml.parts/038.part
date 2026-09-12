@@ -1,3 +1,7 @@
+      required: [channel, channel_version, primary_metric, reference_distances, median, mad, q95, q99]
+      properties:
+        channel:
+          type: string
           enum: [surface, grammar, rhythm, narrative, lexical, optional_embedding]
         channel_version:
           type: string
@@ -83,7 +87,3 @@
         calibration_statistics:
           oneOf:
             - type: object
-              maxProperties: 0
-            - $ref: "#/components/schemas/StyleCalibrationProfile"
-      additionalProperties: false
-    StyleProfileVersion:

@@ -1,3 +1,7 @@
+          description: Available server-side reference styles. Registry errors are
+            explicit.
+          content:
+            application/json:
               schema:
                 $ref: '#/components/schemas/StyleList'
         default:
@@ -5,6 +9,7 @@
   /novels/{novelId}/style-comparisons:
     post:
       operationId: novels_style-comparisons_create
+      x-required-scopes: ["style:analyze"]
       summary: Fresh uncached comparison returned after background calculation; no
         task identifier or polling.
       parameters:
@@ -100,12 +105,3 @@ components:
       in: path
       required: true
       schema:
-        type: string
-        pattern: '^key_[0-9a-f-]{36}$'
-    ArtifactId:
-      name: artifactId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^art_[0-9a-f-]{36}$'

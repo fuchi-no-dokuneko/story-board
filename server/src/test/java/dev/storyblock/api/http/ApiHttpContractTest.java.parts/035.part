@@ -1,3 +1,12 @@
+                .andExpect(header().string(HttpHeaders.PRAGMA, "no-cache"))
+                .andExpect(jsonPath("$.secret").isString())
+                .andReturn();
+        return object(result);
+    }
+
+    private Map<String, Object> startExport(
+            CanonicalRevision revision,
+            String token,
             String idempotencyKey
     ) throws Exception {
         String novelId = stringField(revision.canonicalContent(), "novel_id");
@@ -54,11 +63,3 @@
         List<Map<String, Object>> chapters = (List<Map<String, Object>>)
                 revision.canonicalContent().get("chapters");
         List<Map<String, Object>> scenes = (List<Map<String, Object>>)
-                chapters.getFirst().get("scenes");
-        return stringField(scenes.getFirst(), "id");
-    }
-
-    private static byte[] imagePng() throws Exception {
-        BufferedImage image = new BufferedImage(120, 80, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = image.createGraphics();
-        graphics.setColor(Color.WHITE);

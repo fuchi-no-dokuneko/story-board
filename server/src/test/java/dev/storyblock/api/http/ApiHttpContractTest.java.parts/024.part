@@ -1,3 +1,13 @@
+                        "test-only",
+                        "test-owner"
+                )),
+                features,
+                windows,
+                calibration.canonicalValue()
+        );
+        MvcResult versionResult = mvc.perform(post(
+                        "/v1/style-profiles/{profileId}/versions", profileId
+                )
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
                                 "style-http-version")
@@ -41,8 +51,3 @@
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
                                 "style-http-ready-unconfirmed")
-                        .header(HttpHeaders.IF_MATCH,
-                                calibrating.getResponse().getHeader(HttpHeaders.ETAG))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(CanonicalJson.bytes(Map.of(
-                                "target_state", "ready",

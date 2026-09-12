@@ -1,3 +1,5 @@
+      type: object
+      required: [lease_owner, attempt, snapshot_hash, profile_version_hash, analyzer_contract_hash, window_configuration_hash, summary, windows, trace, completed_at]
       properties:
         lease_owner:
           type: string

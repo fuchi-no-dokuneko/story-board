@@ -1,3 +1,8 @@
+        String keyId = stringField(key, "key_id");
+
+        mvc.perform(get("/v1/admin/novels")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
+                .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
 
         byte[] crossNovelRegistration = CanonicalJson.bytes(Map.of(
@@ -45,7 +50,3 @@
                         .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "expiry-denied")
                         .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(expiryEscalationBody))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("EXPIRY_DELEGATION_DENIED"));

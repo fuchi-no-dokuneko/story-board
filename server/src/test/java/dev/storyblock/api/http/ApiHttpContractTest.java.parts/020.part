@@ -1,3 +1,8 @@
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(rewriteBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+
         String mismatchKey = "cross-body-commit";
         Map<String, Object> mismatchedOperation = Map.of(
                 "operation_id", Ids.OperationId.create().value(),
@@ -45,6 +50,3 @@
 
         mvc.perform(delete("/v1/access-keys/{keyId}", keyId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(OWNER_TOKEN))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "security-revoke")
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash())))
-                .andExpect(status().isOk())

@@ -1,3 +1,10 @@
+          additionalProperties: true
+      additionalProperties: false
+    MonitorPacketRequest:
+      type: object
+      required: [revision_id, revision_hash, target_block_id, neighbor_count]
+      properties:
+        revision_id:
           type: string
           pattern: '^rev_[A-Za-z0-9]{5}$'
         revision_hash:
@@ -78,10 +85,3 @@
         window_blocks:
           type: array
           minItems: 1
-          maxItems: 5
-          uniqueItems: true
-          items:
-            $ref: "#/components/schemas/MonitorBlockFingerprint"
-      additionalProperties: false
-    MonitorBlockFingerprint:
-      type: object

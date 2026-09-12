@@ -1,3 +1,8 @@
+      description: Fresh uncached comparison returned after background calculation; no
+        task identifier or polling.
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
       - server/src/main/java/dev/storyblock/api/style
       examples:
       - novel_id: nov_Ab123
@@ -78,12 +83,3 @@
         initial_revision:
           $ref: "#/components/schemas/CanonicalRevision"
       additionalProperties: false
-    ImportRequest:
-      type: object
-      required: [format, document]
-      properties:
-        format:
-          type: string
-          enum: [canonical-revision, canonical-package]
-        document:
-          oneOf:

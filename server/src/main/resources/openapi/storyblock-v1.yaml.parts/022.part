@@ -1,3 +1,12 @@
+    ImportRequest:
+      type: object
+      required: [format, document]
+      properties:
+        format:
+          type: string
+          enum: [canonical-revision, canonical-package]
+        document:
+          oneOf:
             - $ref: "#/components/schemas/CanonicalRevision"
             - $ref: "#/components/schemas/CanonicalPackage"
       additionalProperties: false
@@ -86,12 +95,3 @@
         revision:
           $ref: "#/components/schemas/CanonicalRevision"
         schema_version:
-          const: admin-novel-reader-1.0.0
-      additionalProperties: false
-    AgentNovelRegistrationChapter:
-      type: object
-      required: [title, text]
-      properties:
-        title:
-          type: string
-          minLength: 1

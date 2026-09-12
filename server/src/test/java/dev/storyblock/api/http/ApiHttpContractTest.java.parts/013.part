@@ -1,3 +1,6 @@
+        String resultHash = stringField(object(committed), "content_hash");
+
+        byte[] renderBody = CanonicalJson.bytes(Map.of("revision_id", resultRevisionId));
         mvc.perform(post("/v1/novels/{novelId}/renders", novelId)
                         .with(userWithScope("novel:read"))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "image-text-render")
@@ -44,6 +47,3 @@
         CanonicalRevision revision = detectorRevision();
         String novelId = stringField(revision.canonicalContent(), "novel_id");
         String revisionId = stringField(revision.canonicalContent(), "revision_id");
-        importAsOwner(revision, "detector-import");
-        byte[] body = CanonicalJson.bytes(Map.of(
-                "revision_id", revisionId,

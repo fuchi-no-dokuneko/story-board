@@ -1,3 +1,5 @@
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "submit-denied")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(submissionBody))
                 .andExpect(status().isForbidden())
@@ -51,8 +53,3 @@
                 )
         );
         String bearer = stringField(key, "secret");
-        String keyId = stringField(key, "key_id");
-
-        mvc.perform(get("/v1/admin/novels")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
-                .andExpect(status().isForbidden())

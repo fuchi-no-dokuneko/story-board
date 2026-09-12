@@ -1,3 +1,9 @@
+      type: object
+      required: [artifact_id, revision_id, kind, media_type, codec, content_hash, size_bytes, created_at, content_base64]
+      properties:
+        artifact_id:
+          type: string
+        revision_id:
           type: string
         kind:
           type: string
@@ -94,8 +100,3 @@
         idempotent_replay:
           type: boolean
       additionalProperties: false
-    RenderPacket:
-      type: object
-      required: [novel_id, revision_id, revision_hash, renderer_version, range, rendered_text, blocks, resolved_meta, offset_map, scene_boundaries]
-      properties:
-        novel_id:

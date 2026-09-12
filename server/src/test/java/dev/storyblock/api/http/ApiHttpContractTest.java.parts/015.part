@@ -1,3 +1,6 @@
+                .andReturn();
+        assertArrayEquals(
+                first.getResponse().getContentAsByteArray(),
                 second.getResponse().getContentAsByteArray()
         );
 
@@ -47,5 +50,3 @@
                         .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(packetBody))
-                .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));

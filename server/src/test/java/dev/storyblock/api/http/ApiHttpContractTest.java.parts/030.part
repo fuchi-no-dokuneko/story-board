@@ -1,3 +1,8 @@
+            String token,
+            String keyPrefix
+    ) throws Exception {
+        String novelId = stringField(revision.canonicalContent(), "novel_id");
+        StyleProfileScope scope = new StyleProfileScope(
                 new Ids.NovelId(novelId), StyleScopeKind.NOVEL, null
         );
         MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
@@ -45,10 +50,3 @@
                 List.of(new StyleCorpusSource(
                         "generated-durable-corpus",
                         features.sourceHash(),
-                        StyleCorpusSourceKind.GENERATED,
-                        "Durable job HTTP fixture",
-                        "test-only",
-                        "test-owner"
-                )),
-                features,
-                windows,

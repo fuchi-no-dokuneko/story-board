@@ -1,3 +1,6 @@
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "security-revoke")
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(first.contentHash())))
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.revoked").value(true));
         mvc.perform(get("/v1/jobs/{jobId}", ownJobId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(bearer)))
@@ -45,11 +48,6 @@
                 .header(ApiRequestMetadata.REQUEST_ID_HEADER, "req_http_commit_first")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body);
-        MvcResult first = mvc.perform(request)
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.operation_id").value(operationId))
-                .andExpect(jsonPath("$.idempotent_replay").value(false))
-                .andReturn();
-        String committedRevision = stringField(object(first), "revision_id");
-
-        mvc.perform(post("/v1/novels/{novelId}/commits", novelId)
+        mvc.perform(get("/v1/novels/{novelId}/revisions/{revisionId}", novelId, revisionId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk());

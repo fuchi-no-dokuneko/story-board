@@ -13,7 +13,7 @@ public final class RecentReadLedger {
 
     void mark(String novel, String revision, String item) {
         Instant now = clock.instant();
-        reads.put(new Key(novel, revision, item), now);
+        reads.merge(new Key(novel, revision, item), now, (first, second) -> first.isAfter(second) ? first : second);
     }
 
     void prune() {

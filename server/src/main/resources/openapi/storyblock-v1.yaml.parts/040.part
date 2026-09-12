@@ -1,3 +1,8 @@
+    StyleProfileTransitionRequest:
+      type: object
+      required: [target_state, reason, confirm_generated_corpus_promotion]
+      properties:
+        target_state:
           type: string
           enum: [calibrating, ready, deprecated]
         reason:
@@ -74,11 +79,3 @@
       properties:
         distance:
           $ref: "#/components/schemas/StyleChannelDistance"
-        percentile:
-          type: number
-          minimum: 0
-          maximum: 100
-        robust_z:
-          type: number
-          minimum: 0
-        q95:

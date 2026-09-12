@@ -1,3 +1,10 @@
+                        "location", Map.of("mode", "explicit", "value", "room_b"),
+                        "present_character_ids", List.of()
+                ),
+                "blocks", List.of(secondBlock)
+        );
+        Map<String, Object> chapter = Map.of(
+                "id", chapterId,
                 "order_key", OrderKey.initial().value(),
                 "title", "Detector chapter",
                 "scenes", List.of(firstScene, secondScene)
@@ -48,12 +55,3 @@
                         .content(body))
                 .andExpect(status().isCreated())
                 .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-store"))
-                .andExpect(header().string(HttpHeaders.PRAGMA, "no-cache"))
-                .andExpect(jsonPath("$.secret").isString())
-                .andReturn();
-        return object(result);
-    }
-
-    private Map<String, Object> startExport(
-            CanonicalRevision revision,
-            String token,

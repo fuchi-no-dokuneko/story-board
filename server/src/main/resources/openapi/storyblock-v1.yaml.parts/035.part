@@ -1,3 +1,10 @@
+        block_ids:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            pattern: '^blk_[A-Za-z0-9]{5}$'
         can_trigger_rewrite:
           type: boolean
         confidence:
@@ -91,10 +98,3 @@
         profile_id:
           type: string
           pattern: '^spf_[0-9a-f-]{36}$'
-        name:
-          type: string
-        scope:
-          $ref: "#/components/schemas/StyleProfileScope"
-        provenance:
-          type: string
-        created_by:

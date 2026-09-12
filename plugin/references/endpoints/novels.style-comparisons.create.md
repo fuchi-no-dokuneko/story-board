@@ -10,7 +10,7 @@ Read the complete machine-readable contract: [JSON](../endpoints.json).
 | Path / 路徑 / 路径 | `/v1/novels/{novelId}/style-comparisons` |
 | Request / 請求 / 请求 | StyleComparisonRequest |
 | Response / 回應 / 响应 | 200: StyleComparisonResponse |
-| Scopes / 範圍 / 范围 | novel:propose |
+| Scopes / 範圍 / 范围 | style:analyze |
 
 The default local server trusts reachable clients; credentials are optional.
 預設本機伺服器信任可連線裝置；密鑰為選填。

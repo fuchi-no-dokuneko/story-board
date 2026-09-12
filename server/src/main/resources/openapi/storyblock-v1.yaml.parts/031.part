@@ -1,3 +1,9 @@
+      maxItems: 16
+      items:
+        $ref: "#/components/schemas/MonitorEvidence"
+    MonitorEvidence:
+      type: object
+      required: [block_id, start_grapheme, end_grapheme, quote, quote_hash]
       properties:
         block_id:
           type: string
@@ -82,10 +88,3 @@
     MonitorSubmissionResponse:
       allOf:
         - $ref: "#/components/schemas/MonitorRunStatus"
-        - type: object
-          required: [idempotent_replay]
-          properties:
-            idempotent_replay:
-              type: boolean
-    StyleAnalysisRequest:
-      type: object

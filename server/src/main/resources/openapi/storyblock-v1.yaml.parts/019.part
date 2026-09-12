@@ -1,3 +1,8 @@
+      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
+      - server/src/main/java/dev/storyblock/api/style
+      examples:
+      - id: lyrical
+        name: 抒情敘事
         description: 環境與內心描寫
         language: zh-Hant
         status: ready
@@ -89,13 +94,3 @@
         scores:
           type: array
           items:
-            $ref: '#/components/schemas/StyleChannelDistance'
-          minItems: 5
-          maxItems: 5
-        reference_metadata:
-          const: text_only
-      required:
-      - id
-      - name
-      - description
-      - language

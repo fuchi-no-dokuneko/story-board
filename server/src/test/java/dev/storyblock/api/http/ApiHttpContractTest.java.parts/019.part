@@ -1,3 +1,7 @@
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(expiryEscalationBody))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("EXPIRY_DELEGATION_DENIED"));
         mvc.perform(post("/v1/style-profiles")
                         .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "scope-route-denied")
@@ -43,8 +47,3 @@
                         .header(HttpHeaders.AUTHORIZATION, bearer(bearer))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "cross-rewrite")
                         .header(HttpHeaders.IF_MATCH, quotedEtag(second.contentHash()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(rewriteBody))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
-

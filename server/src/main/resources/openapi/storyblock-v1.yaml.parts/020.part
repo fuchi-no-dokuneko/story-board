@@ -1,3 +1,13 @@
+            $ref: '#/components/schemas/StyleChannelDistance'
+          minItems: 5
+          maxItems: 5
+        reference_metadata:
+          const: text_only
+      required:
+      - id
+      - name
+      - description
+      - language
       - status
       - reference_file_count
       - reference_graphemes
@@ -77,8 +87,3 @@
       - comparisons
       additionalProperties: false
       title: StyleComparisonResponse
-      description: Fresh uncached comparison returned after background calculation; no
-        task identifier or polling.
-      x-confidence: confirmed-from-code
-      x-source:
-      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java

@@ -1,3 +1,9 @@
+      - index: 0
+        block_id: blk_Cc345
+        block_version_id: blv_Dd456
+        order_key: a0
+        text: 清晨下雨。
+        meta: {}
         extensions: {}
     BlockSlice:
       type: object
@@ -98,8 +104,3 @@
       description: Registered reference benchmark status. Sources stay on the server.
       x-confidence: confirmed-from-code
       x-source:
-      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
-      - server/src/main/java/dev/storyblock/api/style
-      examples:
-      - id: lyrical
-        name: 抒情敘事

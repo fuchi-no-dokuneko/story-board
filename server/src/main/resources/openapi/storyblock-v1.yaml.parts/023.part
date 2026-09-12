@@ -1,3 +1,12 @@
+          const: admin-novel-reader-1.0.0
+      additionalProperties: false
+    AgentNovelRegistrationChapter:
+      type: object
+      required: [title, text]
+      properties:
+        title:
+          type: string
+          minLength: 1
           maxLength: 200
         text:
           type: string
@@ -89,12 +98,3 @@
         chapters:
           type: array
           items:
-            type: object
-            additionalProperties: true
-        created_at:
-          type: string
-          format: date-time
-        content_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        extensions:

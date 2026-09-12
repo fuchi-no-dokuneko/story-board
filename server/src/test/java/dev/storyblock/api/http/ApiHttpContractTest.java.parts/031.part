@@ -1,3 +1,10 @@
+                        StyleCorpusSourceKind.GENERATED,
+                        "Durable job HTTP fixture",
+                        "test-only",
+                        "test-owner"
+                )),
+                features,
+                windows,
                 calibration.canonicalValue()
         );
         MvcResult versionResult = mvc.perform(post(
@@ -42,7 +49,3 @@
                         .header(HttpHeaders.IF_MATCH,
                                 calibrating.getResponse().getHeader(HttpHeaders.ETAG))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(CanonicalJson.bytes(Map.of(
-                                "target_state", "ready",
-                                "reason", "Human-approved durable analysis fixture",
-                                "confirm_generated_corpus_promotion", true

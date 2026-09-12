@@ -1,0 +1,41 @@
+        commit(revision, body).andExpect(status().isCreated());
+        commit(revision, body).andExpect(status().isOk()).andExpect(jsonPath("$.idempotent_replay").value(true));
+        slice(revision, 0, 4).andExpect(status().isBadRequest());
+    }
+
+    @Test void emptySceneRequiresItsEmptySlice() throws Exception {
+        var revision = create(true); var body = NarrativeHttpFixture.insertion(revision);
+        commit(revision, body).andExpect(status().isConflict());
+        slice(revision, 0, 0).andExpect(status().isOk()).andExpect(jsonPath("$.block_count").value(0));
+        commit(revision, body).andExpect(status().isCreated());
+    }
+
+    @Test void multipleStylesFinishOnOneAsyncRequestAndAssetsAreAccessible() throws Exception {
+        var revision = create(false);
+        for (int i = 0; i < 100 && !styles.list().toString().contains("ready"); i++) Thread.sleep(20);
+        mvc.perform(get("/v1/style/")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.styles[0].status").value("ready"));
+        var result = mvc.perform(post(path(revision) + "/style-comparisons")
+                        .header("If-Match", "\"" + NarrativeHttpFixture.hash(revision) + "\"")
+                        .header("Idempotency-Key", "style-comparison")
+                        .contentType("application/json").content(CanonicalJson.bytes(Map.of(
+                                "revision_id", revision.id().value(), "style_ids", List.of("lyrical", "suspense")))))
+                .andExpect(request().asyncStarted()).andReturn();
+        mvc.perform(asyncDispatch(result)).andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(jsonPath("$.comparisons.length()").value(2))
+                .andExpect(jsonPath("$.comparisons[0].scores.length()").value(5))
+                .andExpect(jsonPath("$.task_id").doesNotExist()).andExpect(jsonPath("$.job_id").doesNotExist());
+        for (String asset : List.of("reader-actions.js", "reader-tools.css", "style-comparison.js", "style-score-table.js", "style-math.html"))
+            mvc.perform(get("/" + asset)).andExpect(status().isOk());
+    }
+
+    private RevisionManifest create(boolean empty) throws Exception {
+        var revision = NarrativeHttpFixture.revision(empty);
+        var canonical = NarrativeCanonicalMapper.toCanonical(revision);
+        mvc.perform(post("/v1/novels").header("If-Match", "*")
+                        .header("Idempotency-Key", "create-" + revision.id().value()).contentType("application/json")
+                        .content(CanonicalJson.bytes(Map.of("initial_revision", CanonicalJson.parse(canonical.envelopeBytes(), Map.class)))))
+                .andExpect(status().isCreated());
+        return revision;
+    }

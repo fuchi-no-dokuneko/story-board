@@ -1,3 +1,6 @@
+        importAsOwner(revision, "detector-import");
+        byte[] body = CanonicalJson.bytes(Map.of(
+                "revision_id", revisionId,
                 "revision_hash", revision.contentHash()
         ));
 
@@ -42,6 +45,3 @@
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
-                .andReturn();
-        assertArrayEquals(
-                first.getResponse().getContentAsByteArray(),

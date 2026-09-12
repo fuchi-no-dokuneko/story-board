@@ -1,3 +1,12 @@
+          minimum: 0
+      additionalProperties: false
+    ResolvedSceneBoundary:
+      type: object
+      required: [scene_id, state_in, state_out]
+      properties:
+        scene_id:
+          type: string
+        state_in:
           $ref: "#/components/schemas/ResolvedMetadataState"
         state_out:
           $ref: "#/components/schemas/ResolvedMetadataState"
@@ -74,14 +83,3 @@
         render_packet:
           oneOf:
             - $ref: "#/components/schemas/RenderPacket"
-            - type: "null"
-        violations:
-          type: array
-          items:
-            type: object
-        warnings:
-          type: array
-          items:
-            type: object
-        committable:
-          type: boolean

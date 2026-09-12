@@ -82,7 +82,7 @@
       "summary": "Fresh uncached comparison returned after background calculation; no task identifier or polling.",
       "auth": "bearer-or-trusted-lan-owner",
       "scopes": [
-        "novel:propose"
+        "style:analyze"
       ],
       "roles": [],
       "pathParameters": [

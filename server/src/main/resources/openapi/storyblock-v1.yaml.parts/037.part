@@ -1,3 +1,9 @@
+          $ref: "#/components/schemas/StyleFeatureContract"
+        channels:
+          type: array
+          minItems: 5
+          maxItems: 6
+          items:
             $ref: "#/components/schemas/StyleFeatureVector"
       additionalProperties: false
     StyleWindowConfiguration:
@@ -80,7 +86,3 @@
       additionalProperties: false
     StyleChannelCalibration:
       type: object
-      required: [channel, channel_version, primary_metric, reference_distances, median, mad, q95, q99]
-      properties:
-        channel:
-          type: string

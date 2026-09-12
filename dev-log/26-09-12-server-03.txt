@@ -6,3 +6,9 @@ Apporch chosen: 請求範圍內配置識別；交易中一次讀取既有歸屬�
 Assumption made to chose this approch: 新增識別須持久化；既有版本內容不可改寫。
 affect scope: 領域、SQLite、API 與標準測試資料；全 Java 測試通過。
 ---
+---13:14---ADR-298閱讀與非同步驗證
+category: bug_discovery
+Current status: 已修正非同步回應遭 401 阻擋；切片、閱讀期限、空場景及多風格測試通過。
+Issues: 真實每分鐘監看及 GUI 下載待驗收。
+affect scope: HTTP 非同步分派、閱讀紀錄、YAML 時間變動及獨立 CLI；CLI 共 187 測試通過。
+---

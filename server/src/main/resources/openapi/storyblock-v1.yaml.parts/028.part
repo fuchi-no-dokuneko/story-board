@@ -1,3 +1,14 @@
+            - type: "null"
+        violations:
+          type: array
+          items:
+            type: object
+        warnings:
+          type: array
+          items:
+            type: object
+        committable:
+          type: boolean
       additionalProperties: false
     CommitResponse:
       type: object
@@ -83,10 +94,3 @@
             type: string
         evidence:
           type: object
-          additionalProperties: true
-      additionalProperties: false
-    MonitorPacketRequest:
-      type: object
-      required: [revision_id, revision_hash, target_block_id, neighbor_count]
-      properties:
-        revision_id:

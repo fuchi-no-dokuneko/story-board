@@ -68,6 +68,7 @@
   /novels/{novelId}/chapters:
     get:
       operationId: novels_chapters_list
+      x-required-scopes: ["novel:read"]
       summary: All chapters at a fixed novel revision.
       parameters:
       - name: novelId
@@ -79,4 +80,3 @@
       - name: revision_id
         required: true
         schema:
-          type: string

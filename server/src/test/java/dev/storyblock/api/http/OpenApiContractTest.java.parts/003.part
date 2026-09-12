@@ -1,3 +1,8 @@
+                        operation.key()
+                )
+                        ? "#/components/parameters/IfMatchForCreation"
+                        : "#/components/parameters/IfMatch";
+                assertTrue(
                         parameterRefs.contains(expectedIfMatch),
                         "missing If-Match for " + operation.key()
                 );
@@ -56,7 +61,3 @@
         assertStrongEtag("GET /admin/novels/{novelId}", "200");
         assertStrongEtag("POST /agent/novels", "200");
         assertStrongEtag("POST /agent/novels", "201");
-        assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
-        assertStrongEtag("POST /novels", "201");
-        assertStrongEtag("POST /imports", "201");
-        assertStrongEtag("POST /imports", "200");

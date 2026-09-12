@@ -1,3 +1,8 @@
+                        .header(HttpHeaders.IF_MATCH,
+                                calibrating.getResponse().getHeader(HttpHeaders.ETAG))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(CanonicalJson.bytes(Map.of(
+                                "target_state", "ready",
                                 "reason", "Attempt without confirmation",
                                 "confirm_generated_corpus_promotion", false
                         ))))
@@ -45,10 +50,3 @@
                 "style-http-other-key",
                 List.of("novel:read", "style:admin")
         ), "secret");
-        mvc.perform(get("/v1/style-profiles/{profileId}", profileId)
-                        .header(HttpHeaders.AUTHORIZATION, bearer(otherToken)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
-    }
-
-    @Test
