@@ -12,3 +12,9 @@ Current status: 已修正非同步回應遭 401 阻擋；切片、閱讀期限�
 Issues: 真實每分鐘監看及 GUI 下載待驗收。
 affect scope: HTTP 非同步分派、閱讀紀錄、YAML 時間變動及獨立 CLI；CLI 共 187 測試通過。
 ---
+---13:14---ADR-311容器路徑修訂
+category: refactor
+Current status: Compose 預設 public；各程序暫存與掛載對齊應用 data。
+Issues: 架構測試通過，尚未在 Docker 程序內驗證。
+affect scope: 容器啟動與部署架構測試。
+---

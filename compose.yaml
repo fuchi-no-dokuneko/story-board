@@ -5,7 +5,7 @@ services:
       target: api
     user: "${STORYBLOCK_UID:-1000}:${STORYBLOCK_GID:-1000}"
     ports:
-      - "${STORYBLOCK_BIND_ADDRESS:-127.0.0.1}:${STORYBLOCK_HTTPS_PORT:-8443}:8443"
+      - "${STORYBLOCK_BIND_ADDRESS:-0.0.0.0}:${STORYBLOCK_HTTPS_PORT:-8443}:8443"
     environment:
       POLICY: public
       PORT: 8443
