@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public final class AgentNovelRegistrationService {
     static final Pattern SENTENCE = Pattern.compile(
-            "\\G\\s*(.*?(?:[。！？!?]+|…{1,2})[」』”’\\\"'）)】》〉〕］}]*?)",
+            "\\G\\s*(.*?(?:[。！？!?]+|…{1,2})[」』”’\\\"'）)】》〉〕］}]*)",
             Pattern.DOTALL
     );
 

@@ -21,3 +21,9 @@ Dep release date : 2026-05-15
 固定套件已安裝於 acceptance/.local-tool-app；使用真正 Chromium 的私有管道完成驗收。
 版本發布時間來源：https://registry.npmjs.org/@cucumber%2Fcucumber 的 time 欄位。
 ---
+---13:26---風格比較與匯出介面
+milestone-type : success-test
+Time used (min) : 4
+Chromium 實際選取新稿，顯示兩種風格的五項距離，兩個下載按鈕成功。
+PDF 四頁中文可讀；TXT 包含兩章。證據位於 .local/authoring-work/gui。
+---
