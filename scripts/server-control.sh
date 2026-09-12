@@ -12,7 +12,7 @@ server_start() {
   read_process
   if is_server; then server_status; return; fi
   rm -f -- "$pid_file"
-  nohup "$repo_dir/scripts/local-server.sh" run >>"$log_file" 2>&1 9>&- &
+  nohup "$repo_dir/scripts/local-server.sh" run "$@" >>"$log_file" 2>&1 9>&- &
   pid=$!
   ticks=$(process_ticks "$pid")
   printf '%s %s\n' "$pid" "$ticks" >"$pid_file"

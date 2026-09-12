@@ -5,20 +5,16 @@ certificate upload, ACME flow, or external certificate issuer. The first start
 generates a self-signed server leaf with `CA=false`; its private key never leaves
 the local repository installation or the private container volume.
 
-The default bind is `127.0.0.1:8443`. Keep that default and use an SSH tunnel for
-remote access. A private-interface deployment may set all three values together:
+The standalone default bind is `0.0.0.0:8443`. Select the policy and port with
+launcher arguments; no environment variables are required:
 
 ```text
-STORYBLOCK_BIND_ADDRESS=192.168.1.20
-STORYBLOCK_HTTPS_PORT=8443
-STORYBLOCK_TLS_HOST=192.168.1.20
+./scripts/local-server.sh start --policy public --port 8443
 ```
 
-Changing `STORYBLOCK_TLS_HOST` regenerates the self-signed leaf with a matching
-DNS or IPv4 subject alternative name. No certificate or key needs to be supplied
-by the operator. Browsers will show an untrusted-certificate warning because the
-leaf has no issuer; this is expected. Never expose this deployment directly to
-the public internet.
+Use `--policy local` to bind loopback and an SSH tunnel for remote access.
+The API generates its own certificate and private key. Browsers show a
+self-signed certificate warning; no certificate or key upload is required.
 
 ## Repository-local installation
 

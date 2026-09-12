@@ -12,6 +12,12 @@ EN: A local narrative engine with immutable revisions, typed edits, image blocks
 ./scripts/local-server.sh start
 ```
 
+EN: Startup defaults to public HTTPS on `0.0.0.0:8443`. Open `https://<server-ip>:8443/` remotely. Use `start --policy local --port 8443` for loopback, or `run --policy public --port 9443` in the foreground. Restart to apply changed options.
+
+繁體中文：啟動預設為 public HTTPS（`0.0.0.0:8443`），遠端開啟 `https://<server-ip>:8443/`。使用 `start --policy local --port 8443` 限定 loopback，或 `run --policy public --port 9443` 前景執行；變更選項後須重新啟動。
+
+简体中文：启动默认为 public HTTPS（`0.0.0.0:8443`），远程打开 `https://<server-ip>:8443/`。使用 `start --policy local --port 8443` 限定 loopback，或 `run --policy public --port 9443` 前台运行；更改选项后须重新启动。
+
 EN: Open `https://127.0.0.1:8443/` and accept the local certificate warning. Installation needs no root access or supplied keys. Java 21, Python, Node through nvm, and ordinary build utilities must already be available. The administrative prerequisite script is provided for an operator to review and run separately.
 
 繁體中文：開啟 `https://127.0.0.1:8443/` 並接受本機憑證提示。安裝不需 root 或提供密鑰。電腦須已有 Java 21、Python、nvm 管理的 Node 及一般建置工具。管理員前置安裝腳本供操作人員另行審查與執行。

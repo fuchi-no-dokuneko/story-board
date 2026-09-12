@@ -10,8 +10,9 @@ generated self-signed server leaf. The leaf is explicitly not a certificate
 authority. Its private key remains in repository-local state or a private
 container volume. Operators are never required to upload a certificate or key.
 
-The default deployment binds to loopback and is reached remotely through a
-private tunnel. No reverse proxy, ACME client, public certificate issuer, or
+As amended by the user on 2026-09-12, standalone startup defaults to public
+IPv4 (0.0.0.0). Use --policy local for loopback with a private tunnel.
+No reverse proxy, ACME client, public certificate issuer, or
 external certificate-distribution dependency belongs in the deployment.
 
 Workers that call the API receive only an exported public trust store. They do
@@ -22,6 +23,6 @@ not mount or read the server keystore.
 - Browsers and generic clients show a trust warning unless configured for the
   generated public leaf.
 - Hostname or IP changes regenerate the leaf and invalidate prior trust.
-- Internet-facing deployment is unsupported.
+- Public mode listens on all IPv4 interfaces; local mode supports private tunnels.
 - Build, runtime state, secrets, and TLS files may stay entirely inside the
   repository-local `.local/storyblock/` directory.

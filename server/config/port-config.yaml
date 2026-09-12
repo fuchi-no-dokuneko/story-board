@@ -1,5 +1,5 @@
 port: 8443
 purpose: StoryBlock HTTPS API and library
-policy: local
+policy: public
 enable_whitelist: false
 whitelist: ""

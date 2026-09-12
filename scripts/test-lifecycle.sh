@@ -2,16 +2,18 @@
 set -euo pipefail
 repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 source "$repo_dir/scripts/build-environment.sh"
+python3 "$repo_dir/scripts/test-server-arguments.py"
 work=$repo_dir/.local/refactor-evidence/lifecycle
 mkdir -p "$work/scripts" "$work/server" "$work/.local/storyblock"/{server,runtime,secrets}
-cp "$repo_dir/scripts/"{local-server,repository-paths,server-runtime,server-process,server-control}.sh "$work/scripts/"
+cp "$repo_dir/scripts/"{local-server,repository-paths,server-runtime,server-process,server-control,server-arguments}.sh "$work/scripts/"
 cp "$repo_dir/scripts/server-listener.py" "$work/scripts/"
 cp -R "$repo_dir/server/config" "$work/server/"
 cp --remove-destination "$repo_dir/.local/storyblock/server/application.jar" "$work/.local/storyblock/server/"
 printf '%s\n' "$JAVA_HOME" >"$work/.local/storyblock/runtime/java-home"
 printf '%s' 'isolated-lifecycle-test-pepper-thirty-two-bytes' >"$work/.local/storyblock/secrets/server-pepper"
 printf '%s' 'isolated-lifecycle-test-owner-thirty-two-bytes' >"$work/.local/storyblock/secrets/owner-token"
-export STORYBLOCK_LOCAL_PORT=19443 STORYBLOCK_PORT_POLICY=public
+unset STORYBLOCK_PORT_POLICY STORYBLOCK_LOCAL_PORT
+export STORYBLOCK_LOCAL_PORT=19443
 launcher=$work/scripts/local-server.sh
 pid_file=$work/.local/storyblock/run/server.pid
 cleanup() {
@@ -21,3 +23,5 @@ cleanup() {
 trap cleanup EXIT
 source "$repo_dir/scripts/test-lifecycle-cases.sh"
 run_lifecycle_cases
+source "$repo_dir/scripts/test-server-options-cases.sh"
+run_server_options_cases

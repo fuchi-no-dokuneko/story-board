@@ -4,6 +4,7 @@ run_lifecycle_cases() {
   "$launcher" start >"$work/second-start.txt" & second=$!
   wait "$first"; wait "$second"
   read -r initial_pid initial_ticks <"$pid_file"
+  ss -4 -ltn | rg '0\.0\.0\.0:19443'
   curl -4 -kfsS --noproxy '*' https://127.0.0.1:19443/v1/admin/novels >"$work/catalog.json"
   STORYBLOCK_BASE_URL=https://127.0.0.1:19443 node "$repo_dir/plugin/scripts/storyblock-author.mjs" \
     register --source "$repo_dir/plugin/examples/minimal-novel.json" --json >"$work/registration.json"
@@ -41,11 +42,10 @@ PY
   kill "$holder"; wait "$holder" 2>/dev/null || true
   holder=
   rm -f "$pid_file"
-  export STORYBLOCK_PORT_POLICY=local
-  "$launcher" start
+  "$launcher" start --policy local --port 19443
   read -r pid ticks <"$pid_file"
   python3 "$work/scripts/server-listener.py" "$pid"
   ss -4 -ltn | rg '127\.0\.0\.1:19443'
   "$launcher" stop
-  echo 'PASS: concurrent start, restart persistence, stale logs, port collision, PID ownership, loopback'
+  echo 'PASS: concurrent start, restart persistence, stale logs, port collision, PID ownership, public default, loopback option'
 }

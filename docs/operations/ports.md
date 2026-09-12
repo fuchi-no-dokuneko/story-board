@@ -9,18 +9,27 @@ EN: Edit `server/config/port-config.yaml`. The only policies are `local` (127.0.
 ```yaml
 port: 8443
 purpose: StoryBlock HTTPS API and library
-policy: local
+policy: public
 enable_whitelist: false
 whitelist: ""
 ```
 
-EN: Deployment defaults to loopback. During development use the command below; the whitelist remains disabled. An explicitly enabled whitelist accepts comma-separated literal IPv4 addresses and checks the socket peer, not forwarded headers. No public/private address category is blocked by default.
+EN: The standalone launcher defaults to public (`0.0.0.0:8443`). Both `start` and foreground `run` accept `--policy public` / `--policy=public` and `--port 9443` / `--port=9443`. Options override legacy `STORYBLOCK_PORT_POLICY` / `STORYBLOCK_LOCAL_PORT`, then YAML. Stop and start to apply changes to a running server. Unknown options and invalid values fail before launch; `--help` lists usage.
 
-繁體中文：部署預設 loopback。開發時使用下列命令，白名單維持停用。明確啟用的白名單接受逗號分隔 IPv4 位址，檢查 socket 對端，不信任轉送標頭。預設不按公用或私有位址類型封鎖。
+繁體中文：獨立啟動器預設 public（`0.0.0.0:8443`）。`start` 與前景 `run` 均接受 `--policy public` / `--policy=public` 及 `--port 9443` / `--port=9443`。優先順序為參數、舊環境變數、YAML。變更後須停止再啟動；未知選項或無效值會在啟動前失敗，`--help` 顯示用法。
 
-简体中文：部署默认 loopback。开发时使用下列命令，白名单保持停用。明确启用的白名单接受逗号分隔 IPv4 地址，检查 socket 对端，不信任转发标头。默认不按公网或私有地址类型封锁。
+简体中文：独立启动器默认 public（`0.0.0.0:8443`）。`start` 与前台 `run` 均接受 `--policy public` / `--policy=public` 及 `--port 9443` / `--port=9443`。优先顺序为参数、旧环境变量、YAML。更改后须停止再启动；未知选项或无效值会在启动前失败，`--help` 显示用法。
 
 ```bash
-STORYBLOCK_PORT_POLICY=public ./scripts/local-server.sh run
+./scripts/local-server.sh start
+./scripts/local-server.sh stop
+./scripts/local-server.sh start --policy local --port 8443
+# On your computer / 在你的電腦 / 在你的电脑
 ssh -4 -N -L 8443:127.0.0.1:8443 operator@private-host
 ```
+
+EN: For public mode browse to `https://<server-ip>:8443/`; for local mode use the private SSH tunnel above and browse to `https://127.0.0.1:8443/`. The optional whitelist checks literal IPv4 socket peers, not forwarded headers.
+
+繁體中文：public 模式使用 `https://<server-ip>:8443/`；local 模式使用上述私有 SSH 通道與 `https://127.0.0.1:8443/`。選用白名單檢查 IPv4 socket 對端，不信任轉送標頭。
+
+简体中文：public 模式使用 `https://<server-ip>:8443/`；local 模式使用上述私有 SSH 通道与 `https://127.0.0.1:8443/`。可选白名单检查 IPv4 socket 对端，不信任转发标头。

@@ -18,7 +18,7 @@ final class PolicyTomcatFactory extends TomcatServletWebServerFactory {
         try {
             int port = environment.getProperty("port", Integer.class, 8443);
             if (port < 1 || port > 65535) throw new IllegalArgumentException("Port must be 1..65535");
-            List<InetAddress> addresses = Ipv4Listeners.resolve(environment.getProperty("policy", "local"));
+            List<InetAddress> addresses = Ipv4Listeners.resolve(environment.getProperty("policy", "public"));
             setPort(port);
             setSsl(LocalServerTls.prepare());
             setBaseDirectory(LocalRuntime.directory("tmp/tomcat").toFile());
