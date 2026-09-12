@@ -1,6 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeText;
 import dev.storyblock.domain.UnicodeText;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -11,14 +11,14 @@ import java.util.Map;
 
 final class StyleFeatureAnalyzerLexical {
     static StyleFeatureVector lexical(
-            List<NarrativeBlock> blocks,
+            List<? extends NarrativeText> blocks,
             StyleFeatureContract contract,
             String contractHash
     ) {
         List<String> tokens = new ArrayList<>();
         Map<String, Long> lengthBuckets = new LinkedHashMap<>();
         Map<String, Long> ngrams = new LinkedHashMap<>();
-        for (NarrativeBlock block : blocks) {
+        for (NarrativeText block : blocks) {
             List<String> local = StyleFeatureAnalyzerTokens.tokens(block.text());
             tokens.addAll(local);
             for (String token : local) {

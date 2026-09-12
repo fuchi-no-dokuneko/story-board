@@ -10,7 +10,7 @@ public record NarrativeBlock(
         String text,
         BlockMetadata metadata,
         Map<String, Object> extensions
-) {
+) implements NarrativeText {
     public NarrativeBlock {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(versionId, "versionId");

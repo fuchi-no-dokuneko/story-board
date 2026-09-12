@@ -1,6 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeText;
 import dev.storyblock.domain.UnicodeText;
 import java.text.Normalizer;
 import java.util.LinkedHashMap;
@@ -10,12 +10,12 @@ import static dev.storyblock.style.StyleFeatureAnalyzer.FUNCTION_WORDS;
 
 final class StyleFeatureAnalyzerGrammar {
     static StyleFeatureVector grammar(
-            List<NarrativeBlock> blocks,
+            List<? extends NarrativeText> blocks,
             StyleFeatureContract contract,
             String contractHash
     ) {
         Map<String, Long> counts = new LinkedHashMap<>();
-        for (NarrativeBlock block : blocks) {
+        for (NarrativeText block : blocks) {
             String text = Normalizer.normalize(
                     block.text(), Normalizer.Form.NFC
             ).toLowerCase(java.util.Locale.ROOT);

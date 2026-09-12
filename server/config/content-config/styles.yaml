@@ -1,0 +1,14 @@
+schema_version: 1
+styles:
+  - id: lyrical
+    name: 抒情敘事
+    description: 節奏舒緩，偏重環境與內心描寫
+    language: zh-Hant
+    sources_dir:
+      - ../../style-references/lyrical
+  - id: suspense
+    name: 懸疑敘事
+    description: 對話與短句帶動線索和懸念
+    language: zh-Hant
+    sources_dir:
+      - ../../style-references/suspense

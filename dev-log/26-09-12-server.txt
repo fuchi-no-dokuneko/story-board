@@ -19,3 +19,9 @@ Apporch chosen: 只記錄已回傳正文的版本與位置；提交時檢查相�
 Assumption made to chose this approch: 閱讀不依身份；空場景以空切片登記。
 affect scope: API 查詢與提交；已有成功提交的重試保留冪等結果。
 ---
+---13:01---ADR-304參考風格初版
+category: api_schema_change
+Current status: TXT 參考與 YAML 註冊、背景監看及多風格比較初版已編譯。
+Issues: 真實監看、併發與獨立客戶端驗證待進行。
+affect scope: 五種既有分析器與新 HTTP 比較；不保存小說比較結果。
+---

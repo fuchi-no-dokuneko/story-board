@@ -1,6 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeText;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Objects;
 
 final class StyleFeatureAnalyzerExtractAction {
-    static StyleFeatureSet extract(StyleFeatureAnalyzer self, List<NarrativeBlock> blocks, StyleMaskingLexicon lexicon, StyleFeatureContract contract, List<BigDecimal> contentReducedEmbedding)  {
+    static StyleFeatureSet extract(StyleFeatureAnalyzer self, List<? extends NarrativeText> blocks, StyleMaskingLexicon lexicon, StyleFeatureContract contract, List<BigDecimal> contentReducedEmbedding)  {
         blocks = List.copyOf(blocks);
-        if (blocks.isEmpty() || blocks.size() > 1_000) {
-            throw new IllegalArgumentException("Style extraction requires 1 to 1000 blocks");
+        if (blocks.isEmpty()) {
+            throw new IllegalArgumentException("Style extraction requires at least one text block");
         }
         Objects.requireNonNull(lexicon, "lexicon");
         Objects.requireNonNull(contract, "contract");

@@ -1,6 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeText;
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,14 +8,14 @@ import java.util.Map;
 
 final class StyleFeatureAnalyzerNarrative {
     static StyleFeatureVector narrative(
-            List<NarrativeBlock> blocks,
+            List<? extends NarrativeText> blocks,
             StyleFeatureContract contract,
             String contractHash
     ) {
         Map<String, Long> counts = new LinkedHashMap<>();
         String previousSpeaker = null;
         long speakerTurns = 0;
-        for (NarrativeBlock block : blocks) {
+        for (NarrativeText block : blocks) {
             Map<String, Object> metadata = block.metadata().fields();
             Object speech = metadata.get("speech");
             boolean dialogue = StyleAnalysisBlock.isDialogue(block);
