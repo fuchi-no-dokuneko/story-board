@@ -27,3 +27,10 @@ Time used (min) : 4
 Chromium 實際選取新稿，顯示兩種風格的五項距離，兩個下載按鈕成功。
 PDF 四頁中文可讀；TXT 包含兩章。證據位於 .local/authoring-work/gui。
 ---
+---14:05---新版瀏覽器與中文匯出
+milestone-type : success-test
+Time used (min) : 3
+安裝版通過 9 情境、85 步驟，包含搜尋、章節導覽與手機版；新功能另驗證兩風格五欄表格及公式頁。
+真實 Chromium 下載 PDF／UTF-8 TXT；四頁 PDF 內附中文字型可讀，已查看正文頁。
+證據：.local/authoring-work/regression-browser.log、final-browser.json 及 server/data/uat/authoring-Y01PgG。
+---

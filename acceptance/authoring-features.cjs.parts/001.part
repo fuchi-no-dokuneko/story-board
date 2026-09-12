@@ -1,0 +1,39 @@
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { CdpDriver } = require('./cdp-driver.cjs');
+
+(async () => {
+  const [base, novel, destination = 'server/data/uat'] = process.argv.slice(2);
+  if (!base || !/^nov_[A-Za-z0-9]{5}$/.test(novel || ''))
+    throw Error('Usage: node acceptance/authoring-features.cjs https://host:port nov_Ab123 [output-directory]');
+  const target = new URL(base);
+  if (target.protocol !== 'https:' || target.hostname.includes(':')) throw Error('IPv4 HTTPS is required');
+  await fs.mkdir(destination, { recursive: true });
+  const output = await fs.mkdtemp(path.resolve(destination, 'authoring-'));
+  const driver = await CdpDriver.create({ headless: true });
+  try {
+    await driver.sendDevToolsCommand('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: output });
+    await driver.get(`${target.origin}/#${novel}`);
+    await driver.wait(() => driver.evaluate("!document.getElementById('reader-content').hidden"));
+    await driver.wait(() => driver.evaluate("document.querySelectorAll('#style-choices input:checked').length>=2"));
+    const [compare] = await driver.findElements('#compare-styles'); await compare.click();
+    await driver.wait(() => driver.evaluate("document.querySelectorAll('#style-score-rows tr').length>=2"));
+    const table = await driver.evaluate("document.getElementById('style-score-rows').innerText");
+    const title = await driver.evaluate("document.getElementById('reader-title').innerText");
+    await fs.writeFile(path.join(output, 'comparison.png'), Buffer.from(await driver.takeScreenshot(), 'base64'));
+    for (const format of ['txt', 'pdf']) {
+      const [button] = await driver.findElements('#download-' + format); await button.click();
+      await driver.wait(async () => (await fs.readdir(output)).some(file => file.endsWith('.' + format)));
+    }
+    const files = await fs.readdir(output);
+    const pdf = await fs.readFile(path.join(output, files.find(file => file.endsWith('.pdf'))));
+    assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
+    const txt = await fs.readFile(path.join(output, files.find(file => file.endsWith('.txt'))));
+    assert.ok(new TextDecoder('utf-8', { fatal: true }).decode(txt).length);
+    await driver.get(`${target.origin}/style-math.html`);
+    assert.match(await driver.evaluate('document.body.innerText'), /Jensen|JSD/);
+    await fs.writeFile(path.join(output, 'formulas.png'), Buffer.from(await driver.takeScreenshot(), 'base64'));
+    const result = { title, table, output, pdfBytes: pdf.length, txtBytes: txt.length, formulas: true };
+    await fs.writeFile(path.join(output, 'result.json'), JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(result, null, 2));

@@ -5,3 +5,4 @@
 /.local-tool-app/*
 !/.local-tool-app/install-local.sh
 /node_modules
+/authoring-features.cjs

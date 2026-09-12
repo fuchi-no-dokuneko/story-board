@@ -10,3 +10,9 @@ Current status: 已內附 Noto Sans CJK 2.004 與完整 SIL 授權，操作人�
 Issues: 原渲染器依賴主機字型；乾淨 VPS 無中文字型時可能出現方框，已修正。
 affect scope: PDF 使用內附繁體字型；Java 字型快取與暫存留在各應用 data。
 ---
+---14:05---ADR-298更新瀏覽器驗收
+category: bug_discovery
+Current status: 已修正舊驗收步驟仍要求 UUID 的遺漏；重新通過 9 情境、85 步驟。
+Issues: 使用五碼 ID 時，舊驗收的精確作品選取會拒絕有效 ID；產品端操作正常。
+affect scope: 新增可重跑的比較／下載／公式頁 Chromium 驗收；參考文字兩項邊界測試通過。
+---
