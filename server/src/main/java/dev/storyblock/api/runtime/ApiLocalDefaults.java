@@ -12,6 +12,7 @@ public final class ApiLocalDefaults {
     public static Map<String, Object> prepare() {
         try {
             System.setProperty("java.net.preferIPv4Stack", "true");
+            System.setProperty("user.home", LocalRuntime.directory("").toString());
             System.setProperty("java.io.tmpdir", LocalRuntime.directory("tmp").toString());
             Path directory = LocalRuntime.directory("secrets");
             Path pepper = LocalRuntime.contained(directory.resolve("server-pepper"));

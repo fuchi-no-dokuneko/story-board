@@ -4,3 +4,9 @@ Current status: GUI 驗收發現登錄分句會把右引號留在下一塊；已
 Issues: 既有稿件不自動改寫；驗收稿中「離開三年」也觸發既有離場規則，已改成明確的「辭世」。
 affect scope: 新稿件登錄分句；保留原文，不改變既有編輯驗證器。
 ---
+---14:01---ADR-298內附中文PDF字型
+category: bug_discovery
+Current status: 已內附 Noto Sans CJK 2.004 與完整 SIL 授權，操作人員不需另外安裝字型。
+Issues: 原渲染器依賴主機字型；乾淨 VPS 無中文字型時可能出現方框，已修正。
+affect scope: PDF 使用內附繁體字型；Java 字型快取與暫存留在各應用 data。
+---

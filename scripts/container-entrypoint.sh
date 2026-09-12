@@ -22,4 +22,4 @@ if [[ ${STORYBLOCK_CONTAINER_APP:-api} == api ]]; then
   args+=(--spring.config.additional-location=file:/workspace/server/config/config.yaml,file:/workspace/server/config/port-config.yaml,file:/workspace/server/config/content-config/logging.yaml)
   args+=("--policy=${POLICY:-public}" "--port=${PORT:-8443}")
 fi
-exec java "-Djava.io.tmpdir=$data_dir/tmp" -jar /workspace/application.jar "${args[@]}" "$@"
+exec java "-Duser.home=$data_dir" "-Djava.io.tmpdir=$data_dir/tmp" -jar /workspace/application.jar "${args[@]}" "$@"
