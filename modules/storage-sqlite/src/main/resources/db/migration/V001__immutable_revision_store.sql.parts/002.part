@@ -1,3 +1,18 @@
+    created_at TEXT NOT NULL,
+    PRIMARY KEY (novel_id, sequence),
+    FOREIGN KEY (novel_id) REFERENCES novels(novel_id),
+    FOREIGN KEY (revision_id) REFERENCES revisions(revision_id)
+);
+
+CREATE TABLE IF NOT EXISTS block_tombstones (
+    novel_id TEXT NOT NULL,
+    operation_id TEXT NOT NULL,
+    deleted_in_revision_id TEXT NOT NULL,
+    source_scene_id TEXT NOT NULL,
+    block_id TEXT NOT NULL,
+    block_version_id TEXT NOT NULL,
+    block_json TEXT NOT NULL CHECK (json_valid(block_json)),
+    PRIMARY KEY (operation_id, block_id),
     FOREIGN KEY (novel_id) REFERENCES novels(novel_id),
     FOREIGN KEY (operation_id) REFERENCES operations(operation_id),
     FOREIGN KEY (deleted_in_revision_id) REFERENCES revisions(revision_id)

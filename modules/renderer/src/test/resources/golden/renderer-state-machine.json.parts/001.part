@@ -1,7 +1,7 @@
 {
   "resolved_meta": [
     {
-      "block_id": "blk_J91ub",
+      "block_id": "blk_00005",
       "before": {
         "location": {"id": "alley"},
         "pov": {"mode": "unknown"},
@@ -19,7 +19,7 @@
       }
     },
     {
-      "block_id": "blk_z1s7h",
+      "block_id": "blk_00006",
       "before": {
         "location": {"id": "alley"},
         "pov": {"mode": "unknown"},
@@ -48,7 +48,7 @@
       }
     },
     {
-      "block_id": "blk_W2oGI",
+      "block_id": "blk_00007",
       "before": {
         "location": {"id": "roof"},
         "pov": {"mode": "unknown"},
@@ -68,7 +68,7 @@
   ],
   "scene_boundaries": [
     {
-      "scene_id": "scn_I8ENj",
+      "scene_id": "scn_00003",
       "state_in": {
         "location": {"id": "alley"},
         "pov": {"mode": "unknown"},
@@ -85,7 +85,7 @@
       }
     },
     {
-      "scene_id": "scn_NRYAt",
+      "scene_id": "scn_00004",
       "state_in": {
         "location": {"id": "roof"},
         "pov": {"mode": "unknown"},
@@ -94,3 +94,7 @@
         "weather": {"mode": "not_applicable"}
       },
       "state_out": {
+        "location": {"id": "roof"},
+        "pov": {"mode": "unknown"},
+        "present_character_ids": ["char_min"],
+        "time": {"mode": "unknown"},

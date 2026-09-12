@@ -43,6 +43,15 @@ interface ApiEditErrors extends ApiErrorContext {
     return ApiExceptionHandlerCommitRejectedAction.commitRejected(context(), failure, request);
   }
 
+  @ExceptionHandler(IdentityConflictException.class)
+  default ResponseEntity<Map<String, Object>> identityConflict(
+      IdentityConflictException failure, HttpServletRequest request) {
+    return ApiExceptionHandlerResponse.response(request, new ApiFailureException(
+        HttpStatus.CONFLICT, "ID_CONFLICT", "Identifier collision", "id-conflict",
+        failure.getMessage() + "; generate a new ID for the new entity and preview again.",
+        Map.of("identifier", failure.identifier()), null));
+  }
+
   @ExceptionHandler(NovelConflictException.class)
   default ResponseEntity<Map<String, Object>> resourceConflict(
       NovelConflictException failure,

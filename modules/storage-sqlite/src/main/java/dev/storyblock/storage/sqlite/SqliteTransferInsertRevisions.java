@@ -25,6 +25,7 @@ final class SqliteTransferInsertRevisions {
                 """)) {
             for (CanonicalNovelPackage.RevisionEntry entry : document.revisions()) {
                 RevisionManifest revision = NarrativeCanonicalMapper.fromCanonical(entry.revision());
+                SqliteRevisionIdentities.claim(connection, revision, entry.revision().contentHash());
                 statement.setString(1, revision.id().value());
                 statement.setString(2, revision.novel().id().value());
                 statement.setString(3, revision.parentId() == null

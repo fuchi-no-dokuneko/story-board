@@ -1,0 +1,8 @@
+---13:14---ADR-293短識別持久化
+category: db_schema_change
+Current status: 六類識別以資料庫查重與保留；碰撞、併發、重開資料庫及版本歸屬測試通過。
+Issues: 尚待真實伺服器重啟與 GUI 驗收。
+Apporch chosen: 請求範圍內配置識別；交易中一次讀取既有歸屬，避免重複 SQL。
+Assumption made to chose this approch: 新增識別須持久化；既有版本內容不可改寫。
+affect scope: 領域、SQLite、API 與標準測試資料；全 Java 測試通過。
+---

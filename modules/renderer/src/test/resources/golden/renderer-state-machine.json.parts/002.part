@@ -1,7 +1,3 @@
-        "location": {"id": "roof"},
-        "pov": {"mode": "unknown"},
-        "present_character_ids": ["char_min"],
-        "time": {"mode": "unknown"},
         "weather": {"mode": "not_applicable"}
       }
     }

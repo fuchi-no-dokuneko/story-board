@@ -9,6 +9,6 @@
     }
 
     private static String id(String prefix, int suffix) {
-        return prefix + "_018f0f5e-7b4a-7c00-8000-" + "%012d".formatted(suffix);
+        return prefix + "_" + "%05d".formatted(suffix);
     }
 }

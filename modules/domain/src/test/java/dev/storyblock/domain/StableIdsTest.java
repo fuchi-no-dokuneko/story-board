@@ -4,19 +4,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.UUID;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.HashSet;
 import org.junit.jupiter.api.Test;
 
 class StableIdsTest {
     @Test
-    void generatesTypedUuidVersionSevenIdentifiers() {
-        Ids.BlockId first = Ids.BlockId.create();
-        Ids.BlockId second = Ids.BlockId.create();
-
-        assertNotEquals(first, second);
-        UUID uuid = UUID.fromString(first.value().substring("blk_".length()));
-        assertEquals(7, uuid.version());
-        assertEquals(2, uuid.variant());
+    void generatesUniqueShortIdentifiersForAllSixTypes() {
+        for (String prefix : ShortIds.PREFIXES) {
+            var seen = new HashSet<String>();
+            for (int i = 0; i < 2000; i++) {
+                String id = StableIds.generate(prefix);
+                assertTrue(id.matches(prefix + "_[A-Za-z0-9]{5}"));
+                assertTrue(seen.add(id));
+            }
+        }
     }
 
     @Test
@@ -26,7 +28,7 @@ class StableIdsTest {
     }
 
     @Test
-    void derivesRepeatableDistinctUuidVersionSevenIdentifiers() {
+    void derivesRepeatableDistinctShortIdentifiers() {
         Ids.OperationId operationId = Ids.OperationId.create();
 
         String first = StableIds.derive("blv", operationId.value(), "first");
