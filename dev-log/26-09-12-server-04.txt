@@ -22,3 +22,9 @@ Current status: 容器啟動包裝器改用各應用 data；資料連結例外�
 Issues: Docker 執行環境不可用；容器架構靜態檢查、Shell 語法、真實啟停及備份還原均通過。
 affect scope: server/data/storyblock.db、工作程式資料目錄與操作文件；既有 VPS 未變更。
 ---
+---14:09---ADR-298需求完成核對
+category: decision_make
+Current status: 附件十三項需求皆有程式、測試或實際 HTTPS／GUI 證據；todo 與覆蓋清單已更新。
+Issues: 八個一萬字小說比較請求全部回 200；比較結果未新增資料庫工作或風格資料。
+affect scope: 更新驗收文件與獨立 skill；來源基準保留於記憶體，小說比較每次重算。
+---

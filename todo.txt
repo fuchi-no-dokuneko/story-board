@@ -1,17 +1,19 @@
 Authoring and style batch / 撰寫與風格批次
 Source / 來源: attachment 086b103d-d28d-4883-a2d3-06cfdd9228d3/pasted-text-1.txt
 
-MVP implemented; verification/refinement pending / 初版已實作，待驗證與修訂:
-1. Six short identifier types, collision handling, fresh DB contracts. 六種短識別、防碰撞及新資料庫契約。
-2. Chapter/scene listings and scene-local block slices. 章節／場景清單與區塊切片。
-3. Shared revision-bound 300-second reading gate. 共用且綁定版本的五分鐘閱讀閘門。
-4. One YAML style registry, TXT ingestion and 60-second watcher. 單一 YAML、TXT 及每分鐘檢查。
-5. Async HTTP 200 multi-style comparison without jobs or result storage. 非同步比較回 200，不建立工作或儲存結果。
-6. Comparison table, static math page, PDF/TXT buttons. 比較表、公式頁及 PDF／TXT 按鈕。
-7. Runtime data under server/data with symlink support. 執行資料集中 server/data 並支援連結。
-8. API/CLI/skill documentation and standalone verification. API／CLI／skill 文件與獨立驗證。
-9. Refine, meaningful tests, HTTPS GUI UAT, coverage and milestones. 修訂、測試、HTTPS GUI 驗收、覆蓋與里程碑。
+Implementation and verification remaining: none for the 13 confirmed requirements.
+13 項確認需求的實作與驗證：無剩餘項目。
 
-Plan / 計畫: MVP across all features, then tests and refinement; goal remains active until all requirements pass. 先完成各功能初版，再測試修訂；全部驗證完成前目標保持進行。
+Completed / 已完成:
+1. Short IDs, durable collision checks and restart-safe retries. 短 ID、持久防碰撞及跨重啟重試。
+2. Scene-local slices, chapter/scene lists and grapheme counts. 場景切片、章節／場景列表及字素數。
+3. Shared revision-bound 300-second reading gate. 共用且綁定版本的五分鐘閱讀限制。
+4. YAML/TXT registry and asynchronous 60-second reference refresh. YAML／TXT 登記及每分鐘背景更新。
+5. Async HTTP 200 multi-style scores without task IDs or result storage. 非同步回 200，無工作 ID 或結果儲存。
+6. GUI comparison table, math page, PDF/TXT downloads with bundled CJK font. 比較表、公式頁、PDF／TXT 及內附中文字型。
+7. server/data database, data symlinks, installation and backup verification. 資料庫集中、連結、安裝及備份驗證。
+8. Updated contracts/standalone Skill; Java, CLI, live HTTPS and Chromium checks. 契約／獨立技能及各層驗收。
 
-Known refinements / 已知待修訂: persistent short-ID collisions; restart-safe retry; GUI/PDF Chinese output; API/CLI and watcher tests. 跨重啟防碰撞與重試、GUI/PDF 中文、API/CLI 與監看測試。
+Evidence / 證據: docs/acceptance/authoring-styles.md; text-coverage.txt
+Delivery / 交付: tickets/ADR-298-authoring-styles; fresh installation, no VPS deployment or old-data migration. 全新安裝；未部署 VPS，不遷移舊資料。
+Limit / 限制: optional Docker runtime unavailable; static container checks passed. 選用 Docker 無執行環境，容器靜態檢查通過。

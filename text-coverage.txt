@@ -1,20 +1,20 @@
-ADR-311 coverage inventory / 覆蓋清單
-Java: 183 tests passed; 19 modules. Java：183 項通過，19 模組。
-Domain/contracts: real objects, codecs and property tests; no mocks. 領域／契約：實物、編碼及性質測試，無替身。
-Renderer/validator/detector: real implementations and golden fixtures. 渲染／驗證／偵測：真實實作與黃金範例。
-Monitor/style/rewrite: real planners, analysis, contracts and policy fixtures. 監控／風格／改寫：真實規劃、分析、契約與策略範例。
-Application: editor, preview and canonical package validation; fixed clock where needed. 應用：編輯、預覽及封裝驗證，部分使用固定時鐘。
-Storage API/security: exercised through SQLite and Spring integration. 儲存介面／安全：經 SQLite 與 Spring 整合驗證。
-SQLite: real JDBC databases, concurrent writers and subprocess crash tests; no database mock. SQLite：真實資料庫、併發及程序崩潰，無資料庫替身。
-HTTP: real Spring controllers, advice and SQLite; MockMvc simulates servlet transport. HTTP：真實 Spring 與 SQLite，MockMvc 模擬 Servlet 傳輸。
-Proposal read boundary: real controller and principal; RewriteGateService lookup mocked. 提案讀取界線：真實控制器與身分，服務查詢使用替身。
-Workers: real Java HTTPS clients and local self-signed fixture servers; model/API responses simulated. 工作程式：真實 HTTPS 客戶端，模型／API 回應由本機伺服器模擬。
-CLI: actual command execution, SQLite and qualification fixtures. CLI：實際命令、SQLite 與驗證範例。
-Architecture: module boundaries and deployment/installer source assertions. 架構：模組界線、部署與安裝器來源檢查。
-Plugin: 173 Node tests; validation and standalone assembly real, HTTP transport injected in unit tests. 作者工具：173 項；驗證及獨立組合為真實執行，單元 HTTP 使用替身。
-Browser assets: 4 Node tests with DOM/storage fixtures. 瀏覽器資源：4 項 Node 測試，使用 DOM／儲存範例。
-GUI UAT: 9 scenarios/85 steps, real Chromium/CDP, HTTPS and SQLite; degraded health and offline network simulated. GUI：9 情境／85 步驟，健康降級及斷線為模擬。
-Live authoring/transfer: real HTTPS, image upload, PDF and separate SQLite databases; no mocks. 即時撰寫／轉移：真實 HTTPS、圖片、PDF 與隔離資料庫，無替身。
-Lifecycle/backup: real JVM, SQLite, keyless compressed archives, concurrent backup, restore, corruption rejection and retention; no mocks. 生命週期／備份：真實 JVM、SQLite、無金鑰壓縮、併發、還原、損壞拒絕及保留策略，無替身。
-Backup telemetry: real SQLite, meter registry and filesystem; fixed test clock. 備份監測：真實 SQLite、計量器與檔案系統，固定測試時鐘。
-Containers: static checks only; Docker absent and user namespace denied. 容器：僅靜態檢查；缺少 Docker，命名空間權限遭拒。
+ADR-298 coverage / 覆蓋
+Java: 195 full-suite tests plus 2 reference-text tests passed; 19 modules. Java：全套195項加參考文字2項通過，19模組。
+Domain/contracts: real codecs/property tests; no mocks. 領域／契約：真實物件、編碼及性質測試，無替身。
+Renderer/validator/detector: real implementations, golden fixtures and bundled Chinese font. 渲染／驗證／偵測：真實實作、黃金範例及內附中文字型。
+Monitor/style/rewrite: real analysis and planners; reference TXT filesystem fixtures. 監控／風格／改寫：真實分析、規劃及TXT檔案系統範例。
+Application: real editor, preview and package validation; fixed clock where needed. 應用：真實編輯、預覽、封裝驗證，部分固定時鐘。
+SQLite: real JDBC databases, concurrent writers, ID collision/reopen and process-crash tests. SQLite：真實資料庫、併發、識別碰撞／重啟及崩潰測試。
+HTTP: real Spring controllers/security and SQLite; MockMvc simulates servlet transport. HTTP：真實Spring、安全及SQLite，MockMvc模擬傳輸。
+Read ledger: real shared ledger and target selection; controlled expiry clock. 閱讀：真實共用紀錄與範圍選取，受控到期時鐘。
+Proposal read boundary: real controller/principal; RewriteGateService lookup mocked. 提案界線：真實控制器／身分，服務查詢替身。
+Workers: real Java HTTPS clients; model/API responses simulated by local self-signed servers. 工作程式：真實HTTPS客戶端，本機自簽伺服器模擬模型回應。
+Architecture: real module and installer assertions. 架構：模組界線及部署／安裝來源檢查通過。
+Plugin: 187 Node tests; real standalone assembly/validation, injected unit HTTP transport. 技能：187項，真實獨立組合／驗證，單元HTTP替身。
+Browser assets: 4 Node tests with DOM/storage fixtures. 介面資源：4項，DOM／儲存範例。
+GUI: real Chromium/CDP, HTTPS and SQLite; 9 scenarios/85 steps plus style table, formulas and PDF/TXT downloads. GUI：真實Chromium、HTTPS、SQLite，9情境／85步驟及新功能。
+GUI fault cases: degraded health response and offline browser network simulated. GUI故障情境：健康降級回應及瀏覽器斷線為模擬。
+Live authoring: real standalone CLI, revision slices, guarded edits and restart replay. 實際撰寫：獨立CLI、版本切片、閱讀限制與重啟重試。
+Live styles: real external directories, minute watcher, eight concurrent comparisons and SQLite storage inspection. 實際風格：外部目錄、分鐘檢查、八個併發比較及資料庫檢查。
+Lifecycle/backup: real JVM, SQLite, data symlink, keyless archives, restore, corruption rejection and retention. 生命週期／備份：真實JVM、SQLite、連結、無金鑰壓縮、還原及保留策略。
+Containers: static checks passed; Docker execution unavailable. 容器：靜態檢查通過，無Docker執行環境。
