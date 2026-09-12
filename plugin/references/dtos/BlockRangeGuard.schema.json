@@ -12,15 +12,15 @@
   "properties": {
     "scene_id": {
       "type": "string",
-      "pattern": "^scn_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^scn_[A-Za-z0-9]{5}$"
     },
     "first_block_id": {
       "type": "string",
-      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^blk_[A-Za-z0-9]{5}$"
     },
     "last_block_id": {
       "type": "string",
-      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^blk_[A-Za-z0-9]{5}$"
     },
     "expected_blocks": {
       "type": "array",
@@ -38,7 +38,7 @@
       "oneOf": [
         {
           "type": "string",
-          "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          "pattern": "^blk_[A-Za-z0-9]{5}$"
         },
         {
           "type": "null"
@@ -49,7 +49,7 @@
       "oneOf": [
         {
           "type": "string",
-          "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+          "pattern": "^blk_[A-Za-z0-9]{5}$"
         },
         {
           "type": "null"
@@ -71,18 +71,18 @@
   ],
   "examples": [
     {
-      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
-      "first_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
-      "last_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+      "scene_id": "scn_UX5V4",
+      "first_block_id": "blk_49pHt",
+      "last_block_id": "blk_49pHt",
       "expected_blocks": [
         {
-          "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
-          "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001"
+          "block_id": "blk_49pHt",
+          "block_version_id": "blv_xwDzm"
         }
       ],
       "expected_range_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "expected_previous_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
-      "expected_next_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+      "expected_previous_block_id": "blk_49pHt",
+      "expected_next_block_id": "blk_49pHt"
     }
   ]
 }

@@ -19,7 +19,7 @@ test("registration rejects a sentence that the server cannot fit in a block", as
 
 test("operation range guards bind first and last expected block ids", async () => {
   const value = structuredClone((await getSchema("DeleteBlockRangeOperation")).examples[0]);
-  value.payload.range.first_block_id = "blk_018f0f5e-7b4a-7c00-8000-000000000099";
+  value.payload.range.first_block_id = "blk_VAGAA";
   const result = await validateDto("DeleteBlockRangeOperation", value, { throwOnError: false });
   assert.equal(result.valid, false);
   assert.ok(result.issues.some(({ message }) => message.includes("first expected_blocks")));

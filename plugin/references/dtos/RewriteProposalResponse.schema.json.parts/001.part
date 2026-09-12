@@ -34,7 +34,7 @@
     },
     "novel_id": {
       "type": "string",
-      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^nov_[A-Za-z0-9]{5}$"
     },
     "proposal_id": {
       "type": "string",
@@ -50,7 +50,7 @@
     },
     "revision_id": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "status": {
       "const": "pending"
@@ -77,7 +77,7 @@
       "finding_ids": [
         "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       ],
-      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "novel_id": "nov_EUubI",
       "proposal_id": "prp_018f0f5e-7b4a-7c00-8000-000000000001",
       "reservation_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",

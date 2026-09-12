@@ -48,8 +48,8 @@ test("upload-image sends raw bytes and emits a validated image block", async () 
     const imagePath = join(directory, "reference.png");
     const imageBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     await writeFile(imagePath, imageBytes);
-    const novelId = "nov_018f0f5e-7b4a-7c00-8000-000000000001";
-    const revisionId = "rev_018f0f5e-7b4a-7c00-8000-000000000001";
+    const novelId = "nov_EUubI";
+    const revisionId = "rev_mG1Ct";
     const hash = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     const requests = [];
     const responses = [

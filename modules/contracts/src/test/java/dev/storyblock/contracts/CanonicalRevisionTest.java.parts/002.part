@@ -12,16 +12,16 @@
         Map<String, Object> chapter = new LinkedHashMap<>();
         chapter.put("title", "Arrival");
         chapter.put("scenes", new ArrayList<>());
-        chapter.put("id", "ch_018f0f5e-7b4a-7c00-8000-000000000002");
+        chapter.put("id", "ch_NEAJM");
         chapter.put("order_key", "55555555555555555555555555555555");
 
         Map<String, Object> content = new LinkedHashMap<>();
-        content.put("revision_id", "rev_018f0f5e-7b4a-7c00-8000-000000000003");
+        content.put("revision_id", "rev_69qzn");
         content.put("created_at", "2026-08-20T12:00:00Z");
         content.put("chapters", new ArrayList<>(List.of(chapter)));
         content.put("schema_version", CanonicalRevision.SCHEMA_VERSION);
         content.put("parent_revision_id", null);
-        content.put("novel_id", "nov_018f0f5e-7b4a-7c00-8000-000000000001");
+        content.put("novel_id", "nov_EUubI");
         return content;
     }
 

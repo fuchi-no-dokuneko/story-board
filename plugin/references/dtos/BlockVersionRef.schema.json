@@ -7,11 +7,11 @@
   "properties": {
     "block_id": {
       "type": "string",
-      "pattern": "^blk_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^blk_[A-Za-z0-9]{5}$"
     },
     "block_version_id": {
       "type": "string",
-      "pattern": "^blv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^blv_[A-Za-z0-9]{5}$"
     }
   },
   "additionalProperties": false,
@@ -28,8 +28,8 @@
   ],
   "examples": [
     {
-      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
-      "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001"
+      "block_id": "blk_49pHt",
+      "block_version_id": "blv_xwDzm"
     }
   ]
 }

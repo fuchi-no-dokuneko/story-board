@@ -1,7 +1,7 @@
 {
   "resolved_meta": [
     {
-      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000005",
+      "block_id": "blk_J91ub",
       "before": {
         "location": {"id": "alley"},
         "pov": {"mode": "unknown"},
@@ -19,7 +19,7 @@
       }
     },
     {
-      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000006",
+      "block_id": "blk_z1s7h",
       "before": {
         "location": {"id": "alley"},
         "pov": {"mode": "unknown"},
@@ -48,7 +48,7 @@
       }
     },
     {
-      "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000007",
+      "block_id": "blk_W2oGI",
       "before": {
         "location": {"id": "roof"},
         "pov": {"mode": "unknown"},
@@ -68,7 +68,7 @@
   ],
   "scene_boundaries": [
     {
-      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000003",
+      "scene_id": "scn_I8ENj",
       "state_in": {
         "location": {"id": "alley"},
         "pov": {"mode": "unknown"},
@@ -85,7 +85,7 @@
       }
     },
     {
-      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000004",
+      "scene_id": "scn_NRYAt",
       "state_in": {
         "location": {"id": "roof"},
         "pov": {"mode": "unknown"},

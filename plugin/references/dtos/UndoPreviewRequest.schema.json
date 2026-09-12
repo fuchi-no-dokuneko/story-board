@@ -10,18 +10,18 @@
   "properties": {
     "base_revision_id": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "restore_revision_id": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "expected_restore_hash": {
       "type": "string"
     },
     "candidate_revision_id": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "candidate_created_at": {
       "type": "string",
@@ -43,10 +43,10 @@
   ],
   "examples": [
     {
-      "base_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
-      "restore_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "base_revision_id": "rev_mG1Ct",
+      "restore_revision_id": "rev_mG1Ct",
       "expected_restore_hash": "example-1",
-      "candidate_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "candidate_revision_id": "rev_mG1Ct",
       "candidate_created_at": "2026-08-27T12:00:00Z"
     }
   ]

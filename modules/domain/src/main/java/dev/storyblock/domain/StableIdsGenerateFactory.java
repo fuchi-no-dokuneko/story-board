@@ -8,6 +8,7 @@ final class StableIdsGenerateFactory {
     static String generate(String prefix, Clock clock)  {
         StableIdsRequirePrefix.requirePrefix(prefix);
         Objects.requireNonNull(clock, "clock");
+        if (ShortIds.PREFIXES.contains(prefix)) return ShortIds.generate(prefix);
 
         long timestamp = clock.millis() & 0x0000FFFFFFFFFFFFL;
         long randomA = StableIds.RANDOM.nextInt(1 << 12);

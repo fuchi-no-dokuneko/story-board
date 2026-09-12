@@ -1,12 +1,12 @@
-      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_id": "rev_mG1Ct",
       "status": "pending",
       "worker_input": {
         "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
         "analyzer_contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "blocks": [
           {
-            "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
-            "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+            "block_id": "blk_49pHt",
+            "block_version_id": "blv_xwDzm",
             "editable": true,
             "text": "春風到了。",
             "text_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -22,12 +22,12 @@
         "finding_ids": [
           "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
         ],
-        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "novel_id": "nov_EUubI",
         "profile_version_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "profile_version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
         "proposal_id": "prp_018f0f5e-7b4a-7c00-8000-000000000001",
         "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "revision_id": "rev_mG1Ct",
         "schema_version": "example-1",
         "window_configuration_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       }

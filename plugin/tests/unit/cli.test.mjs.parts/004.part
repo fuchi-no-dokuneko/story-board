@@ -52,8 +52,8 @@
 test("render-pdf writes exact private PDF bytes and reports render metadata", async () => {
   const directory = await mkdtemp(join(tmpdir(), "storyblock-author-pdf-"));
   try {
-    const novelId = "nov_018f0f5e-7b4a-7c00-8000-000000000001";
-    const revisionId = "rev_018f0f5e-7b4a-7c00-8000-000000000001";
+    const novelId = "nov_EUubI";
+    const revisionId = "rev_mG1Ct";
     const hash = "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     const requestPath = join(directory, "request.json");
     const outputPath = join(directory, "novel.pdf");

@@ -5,16 +5,18 @@ export const ID_PREFIXES = Object.freeze([
   "mpr", "mrun", "nov", "op", "prp", "rev", "scn", "sle", "spf", "spv",
 ]);
 
+const SHORT = new Set(["nov", "ch", "scn", "blk", "blv", "rev"]);
+const issued = new Set();
 const UUID_V7 = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 
 export function typedIdPattern(prefix) {
   if (!ID_PREFIXES.includes(prefix)) throw new TypeError(`unsupported StoryBlock ID prefix: ${prefix}`);
-  return new RegExp(`^${prefix}_${UUID_V7.source.slice(1, -1)}$`, "u");
+  return new RegExp(`^${prefix}_${SHORT.has(prefix) ? "[A-Za-z0-9]{5}" : UUID_V7.source.slice(1, -1)}$`, "u");
 }
 
 export function requireTypedId(value, prefix, location = `${prefix}_id`) {
   if (typeof value !== "string" || !typedIdPattern(prefix).test(value)) {
-    throw new TypeError(`${location} must be ${prefix}_<RFC 9562 UUIDv7>`);
+    throw new TypeError(`${location} has an invalid ${prefix} identifier`);
   }
   return value;
 }
@@ -23,6 +25,20 @@ export function createTypedId(prefix, timestamp = Date.now()) {
   if (!ID_PREFIXES.includes(prefix)) throw new TypeError(`unsupported StoryBlock ID prefix: ${prefix}`);
   if (!Number.isSafeInteger(timestamp) || timestamp < 0 || timestamp > 0xffffffffffff) {
     throw new TypeError("UUIDv7 timestamp must be an unsigned 48-bit millisecond integer");
+  }
+  if (SHORT.has(prefix)) {
+    const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    let value;
+    do {
+      let suffix = "";
+      while (suffix.length < 5) {
+        const n = randomBytes(1)[0];
+        if (n < 248) suffix += alphabet[n % 62];
+      }
+      value = `${prefix}_${suffix}`;
+    } while (issued.has(value));
+    issued.add(value);
+    return value;
   }
   const bytes = randomBytes(16);
   let remaining = BigInt(timestamp);

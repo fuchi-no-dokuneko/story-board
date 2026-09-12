@@ -44,7 +44,7 @@
     },
     "head_revision_id": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "head_sequence": {
       "type": "integer",
@@ -62,7 +62,7 @@
     },
     "novel_id": {
       "type": "string",
-      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^nov_[A-Za-z0-9]{5}$"
     },
     "scene_count": {
       "type": "integer",

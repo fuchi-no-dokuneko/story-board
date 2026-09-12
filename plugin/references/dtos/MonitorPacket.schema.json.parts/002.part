@@ -1,5 +1,5 @@
-        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
-        "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "novel_id": "nov_EUubI",
+        "revision_id": "rev_mG1Ct",
         "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "renderer_version": "example-1",
         "range": {
@@ -30,12 +30,12 @@
         "max_direct_speakers": 1,
         "max_sentences": 2,
         "min_sentences": 1,
-        "target_block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
-        "target_scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+        "target_block_version_id": "blv_xwDzm",
+        "target_scene_id": "scn_UX5V4",
         "window_blocks": [
           {
-            "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
-            "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+            "block_id": "blk_49pHt",
+            "block_version_id": "blv_xwDzm",
             "content_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
           }
         ]

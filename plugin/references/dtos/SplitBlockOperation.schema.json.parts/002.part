@@ -1,13 +1,13 @@
         "split_after_grapheme": 1,
         "new_blocks": [
           {
-            "id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+            "id": "blk_49pHt",
             "text": "春風到了。",
             "meta": {
             }
           },
           {
-            "id": "blk_018f0f5e-7b4a-7c00-8000-000000000002",
+            "id": "blk_YZwmw",
             "text": "春風到了。",
             "meta": {
             }
@@ -16,11 +16,11 @@
         "provenance_mapping": [
           {
             "source": {
-              "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
-              "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001"
+              "block_id": "blk_49pHt",
+              "block_version_id": "blv_xwDzm"
             },
             "result_block_ids": [
-              "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+              "blk_49pHt"
             ]
           }
         ]
