@@ -1,0 +1,6 @@
+---14:16---ADR-298取消推送時限
+category: decision_make
+Current status: 使用者明確指示重新推送，取消原五秒時限；已保存原文指示。
+Issues: 原推送逾時限制已由最新指示解除；功能及驗收無剩餘項目。
+affect scope: tickets/ADR-298-authoring-styles 的 GitHub 交付。
+---

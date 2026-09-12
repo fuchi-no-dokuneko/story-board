@@ -18,5 +18,4 @@ Evidence / 證據: docs/acceptance/authoring-styles.md; text-coverage.txt
 Delivery / 交付: tickets/ADR-298-authoring-styles; fresh installation, no VPS deployment or old-data migration. 全新安裝；未部署 VPS，不遷移舊資料。
 Limit / 限制: optional Docker runtime unavailable; static container checks passed. 選用 Docker 無執行環境，容器靜態檢查通過。
 
-Pending delivery / 待交付: final push timed out after 5 seconds (exit 124); remote remains d614c54. Do not retry automatically. 最後推送五秒逾時；遠端仍在 d614c54，依規則不自動重試。
-Human action / 人工後續: git push origin HEAD from tickets/ADR-298-authoring-styles, or explicitly authorize a retry. 請手動推送此分支，或明確允許重試。
+Push policy / 推送規則: user authorized retry without a time limit on 2026-09-12. 使用者已明確允許重新推送，取消時間限制。
