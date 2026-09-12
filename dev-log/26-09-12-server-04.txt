@@ -28,3 +28,15 @@ Current status: 附件十三項需求皆有程式、測試或實際 HTTPS／GUI 
 Issues: 八個一萬字小說比較請求全部回 200；比較結果未新增資料庫工作或風格資料。
 affect scope: 更新驗收文件與獨立 skill；來源基準保留於記憶體，小說比較每次重算。
 ---
+---14:11---ADR-298最後推送逾時
+category: devenv_change
+Current status: 最後批次 git push 超過五秒，timeout 以 124 結束；依使用者規則未重試。
+Issues: 唯讀 ls-remote 確認遠端仍為 d614c54，最後修訂及此紀錄尚未發布；未修改系統網路。
+TODO for human: 網路可用時手動推送 tickets/ADR-298-authoring-styles，或明確允許代理再試。
+affect scope: GitHub 交付；十三項功能與本機驗收均已完成。
+---
+
+---14:09---ADR-298紀錄時間更正
+category: decision_make
+Current status: 上筆推送逾時標記 14:11 為誤植；實際執行時間為 14:09 UTC，事件內容不變。
+---
