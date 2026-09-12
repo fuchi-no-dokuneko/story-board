@@ -39,12 +39,6 @@ final class AgentRegistrationInput {
                 request, "main_characters", "agent novel registration"
             ),
             StrictJsonRequest.integer(
-                request, "zombie_count", "agent novel registration"
-            ),
-            StrictJsonRequest.integer(
-                request, "tnt_cannon_count", "agent novel registration"
-            ),
-            StrictJsonRequest.integer(
                 request, "expected_han_characters", "agent novel registration"
             ),
             chapters

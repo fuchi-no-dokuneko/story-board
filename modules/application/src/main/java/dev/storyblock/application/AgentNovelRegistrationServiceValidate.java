@@ -8,18 +8,14 @@ final class AgentNovelRegistrationServiceValidate {
         Objects.requireNonNull(request, "request");
         AgentNovelRegistrationServiceRequireText.requireText(request.title(), "title", 200);
         AgentNovelRegistrationServiceRequireText.requireText(request.language(), "language", 32);
-        if (request.mainCharacters().size() != 5
-                || new LinkedHashSet<>(request.mainCharacters()).size() != 5) {
+        if (new LinkedHashSet<>(request.mainCharacters()).size() != request.mainCharacters().size()) {
             throw new IllegalArgumentException(
-                    "main_characters must contain exactly five unique characters"
+                    "main_characters must contain unique character names"
             );
         }
         request.mainCharacters().forEach(name -> AgentNovelRegistrationServiceRequireText.requireText(name, "main character", 80));
-        if (request.zombieCount() < 0 || request.tntCannonCount() < 0) {
-            throw new IllegalArgumentException("aggregate counts cannot be negative");
-        }
-        if (request.expectedHanCharacters() < 1) {
-            throw new IllegalArgumentException("expected_han_characters must be positive");
+        if (request.expectedHanCharacters() < 0) {
+            throw new IllegalArgumentException("expected_han_characters cannot be negative");
         }
         if (request.chapters().isEmpty() || request.chapters().size() > 100) {
             throw new IllegalArgumentException("chapters must contain 1 to 100 entries");

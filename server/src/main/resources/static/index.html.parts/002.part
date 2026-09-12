@@ -39,8 +39,6 @@
               <div><dt>Chapters</dt><dd id="stat-chapters">0</dd></div>
               <div><dt>Scenes</dt><dd id="stat-scenes">0</dd></div>
               <div><dt>Blocks</dt><dd id="stat-blocks">0</dd></div>
-              <div><dt>Zombies</dt><dd id="stat-zombies">0</dd></div>
-              <div><dt>TNT cannons</dt><dd id="stat-cannons">0</dd></div>
             </dl>
 
             <div class="reader-tools">
@@ -52,3 +50,5 @@
               <h3 id="style-title">Style comparison / 風格比較</h3>
               <div id="style-choices"></div>
               <button id="compare-styles" type="button">Compare selected styles / 比較所選風格</button>
+              <button id="reload-styles" type="button">Refresh styles / 更新風格清單</button>
+              <p id="style-status" role="status"></p>

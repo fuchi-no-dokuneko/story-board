@@ -1,5 +1,3 @@
-      const persisted = await fetchNovel(clientFor(parsed, context.clientOverrides), novelId);
-      const report = verificationReport(manuscript, persisted);
       if (!report.ok) throw new VerificationError(report);
       return { value: report };
     }
@@ -52,3 +50,6 @@
       const mediaType = imageMediaType(content);
       const client = clientFor(parsed, context.clientOverrides);
       const novel = await fetchNovel(client, novelId);
+      const idempotencyKey = parsed.options.get("idempotency-key")
+        ?? deriveIdempotencyKey("upload-image", {
+          novelId,

@@ -1,0 +1,6 @@
+---14:42---ADR-311移除示範欄位
+category: api_schema_change
+Current status: 移除殭屍與 TNT 數量的登錄欄位、metadata 寫入、書庫輸出及 GUI 統計。
+Issues: 原示範要求滲入一般小說契約；五位主角與必須含漢字的限制也已解除。
+affect scope: API、領域資料、OpenAPI、獨立 skill；不新增資料遷移。
+---

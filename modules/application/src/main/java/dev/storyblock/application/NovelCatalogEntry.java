@@ -18,8 +18,6 @@ public record NovelCatalogEntry(
         int hanCharacterCount,
         String hanTextSha256,
         List<String> mainCharacters,
-        int zombieCount,
-        int tntCannonCount,
         boolean agentWriteRegistered
 ) {
     public NovelCatalogEntry {

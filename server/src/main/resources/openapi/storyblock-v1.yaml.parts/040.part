@@ -1,13 +1,3 @@
-    StyleProfileTransitionRequest:
-      type: object
-      required: [target_state, reason, confirm_generated_corpus_promotion]
-      properties:
-        target_state:
-          type: string
-          enum: [calibrating, ready, deprecated]
-        reason:
-          type: string
-          minLength: 1
           maxLength: 1000
         confirm_generated_corpus_promotion:
           type: boolean
@@ -79,3 +69,17 @@
       properties:
         distance:
           $ref: "#/components/schemas/StyleChannelDistance"
+        percentile:
+          type: number
+          minimum: 0
+          maximum: 100
+        robust_z:
+          type: number
+          minimum: 0
+        q95:
+          type: number
+          minimum: 0
+        q99:
+          type: number
+          minimum: 0
+        above_q95:

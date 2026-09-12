@@ -1,14 +1,4 @@
           type: string
-        format:
-          type: string
-          enum: [canonical-revision, canonical-package]
-      additionalProperties: false
-    AccessKeyRequest:
-      type: object
-      required: [actor_id, scopes, expires_at]
-      properties:
-        actor_id:
-          type: string
           pattern: '^[A-Za-z0-9._:@-]{1,128}$'
         scopes:
           type: array
@@ -87,3 +77,13 @@
         idempotent_replay:
           type: boolean
         job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        lease_owner:
+          type: string
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        lease_until:
+          type: string
+          format: date-time
+        retention_until:
+          type: string

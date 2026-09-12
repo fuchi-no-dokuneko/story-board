@@ -67,7 +67,7 @@
 
 .novel-stats {
   display: grid;
-  grid-template-columns: repeat(6, minmax(95px, 1fr));
+  grid-template-columns: repeat(4, minmax(95px, 1fr));
   margin: 28px 0 0;
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);

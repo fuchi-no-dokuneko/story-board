@@ -40,15 +40,11 @@
         "head_revision_id": "rev_mG1Ct",
         "head_sequence": 0,
         "language": "zh-Hant",
-        "main_characters": [
-
-        ],
+        "main_characters": [],
         "novel_id": "nov_EUubI",
         "scene_count": 0,
         "title": "第一章",
-        "tnt_cannon_count": 0,
-        "updated_at": "2026-08-27T12:00:00Z",
-        "zombie_count": 0
+        "updated_at": "2026-08-27T12:00:00Z"
       },
       "schema_version": "agent-novel-registration-1.0.0"
     }

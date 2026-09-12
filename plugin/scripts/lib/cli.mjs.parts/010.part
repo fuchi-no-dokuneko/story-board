@@ -1,4 +1,3 @@
-        images: Number(caseInsensitiveHeader(response.headers, "X-PDF-Image-Count")),
         renderer_version: caseInsensitiveHeader(response.headers, "X-PDF-Renderer-Version"),
         output,
       } };
@@ -57,3 +56,8 @@
         content_base64: output === undefined ? response.data.toString("base64") : undefined,
       } };
     }
+    default:
+      throw new UsageError(`Unknown command: ${parsed.command}`);
+  }
+}
+

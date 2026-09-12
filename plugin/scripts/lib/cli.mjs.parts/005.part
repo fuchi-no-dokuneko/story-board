@@ -1,5 +1,3 @@
-    for (const descriptor of descriptors) {
-      if (group[descriptor.name] === undefined) continue;
       const values = Array.isArray(group[descriptor.name]) && descriptor.schema.type !== "array"
         ? group[descriptor.name]
         : [group[descriptor.name]];
@@ -61,3 +59,4 @@ async function execute(parsed, context) {
     case "call": {
       assertOptions(parsed, ["body", "params"]);
       expectPositionals(parsed, 1, "endpoint id");
+      const endpoint = await getEndpoint(parsed.positionals[0]);

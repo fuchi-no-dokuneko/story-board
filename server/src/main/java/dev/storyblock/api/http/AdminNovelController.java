@@ -51,9 +51,7 @@ public final class AdminNovelController {
         result.put("novel_id", value.novelId().value());
         result.put("scene_count", value.sceneCount());
         result.put("title", value.title());
-        result.put("tnt_cannon_count", value.tntCannonCount());
         result.put("updated_at", value.updatedAt().toString());
-        result.put("zombie_count", value.zombieCount());
         return result;
     }
 }

@@ -14,9 +14,7 @@
     "novel_id",
     "scene_count",
     "title",
-    "tnt_cannon_count",
-    "updated_at",
-    "zombie_count"
+    "updated_at"
   ],
   "properties": {
     "agent_write_registered": {
@@ -55,7 +53,6 @@
     },
     "main_characters": {
       "type": "array",
-      "maxItems": 5,
       "items": {
         "type": "string"
       }
@@ -71,18 +68,10 @@
     "title": {
       "type": "string"
     },
-    "tnt_cannon_count": {
-      "type": "integer",
-      "minimum": 0
-    },
     "updated_at": {
       "type": "string",
       "format": "date-time",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
-    },
-    "zombie_count": {
-      "type": "integer",
-      "minimum": 0
     }
   },
   "additionalProperties": false,
@@ -107,3 +96,11 @@
       "head_revision_id": "rev_mG1Ct",
       "head_sequence": 0,
       "language": "zh-Hant",
+      "main_characters": [],
+      "novel_id": "nov_EUubI",
+      "scene_count": 0,
+      "title": "第一章",
+      "updated_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

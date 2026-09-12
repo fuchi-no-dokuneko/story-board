@@ -34,8 +34,6 @@ final class NovelCatalogServiceDescribe {
                 HanText.count(text),
                 HanText.sha256(text),
                 NovelCatalogServiceStringListExtension.stringListExtension(extensions, "main-characters"),
-                NovelCatalogServiceIntExtension.intExtension(extensions, "zombie-count"),
-                NovelCatalogServiceIntExtension.intExtension(extensions, "tnt-cannon-count"),
                 Boolean.TRUE.equals(extensions.get("agent-write-registered"))
         );
     }

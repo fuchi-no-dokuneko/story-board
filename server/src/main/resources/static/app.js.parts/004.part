@@ -26,8 +26,6 @@ function renderNovel(payload) {
   elements['stat-chapters'].textContent = number(novel.chapter_count);
   elements['stat-scenes'].textContent = number(novel.scene_count);
   elements['stat-blocks'].textContent = number(novel.block_count);
-  elements['stat-zombies'].textContent = number(novel.zombie_count);
-  elements['stat-cannons'].textContent = number(novel.tnt_cannon_count);
   elements['meta-revision'].textContent = novel.head_revision_id;
   elements['meta-updated'].textContent = novel.updated_at;
   elements['meta-hash'].textContent = novel.head_hash;
@@ -56,3 +54,6 @@ async function selectNovel(novelId) {
     history.replaceState(null, '', `#${encodeURIComponent(novelId)}`);
   } catch (error) {
     if (state.selectedNovelId !== novelId || authRevision !== state.authRevision) return;
+    reportAuthenticationError(error);
+    show(elements['reader-loading'], false);
+    show(elements['reader-empty'], true);

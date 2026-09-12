@@ -1,11 +1,3 @@
-              maxProperties: 0
-            - $ref: "#/components/schemas/StyleCalibrationProfile"
-      additionalProperties: false
-    StyleProfileVersion:
-      type: object
-      required: [version_id, profile_id, version, content, created_by, created_at]
-      properties:
-        version_id:
           type: string
           pattern: '^spv_[0-9a-f-]{36}$'
         profile_id:
@@ -86,3 +78,13 @@
         can_gate_rewrites:
           type: boolean
       additionalProperties: false
+    StyleProfileTransitionRequest:
+      type: object
+      required: [target_state, reason, confirm_generated_corpus_promotion]
+      properties:
+        target_state:
+          type: string
+          enum: [calibrating, ready, deprecated]
+        reason:
+          type: string
+          minLength: 1

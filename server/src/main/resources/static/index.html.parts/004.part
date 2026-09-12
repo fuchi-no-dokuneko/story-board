@@ -1,6 +1,3 @@
-            <input id="path" value="/actuator/health" aria-label="Request path" spellcheck="false">
-            <button id="send" type="button">Send</button>
-          </div>
           <p class="console-auth-note">Requests connect directly to this server.</p>
         </section>
         <section class="response-panel" aria-labelledby="response-title">

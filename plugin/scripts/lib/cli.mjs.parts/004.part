@@ -2,8 +2,6 @@
     title: extensions.title === source.title,
     language: extensions.language === source.language,
     main_characters: stableStringify(extensions["main-characters"]) === stableStringify(source.main_characters),
-    zombie_count: extensions["zombie-count"] === source.zombie_count,
-    tnt_cannon_count: extensions["tnt-cannon-count"] === source.tnt_cannon_count,
     agent_registration: extensions["agent-write-registered"] === true,
   };
   return {
@@ -65,3 +63,5 @@ async function writePrivateOutput(path, content, force) {
 async function validateCallParameters(endpoint, params) {
   for (const [groupName, descriptors] of [["path", endpoint.pathParameters], ["query", endpoint.queryParameters]]) {
     const group = params[groupName] ?? {};
+    for (const descriptor of descriptors) {
+      if (group[descriptor.name] === undefined) continue;

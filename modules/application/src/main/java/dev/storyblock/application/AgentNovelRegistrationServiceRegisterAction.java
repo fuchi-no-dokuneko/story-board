@@ -33,9 +33,7 @@ final class AgentNovelRegistrationServiceRegisterAction {
             "han-text-sha256", HanText.sha256(completeText),
             "language", request.language(),
             "main-characters", request.mainCharacters(),
-            "title", request.title(),
-            "tnt-cannon-count", request.tntCannonCount(),
-            "zombie-count", request.zombieCount()
+            "title", request.title()
         )
     );
     Ids.RevisionId revisionId = new Ids.RevisionId(StableIds.derive(

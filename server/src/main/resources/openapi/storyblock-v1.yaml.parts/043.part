@@ -1,13 +1,3 @@
-          type: string
-          pattern: '^job_[0-9a-f-]{36}$'
-        lease_owner:
-          type: string
-          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
-        lease_until:
-          type: string
-          format: date-time
-        retention_until:
-          type: string
           format: date-time
         snapshot:
           $ref: "#/components/schemas/StyleAnalysisSnapshot"
@@ -90,3 +80,8 @@
           minLength: 1
       additionalProperties: false
     WorkerResultRequest:
+      type: object
+      required: [lease_owner, attempt, snapshot_hash, profile_version_hash, analyzer_contract_hash, window_configuration_hash, summary, windows, trace, completed_at]
+      properties:
+        lease_owner:
+          type: string

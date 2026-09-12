@@ -1,14 +1,3 @@
-        - type: object
-          required: [idempotent_replay]
-          properties:
-            idempotent_replay:
-              type: boolean
-    StyleAnalysisRequest:
-      type: object
-      required: [revision_id, profile_id, profile_version_id]
-      properties:
-        revision_id:
-          type: string
           pattern: '^rev_[A-Za-z0-9]{5}$'
         profile_id:
           type: string
@@ -98,3 +87,16 @@
           uniqueItems: true
           items:
             type: string
+            pattern: '^sha256:[0-9a-f]{64}$'
+        cooldown_seconds:
+          type: integer
+          minimum: 300
+          maximum: 2592000
+          default: 86400
+      additionalProperties: false
+    JobAccepted:
+      type: object
+      required: [job_id, status, status_uri]
+      properties:
+        job_id:
+          type: string

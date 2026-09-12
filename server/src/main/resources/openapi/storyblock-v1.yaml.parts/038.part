@@ -1,10 +1,3 @@
-      required: [channel, channel_version, primary_metric, reference_distances, median, mad, q95, q99]
-      properties:
-        channel:
-          type: string
-          enum: [surface, grammar, rhythm, narrative, lexical, optional_embedding]
-        channel_version:
-          type: string
         primary_metric:
           type: string
           enum: [jensen_shannon_distance, wasserstein_distance, robust_l1_input, cosine_distance]
@@ -87,3 +80,11 @@
         calibration_statistics:
           oneOf:
             - type: object
+              maxProperties: 0
+            - $ref: "#/components/schemas/StyleCalibrationProfile"
+      additionalProperties: false
+    StyleProfileVersion:
+      type: object
+      required: [version_id, profile_id, version, content, created_by, created_at]
+      properties:
+        version_id:

@@ -1,21 +1,7 @@
-Authoring and style batch / 撰寫與風格批次
-Source / 來源: attachment 086b103d-d28d-4883-a2d3-06cfdd9228d3/pasted-text-1.txt
+ADR-311 product review / 產品重新驗收
 
-Implementation and verification remaining: none for the 13 confirmed requirements.
-13 項確認需求的實作與驗證：無剩餘項目。
-
-Completed / 已完成:
-1. Short IDs, durable collision checks and restart-safe retries. 短 ID、持久防碰撞及跨重啟重試。
-2. Scene-local slices, chapter/scene lists and grapheme counts. 場景切片、章節／場景列表及字素數。
-3. Shared revision-bound 300-second reading gate. 共用且綁定版本的五分鐘閱讀限制。
-4. YAML/TXT registry and asynchronous 60-second reference refresh. YAML／TXT 登記及每分鐘背景更新。
-5. Async HTTP 200 multi-style scores without task IDs or result storage. 非同步回 200，無工作 ID 或結果儲存。
-6. GUI comparison table, math page, PDF/TXT downloads with bundled CJK font. 比較表、公式頁、PDF／TXT 及內附中文字型。
-7. server/data database, data symlinks, installation and backup verification. 資料庫集中、連結、安裝及備份驗證。
-8. Updated contracts/standalone Skill; Java, CLI, live HTTPS and Chromium checks. 契約／獨立技能及各層驗收。
-
-Evidence / 證據: docs/acceptance/authoring-styles.md; text-coverage.txt
-Delivery / 交付: tickets/ADR-298-authoring-styles; fresh installation, no VPS deployment or old-data migration. 全新安裝；未部署 VPS，不遷移舊資料。
-Limit / 限制: optional Docker runtime unavailable; static container checks passed. 選用 Docker 無執行環境，容器靜態檢查通過。
-
-Push policy / 推送規則: user authorized retry without a time limit on 2026-09-12. 使用者已明確允許重新推送，取消時間限制。
+Pending / 待完成:
+1. Remove demo-only metadata from UI, registration, catalog and Skill contracts. 移除介面、登錄、書庫及技能的示範專用欄位。
+2. Review general-novel registration constraints and examples. 檢查一般小說登錄限制與範例。
+3. Verify ordinary-novel registration, context edits, style comparisons and downloads in real GUI. 以一般小說驗證登錄、上下文編輯、風格比較與下載。
+4. Update coverage, evidence and push the completed branch. 更新覆蓋、證據並推送分支。
