@@ -1,9 +1,17 @@
+    elements['chapter-nav'].append(navButton);
+
+    const section = document.createElement('section');
     const heading = document.createElement('h3');
     section.id = sectionId;
     section.className = 'chapter-section';
     heading.textContent = title;
     section.append(heading);
     chapterBlocks(chapter).forEach((block) => {
+      const illustration = window.StoryBlockImages?.render(block, state.operatorToken);
+      if (illustration) {
+        section.append(illustration);
+        return;
+      }
       const paragraph = document.createElement('p');
       paragraph.className = 'story-block';
       paragraph.textContent = text(block.text, '');
@@ -35,6 +43,7 @@ function renderNovel(payload) {
 }
 
 async function selectNovel(novelId) {
+  window.StoryBlockImages?.clear();
   const authRevision = state.authRevision;
   state.selectedNovelId = novelId;
   document.querySelectorAll('.novel-item').forEach((button) => {
@@ -51,9 +60,3 @@ async function selectNovel(novelId) {
     renderNovel(payload);
     show(elements['reader-loading'], false);
     show(elements['reader-content'], true);
-    history.replaceState(null, '', `#${encodeURIComponent(novelId)}`);
-  } catch (error) {
-    if (state.selectedNovelId !== novelId || authRevision !== state.authRevision) return;
-    reportAuthenticationError(error);
-    show(elements['reader-loading'], false);
-    show(elements['reader-empty'], true);

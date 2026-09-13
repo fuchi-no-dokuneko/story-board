@@ -1,0 +1,47 @@
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { execFileSync } = require('node:child_process');
+const { CdpDriver } = require('./cdp-driver.cjs');
+
+(async () => {
+  const [base, novel, destination, tokenFile] = process.argv.slice(2);
+  if (!destination || !/^nov_[A-Za-z0-9]{5}$/.test(novel || ''))
+    throw Error('Usage: node acceptance/reader-images.cjs BASE NOVEL OUTPUT [OWNER_TOKEN_FILE]');
+  const target = new URL(base);
+  assert.ok(target.protocol === 'https:' && target.hostname === '127.0.0.1', 'Use the local HTTPS server');
+  await fs.mkdir(destination, { recursive: true });
+  const output = await fs.mkdtemp(path.resolve(destination, 'images-'));
+  const driver = await CdpDriver.create({ headless: true });
+  const evaluate = source => driver.evaluate(source);
+  const click = async selector => (await driver.findElements(selector))[0].click();
+  const screenshot = async name => fs.writeFile(path.join(output, `${name}.png`),
+    Buffer.from(await driver.takeScreenshot(), 'base64'));
+  const loaded = () => evaluate(`[...document.querySelectorAll('.story-image img')]
+    .every(i => !i.hidden && i.complete && i.naturalWidth > 0)`);
+  try {
+    await driver.sendDevToolsCommand('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: output });
+    await driver.sendDevToolsCommand('Page.addScriptToEvaluateOnNewDocument', { source: `
+      window.imageEvidence = { revoked: [], csp: [], requests: [] };
+      const revoke = URL.revokeObjectURL.bind(URL);
+      URL.revokeObjectURL = url => { imageEvidence.revoked.push(url); revoke(url); };
+      addEventListener('securitypolicyviolation', e => imageEvidence.csp.push(e.violatedDirective));
+      const originalFetch = window.fetch.bind(window);
+      window.fetch = (url, options) => {
+        if (String(url).includes('/v1/artifacts/')) imageEvidence.requests.push({
+          url: String(url), authenticated: new Headers(options?.headers).has('Authorization')
+        });
+        return originalFetch(url, options);
+      };
+    ` });
+    await driver.get(`${target.origin}/#${novel}`);
+    if (tokenFile) {
+      await driver.wait(() => evaluate("document.getElementById('operator-status').dataset.state === 'error'"));
+      await click('details.operator-bar summary');
+      const token = (await fs.readFile(tokenFile, 'utf8')).trim();
+      await evaluate(`document.getElementById('operator-token').value = ${JSON.stringify(token)}`);
+      await click('#operator-connect');
+    }
+    await driver.wait(() => evaluate("!document.getElementById('reader-content').hidden"));
+    const canonical = await evaluate('window.StoryBlockFeatures.selected.revision');
+    assert.equal(canonical.novel_id, novel);

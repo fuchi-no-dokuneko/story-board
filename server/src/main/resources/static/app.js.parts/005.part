@@ -1,3 +1,9 @@
+    history.replaceState(null, '', `#${encodeURIComponent(novelId)}`);
+  } catch (error) {
+    if (state.selectedNovelId !== novelId || authRevision !== state.authRevision) return;
+    reportAuthenticationError(error);
+    show(elements['reader-loading'], false);
+    show(elements['reader-empty'], true);
     elements['reader-empty'].querySelector('h2').textContent = 'Unable to read novel';
     elements['reader-empty'].querySelector('p').textContent = error.message;
   }
@@ -19,6 +25,7 @@ async function applyOperatorToken(event) {
   }
   state.operatorToken = token;
   state.authRevision += 1;
+  clearReader();
   elements['operator-token'].value = '';
   elements['operator-clear'].disabled = false;
   setOperatorStatus('checking', 'Checking operator token…');
@@ -69,12 +76,3 @@ let searchTimer;
 elements['catalog-search'].addEventListener('input', () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(() => {
-    state.query = elements['catalog-search'].value.trim();
-    state.page = 0;
-    loadCatalog({ preserveSelection: false });
-  }, 220);
-});
-elements['catalog-refresh'].addEventListener('click', () => loadCatalog());
-elements['page-previous'].addEventListener('click', () => {
-  if (state.page > 0) {
-    state.page -= 1;

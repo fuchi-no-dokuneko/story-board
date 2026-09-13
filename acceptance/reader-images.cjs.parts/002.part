@@ -1,0 +1,36 @@
+    const blocks = canonical.chapters.flatMap(c => c.scenes.flatMap(s => s.blocks));
+    const expected = blocks.filter(b => b.extensions?.['storyblock.image']);
+    assert.deepEqual(new Set(expected.map(b => b.extensions['storyblock.image'].media_type)),
+      new Set(['image/jpeg', 'image/png']), 'Fixture must contain both image formats');
+    await screenshot('initial');
+    assert.equal(await evaluate("document.querySelectorAll('.story-image img').length"), expected.length,
+      'Every persisted image must have an actual img element');
+    await driver.wait(loaded, 15000, 'Persisted images did not decode in the browser');
+    const rendered = await evaluate(`[...document.querySelectorAll('.story-image')].map(f => {
+      const i = f.querySelector('img'); return { id: f.dataset.blockId, caption: f.querySelector('figcaption').textContent,
+        alt: i.alt, width: i.naturalWidth, height: i.naturalHeight, source: i.src.startsWith('blob:') };
+    })`);
+    assert.deepEqual(rendered, expected.map(b => { const d = b.extensions['storyblock.image'];
+      return { id: b.id, caption: b.text, alt: d.alt_text, width: d.width_px, height: d.height_px, source: true };
+    }));
+    assert.deepEqual(await evaluate("[...document.querySelectorAll('#chapter-content .story-block')].map(n => n.textContent)"),
+      blocks.map(b => b.text), 'Text and captions must preserve canonical order');
+    await evaluate("document.querySelector('.story-image').scrollIntoView({block:'center'})");
+    await screenshot('desktop-jpeg');
+    await driver.sendDevToolsCommand('Emulation.setDeviceMetricsOverride',
+      { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+    for (let index = 0; index < expected.length; index++) {
+      const layout = await evaluate(`(() => {
+        const image = document.querySelectorAll('.story-image img')[${index}];
+        image.scrollIntoView({block:'center'}); const r = image.getBoundingClientRect();
+        return { width: r.width, height: r.height, left: r.left, right: r.right,
+          viewport: innerWidth, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth };
+      })()`);
+      assert.ok(layout.width > 0 && layout.left >= 0 && layout.right <= layout.viewport && !layout.overflow);
+      const descriptor = expected[index].extensions['storyblock.image'];
+      assert.ok(Math.abs(layout.width / layout.height - descriptor.width_px / descriptor.height_px) < 0.01);
+      await screenshot(`mobile-${index}`);
+    }
+    await driver.sendDevToolsCommand('Emulation.clearDeviceMetricsOverride');
+    const previousUrls = await evaluate("[...document.querySelectorAll('.story-image img')].map(i => i.src)");
+    const missing = `/v1/artifacts/${expected[0].extensions['storyblock.image'].artifact_id}`;

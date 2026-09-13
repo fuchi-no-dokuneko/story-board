@@ -1,0 +1,9 @@
+    retry.addEventListener('click', () => load(view, descriptor, token));
+    views.add(view);
+    figure.append(image, caption, status, retry);
+    load(view, descriptor, token);
+    return figure;
+  }
+  window.StoryBlockImages = { render, clear };
+  window.addEventListener('pagehide', clear);
+})();

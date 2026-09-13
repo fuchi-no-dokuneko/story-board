@@ -1,0 +1,7 @@
+---07:39---ADR-311本機圖片閱讀修正
+category: bug_discovery
+Current status: 書庫依區塊順序顯示 PNG／JPEG 與圖說，支援手機縮放、金鑰讀取及失敗重試。
+Issues: 舊版同一小說有兩個圖片區塊但零個 img；瀏覽器回歸先重現失敗，修正後兩種存取模式均通過。
+affect scope: 靜態閱讀介面與資源存取；Node 8、Java HTTP／架構 4、GUI 9 情境81步驟通過。
+Evidence: .local/reader-images-local/；本機 nov_9Dqqj，PDF插圖頁與桌面／手機畫面已查看。
+---

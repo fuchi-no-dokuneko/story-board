@@ -1,0 +1,43 @@
+    await evaluate(`(() => {
+      const realFetch = window.fetch; let fail = true;
+      window.fetch = (url, options) => {
+        if (fail && String(url) === ${JSON.stringify(missing)}) {
+          fail = false; return Promise.resolve(new Response('', {status:404}));
+        }
+        return realFetch(url, options);
+      };
+    })()`);
+    await click('#catalog-refresh');
+    await driver.wait(() => evaluate("document.querySelector('.story-image-status')?.textContent.includes('HTTP 404')"));
+    assert.equal(await evaluate("document.querySelector('.story-image figcaption').textContent"), expected[0].text);
+    assert.ok(await evaluate("document.querySelector('.story-image img').hidden"));
+    const revoked = await evaluate('imageEvidence.revoked');
+    assert.ok(previousUrls.every(url => revoked.includes(url)), 'Refresh must release previous image URLs');
+    await screenshot('retry-error');
+    await click('.story-image button');
+    await driver.wait(loaded, 15000, 'Retry did not display the image');
+    await screenshot('retry-loaded');
+    for (const format of ['pdf', 'txt']) {
+      await click(`#download-${format}`);
+      await driver.wait(async () => (await fs.readdir(output)).some(file => file.endsWith(`.${format}`)));
+    }
+    const files = await fs.readdir(output);
+    const pdfPath = path.join(output, files.find(f => f.endsWith('.pdf')));
+    const pdf = await fs.readFile(pdfPath);
+    assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
+    const pdfImages = execFileSync('pdfimages', ['-list', pdfPath], { encoding: 'utf8' });
+    await fs.writeFile(path.join(output, 'pdf-images.txt'), pdfImages);
+    const pdfResponse = driver.cdp.events.find(e => e.method === 'Network.responseReceived'
+      && e.params.response.url.endsWith(`/v1/novels/${novel}/pdf-renders`))?.params.response;
+    assert.equal(pdfResponse?.status, 200);
+    const pdfHeaders = Object.fromEntries(Object.entries(pdfResponse.headers).map(([k, v]) => [k.toLowerCase(), v]));
+    assert.equal(Number(pdfHeaders['x-pdf-image-count']), expected.length);
+    const pdfPages = Number(pdfHeaders['x-pdf-page-count']);
+    // The renderer embeds one raster per A4 page, including text and illustrations.
+    assert.equal(pdfImages.split('\n').filter(line => /^\s*\d+\s+\d+\s+image\s/.test(line)).length, pdfPages);
+    const txt = await fs.readFile(path.join(output, files.find(f => f.endsWith('.txt'))), 'utf8');
+    const expectedText = canonical.chapters.map(c => [c.title || '',
+      ...c.scenes.flatMap(s => s.blocks.map(b => b.text))].join('\n')).join('\n');
+    assert.equal(txt.replace(/\s+/gu, ''), expectedText.replace(/\s+/gu, ''));
+    assert.deepEqual(await evaluate('imageEvidence.csp'), []);
+    const requests = await evaluate('imageEvidence.requests');

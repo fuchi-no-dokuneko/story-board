@@ -1,0 +1,5 @@
+.story-image { margin: 1.5rem 0; min-width: 0; }
+.story-image img { display: block; max-width: 100%; height: auto; margin-inline: auto; border-radius: 4px; }
+.story-image img[hidden] { display: none; }
+.story-image figcaption { margin: .6rem 0; font-size: .9rem; text-align: center; color: var(--muted); }
+.story-image-status { margin: .5rem 0; color: var(--muted); font-size: .9rem; }

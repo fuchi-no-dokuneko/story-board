@@ -1,0 +1,64 @@
+(() => {
+  const views = new Set();
+  function release(view) {
+    view.controller?.abort();
+    if (view.url) URL.revokeObjectURL(view.url);
+    view.url = null;
+  }
+  function clear() {
+    views.forEach(release);
+    views.clear();
+  }
+  async function load(view, descriptor, token) {
+    release(view);
+    const controller = view.controller = new AbortController();
+    view.image.hidden = true;
+    view.retry.hidden = true;
+    view.status.hidden = false;
+    view.status.textContent = 'Loading image / 正在載入圖片…';
+    try {
+      if (!/^art_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(descriptor.artifact_id)
+          || !['image/png', 'image/jpeg'].includes(descriptor.media_type)) {
+        throw new Error('Invalid image / 圖片資料無效');
+      }
+      const response = await fetch(`/v1/artifacts/${descriptor.artifact_id}`, {
+        headers: { Accept: descriptor.media_type, ...window.StoryBlockAuth.authorizationHeaders(token) },
+        signal: controller.signal, redirect: 'error',
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const blob = await response.blob();
+      if (blob.type.split(';')[0] !== descriptor.media_type) throw new Error('Unexpected image format / 圖片格式不符');
+      if (controller.signal.aborted) return;
+      view.url = URL.createObjectURL(blob);
+      view.image.src = view.url;
+      await view.image.decode();
+      if (controller.signal.aborted) return;
+      view.image.hidden = false;
+      view.status.hidden = true;
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      release(view);
+      view.status.textContent = `Image unavailable / 圖片無法載入：${error.message}`;
+      view.retry.hidden = false;
+    }
+  }
+  function render(block, token) {
+    const descriptor = block.extensions?.['storyblock.image'];
+    if (!descriptor) return null;
+    const figure = document.createElement('figure');
+    figure.className = 'story-image';
+    figure.dataset.blockId = block.id;
+    const image = document.createElement('img');
+    image.alt = String(descriptor.alt_text || 'Novel illustration / 小說插圖');
+    image.width = descriptor.width_px;
+    image.height = descriptor.height_px;
+    const caption = document.createElement('figcaption');
+    caption.className = 'story-block';
+    caption.textContent = String(block.text || '');
+    const status = document.createElement('p');
+    status.className = 'story-image-status';
+    status.setAttribute('role', 'status');
+    const retry = document.createElement('button');
+    retry.type = 'button';
+    retry.textContent = 'Retry image / 重試圖片';
+    const view = { image, status, retry, controller: null, url: null };

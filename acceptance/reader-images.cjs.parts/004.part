@@ -1,0 +1,20 @@
+    assert.ok(requests.length >= expected.length * 2 && requests.every(r => r.authenticated === Boolean(tokenFile)));
+    if (tokenFile) {
+      assert.equal(await evaluate(`fetch(${JSON.stringify(missing)}).then(r => r.status)`), 401);
+      const activeUrls = await evaluate("[...document.querySelectorAll('.story-image img')].map(i => i.src)");
+      await click('#operator-clear');
+      await driver.wait(() => evaluate("document.getElementById('reader-content').hidden"));
+      const released = await evaluate('imageEvidence.revoked');
+      assert.ok(activeUrls.every(url => released.includes(url)), 'Clearing credentials must release image URLs');
+    }
+    const result = { novel, revision: canonical.revision_id, images: rendered, authenticated: Boolean(tokenFile),
+      desktop: true, mobile: true, retry: true, releasesUrls: true, pdfImages: expected.length,
+      pdfPages, pdfBytes: pdf.length, txtMatches: true, cspViolations: 0, output };
+    await fs.writeFile(path.join(output, 'result.json'), JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(result, null, 2));
+  } catch (error) {
+    await screenshot('failure').catch(() => {});
+    await fs.writeFile(path.join(output, 'failure.json'), JSON.stringify({ message: error.message, output }));
+    throw error;
+  } finally { await driver.quit(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

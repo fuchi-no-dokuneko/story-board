@@ -1,5 +1,5 @@
 ADR-311 coverage / 覆蓋
-Java: 203 full-suite tests passed; 19 reactor projects. Java：全套203項通過，19個建置項目。
+Java baseline: 203 full-suite tests passed; 19 projects. Java基準：全套203項通過，19個建置項目。
 Domain/contracts: real codecs/property tests; no mocks. 領域／契約：真實物件、編碼及性質測試，無替身。
 Renderer/validator/detector: real implementations, golden fixtures, page-break pixel regression and inherited-presence validation. 渲染／驗證／偵測：真實實作、黃金範例、換頁像素及既有標註回歸。
 Monitor/style/rewrite: real analysis and planners; reference TXT filesystem fixtures. 監控／風格／改寫：真實分析、規劃及TXT檔案系統範例。
@@ -11,8 +11,9 @@ Proposal read boundary: real controller/principal; RewriteGateService lookup moc
 Workers: real Java HTTPS clients; model/API responses simulated by local self-signed servers. 工作程式：真實HTTPS客戶端，本機自簽伺服器模擬模型回應。
 Architecture: real module and installer assertions. 架構：模組界線及部署／安裝來源檢查通過。
 Plugin: 188 Node tests; real standalone assembly/validation, injected unit HTTP transport. 技能：188項，真實獨立組合／驗證，單元HTTP替身。
-Browser assets: 4 Node tests with DOM/storage fixtures. 介面資源：4項，DOM／儲存範例。
-GUI: real Chromium, HTTPS and SQLite; 9 scenarios/81 steps, source comparison, style table and PDF/TXT downloads. GUI：真實瀏覽器與資料庫，9情境／81步驟、全文比對及下載。
+Browser assets: 8 Node tests with DOM/storage fixtures. 介面資源：8項，DOM／儲存範例。
+GUI: real Chromium, HTTPS, SQLite; 9 scenarios/81 steps; reader/style/downloads. GUI：9情境81步驟，全文、風格及下載。
+Images / 圖片: docs/acceptance/reader-images.md
 GUI fault cases: degraded health response and offline browser network simulated. GUI故障情境：健康降級回應及瀏覽器斷線為模擬。
 Live authoring: real standalone CLI, revision slices, guarded edits and restart replay. 實際撰寫：獨立CLI、版本切片、閱讀限制與重啟重試。
 Live styles: real external directories, minute watcher, eight concurrent comparisons and SQLite storage inspection. 實際風格：外部目錄、分鐘檢查、八個併發比較及資料庫檢查。

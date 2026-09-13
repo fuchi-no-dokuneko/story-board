@@ -1,3 +1,12 @@
+    state.query = elements['catalog-search'].value.trim();
+    state.page = 0;
+    loadCatalog({ preserveSelection: false });
+  }, 220);
+});
+elements['catalog-refresh'].addEventListener('click', () => loadCatalog());
+elements['page-previous'].addEventListener('click', () => {
+  if (state.page > 0) {
+    state.page -= 1;
     loadCatalog({ preserveSelection: false });
   }
 });

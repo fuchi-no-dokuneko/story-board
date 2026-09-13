@@ -41,3 +41,10 @@ Time used (min) : 1
 最後安裝版重測單一／兩種風格五欄比較、公式及 PDF／TXT；三頁 PDF 逐頁查看，換頁字體正常。
 證據：.local/product-review/ 及 server/data/uat/product-review/authoring-GPK0qO。
 ---
+---07:39---本機圖片端到端驗收
+milestone-type : success-test
+Time used (min) : 16
+同一新小說重現零圖片失敗；修正安裝版通過 JPEG／PNG、桌面／手機、金鑰、404重試及清理。
+GUI 9情境81步驟通過；圖片雜湊吻合，兩種登入模式PDF一致，已查看插圖頁與截圖。
+證據：.local/reader-images-local/；流程 acceptance/reader-images.md。
+---

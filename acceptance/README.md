@@ -2,6 +2,8 @@
 
 [Run workflows / 執行流程 / 执行流程](workflows.md)
 
+[Verify image display / 驗證圖片顯示 / 验证图片显示](reader-images.md)
+
 EN: Browser UAT follows installation and backend verification. Use an isolated database and a registered fixture. The dependency-free browser runner communicates with real Chromium over its private debugging pipe; it does not open an HTTP control service. Screenshots and results stay in the repository.
 
 繁體中文：安裝與後端驗證後執行瀏覽器驗收，使用隔離資料庫與已登錄範例。無套件依賴的瀏覽器測試器透過私有除錯管道操作真正 Chromium，不開啟 HTTP 控制服務。截圖與結果留在儲存庫。

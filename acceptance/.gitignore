@@ -6,3 +6,5 @@
 !/.local-tool-app/install-local.sh
 /node_modules
 /authoring-features.cjs
+/prepare-reader-images.mjs
+/reader-images.cjs

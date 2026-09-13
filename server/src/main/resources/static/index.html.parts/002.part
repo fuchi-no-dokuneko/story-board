@@ -1,3 +1,4 @@
+        <div class="search-controls" role="search">
           <label class="sr-only" for="catalog-search">Search novels</label>
           <input id="catalog-search" type="search" placeholder="Search novels" autocomplete="off">
           <button id="catalog-refresh" type="button">Refresh</button>

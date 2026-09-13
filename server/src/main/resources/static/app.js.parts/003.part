@@ -26,6 +26,7 @@
 }
 
 function clearReader() {
+  window.StoryBlockImages?.clear();
   state.selectedNovelId = null;
   show(elements['reader-empty'], true);
   show(elements['reader-loading'], false);
@@ -53,6 +54,7 @@ function chapterBlocks(chapter) {
 }
 
 function renderChapters(chapters) {
+  window.StoryBlockImages?.clear();
   elements['chapter-nav'].replaceChildren();
   elements['chapter-content'].replaceChildren();
   if (!Array.isArray(chapters) || chapters.length === 0) {
@@ -70,6 +72,3 @@ function renderChapters(chapters) {
     navButton.className = 'chapter-link';
     navButton.textContent = `${index + 1}. ${title}`;
     navButton.addEventListener('click', () => document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' }));
-    elements['chapter-nav'].append(navButton);
-
-    const section = document.createElement('section');

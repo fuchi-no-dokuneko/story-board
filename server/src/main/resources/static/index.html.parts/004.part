@@ -12,6 +12,7 @@
   </main>
 
   <script src="/auth.js" defer></script>
+  <script src="/reader-images.js" defer></script>
   <script src="/app.js" defer></script>
   <script src="/reader-actions.js" defer></script>
   <script src="/style-score-table.js" defer></script>

@@ -1,0 +1,45 @@
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { resolve } from 'node:path';
+import assert from 'node:assert/strict';
+import { createTypedId as id } from '../plugin/scripts/lib/ids.mjs';
+import { countHanCodePoints } from '../plugin/scripts/lib/validation.mjs';
+const [base, jpeg, png, destination] = process.argv.slice(2);
+if (!destination) throw Error('Usage: node acceptance/prepare-reader-images.mjs BASE JPEG PNG OUTPUT');
+const target = new URL(base);
+assert.ok(target.protocol === 'https:' && target.hostname === '127.0.0.1', 'Use the local HTTPS server');
+const output = resolve(destination);
+mkdirSync(output, { recursive: true });
+const save = (name, value) => {
+  const path = `${output}/${name}.json`;
+  writeFileSync(path, JSON.stringify(value, null, 2), { mode: 0o600 });
+  return path;
+};
+const cli = (...args) => JSON.parse(execFileSync(process.execPath,
+  ['plugin/scripts/storyblock-author.mjs', ...args, '--base-url', base, '--json'],
+  { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 }));
+const chapters = [1, 2].map(n => ({ title: `第${n}章`,
+  text: readFileSync(`acceptance/fixtures/last-train-${n}.txt`, 'utf8').trim() }));
+const manuscript = `${output}/manuscript.json`;
+const source = existsSync(manuscript) ? JSON.parse(readFileSync(manuscript, 'utf8'))
+  : { novel_id: id('nov'), title: '圖片閱讀驗收', language: 'zh-Hant',
+  created_at: new Date().toISOString(), main_characters: ['林雨', '周遠'], chapters,
+  expected_han_characters: countHanCodePoints(chapters.map(c => c.text).join('')) };
+if (!existsSync(manuscript)) save('manuscript', source);
+save('register', cli('register', '--source', manuscript));
+const live = cli('read', '--novel-id', source.novel_id);
+const blocks = [jpeg, png].map((file, index) => {
+  const format = index === 0 ? 'JPEG' : 'PNG';
+  const receipt = `${output}/upload-${index}.json`;
+  const upload = existsSync(receipt) ? JSON.parse(readFileSync(receipt, 'utf8'))
+    : cli('upload-image', '--novel-id', source.novel_id, '--file', file,
+      '--alt-text', `${format} 格式插圖`);
+  save(`upload-${index}`, upload);
+  assert.equal(upload.block_image.media_type, index === 0 ? 'image/jpeg' : 'image/png');
+  return { id: id('blk'), text: `${format} 格式圖片驗收。`, meta: {}, image: upload.block_image };
+});
+const scene = live.revision.chapters[0].scenes[0];
+const context = cli('blocks', '--novel-id', source.novel_id, '--revision-id', live.head.head_revision_id,
+  '--scene-id', scene.id, '--start', String(Math.max(0, scene.blocks.length - 2)), '--end', String(scene.blocks.length));
+save('context', context);
+const request = `${output}/edit.json`;

@@ -1,0 +1,8 @@
+if (!existsSync(request)) save('edit', { operation: { operation_id: id('op'), idempotency_key: `images-${source.novel_id}`,
+  novel_id: source.novel_id, base_revision_id: live.head.head_revision_id, expected_head_hash: live.head.head_hash,
+  type: 'insert_blocks', payload: { insertion_point: { scene_id: scene.id, position: 'end' }, blocks } },
+  candidate_revision_id: id('rev'), candidate_created_at: new Date().toISOString() });
+const preview = cli('preview-edit', '--novel-id', source.novel_id, '--file', request);
+save('preview', preview);
+console.log(JSON.stringify({ novel: source.novel_id, context: context.body.blocks, committable: preview.body.committable,
+  violations: preview.body.violations, warnings: preview.body.warnings, request }));

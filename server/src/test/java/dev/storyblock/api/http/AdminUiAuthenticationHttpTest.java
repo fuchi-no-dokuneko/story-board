@@ -61,5 +61,8 @@ class AdminUiAuthenticationHttpTest {
         mvc.perform(get("/auth.js"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("resolveSameOriginUrl")));
+        for (String path : new String[]{"/reader-images.js", "/reader-images.css"}) {
+            mvc.perform(get(path)).andExpect(status().isOk());
+        }
     }
 }
