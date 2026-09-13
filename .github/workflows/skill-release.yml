@@ -1,0 +1,58 @@
+name: Release StoryBlock Author Skill
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release-skill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Package and test the committed skill
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_root="$RUNNER_TEMP/storyblock-skill"
+          mkdir -p "$package_root"
+          git archive --format=tar --prefix=storyblock-author/ "$GITHUB_SHA:plugin" | tar -xf - -C "$package_root"
+          npm --prefix "$package_root/storyblock-author" test
+          test -s "$package_root/storyblock-author/SKILL.md"
+          test -s "$package_root/storyblock-author/scripts/storyblock-author.mjs"
+          test -s "$package_root/storyblock-author/references/dtos.json"
+          (cd "$package_root" && zip -q -r "$GITHUB_WORKSPACE/storyblock-author.zip" storyblock-author)
+          unzip -t "$GITHUB_WORKSPACE/storyblock-author.zip" >/dev/null
+          sha256sum "$GITHUB_WORKSPACE/storyblock-author.zip"
+      - name: Publish commit-specific GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release_tag="storyblock-author-$GITHUB_SHA"
+          skill_version="$(tr -d '\r\n' < plugin/VERSION)"
+          if gh release view "$release_tag" --repo "$GITHUB_REPOSITORY" --json assets >/dev/null 2>&1; then
+            if gh release view "$release_tag" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name' | grep -Fx 'storyblock-author.zip' >/dev/null; then
+              echo "The skill ZIP is already published for $GITHUB_SHA"
+            else
+              gh release upload "$release_tag" "$GITHUB_WORKSPACE/storyblock-author.zip" --repo "$GITHUB_REPOSITORY"
+            fi
+          else
+            gh release create "$release_tag" "$GITHUB_WORKSPACE/storyblock-author.zip" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "StoryBlock Author v$skill_version (${GITHUB_SHA:0:12})" \
+              --notes "Standalone skill ZIP built from main commit $GITHUB_SHA. Extract the archive and run storyblock-author/install-local.sh." \
+              --latest
+          fi
