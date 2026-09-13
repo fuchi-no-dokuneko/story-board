@@ -1,0 +1,69 @@
+{
+  "type": "object",
+  "properties": {
+    "scene_id": {
+      "type": "string",
+      "pattern": "^scn_[A-Za-z0-9]{5}$"
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "chapter_id": {
+      "type": "string",
+      "pattern": "^ch_[A-Za-z0-9]{5}$"
+    },
+    "chapter_index": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "title": {
+      "type": "string"
+    },
+    "block_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "block_slice": {
+      "$ref": "IndexSlice.schema.json"
+    },
+    "total_text_graphemes": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "scene_id",
+    "index",
+    "chapter_id",
+    "chapter_index",
+    "title",
+    "block_count",
+    "block_slice",
+    "total_text_graphemes"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/SceneListItem.schema.json",
+  "title": "SceneListItem",
+  "description": "Scene distribution; text length counts Unicode graphemes including punctuation.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+  ],
+  "examples": [
+    {
+      "scene_id": "scn_Bb234",
+      "index": 0,
+      "chapter_id": "ch_Aa123",
+      "chapter_index": 0,
+      "title": "清晨",
+      "block_count": 1,
+      "block_slice": {
+        "start": 0,
+        "end": 1
+      },
+      "total_text_graphemes": 5
+    }
+  ]
+}

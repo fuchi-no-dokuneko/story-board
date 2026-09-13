@@ -27,6 +27,9 @@
         wrongDimensions.put(
                 "width_px", ((Number) wrongDimensions.get("width_px")).intValue() + 1
         );
+        mvc.perform(get("/v1/novels/{novelId}/revisions/{revisionId}", novelId, revisionId)
+                        .with(userWithScope("novel:read")))
+                .andExpect(status().isOk());
         String mismatchKey = "image-dimension-mismatch";
         Map<String, Object> mismatchOperation = Map.of(
                 "operation_id", Ids.OperationId.create().value(),
@@ -44,8 +47,3 @@
                                 "id", Ids.BlockId.create().value(),
                                 "text", "The mismatched blue signal appears on white.",
                                 "meta", Map.of(),
-                                "image", wrongDimensions
-                        ))
-                )
-        );
-        mvc.perform(post("/v1/novels/{novelId}/commits", novelId)

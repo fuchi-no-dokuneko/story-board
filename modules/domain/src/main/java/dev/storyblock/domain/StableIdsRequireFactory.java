@@ -7,6 +7,7 @@ final class StableIdsRequireFactory {
     static String require(String value, String prefix)  {
         Objects.requireNonNull(value, "value");
         StableIdsRequirePrefix.requirePrefix(prefix);
+        if (ShortIds.PREFIXES.contains(prefix)) return ShortIds.require(value, prefix);
         String expectedPrefix = prefix + "_";
         if (!value.startsWith(expectedPrefix)) {
             throw new IllegalArgumentException("Expected " + prefix + " identifier");

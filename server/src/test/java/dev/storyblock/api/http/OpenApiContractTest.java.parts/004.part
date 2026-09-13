@@ -1,3 +1,7 @@
+        assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
+        assertStrongEtag("POST /novels", "201");
+        assertStrongEtag("POST /imports", "201");
+        assertStrongEtag("POST /imports", "200");
         assertStrongEtag("POST /novels/{novelId}/renders", "200");
         assertStrongEtag("POST /novels/{novelId}/pdf-renders", "200");
         assertStrongEtag("POST /novels/{novelId}/images", "200");
@@ -50,8 +54,3 @@
                 list(operation("POST /imports").get("x-required-scopes"))
         );
         assertEquals(
-                List.of("worker:execute"),
-                list(operation("POST /internal/jobs/claims").get("x-required-scopes"))
-        );
-        assertEquals(
-                List.of("worker:execute"),

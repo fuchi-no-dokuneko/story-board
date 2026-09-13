@@ -13,15 +13,13 @@ Feature: StoryBlock 小說庫廣東話介紹
     And CSS "#reader-content" is visible
     When I narrate in "yue-Hant-HK" for at least 9 seconds:
       """
-      左邊目錄會開啟目前版本，閱讀器清楚列出書名、五位主角、章節導覽，同埋資料庫實際保存嘅故事段落。
+      左邊目錄會開啟目前版本，閱讀器清楚列出書名、主角、章節導覽，同埋資料庫實際保存嘅故事段落。
       """
     Then CSS "#reader-title" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
-    And CSS "#stat-han" has text "10,000"
-    And CSS "#stat-zombies" has text "1,000"
-    And CSS "#stat-cannons" has text "1,000"
+    And the reader matches the registered manuscript
     When I narrate in "yue-Hant-HK" for at least 8 seconds:
       """
-      字數、殭屍總數、炸藥炮總數同雜湊都來自持久化版本，所以管理員驗證緊嘅係真正落咗資料庫嘅內容。
+      字數、章節、區塊數同雜湊都來自持久化版本，所以管理員驗證緊嘅係真正落咗資料庫嘅內容。
       """
     And I click CSS "#console-tab"
     And I click CSS ".quick-requests button[data-path='/v1/openapi.yaml']"

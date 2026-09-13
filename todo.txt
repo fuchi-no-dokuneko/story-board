@@ -1,18 +1,11 @@
-ADR-311: Guide refactor / 指南重構
-Branch / 分支: tickets/ADR-311-guide-refactor
+ADR-311 product review / 產品重新驗收
 
 Completed / 已完成:
-- Root applications and repository-local, unprivileged installation. 根目錄應用及儲存庫內無特權安裝。
-- API-process self-signed CA=false HTTPS; automatic keys and default loopback. API 內部自簽 HTTPS，自動金鑰，預設 loopback。
-- IPv4 local/public/tunnel policies; reachable clients trusted, no default whitelist. IPv4 三策略，信任可連線客戶端，無預設白名單。
-- Source size limits and trilingual Markdown. 來源檔案大小限制及三語 Markdown。
-- Preserve HTTP paths, DTO shapes, OpenAPI and all migrations. 保留 HTTP 路徑、DTO、OpenAPI 及所有遷移。
-- Fix stale-log startup, PID ownership, proposal access and PDF error handling. 修正舊日誌啟動、PID 身分、提案存取及 PDF 錯誤處理。
-- Full Java/Node tests, real browser UAT, image/PDF transfer, concurrent backup and restore. 完整 Java／Node、GUI、圖片／PDF 轉移、併發備份還原。
-- Coverage inventory, append-only logs, milestones and bilingual ticket commits. 覆蓋清單、追加日誌、里程碑與雙語提交。
+1. Removed Zombies/TNT from UI, registration, catalog and Skill contracts. 已移除示範專用欄位。
+2. Removed fixed cast/Han restrictions; corrected English spacing and unrelated edit validation. 已解除固定角色／漢字限制，修正英文空格及無關編輯阻擋。
+3. Verified one ordinary novel through real GUI, guarded edits, styles and fresh PDF/TXT downloads. 已用一部普通小說完成真實介面、閱讀限制、風格及匯出驗證。
+4. Fixed PDF page-break fonts; updated coverage and product-review evidence. 已修正換頁字體並更新覆蓋與驗收證據。
 
-- Remove backup keys, encryption and rotation; retain compressed backups and integrity checks. 移除備份金鑰、加密與輪替，保留壓縮備份及完整性檢查。
-
-External limitations / 外部限制:
-- Container execution remains unverified: Docker is absent and user namespace creation is denied. 容器執行尚未驗證：缺少 Docker，建立使用者命名空間遭拒。
-- GitHub synchronization is unconfirmed: the fifth-commit push timed out after five seconds; no retry or network changes. GitHub 同步未確認：第五次提交後推送逾時，未重試或變更網路。
+Pending implementation/verification: none for this review. 此次產品驗收無待完成實作或驗證。
+Delivery branch / 交付分支: tickets/ADR-311-remove-demo-metadata
+Installed build verified locally; VPS deployment is outside this review. 已驗證本機安裝版；此次未部署 VPS。

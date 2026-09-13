@@ -1,0 +1,23 @@
+    for (const format of ['txt', 'pdf']) {
+      const [button] = await driver.findElements('#download-' + format); await button.click();
+      await driver.wait(async () => (await fs.readdir(output)).some(file => file.endsWith('.' + format)));
+    }
+    const files = await fs.readdir(output);
+    const pdf = await fs.readFile(path.join(output, files.find(file => file.endsWith('.pdf'))));
+    assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
+    const txt = await fs.readFile(path.join(output, files.find(file => file.endsWith('.txt'))));
+    const downloaded = new TextDecoder('utf-8', { fatal: true }).decode(txt);
+    assert.equal(downloaded.replace(/\s+/gu, ''), canonicalText.replace(/\s+/gu, ''));
+    await driver.manage().window().setRect({ width: 390, height: 844 });
+    assert.ok(await driver.evaluate('document.documentElement.scrollWidth <= document.documentElement.clientWidth'));
+    await fs.writeFile(path.join(output, 'mobile.png'), Buffer.from(await driver.takeScreenshot(), 'base64'));
+    await driver.evaluate("document.getElementById('style-title').scrollIntoView({block:'start'})");
+    await fs.writeFile(path.join(output, 'mobile-styles.png'), Buffer.from(await driver.takeScreenshot(), 'base64'));
+    await driver.get(`${target.origin}/style-math.html`);
+    assert.match(await driver.evaluate('document.body.innerText'), /Jensen|JSD/);
+    await fs.writeFile(path.join(output, 'formulas.png'), Buffer.from(await driver.takeScreenshot(), 'base64'));
+    const result = { title, table, output, pdfBytes: pdf.length, txtBytes: txt.length, formulas: true };
+    await fs.writeFile(path.join(output, 'result.json'), JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(result, null, 2));
+  } finally { await driver.quit(); }
+})().catch(error => { console.error(error); process.exitCode = 1; });

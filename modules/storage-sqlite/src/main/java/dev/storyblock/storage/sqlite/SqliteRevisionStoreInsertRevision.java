@@ -15,6 +15,7 @@ final class SqliteRevisionStoreInsertRevision {
             byte[] canonicalJson,
             Ids.OperationId operationId
     ) throws SQLException {
+        SqliteRevisionIdentities.claim(connection, revision, contentHash);
         try (PreparedStatement statement = connection.prepareStatement("""
                 INSERT INTO revisions(
                     revision_id, novel_id, parent_revision_id, sequence, content_hash,

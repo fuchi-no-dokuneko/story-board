@@ -1,3 +1,5 @@
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("SCOPE_REQUIRED"));
 
         mvc.perform(post("/v1/novels/{novelId}/monitor-packets", novelId)
                         .with(userWithScope("novel:read"))
@@ -48,5 +50,3 @@
 
         mvc.perform(post("/v1/novels/{novelId}/monitor-runs", novelId)
                         .with(userWithScope("novel:read"))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "submit-denied")
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))

@@ -1,89 +1,100 @@
-          format: date-time
-      additionalProperties: false
-    StyleAnalysisJobFields:
-      type: object
-      required: [analysis_id, attempt, created_at, failure_code, job_id, kind, max_attempts, novel_id, result_artifact_id, result_hash, retention_until, revision_id, status, updated_at]
-      properties:
-        analysis_id:
+          pattern: '^sha256:[0-9a-f]{64}$'
+        renderer_version:
           type: string
-          pattern: '^ana_[0-9a-f-]{36}$'
-        attempt:
+        range:
+          $ref: "#/components/schemas/RenderRange"
+        rendered_text:
+          type: string
+        blocks:
+          type: array
+          items:
+            $ref: "#/components/schemas/RenderedBlock"
+        resolved_meta:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolvedBlockMetadata"
+        offset_map:
+          type: array
+          items:
+            $ref: "#/components/schemas/RenderOffset"
+        scene_boundaries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolvedSceneBoundary"
+      additionalProperties: false
+    RenderRange:
+      type: object
+      required: [from_block_id, to_block_id]
+      properties:
+        from_block_id:
+          type: [string, "null"]
+        to_block_id:
+          type: [string, "null"]
+      additionalProperties: false
+    RenderedBlock:
+      type: object
+      required: [block_id, block_version_id, text, local_meta]
+      properties:
+        block_id:
+          type: string
+        block_version_id:
+          type: string
+        text:
+          type: string
+        local_meta:
+          type: object
+          additionalProperties: true
+        image:
+          $ref: "#/components/schemas/BlockImage"
+      additionalProperties: false
+    ResolvedBlockMetadata:
+      type: object
+      required: [block_id, before, events, after]
+      properties:
+        block_id:
+          type: string
+        before:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+        events:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        after:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+      additionalProperties: false
+    ResolvedMetadataState:
+      type: object
+      required: [time, location, weather, pov, present_character_ids]
+      properties:
+        time: {}
+        location: {}
+        weather: {}
+        pov: {}
+        present_character_ids:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+    RenderOffset:
+      type: object
+      required: [block_id, rendered_start, rendered_end]
+      properties:
+        block_id:
+          type: string
+        rendered_start:
           type: integer
           minimum: 0
-          maximum: 20
-        created_at:
-          type: string
-          format: date-time
-        failure_code:
-          type: [string, "null"]
-          pattern: '^[a-z][a-z0-9._-]{1,63}$'
-        job_id:
-          type: string
-          pattern: '^job_[0-9a-f-]{36}$'
-        kind:
-          const: style-analysis
-        max_attempts:
+        rendered_end:
           type: integer
-          minimum: 1
-          maximum: 20
-        novel_id:
-          type: string
-          pattern: '^nov_[0-9a-f-]{36}$'
-        result_artifact_id:
-          type: [string, "null"]
-          pattern: '^art_[0-9a-f-]{36}$'
-        result_hash:
-          type: [string, "null"]
-          pattern: '^sha256:[0-9a-f]{64}$'
-        retention_until:
-          type: string
-          format: date-time
-        revision_id:
-          type: string
-          pattern: '^rev_[0-9a-f-]{36}$'
-        status:
-          type: string
-          enum: [queued, running, succeeded, failed]
-        updated_at:
-          type: string
-          format: date-time
-    StyleAnalysisJob:
-      allOf:
-        - $ref: "#/components/schemas/StyleAnalysisJobFields"
-      unevaluatedProperties: false
-    StyleAnalysisView:
-      allOf:
-        - $ref: "#/components/schemas/StyleAnalysisJobFields"
-        - type: object
-          properties:
-            result:
-              $ref: "#/components/schemas/StyleAnalysisResult"
-            trace_uri:
-              type: string
-              format: uri-reference
-            windows_uri:
-              type: string
-              format: uri-reference
-      unevaluatedProperties: false
-    StyleAnalysisResult:
+          minimum: 0
+      additionalProperties: false
+    ResolvedSceneBoundary:
       type: object
-      required: [analysis_id, completed_at, job_id, result_hash, summary, trace_artifact_id, trace_content_hash, trace_expires_at, trace_uncompressed_bytes]
+      required: [scene_id, state_in, state_out]
       properties:
-        analysis_id:
+        scene_id:
           type: string
-          pattern: '^ana_[0-9a-f-]{36}$'
-        completed_at:
-          type: string
-          format: date-time
-        job_id:
-          type: string
-          pattern: '^job_[0-9a-f-]{36}$'
-        result_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        summary:
-          $ref: "#/components/schemas/StyleAnalysisSummary"
-        trace_artifact_id:
-          type: string
-          pattern: '^art_[0-9a-f-]{36}$'
-        trace_content_hash:
+        state_in:
+          $ref: "#/components/schemas/ResolvedMetadataState"
+        state_out:

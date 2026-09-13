@@ -1,7 +1,3 @@
-      "auth": "bearer-or-trusted-lan-owner",
-      "scopes": [
-        "worker:execute"
-      ],
       "roles": [],
       "pathParameters": [],
       "queryParameters": [],
@@ -93,3 +89,4 @@
           "name": "jobId",
           "required": true,
           "schema": {
+            "type": "string",

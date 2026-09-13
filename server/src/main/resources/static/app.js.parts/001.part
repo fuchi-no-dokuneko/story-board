@@ -16,7 +16,7 @@ const elements = Object.fromEntries([
   'catalog-search', 'catalog-refresh', 'catalog-total', 'catalog-loading', 'catalog-empty',
   'novel-list', 'page-previous', 'page-next', 'page-label', 'reader-empty', 'reader-loading',
   'reader-content', 'reader-language', 'reader-title', 'reader-id', 'reader-registration',
-  'stat-han', 'stat-chapters', 'stat-scenes', 'stat-blocks', 'stat-zombies', 'stat-cannons',
+  'stat-han', 'stat-chapters', 'stat-scenes', 'stat-blocks',
   'character-list', 'chapter-nav', 'chapter-content', 'meta-revision', 'meta-updated',
   'meta-hash', 'meta-han-hash', 'operator-form', 'operator-token', 'operator-connect',
   'operator-clear', 'operator-status', 'method', 'path', 'send',

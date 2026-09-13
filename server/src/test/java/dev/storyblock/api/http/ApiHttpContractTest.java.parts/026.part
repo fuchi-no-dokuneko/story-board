@@ -1,3 +1,10 @@
+        mvc.perform(get("/v1/style-profiles/{profileId}", profileId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(otherToken)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESOURCE_NOT_FOUND"));
+    }
+
+    @Test
     void thousandBlockStyleAnalysisCompletesThroughAsyncApiWithCompressedTrace()
             throws Exception {
         CanonicalRevision revision = thousandBlockRevision();
@@ -48,7 +55,3 @@
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
                                 "analysis-http-create")
-                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isAccepted())

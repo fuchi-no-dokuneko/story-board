@@ -10,8 +10,6 @@ public record AgentNovelRegistration(
         String title,
         String language,
         List<String> mainCharacters,
-        int zombieCount,
-        int tntCannonCount,
         int expectedHanCharacters,
         List<Chapter> chapters
 ) {

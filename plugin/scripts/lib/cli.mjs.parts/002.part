@@ -1,3 +1,12 @@
+  {"path":{"novelId":"..."},"query":{"limit":50},"headers":{"If-Match":"\"sha256:...\"","Idempotency-Key":"..."}}
+`;
+
+export function parseCliArgs(argv) {
+  if (!Array.isArray(argv)) throw new UsageError("CLI arguments must be an array");
+  const command = argv[0];
+  if (command === undefined || command === "-h" || command === "--help") {
+    return { command: "help", options: new Map(), positionals: [] };
+  }
   if (command.startsWith("-")) throw new UsageError("The command must be the first argument");
   const options = new Map();
   const positionals = [];
@@ -59,15 +68,3 @@ function expectPositionals(parsed, count, label = "argument") {
 
 function clientFor(parsed, overrides = {}) {
   return new StoryBlockClient({
-    baseUrl: parsed.options.get("base-url") ?? process.env.STORYBLOCK_BASE_URL,
-    accessKey: parsed.options.get("access-key") ?? process.env.STORYBLOCK_ACCESS_KEY,
-    timeoutMs: parsed.options.get("timeout-ms") ?? process.env.STORYBLOCK_TIMEOUT_MS,
-    userAgent: parsed.options.get("user-agent") ?? process.env.STORYBLOCK_USER_AGENT,
-    ...overrides,
-  });
-}
-
-function quoted(hash) {
-  return `"${hash}"`;
-}
-

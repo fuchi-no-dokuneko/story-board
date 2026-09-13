@@ -1,3 +1,15 @@
+    baseUrl: parsed.options.get("base-url") ?? process.env.STORYBLOCK_BASE_URL,
+    accessKey: parsed.options.get("access-key") ?? process.env.STORYBLOCK_ACCESS_KEY,
+    timeoutMs: parsed.options.get("timeout-ms") ?? process.env.STORYBLOCK_TIMEOUT_MS,
+    userAgent: parsed.options.get("user-agent") ?? process.env.STORYBLOCK_USER_AGENT,
+    ...overrides,
+  });
+}
+
+function quoted(hash) {
+  return `"${hash}"`;
+}
+
 function responseReport(response) {
   return { status: response.status, headers: response.headers, body: response.data };
 }
@@ -60,8 +72,3 @@ function verificationReport(source, persisted) {
     created_at: persisted.revision.created_at === source.created_at,
     han_sequence: actual.sequence === expected.sequence,
     han_count: actual.count === expected.count && extensions["han-character-count"] === expected.count,
-    han_sha256: actual.hash === expected.hash && extensions["han-text-sha256"] === expected.hash,
-    title: extensions.title === source.title,
-    language: extensions.language === source.language,
-    main_characters: stableStringify(extensions["main-characters"]) === stableStringify(source.main_characters),
-    zombie_count: extensions["zombie-count"] === source.zombie_count,

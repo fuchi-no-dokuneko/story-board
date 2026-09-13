@@ -1,0 +1,14 @@
+              "channel": "lexical",
+              "channel_version": "example-1",
+              "primary_metric": "robust_l1_input",
+              "primary_distance": 0,
+              "independent_gate_evidence": true,
+              "diagnostics": {}
+            }
+          ],
+          "reference_metadata": "text_only"
+        }
+      ]
+    }
+  ]
+}

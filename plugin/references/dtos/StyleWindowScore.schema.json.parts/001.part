@@ -48,7 +48,7 @@
         "pov": "example-1",
         "narrative_mode": "example-1",
         "block_ids": [
-          "blk_018f0f5e-7b4a-7c00-8000-000000000001"
+          "blk_49pHt"
         ],
         "grapheme_count": 1,
         "full_sized": true,
@@ -84,3 +84,5 @@
             "diagnostics": {
             }
           },
+          {
+            "channel": "surface",

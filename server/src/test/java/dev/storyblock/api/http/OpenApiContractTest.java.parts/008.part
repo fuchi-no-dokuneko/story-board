@@ -1,3 +1,7 @@
+                List.of("style:admin"),
+                list(operation("POST /style-profiles/{profileId}/versions/{versionId}/transitions")
+                        .get("x-required-scopes"))
+        );
         Map<String, Object> schemas = map(map(document.get("components")).get("schemas"));
         Map<String, Object> transition = map(schemas.get("StyleProfileTransitionRequest"));
         assertTrue(strings(transition.get("required"))
@@ -52,9 +56,3 @@
         return operations.stream()
                 .filter(operation -> operation.key().equals(key))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("missing operation " + key))
-                .contract();
-    }
-
-    private static Set<String> parameterRefs(Map<String, Object> operation) {
-        Set<String> refs = new HashSet<>();

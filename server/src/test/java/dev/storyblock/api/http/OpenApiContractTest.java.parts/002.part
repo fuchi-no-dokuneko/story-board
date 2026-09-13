@@ -1,3 +1,9 @@
+            "POST /rewrite-proposals",
+            "POST /novels/{novelId}/exports"
+    );
+    private static final Set<String> WILDCARD_CREATION_OPERATIONS = Set.of(
+            "POST /agent/novels",
+            "POST /novels",
             "POST /imports",
             "POST /style-profiles",
             "POST /internal/jobs/claims"
@@ -55,8 +61,3 @@
             if (!"GET".equals(operation.method())) {
                 Set<String> parameterRefs = parameterRefs(operation.contract());
                 String expectedIfMatch = WILDCARD_CREATION_OPERATIONS.contains(
-                        operation.key()
-                )
-                        ? "#/components/parameters/IfMatchForCreation"
-                        : "#/components/parameters/IfMatch";
-                assertTrue(

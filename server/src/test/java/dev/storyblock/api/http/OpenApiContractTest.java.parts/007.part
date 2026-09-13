@@ -1,3 +1,7 @@
+                "CHARACTER_APPEARED_WITHOUT_ENTER",
+                "CHARACTER_DISAPPEARED_WITHOUT_EXIT",
+                "WEATHER_CHANGED_WITHOUT_EVIDENCE",
+                "TIME_DISCONTINUITY",
                 "POV_CHANGED_WITHOUT_BOUNDARY",
                 "META_TEXT_MISMATCH",
                 "INTENTIONAL_SCENE_RESET"
@@ -54,7 +58,3 @@
     @Test
     void styleContractMakesPromotionExplicitAndKlDiagnosticOnly() {
         assertEquals(
-                List.of("style:admin"),
-                list(operation("POST /style-profiles/{profileId}/versions/{versionId}/transitions")
-                        .get("x-required-scopes"))
-        );

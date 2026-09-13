@@ -48,7 +48,7 @@
     },
     "novel_id": {
       "type": "string",
-      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^nov_[A-Za-z0-9]{5}$"
     },
     "profile_version_hash": {
       "type": "string",
@@ -68,7 +68,7 @@
     },
     "revision_id": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "schema_version": {
       "type": "string"
@@ -92,3 +92,7 @@
   "examples": [
     {
       "analysis_id": "ana_018f0f5e-7b4a-7c00-8000-000000000001",
+      "analyzer_contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "blocks": [
+        {
+          "block_id": "blk_49pHt",

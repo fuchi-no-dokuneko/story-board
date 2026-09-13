@@ -1,7 +1,7 @@
 package dev.storyblock.style;
 
 import dev.storyblock.contracts.CanonicalJson;
-import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeText;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ public final class StyleFeatureAnalyzer {
     );
 
     public StyleFeatureSet extract(
-            List<NarrativeBlock> blocks,
+            List<? extends NarrativeText> blocks,
             StyleMaskingLexicon lexicon,
             StyleFeatureContract contract
     ) {
@@ -30,7 +30,7 @@ public final class StyleFeatureAnalyzer {
     }
 
     public StyleFeatureSet extract(
-            List<NarrativeBlock> blocks,
+            List<? extends NarrativeText> blocks,
             StyleMaskingLexicon lexicon,
             StyleFeatureContract contract,
             List<BigDecimal> contentReducedEmbedding
@@ -45,16 +45,14 @@ public final class StyleFeatureAnalyzer {
         return StyleFeatureAnalyzerCompareAction.compare(this, target, current);
     }
 
-    public static String sourceHash(List<NarrativeBlock> blocks) {
+    public static String sourceHash(List<? extends NarrativeText> blocks) {
         blocks = List.copyOf(blocks);
-        if (blocks.isEmpty() || blocks.size() > 1_000) {
+        if (blocks.isEmpty()) {
             throw new IllegalArgumentException(
-                    "Style source hash requires 1 to 1000 blocks"
+                    "Style source hash requires at least one text block"
             );
         }
         return CanonicalJson.hash(blocks.stream().map(block -> Map.of(
-                "block_id", block.id().value(),
-                "block_version_id", block.versionId().value(),
                 "extensions", block.extensions(),
                 "meta", block.metadata().fields(),
                 "text", block.text()

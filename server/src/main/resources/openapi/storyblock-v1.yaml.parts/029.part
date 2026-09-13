@@ -1,93 +1,88 @@
-        vocabulary_hash:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        normalizer_version:
+        target_block_id:
           type: string
-        additive_smoothing_alpha:
-          type: number
-          exclusiveMinimum: 0
-          maximum: 1
-        top_k:
-          type: integer
-          minimum: 10
-          maximum: 10000
-      additionalProperties: false
-    StyleFeatureVector:
-      type: object
-      required: [channel, channel_version, contract_hash, distribution, measurements, embedding]
-      properties:
-        channel:
-          type: string
-          enum: [surface, grammar, rhythm, narrative, lexical, optional_embedding]
-        channel_version:
-          type: string
-        contract_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        distribution:
-          type: object
-          additionalProperties:
-            type: number
-            minimum: 0
-        measurements:
-          type: object
-          additionalProperties:
-            type: number
-        embedding:
-          type: array
-          maxItems: 4096
-          items:
-            type: number
-      additionalProperties: false
-    StyleFeatureSet:
-      type: object
-      required: [source_hash, contract, channels]
-      properties:
-        source_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        contract:
-          $ref: "#/components/schemas/StyleFeatureContract"
-        channels:
-          type: array
-          minItems: 5
-          maxItems: 6
-          items:
-            $ref: "#/components/schemas/StyleFeatureVector"
-      additionalProperties: false
-    StyleWindowConfiguration:
-      type: object
-      required: [operational_graphemes, operational_stride_graphemes, micro_graphemes, micro_stride_graphemes, non_overlap_enabled]
-      properties:
-        operational_graphemes:
-          type: integer
-          minimum: 2000
-          maximum: 4000
-        operational_stride_graphemes:
+          pattern: '^blk_[A-Za-z0-9]{5}$'
+        neighbor_count:
           type: integer
           minimum: 1
-          maximum: 4000
-        micro_graphemes:
-          type: integer
-          minimum: 500
-          maximum: 1000
-        micro_stride_graphemes:
+          maximum: 2
+      additionalProperties: false
+    MonitorPacket:
+      type: object
+      required: [novel_id, revision_id, revision_hash, monitor_version, rule_version, detector_rule_version, target_block_id, neighbor_count, render_packet, detector_findings, local_invariants, allowed_tools]
+      properties:
+        novel_id:
+          type: string
+          pattern: '^nov_[A-Za-z0-9]{5}$'
+        revision_id:
+          type: string
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        monitor_version:
+          type: string
+        rule_version:
+          type: string
+        detector_rule_version:
+          type: string
+        target_block_id:
+          type: string
+          pattern: '^blk_[A-Za-z0-9]{5}$'
+        neighbor_count:
           type: integer
           minimum: 1
-          maximum: 1000
-        non_overlap_enabled:
-          type: boolean
+          maximum: 2
+        render_packet:
+          $ref: "#/components/schemas/RenderPacket"
+        detector_findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetectorFinding"
+        local_invariants:
+          $ref: "#/components/schemas/MonitorLocalInvariants"
+        allowed_tools:
+          type: array
+          minItems: 2
+          maxItems: 2
+          prefixItems:
+            - const: submit_finding
+            - const: submit_proposed_operation
       additionalProperties: false
-    StyleStratum:
+    MonitorLocalInvariants:
       type: object
-      required: [kind, speaker_id]
+      required: [affected_ids_must_be_within_window, evidence_required, max_block_graphemes, max_direct_speakers, max_sentences, min_sentences, target_block_version_id, target_scene_id, window_blocks]
       properties:
-        kind:
+        affected_ids_must_be_within_window:
+          const: true
+        evidence_required:
+          const: true
+        max_block_graphemes:
+          const: 100
+        max_direct_speakers:
+          const: 1
+        max_sentences:
+          const: 2
+        min_sentences:
+          const: 1
+        target_block_version_id:
           type: string
-          enum: [narration, dialogue]
-        speaker_id:
-          type: [string, "null"]
-          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+          pattern: '^blv_[A-Za-z0-9]{5}$'
+        target_scene_id:
+          type: string
+          pattern: '^scn_[A-Za-z0-9]{5}$'
+        window_blocks:
+          type: array
+          minItems: 1
+          maxItems: 5
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/MonitorBlockFingerprint"
       additionalProperties: false
-    StyleWindow:
+    MonitorBlockFingerprint:
       type: object
+      required: [block_id, block_version_id, content_hash]
+      properties:
+        block_id:
+          type: string

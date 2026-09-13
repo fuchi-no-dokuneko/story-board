@@ -27,18 +27,24 @@ final class RevisionValidation {
         }
 
         List<ValidationIssue> issues = new ArrayList<>();
+        List<ValidationIssue> warnings = new ArrayList<>();
         for (NarrativeBlock block : candidate.liveBlocks()) {
             ResolvedBlockMetadata state = resolved.get(block.id());
             Set<String> presentBefore = DeterministicValidatorStrings.strings(state.before().get("present_character_ids"));
             NarrativeBlock old = baseline.get(block.id());
-            issues.addAll(self.validateBlock(
+            for (var issue : self.validateBlock(
                     block.id(),
                     block.text(),
                     block.metadata(),
                     presentBefore,
                     old == null ? null : old.metadata()
-            ).issues());
+            ).issues()) {
+                if (issue.code() == ValidationCode.PRESENCE_EVENT_REQUIRED && block.equals(old)) {
+                    warnings.add(new ValidationIssue(issue.code(), ValidationSeverity.WARNING, issue.blockId(),
+                            "Unchanged block has an existing unannotated presence cue", issue.details()));
+                } else issues.add(issue);
+            }
         }
-        return DeterministicValidatorErrors.errors(issues);
+        return new ValidationReport(issues, warnings);
     }
 }

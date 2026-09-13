@@ -14,7 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 final class NovelBoundaryFilter extends OncePerRequestFilter {
     static final Pattern NOVEL_PATH = Pattern.compile(
-            "^/v1/novels/(nov_[0-9a-f-]{36})(?:/.*)?$"
+            "^/v1/novels/(nov_[A-Za-z0-9]{5})(?:/.*)?$"
     );
     static final Pattern JOB_PATH = Pattern.compile(
             "^/v1/jobs/(job_[0-9a-f-]{36})$"

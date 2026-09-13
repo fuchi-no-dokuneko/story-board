@@ -3,3 +3,4 @@
 /endpoints.mjs
 /json.mjs
 /validation.mjs
+/cli-narrative.mjs

@@ -1,3 +1,20 @@
+        renderer_version: caseInsensitiveHeader(response.headers, "X-PDF-Renderer-Version"),
+        output,
+      } };
+    }
+    case "export": {
+      assertOptions(parsed, ["format", "idempotency-key", "novel-id", "revision-id"]);
+      expectPositionals(parsed, 0);
+      const novelId = requiredOption(parsed, "novel-id");
+      const client = clientFor(parsed, context.clientOverrides);
+      let revisionId = parsed.options.get("revision-id");
+      let hash;
+      if (revisionId === undefined) {
+        const novel = await fetchNovel(client, novelId);
+        revisionId = novel.head.head_revision_id;
+        hash = novel.head.head_hash;
+      } else {
+        const revision = await fetchRevision(client, novelId, revisionId);
         hash = revision.data.content_hash;
       }
       const body = { revision_id: revisionId, format: parsed.options.get("format") ?? "canonical-revision" };
@@ -43,21 +60,3 @@
       throw new UsageError(`Unknown command: ${parsed.command}`);
   }
 }
-
-function writeValue(io, value, { json = false, kind } = {}) {
-  if (kind === "text") {
-    io.stdout(value.endsWith("\n") ? value : `${value}\n`);
-    return;
-  }
-  io.stdout(`${JSON.stringify(value, null, json ? 0 : 2)}\n`);
-}
-
-function errorValue(error) {
-  if (error instanceof ApiResponseError) return { error: error.name, ...problemReport(error) };
-  if (error instanceof PayloadValidationError) return { error: error.name, message: error.message, dto: error.dto, issues: error.issues };
-  if (error instanceof VerificationError) return error.report;
-  return { error: error.name ?? "Error", message: error.message };
-}
-
-export async function runCli(argv, {
-  stdout = (text) => process.stdout.write(text),

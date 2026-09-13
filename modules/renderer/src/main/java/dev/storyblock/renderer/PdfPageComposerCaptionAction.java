@@ -11,6 +11,7 @@ final class PdfPageComposerCaptionAction {
         FontMetrics metrics = self.graphics.getFontMetrics();
         List<String> lines = PdfTextWrapping.wrap(text, metrics, PdfPageComposer.contentWidth() - 40);
         self.ensureSpace(lines.size() * 25 + 20);
+        self.graphics.setFont(self.bodyFont.deriveFont(16f));
         self.graphics.setColor(new Color(84, 88, 96));
         for (String line : lines) {
           int x = (PAGE_WIDTH - metrics.stringWidth(line)) / 2;

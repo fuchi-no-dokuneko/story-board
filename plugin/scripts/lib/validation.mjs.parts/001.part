@@ -5,7 +5,7 @@ import { isCanonicalInstant } from "./time.mjs";
 
 const SENTENCE_TERMINATOR = String.raw`(?:[。！？!?]+|(?<!\d)\.{1,3}(?!\d)|…{1,2})`;
 const CLOSING_MARKS = String.raw`[」』”’"'）)】》〉〕］}]*`;
-const REGISTRATION_SENTENCE = /\s*(.*?(?:[。！？!?]+|…{1,2})[」』”’"'）)】》〉〕］}]*?)/gsuy;
+const REGISTRATION_SENTENCE = new RegExp(`\\s*(.*?${SENTENCE_TERMINATOR}${CLOSING_MARKS})`, "gsuy");
 
 export class PayloadValidationError extends Error {
   constructor(dto, issues) {

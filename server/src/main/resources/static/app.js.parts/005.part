@@ -1,5 +1,3 @@
-    show(elements['reader-loading'], false);
-    show(elements['reader-empty'], true);
     elements['reader-empty'].querySelector('h2').textContent = 'Unable to read novel';
     elements['reader-empty'].querySelector('p').textContent = error.message;
   }
@@ -78,3 +76,5 @@ elements['catalog-search'].addEventListener('input', () => {
 });
 elements['catalog-refresh'].addEventListener('click', () => loadCatalog());
 elements['page-previous'].addEventListener('click', () => {
+  if (state.page > 0) {
+    state.page -= 1;

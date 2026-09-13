@@ -32,7 +32,7 @@
     },
     "scene_id": {
       "type": "string",
-      "pattern": "^scn_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^scn_[A-Za-z0-9]{5}$"
     },
     "speaker_id": {
       "type": [
@@ -63,10 +63,10 @@
   "examples": [
     {
       "block": {
-        "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000001",
+        "block_version_id": "blv_xwDzm",
         "extensions": {
         },
-        "id": "blk_018f0f5e-7b4a-7c00-8000-000000000001",
+        "id": "blk_49pHt",
         "metadata": {
         },
         "order_key": "0123456789abcdef0123456789abcdef",
@@ -75,7 +75,7 @@
       "intentional_style_shift_reason": "example-1",
       "narrative_mode": "example-1",
       "pov": "example-1",
-      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
+      "scene_id": "scn_UX5V4",
       "speaker_id": "example-1",
       "stratum_kind": "narration"
     }

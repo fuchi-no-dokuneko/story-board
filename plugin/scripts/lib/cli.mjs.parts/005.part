@@ -1,3 +1,8 @@
+      const values = Array.isArray(group[descriptor.name]) && descriptor.schema.type !== "array"
+        ? group[descriptor.name]
+        : [group[descriptor.name]];
+      for (const value of values) {
+        const result = await validateInline(value, descriptor.schema);
         if (!result.valid) throw new PayloadValidationError(`${endpoint.id}:${descriptor.name}`, result.issues);
       }
     }
@@ -55,8 +60,3 @@ async function execute(parsed, context) {
       assertOptions(parsed, ["body", "params"]);
       expectPositionals(parsed, 1, "endpoint id");
       const endpoint = await getEndpoint(parsed.positionals[0]);
-      if (endpoint.requestBody?.binary === true) {
-        throw new UsageError(`${endpoint.id} uses a binary body; use upload-image`);
-      }
-      const params = parsed.options.has("params") ? await readJsonFile(parsed.options.get("params")) : {};
-      await validateCallParameters(endpoint, params);

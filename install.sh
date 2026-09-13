@@ -2,7 +2,7 @@
 set -euo pipefail
 umask 077
 repo_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
-local_dir=$repo_dir/.local/storyblock
+local_dir=$repo_dir/server/data
 start_after_install=false
 case "${1:-}" in
   --start) start_after_install=true ;;

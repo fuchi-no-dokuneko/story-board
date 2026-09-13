@@ -1,9 +1,3 @@
-        "server/src/main/resources/openapi/storyblock-v1.yaml",
-        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
-      ]
-    },
-    {
-      "id": "novels.exports.create",
       "method": "POST",
       "path": "/v1/novels/{novelId}/exports",
       "summary": "Submit a canonical JSON or package export job",
@@ -18,7 +12,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            "pattern": "^nov_[A-Za-z0-9]{5}$"
           }
         }
       ],
@@ -90,3 +84,10 @@
         "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
         "server/src/main/resources/openapi/storyblock-v1.yaml",
         "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.monitor-packets.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/monitor-packets",
+      "summary": "Resolve a bounded read-only packet for one monitor target",

@@ -1,5 +1,3 @@
-            "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000001",
-            "speaker_id": "example-1",
             "stratum_kind": "narration"
           }
         ],
@@ -11,14 +9,14 @@
 
           ]
         },
-        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+        "novel_id": "nov_EUubI",
         "profile_version": {
           "version_id": "spv_018f0f5e-7b4a-7c00-8000-000000000001",
           "profile_id": "spf_018f0f5e-7b4a-7c00-8000-000000000001",
           "version": 1,
           "content": {
             "scope": {
-              "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+              "novel_id": "nov_EUubI",
               "kind": "novel",
               "subject_id": "example-1"
             },
@@ -74,3 +72,10 @@
                   "contract_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
                   "distribution": {
                   },
+                  "measurements": {
+                  },
+                  "embedding": [
+
+                  ]
+                },
+                {

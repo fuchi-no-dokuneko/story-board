@@ -5,9 +5,9 @@ run_server() {
   export JAVA_HOME
   JAVA_HOME=$(<"$local_dir/runtime/java-home")
   [[ -x $JAVA_HOME/bin/java ]] || { echo 'Installed Java runtime unavailable' >&2; exit 1; }
-  export TMPDIR=$repo_dir/.local/tmp
+  export TMPDIR=$local_dir/tmp
   mkdir -p "$TMPDIR"
-  export STORYBLOCK_DATABASE_PATH=${STORYBLOCK_DATABASE_PATH:-$local_dir/data/storyblock.db}
+  export STORYBLOCK_DATABASE_PATH=${STORYBLOCK_DATABASE_PATH:-$local_dir/storyblock.db}
   repository_path "$STORYBLOCK_DATABASE_PATH" >/dev/null
   export STORYBLOCK_TRUSTED_LAN_ENABLED=${STORYBLOCK_TRUSTED_LAN_ENABLED:-true}
   export STORYBLOCK_SECURITY_PEPPER

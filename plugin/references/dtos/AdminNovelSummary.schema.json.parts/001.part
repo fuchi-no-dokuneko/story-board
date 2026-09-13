@@ -14,9 +14,7 @@
     "novel_id",
     "scene_count",
     "title",
-    "tnt_cannon_count",
-    "updated_at",
-    "zombie_count"
+    "updated_at"
   ],
   "properties": {
     "agent_write_registered": {
@@ -44,7 +42,7 @@
     },
     "head_revision_id": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "head_sequence": {
       "type": "integer",
@@ -55,14 +53,13 @@
     },
     "main_characters": {
       "type": "array",
-      "maxItems": 5,
       "items": {
         "type": "string"
       }
     },
     "novel_id": {
       "type": "string",
-      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^nov_[A-Za-z0-9]{5}$"
     },
     "scene_count": {
       "type": "integer",
@@ -71,18 +68,10 @@
     "title": {
       "type": "string"
     },
-    "tnt_cannon_count": {
-      "type": "integer",
-      "minimum": 0
-    },
     "updated_at": {
       "type": "string",
       "format": "date-time",
       "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{3}|\\.\\d{6}|\\.\\d{9})?Z$"
-    },
-    "zombie_count": {
-      "type": "integer",
-      "minimum": 0
     }
   },
   "additionalProperties": false,
@@ -103,3 +92,15 @@
       "chapter_count": 0,
       "han_character_count": 0,
       "han_text_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "head_revision_id": "rev_mG1Ct",
+      "head_sequence": 0,
+      "language": "zh-Hant",
+      "main_characters": [],
+      "novel_id": "nov_EUubI",
+      "scene_count": 0,
+      "title": "第一章",
+      "updated_at": "2026-08-27T12:00:00Z"
+    }
+  ]
+}

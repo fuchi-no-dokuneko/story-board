@@ -25,3 +25,5 @@
 /StyleWindowScore.schema.json
 /WorkerClaimResponse.schema.json
 /WorkerResultRequest.schema.json
+/StyleComparisonResponse.schema.json
+/StyleComparisonItem.schema.json

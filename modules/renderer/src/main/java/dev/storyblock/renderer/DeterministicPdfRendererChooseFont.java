@@ -8,6 +8,8 @@ import java.util.Set;
 
 final class DeterministicPdfRendererChooseFont {
     static Font chooseFont(String text, int style, int size) {
+        Font bundled = BundledPdfFont.at(style, size);
+        if (bundled.canDisplayUpTo(text) == -1) return bundled;
         Set<String> available = Set.of(
                 GraphicsEnvironment.getLocalGraphicsEnvironment()
                         .getAvailableFontFamilyNames(Locale.ROOT)
@@ -20,8 +22,8 @@ final class DeterministicPdfRendererChooseFont {
                 Font.SERIF,
                 Font.DIALOG
         );
-        Font best = new Font(Font.DIALOG, style, size);
-        long bestScore = -1;
+        Font best = bundled;
+        long bestScore = text.codePoints().filter(bundled::canDisplay).count();
         for (String family : candidates) {
             if (!family.equals(Font.SERIF) && !family.equals(Font.DIALOG)
                     && !available.contains(family)) {

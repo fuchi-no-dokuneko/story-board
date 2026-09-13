@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 
 final class StyleAnalysisBlockIsDialogueFactory {
-    static boolean isDialogue(NarrativeBlock block)  {
+    static boolean isDialogue(dev.storyblock.domain.NarrativeText block)  {
         Objects.requireNonNull(block, "block");
         Map<String, Object> metadata = block.metadata().fields();
         String mode = StyleAnalysisBlockScalar.scalar(metadata.get("narrative_mode"), null);

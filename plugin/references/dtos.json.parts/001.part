@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-08-27T16:43:15Z",
-  "count": 140,
+  "count": 152,
   "dtos": [
     {
       "name": "BlockImage",
@@ -67,3 +67,4 @@
       "file": "dtos/AccessKeyRequest.schema.json",
       "description": "Code-derived StoryBlock Access Key Request JSON contract.",
       "confidence": "confirmed-from-code",
+      "source": [

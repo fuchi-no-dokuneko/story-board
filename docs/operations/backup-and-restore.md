@@ -7,9 +7,9 @@ EN: Backups are unencrypted Zstandard-compressed SQLite snapshots (`.db.zst`). N
 简体中文：备份为未加密的 Zstandard 压缩 SQLite 快照（`.db.zst`），不使用备份密钥、密钥配置或轮换。文件保留在仓库，仅所有者可读写。SHA-256 附件检查损坏；恢复在独立目录检查数据库完整性、数量与标准重放。
 
 ```bash
-./scripts/backup.sh .local/storyblock/data/storyblock.db .local/storyblock/backups
-./scripts/restore-drill.sh .local/storyblock/backups/storyblock-YYYYMMDDTHHMMSSZ.db.zst .local/restore-drill
-./scripts/prune-backups.sh .local/storyblock/backups
+./scripts/backup.sh server/data/storyblock.db server/data/backups
+./scripts/restore-drill.sh server/data/backups/storyblock-YYYYMMDDTHHMMSSZ.db.zst .local/restore-drill
+./scripts/prune-backups.sh server/data/backups
 ```
 
 EN: Retention keeps the newest 48 snapshots, one per day for 30 days, and one per week for 12 weeks. Pruning previews removals unless `--apply` is supplied. Concurrent backups are serialized and receive distinct filenames. The regression command is `./scripts/test-backup.sh <test-database>`.

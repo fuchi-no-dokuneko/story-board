@@ -1,5 +1,3 @@
-  if (state.page > 0) {
-    state.page -= 1;
     loadCatalog({ preserveSelection: false });
   }
 });

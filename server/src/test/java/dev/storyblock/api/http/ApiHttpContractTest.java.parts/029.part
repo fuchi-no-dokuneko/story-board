@@ -1,3 +1,10 @@
+                        .value(execution.windows().size()))
+                .andReturn();
+
+        MvcResult firstPage = mvc.perform(get(
+                        "/v1/style-analyses/{analysisId}/windows", analysisId
+                )
+                        .param("limit", "1")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items.length()").value(1))
@@ -43,8 +50,3 @@
 
     private ReadyStyleProfile createReadyStyleProfile(
             CanonicalRevision revision,
-            String token,
-            String keyPrefix
-    ) throws Exception {
-        String novelId = stringField(revision.canonicalContent(), "novel_id");
-        StyleProfileScope scope = new StyleProfileScope(

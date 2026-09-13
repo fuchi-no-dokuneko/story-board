@@ -1,3 +1,7 @@
+                        .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.job_id").value(jobId))
                 .andExpect(jsonPath("$.analysis_id").value(analysisId))
                 .andExpect(jsonPath("$.idempotent_replay").value(true));
@@ -47,10 +51,3 @@
                 .map(value -> value.canonicalValue()).toList());
         StyleAnalysisTrace submittedTrace = StyleAnalysisTrace.create(
                 persistedJob.analysisId(),
-                execution.tracePayload(),
-                completedAt,
-                persistedJob.retentionUntil()
-        );
-        resultBody.put("trace", Map.of(
-                "codec", StyleAnalysisTrace.CODEC,
-                "content_base64", Base64.getEncoder().encodeToString(

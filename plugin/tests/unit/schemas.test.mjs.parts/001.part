@@ -7,8 +7,8 @@ import { countHanCodePoints, validateDto } from "../../scripts/lib/validation.mj
 test("all DTO schemas parse and every reference resolves", async () => {
   const dtos = await listDtos();
   const schemas = await loadSchemas();
-  assert.equal(dtos.length, 140);
-  assert.equal(schemas.size, 140);
+  assert.equal(dtos.length, 152);
+  assert.equal(schemas.size, 152);
 
   const visit = (value, owner) => {
     if (Array.isArray(value)) {

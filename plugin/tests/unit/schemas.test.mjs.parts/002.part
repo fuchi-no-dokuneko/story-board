@@ -19,21 +19,20 @@ test("registration rejects a sentence that the server cannot fit in a block", as
 
 test("operation range guards bind first and last expected block ids", async () => {
   const value = structuredClone((await getSchema("DeleteBlockRangeOperation")).examples[0]);
-  value.payload.range.first_block_id = "blk_018f0f5e-7b4a-7c00-8000-000000000099";
+  value.payload.range.first_block_id = "blk_VAGAA";
   const result = await validateDto("DeleteBlockRangeOperation", value, { throwOnError: false });
   assert.equal(result.valid, false);
   assert.ok(result.issues.some(({ message }) => message.includes("first expected_blocks")));
 });
 
-test("character image references require five identities and plain-background variants", async () => {
+test("character image references support varying casts and plain-background variants", async () => {
   const value = structuredClone((await getSchema("CharacterImageReferenceConfig")).examples[0]);
   assert.equal((await validateDto("CharacterImageReferenceConfig", value)).valid, true);
 
-  const fourCharacters = structuredClone(value);
-  fourCharacters.characters.pop();
-  const missingCharacter = await validateDto("CharacterImageReferenceConfig", fourCharacters, { throwOnError: false });
-  assert.equal(missingCharacter.valid, false);
-  assert.ok(missingCharacter.issues.some(({ message }) => message.includes("at least 5")));
+  for (const size of [1, 2, 5]) {
+    const selected = { ...value, characters: value.characters.slice(0, size) };
+    assert.equal((await validateDto("CharacterImageReferenceConfig", selected)).valid, true);
+  }
 
   const oneVariant = structuredClone(value);
   oneVariant.characters[0].variants.pop();
@@ -45,3 +44,5 @@ test("character image references require five identities and plain-background va
   nonPlain.characters[0].variants[0].background = "harbor";
   const background = await validateDto("CharacterImageReferenceConfig", nonPlain, { throwOnError: false });
   assert.equal(background.valid, false);
+  assert.ok(background.issues.some(({ path, message }) => path.endsWith("/background") && message.includes("plain")));
+});

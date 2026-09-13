@@ -14,8 +14,8 @@ EN: Review `install-build-tool-ubuntu-headless.sh` before an administrator runs 
 ./scripts/local-server.sh stop
 ```
 
-EN: Installation assembles source sections, builds the apps, atomically installs the API jar, and generates its local self-signed leaf. State stays under `.local/storyblock`: `data`, `secrets`, `tls`, `logs`, and `run`. Existing database and secret files are retained. Stop and start after installing an update. Use `logs` to follow the append-only runtime log.
+EN: Installation assembles source sections, builds the apps, atomically installs the API jar, and generates its local self-signed leaf. State stays under `server/data`: `data`, `secrets`, `tls`, `logs`, and `run`. Existing database and secret files are retained. Stop and start after installing an update. Use `logs` to follow the append-only runtime log.
 
-繁體中文：安裝組合來源區段、建置應用、原子替換 API jar，並產生本機自簽憑證。狀態留在 `.local/storyblock` 的 `data`、`secrets`、`tls`、`logs` 與 `run`；保留既有資料庫及秘密。更新安裝後停止並重新啟動，使用 `logs` 追蹤追加式日誌。
+繁體中文：安裝組合來源區段、建置應用、原子替換 API jar，並產生本機自簽憑證。狀態留在 `server/data` 的 `data`、`secrets`、`tls`、`logs` 與 `run`；保留既有資料庫及秘密。更新安裝後停止並重新啟動，使用 `logs` 追蹤追加式日誌。
 
-简体中文：安装组合源码区段、构建应用、原子替换 API jar，并生成本机自签证书。状态留在 `.local/storyblock` 的 `data`、`secrets`、`tls`、`logs` 与 `run`；保留既有数据库及秘密。更新安装后停止并重新启动，使用 `logs` 跟踪追加式日志。
+简体中文：安装组合源码区段、构建应用、原子替换 API jar，并生成本机自签证书。状态留在 `server/data` 的 `data`、`secrets`、`tls`、`logs` 与 `run`；保留既有数据库及秘密。更新安装后停止并重新启动，使用 `logs` 跟踪追加式日志。

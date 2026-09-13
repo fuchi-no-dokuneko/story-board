@@ -8,8 +8,8 @@ import { getSchema } from "../../scripts/lib/dtos.mjs";
 test("endpoint manifest contains every unique code-derived route", async () => {
   const manifest = await loadEndpointManifest();
   assert.equal(manifest.apiVersion, "v1");
-  assert.equal(manifest.endpoints.length, 39);
-  assert.equal(new Set(manifest.endpoints.map(({ id }) => id)).size, 39);
+  assert.equal(manifest.endpoints.length, 44);
+  assert.equal(new Set(manifest.endpoints.map(({ id }) => id)).size, 44);
 
   for (const endpoint of manifest.endpoints) {
     assert.match(endpoint.id, /^[a-z][a-z0-9.-]+$/u);

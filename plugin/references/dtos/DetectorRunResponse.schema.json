@@ -9,7 +9,7 @@
   "properties": {
     "revision_id": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "revision_hash": {
       "type": "string"
@@ -37,7 +37,7 @@
   ],
   "examples": [
     {
-      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_id": "rev_mG1Ct",
       "revision_hash": "example-1",
       "rule_version": "example-1",
       "findings": [

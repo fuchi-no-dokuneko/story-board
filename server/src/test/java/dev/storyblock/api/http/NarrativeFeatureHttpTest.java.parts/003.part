@@ -1,0 +1,12 @@
+    private static String path(RevisionManifest revision) { return "/v1/novels/" + revision.novel().id().value(); }
+    private ResultActions slice(RevisionManifest revision, int start, int end) throws Exception {
+        String scene = revision.novel().chapters().getFirst().scenes().getFirst().id().value();
+        return mvc.perform(get(path(revision) + "/scenes/" + scene + "/blocks")
+                .param("revision_id", revision.id().value()).param("start", "" + start).param("end", "" + end));
+    }
+    private ResultActions commit(RevisionManifest revision, Map<String, Object> body) throws Exception {
+        return mvc.perform(post(path(revision) + "/commits").header("If-Match", "\"" + NarrativeHttpFixture.hash(revision) + "\"")
+                .header("Idempotency-Key", "insert-" + revision.id().value()).contentType("application/json")
+                .content(CanonicalJson.bytes(body)));
+    }
+}

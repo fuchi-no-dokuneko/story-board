@@ -1,17 +1,9 @@
-      "path": "/v1/novels/{novelId}/monitor-runs",
-      "summary": "Persist an evidence-bound finding or inert proposed operation",
-      "auth": "bearer-or-trusted-lan-owner",
-      "scopes": [
-        "monitor:submit"
-      ],
-      "roles": [],
-      "pathParameters": [
         {
           "name": "novelId",
           "required": true,
           "schema": {
             "type": "string",
-            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            "pattern": "^nov_[A-Za-z0-9]{5}$"
           }
         }
       ],
@@ -92,3 +84,11 @@
       "source": [
         "server/src/main/java/dev/storyblock/api/http/MonitorController.java",
         "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.monitor-runs.read",
+      "method": "GET",
+      "path": "/v1/novels/{novelId}/monitor-runs/{runId}",

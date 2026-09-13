@@ -24,11 +24,11 @@
       "job_id": "job_018f0f5e-7b4a-7c00-8000-000000000001",
       "kind": "style-analysis",
       "max_attempts": 1,
-      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "novel_id": "nov_EUubI",
       "result_artifact_id": "art_018f0f5e-7b4a-7c00-8000-000000000001",
       "result_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "retention_until": "2026-08-27T12:00:00Z",
-      "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+      "revision_id": "rev_mG1Ct",
       "status": "queued",
       "updated_at": "2026-08-27T12:00:00Z"
     }

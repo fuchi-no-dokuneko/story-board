@@ -1,5 +1,6 @@
 import { chmod, readFile, writeFile } from "node:fs/promises";
 
+import { narrativeCommand, narrativeOptions } from "./cli-narrative.mjs";
 import { StoryBlockClient } from "./api-client.mjs";
 import { getSchema, listDtos } from "./dtos.mjs";
 import { getEndpoint, listEndpoints, loadEndpointManifest, materializeEndpoint } from "./endpoints.mjs";
@@ -33,6 +34,11 @@ Authoring and reads:
   verify --source <manuscript.json> [--novel-id <id>] [--json]
   list [--page 0] [--size 25] [--query <text>] [--json]
   read --novel-id <id> [--json]
+  chapters --novel-id <id> --revision-id <id> [--json]
+  scenes --novel-id <id> --revision-id <id> --start 0 --end 1 [--json]
+  blocks --novel-id <id> --revision-id <id> --scene-id <id> --start 0 --end 3 [--json]
+  styles [--json]
+  compare-styles --novel-id <id> --file <styles.json> [--json]
   preview-edit --novel-id <id> --file <request.json> [--json]
   commit --novel-id <id> --file <request.json> [--json]
   render --novel-id <id> --file <request.json> [--json]
@@ -49,12 +55,3 @@ Connection options may appear after the command:
   --user-agent <value>         STORYBLOCK_USER_AGENT
 
 Generic call params JSON:
-  {"path":{"novelId":"..."},"query":{"limit":50},"headers":{"If-Match":"\"sha256:...\"","Idempotency-Key":"..."}}
-`;
-
-export function parseCliArgs(argv) {
-  if (!Array.isArray(argv)) throw new UsageError("CLI arguments must be an array");
-  const command = argv[0];
-  if (command === undefined || command === "-h" || command === "--help") {
-    return { command: "help", options: new Map(), positionals: [] };
-  }

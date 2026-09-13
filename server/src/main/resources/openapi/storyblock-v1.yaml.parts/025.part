@@ -1,105 +1,99 @@
-          type: boolean
-        job_id:
-          type: string
-          pattern: '^job_[0-9a-f-]{36}$'
-        status:
-          const: queued
-        status_uri:
-          type: string
-          format: uri-reference
-      additionalProperties: false
-    StyleMaskingLexicon:
-      type: object
-      required: [names, places]
-      properties:
-        names:
-          type: array
-          uniqueItems: true
-          items:
-            type: string
-            minLength: 1
-            maxLength: 128
-        places:
-          type: array
-          uniqueItems: true
-          items:
-            type: string
-            minLength: 1
-            maxLength: 128
-      additionalProperties: false
-    RewriteProposalRequest:
-      type: object
-      required: [analysis_id, novel_id, revision_id, revision_hash, finding_ids]
-      properties:
-        analysis_id:
-          type: string
-          pattern: '^ana_[0-9a-f-]{36}$'
-        novel_id:
-          type: string
-          pattern: '^nov_[0-9a-f-]{36}$'
-        revision_id:
-          type: string
-          pattern: '^rev_[0-9a-f-]{36}$'
-        revision_hash:
+        content_hash:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        finding_ids:
-          type: array
-          minItems: 1
-          maxItems: 64
-          uniqueItems: true
-          items:
-            type: string
-            pattern: '^sha256:[0-9a-f]{64}$'
-        cooldown_seconds:
+        size_bytes:
           type: integer
-          minimum: 300
-          maximum: 2592000
-          default: 86400
-      additionalProperties: false
-    JobAccepted:
-      type: object
-      required: [job_id, status, status_uri]
-      properties:
-        job_id:
-          type: string
-        status:
-          const: queued
-        status_uri:
-          type: string
-          format: uri-reference
-      additionalProperties: false
-    Job:
-      oneOf:
-        - $ref: "#/components/schemas/ExportJob"
-        - $ref: "#/components/schemas/StyleAnalysisJob"
-    ExportJob:
-      type: object
-      required: [job_id, novel_id, revision_id, kind, status, attempt, result_artifact_id, result_uri, created_at, updated_at]
-      properties:
-        job_id:
-          type: string
-          pattern: '^job_[0-9a-f-]{36}$'
-        novel_id:
-          type: string
-          pattern: '^nov_[0-9a-f-]{36}$'
-        revision_id:
-          type: string
-          pattern: '^rev_[0-9a-f-]{36}$'
-        kind:
-          const: canonical-export
-        status:
-          const: succeeded
-        attempt:
-          const: 1
-        result_artifact_id:
-          type: string
-          pattern: '^art_[0-9a-f-]{36}$'
-        result_uri:
-          type: string
-          format: uri-reference
+          minimum: 0
+          maximum: 16777216
         created_at:
           type: string
           format: date-time
-        updated_at:
+        content_base64:
+          type: string
+          contentEncoding: base64
+      additionalProperties: false
+    RenderRequest:
+      type: object
+      required: [revision_id]
+      properties:
+        revision_id:
+          type: string
+        from_block_id:
+          type: [string, "null"]
+        to_block_id:
+          type: [string, "null"]
+      additionalProperties: false
+    PdfRenderRequest:
+      type: object
+      required: [revision_id]
+      properties:
+        revision_id:
+          type: string
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+      additionalProperties: false
+    BlockImage:
+      type: object
+      required: [artifact_id, content_hash, media_type, width_px, height_px, alt_text]
+      properties:
+        artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        media_type:
+          type: string
+          enum: [image/png, image/jpeg]
+        width_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        height_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        alt_text:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          x-storyblock-max-graphemes: 500
+      additionalProperties: false
+    ImageUploadResponse:
+      type: object
+      required: [schema_version, artifact_id, artifact_uri, content_hash, media_type, width_px, height_px, idempotent_replay]
+      properties:
+        schema_version:
+          const: image-upload-1.0.0
+        artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        artifact_uri:
+          type: string
+          format: uri-reference
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        media_type:
+          type: string
+          enum: [image/png, image/jpeg]
+        width_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        height_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false
+    RenderPacket:
+      type: object
+      required: [novel_id, revision_id, revision_hash, renderer_version, range, rendered_text, blocks, resolved_meta, offset_map, scene_boundaries]
+      properties:
+        novel_id:
+          type: string
+        revision_id:
+          type: string
+        revision_hash:
           type: string

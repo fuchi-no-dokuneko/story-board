@@ -1,3 +1,9 @@
+                .orElseThrow(() -> new AssertionError("missing operation " + key))
+                .contract();
+    }
+
+    private static Set<String> parameterRefs(Map<String, Object> operation) {
+        Set<String> refs = new HashSet<>();
         for (Object parameter : list(operation.get("parameters"))) {
             Object ref = map(parameter).get("$ref");
             if (ref instanceof String value) {
@@ -63,11 +69,3 @@
         if (value == null) {
             return List.of();
         }
-        if (!(value instanceof List<?> values)) {
-            throw new AssertionError("expected list, got " + value);
-        }
-        return values;
-    }
-
-    private static String string(Object value) {
-        if (!(value instanceof String text)) {

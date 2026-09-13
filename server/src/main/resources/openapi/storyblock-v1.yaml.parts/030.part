@@ -1,91 +1,91 @@
-      required: [window_id, kind, segment, requested_stratum, pov, narrative_mode, block_ids, grapheme_count, full_sized, intentional_style_shift_reason, localization_only, primary_decision_eligible, sustainment_eligible]
-      properties:
-        window_id:
+          pattern: '^blk_[A-Za-z0-9]{5}$'
+        block_version_id:
+          type: string
+          pattern: '^blv_[A-Za-z0-9]{5}$'
+        content_hash:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        kind:
+      additionalProperties: false
+    MonitorSubmissionRequest:
+      type: object
+      required: [revision_id, revision_hash, target_block_id, neighbor_count, rule_version, affected_block_ids, output]
+      properties:
+        revision_id:
           type: string
-          enum: [operational, micro, non_overlap]
-        segment:
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        target_block_id:
+          type: string
+          pattern: '^blk_[A-Za-z0-9]{5}$'
+        neighbor_count:
           type: integer
-          minimum: 0
-        requested_stratum:
-          $ref: "#/components/schemas/StyleStratum"
-        pov:
+          minimum: 1
+          maximum: 2
+        rule_version:
           type: string
-        narrative_mode:
-          type: string
-        block_ids:
+        affected_block_ids:
           type: array
           minItems: 1
+          maxItems: 5
           uniqueItems: true
+          contains:
+            type: string
           items:
             type: string
-            pattern: '^blk_[0-9a-f-]{36}$'
-        grapheme_count:
-          type: integer
-          minimum: 1
-        full_sized:
-          type: boolean
-        intentional_style_shift_reason:
-          type: [string, "null"]
-          maxLength: 500
-        localization_only:
-          type: boolean
-          description: True only for micro windows, which cannot trigger rewrites.
-        primary_decision_eligible:
-          type: boolean
-          description: True only for full operational windows.
-        sustainment_eligible:
-          type: boolean
-          description: True only for full non-overlap windows.
+            pattern: '^blk_[A-Za-z0-9]{5}$'
+        output:
+          oneOf:
+            - $ref: "#/components/schemas/MonitorFindingOutput"
+            - $ref: "#/components/schemas/MonitorProposedOperationOutput"
+          discriminator:
+            propertyName: kind
+            mapping:
+              finding: "#/components/schemas/MonitorFindingOutput"
+              proposed_operation: "#/components/schemas/MonitorProposedOperationOutput"
       additionalProperties: false
-    StyleChannelCalibration:
+    MonitorFindingOutput:
       type: object
-      required: [channel, channel_version, primary_metric, reference_distances, median, mad, q95, q99]
+      required: [kind, code, severity, message, evidence]
       properties:
-        channel:
+        kind:
+          const: finding
+        code:
           type: string
-          enum: [surface, grammar, rhythm, narrative, lexical, optional_embedding]
-        channel_version:
+          pattern: '^[A-Z][A-Z0-9_]{2,63}$'
+        severity:
           type: string
-        primary_metric:
+          enum: [error, warning, info]
+        message:
           type: string
-          enum: [jensen_shannon_distance, wasserstein_distance, robust_l1_input, cosine_distance]
-        reference_distances:
-          type: array
-          maxItems: 1000
-          items:
-            type: number
-            minimum: 0
-        median:
-          type: number
-          minimum: 0
-        mad:
-          type: number
-          minimum: 0
-        q95:
-          type: number
-          minimum: 0
-        q99:
-          type: number
-          minimum: 0
+          minLength: 1
+          maxLength: 2000
+        evidence:
+          $ref: "#/components/schemas/MonitorEvidenceList"
       additionalProperties: false
-    StyleStratumCalibration:
+    MonitorProposedOperationOutput:
       type: object
-      required: [stratum, window_count, confidence, channels]
+      required: [kind, operation, evidence]
       properties:
-        stratum:
-          $ref: "#/components/schemas/StyleStratum"
-        window_count:
-          type: integer
-          minimum: 1
-          maximum: 1000
-        confidence:
+        kind:
+          const: proposed_operation
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        evidence:
+          $ref: "#/components/schemas/MonitorEvidenceList"
+      additionalProperties: false
+    MonitorEvidenceList:
+      type: array
+      minItems: 1
+      maxItems: 16
+      items:
+        $ref: "#/components/schemas/MonitorEvidence"
+    MonitorEvidence:
+      type: object
+      required: [block_id, start_grapheme, end_grapheme, quote, quote_hash]
+      properties:
+        block_id:
           type: string
-          enum: [calibrated, low_confidence]
-        channels:
-          type: array
-          minItems: 5
-          maxItems: 6
-          items:
+          pattern: '^blk_[A-Za-z0-9]{5}$'
+        start_grapheme:

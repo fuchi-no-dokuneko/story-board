@@ -19,8 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public final class AgentNovelController {
     static final Set<String> REQUEST_FIELDS = Set.of(
             "chapters", "created_at", "expected_han_characters", "language",
-            "main_characters", "novel_id", "title", "tnt_cannon_count",
-            "zombie_count"
+            "main_characters", "novel_id", "title"
     );
 
     final AgentNovelRegistrationService registrations;

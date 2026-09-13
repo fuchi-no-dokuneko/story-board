@@ -4,7 +4,7 @@ Build the CLI and create an unencrypted, compressed backup inside the repository
 
 ```bash
 ./mvnw -q -pl client-cli -am package -DskipTests
-scripts/backup.sh .local/storyblock/data/storyblock.db .local/storyblock/backups
+scripts/backup.sh server/data/storyblock.db server/data/backups
 ```
 
 The online SQLite snapshot is checked for integrity, compressed with Zstandard,

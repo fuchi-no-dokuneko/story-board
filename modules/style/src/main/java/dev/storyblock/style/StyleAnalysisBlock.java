@@ -49,7 +49,7 @@ public record StyleAnalysisBlock(
         return StyleAnalysisBlockFromFactory.from(scene, block);
     }
 
-    static boolean isDialogue(NarrativeBlock block) {
+    static boolean isDialogue(dev.storyblock.domain.NarrativeText block) {
         return StyleAnalysisBlockIsDialogueFactory.isDialogue(block);
     }
 

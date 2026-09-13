@@ -1,5 +1,3 @@
-        }
-      ],
       "requestBody": {
         "required": true,
         "contentType": "application/json",
@@ -56,7 +54,7 @@
           "required": true,
           "schema": {
             "type": "string",
-            "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+            "pattern": "^nov_[A-Za-z0-9]{5}$"
           }
         }
       ],
@@ -99,3 +97,5 @@
           "dto": "ApiProblem"
         }
       ],
+      "confidence": "confirmed-from-code",
+      "source": [

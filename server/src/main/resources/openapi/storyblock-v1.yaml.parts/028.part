@@ -1,99 +1,92 @@
+      required: [revision_id, sequence, content_hash, operation_id, idempotent_replay]
+      properties:
+        revision_id:
+          type: string
+        sequence:
+          type: integer
+          minimum: 1
+        content_hash:
+          type: string
+        operation_id:
+          type: string
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false
+    DetectorRunRequest:
+      type: object
+      required: [revision_id, revision_hash]
+      properties:
         revision_id:
           type: string
         revision_hash:
           type: string
-        diff:
-          type: object
-        scores:
-          type: object
-        validator_result:
-          type: object
-        status:
-          type: string
-          enum: [pending, ready, stale, expired, rejected]
-      additionalProperties: false
-    StyleProfileRequest:
-      type: object
-      required: [name, scope, provenance]
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 200
-        scope:
-          $ref: "#/components/schemas/StyleProfileScope"
-        provenance:
-          type: string
-          minLength: 1
-          maxLength: 2000
-      additionalProperties: false
-    StyleProfileScope:
-      type: object
-      required: [novel_id, kind, subject_id]
-      properties:
-        novel_id:
-          type: string
-          pattern: '^nov_[0-9a-f-]{36}$'
-        kind:
-          type: string
-          enum: [novel, series, character]
-        subject_id:
+          pattern: '^sha256:[0-9a-f]{64}$'
+        from_block_id:
           type: [string, "null"]
-          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        to_block_id:
+          type: [string, "null"]
       additionalProperties: false
-    StyleProfile:
+    DetectorRunResponse:
       type: object
-      required: [profile_id, name, scope, provenance, created_by, created_at]
+      required: [revision_id, revision_hash, rule_version, findings]
       properties:
-        profile_id:
+        revision_id:
           type: string
-          pattern: '^spf_[0-9a-f-]{36}$'
-        name:
+        revision_hash:
           type: string
-        scope:
-          $ref: "#/components/schemas/StyleProfileScope"
-        provenance:
+        rule_version:
           type: string
-        created_by:
-          type: string
-          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
-        created_at:
-          type: string
-          format: date-time
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetectorFinding"
       additionalProperties: false
-    StyleCorpusSource:
+    DetectorFinding:
       type: object
-      required: [source_id, content_hash, kind, provenance, license, ownership]
+      required: [finding_id, code, severity, revision_id, revision_hash, rule_version, affected_block_ids, affected_scene_ids, context_block_ids, evidence]
       properties:
-        source_id:
+        finding_id:
           type: string
-          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
-        content_hash:
+          pattern: '^fnd_[0-9a-f-]{36}$'
+        code:
+          type: string
+          enum: [LOCATION_CHANGED_WITHOUT_TRANSITION, CHARACTER_APPEARED_WITHOUT_ENTER, CHARACTER_DISAPPEARED_WITHOUT_EXIT, WEATHER_CHANGED_WITHOUT_EVIDENCE, TIME_DISCONTINUITY, POV_CHANGED_WITHOUT_BOUNDARY, META_TEXT_MISMATCH, INTENTIONAL_SCENE_RESET]
+        severity:
+          type: string
+          enum: [error, warning, info]
+        revision_id:
+          type: string
+        revision_hash:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        kind:
+        rule_version:
           type: string
-          enum: [owner, licensed, public_domain, generated, mixed]
-        provenance:
-          type: string
-          minLength: 1
-          maxLength: 2000
-        license:
-          type: string
-          minLength: 1
-          maxLength: 500
-        ownership:
-          type: string
-          minLength: 1
-          maxLength: 500
+        affected_block_ids:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+        affected_scene_ids:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+        context_block_ids:
+          type: array
+          maxItems: 3
+          uniqueItems: true
+          items:
+            type: string
+        evidence:
+          type: object
+          additionalProperties: true
       additionalProperties: false
-    StyleFeatureContract:
+    MonitorPacketRequest:
       type: object
-      required: [analyzer_version, feature_schema_version, tokenizer_id, vocabulary_hash, normalizer_version, additive_smoothing_alpha, top_k]
+      required: [revision_id, revision_hash, target_block_id, neighbor_count]
       properties:
-        analyzer_version:
+        revision_id:
           type: string
-        feature_schema_version:
-          type: string
-        tokenizer_id:
-          type: string
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+        revision_hash:

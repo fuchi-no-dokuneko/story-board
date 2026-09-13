@@ -1,3 +1,15 @@
+      const search = new URLSearchParams({ page: String(page), size: String(size), q: query });
+      const response = await clientFor(parsed, context.clientOverrides).request({ pathname: `/v1/admin/novels?${search}` });
+      return { value: responseReport(response) };
+    }
+    case "chapters": case "scenes": case "blocks": case "styles": case "compare-styles": {
+      assertOptions(parsed, narrativeOptions[parsed.command]);
+      expectPositionals(parsed, 0);
+      const timeout = parsed.command === "compare-styles" && !parsed.options.has("timeout-ms")
+        ? { timeoutMs: 300000 } : {};
+      return narrativeCommand(parsed, clientFor(parsed, { ...timeout, ...context.clientOverrides }));
+    }
+    case "read": {
       assertOptions(parsed, ["novel-id"]);
       expectPositionals(parsed, 0);
       const value = await fetchNovel(clientFor(parsed, context.clientOverrides), requiredOption(parsed, "novel-id"));
@@ -35,16 +47,3 @@
       if (novelId !== manuscript.novel_id) throw new UsageError("--novel-id must equal source novel_id");
       const persisted = await fetchNovel(clientFor(parsed, context.clientOverrides), novelId);
       const report = verificationReport(manuscript, persisted);
-      if (!report.ok) throw new VerificationError(report);
-      return { value: report };
-    }
-    case "preview-edit":
-    case "commit": {
-      assertOptions(parsed, ["file", "novel-id"]);
-      expectPositionals(parsed, 0);
-      const novelId = requiredOption(parsed, "novel-id");
-      requireTypedId(novelId, "nov", "novel_id");
-      const body = await readJsonFile(requiredOption(parsed, "file"));
-      const dto = parsed.command === "commit" ? "CommitRequest" : "EditPreviewRequest";
-      await validateDto(dto, body);
-      if (body.operation.novel_id !== novelId) throw new PayloadValidationError(dto, [{ path: "#/operation/novel_id", message: "must equal --novel-id" }]);

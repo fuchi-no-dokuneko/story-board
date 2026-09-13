@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "start": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "end": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "start",
+    "end"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/IndexSlice.schema.json",
+  "title": "IndexSlice",
+  "description": "Zero-based half-open index range [start,end).",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
+  ],
+  "examples": [
+    {
+      "start": 0,
+      "end": 1
+    }
+  ]
+}

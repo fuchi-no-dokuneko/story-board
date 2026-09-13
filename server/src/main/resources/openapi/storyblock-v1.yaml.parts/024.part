@@ -1,94 +1,94 @@
-          pattern: '^sha256:[0-9a-f]{64}$'
-        target_block_id:
-          type: string
-          pattern: '^blk_[0-9a-f-]{36}$'
-        neighbor_count:
-          type: integer
-          minimum: 1
-          maximum: 2
-        monitor_version:
-          type: string
-        rule_version:
-          type: string
-        affected_blocks:
+      required: [package_version, manifest, revisions, operations, artifacts]
+      properties:
+        package_version:
+          const: 1.0.0
+        manifest:
+          $ref: "#/components/schemas/CanonicalPackageManifest"
+        revisions:
           type: array
           minItems: 1
-          maxItems: 5
-          uniqueItems: true
+          maxItems: 100000
           items:
-            $ref: "#/components/schemas/MonitorBlockFingerprint"
-        output:
-          oneOf:
-            - $ref: "#/components/schemas/MonitorFindingOutput"
-            - $ref: "#/components/schemas/MonitorProposedOperationOutput"
-        request_hash:
+            $ref: "#/components/schemas/CanonicalPackageRevision"
+        operations:
+          type: array
+          maxItems: 99999
+          items:
+            $ref: "#/components/schemas/CanonicalPackageOperation"
+        artifacts:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/CanonicalPackageArtifact"
+      additionalProperties: false
+    CanonicalPackageManifest:
+      type: object
+      required: [novel_id, schema_version, head_revision_id, head_sequence, head_hash, revision_count, operation_count, artifact_count]
+      properties:
+        novel_id:
+          type: string
+        schema_version:
+          const: 1.0.0
+        head_revision_id:
+          type: string
+        head_sequence:
+          type: integer
+          minimum: 0
+        head_hash:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        submitted_at:
+        revision_count:
+          type: integer
+          minimum: 1
+        operation_count:
+          type: integer
+          minimum: 0
+        artifact_count:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    CanonicalPackageRevision:
+      type: object
+      required: [sequence, document]
+      properties:
+        sequence:
+          type: integer
+          minimum: 0
+        document:
+          $ref: "#/components/schemas/CanonicalRevision"
+      additionalProperties: false
+    CanonicalPackageOperation:
+      type: object
+      required: [sequence, operation_hash, operation, result_revision_id, result_hash, committed_at]
+      properties:
+        sequence:
+          type: integer
+          minimum: 1
+        operation_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        result_revision_id:
+          type: string
+        result_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        committed_at:
           type: string
           format: date-time
-        state:
-          type: string
-          enum: [current, stale]
-        stale_reasons:
-          type: array
-          uniqueItems: true
-          items:
-            type: string
-            enum: [head_changed, affected_block_changed, affected_block_missing, rule_version_changed]
-        rebase_allowed:
-          const: false
-        idempotent_replay:
-          type: boolean
       additionalProperties: false
-    MonitorSubmissionResponse:
-      allOf:
-        - $ref: "#/components/schemas/MonitorRunStatus"
-        - type: object
-          required: [idempotent_replay]
-          properties:
-            idempotent_replay:
-              type: boolean
-    StyleAnalysisRequest:
+    CanonicalPackageArtifact:
       type: object
-      required: [revision_id, profile_id, profile_version_id]
+      required: [artifact_id, revision_id, kind, media_type, codec, content_hash, size_bytes, created_at, content_base64]
       properties:
+        artifact_id:
+          type: string
         revision_id:
           type: string
-          pattern: '^rev_[0-9a-f-]{36}$'
-        profile_id:
+        kind:
           type: string
-          pattern: '^spf_[0-9a-f-]{36}$'
-        profile_version_id:
+        media_type:
           type: string
-          pattern: '^spv_[0-9a-f-]{36}$'
-        from_block_id:
-          type: [string, "null"]
-          pattern: '^blk_[0-9a-f-]{36}$'
-        to_block_id:
-          type: [string, "null"]
-          pattern: '^blk_[0-9a-f-]{36}$'
-        masking_lexicon:
-          $ref: "#/components/schemas/StyleMaskingLexicon"
-        max_attempts:
-          type: integer
-          minimum: 1
-          maximum: 20
-          default: 3
-        retention_days:
-          type: integer
-          minimum: 1
-          maximum: 365
-          default: 30
-      additionalProperties: false
-    StyleAnalysisAccepted:
-      type: object
-      required: [analysis_id, analysis_uri, idempotent_replay, job_id, status, status_uri]
-      properties:
-        analysis_id:
+        codec:
           type: string
-          pattern: '^ana_[0-9a-f-]{36}$'
-        analysis_uri:
-          type: string
-          format: uri-reference
-        idempotent_replay:

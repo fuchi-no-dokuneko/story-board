@@ -1,0 +1,24 @@
+---14:42---ADR-311移除示範欄位
+category: api_schema_change
+Current status: 移除殭屍與 TNT 數量的登錄欄位、metadata 寫入、書庫輸出及 GUI 統計。
+Issues: 原示範要求滲入一般小說契約；五位主角與必須含漢字的限制也已解除。
+affect scope: API、領域資料、OpenAPI、獨立 skill；不新增資料遷移。
+---
+---14:56---ADR-311普通稿件編輯修正
+category: bug_discovery
+Current status: 英文分句保留句間空格；未修改段落既有出入場標註缺漏改列警告，無關修正可提交。
+Issues: 修改或新增出入場內容仍須標註；其他驗證錯誤仍阻擋提交，回歸測試已通過。
+affect scope: 登錄分句、修訂驗證、skill；一般角色數量及零漢字稿件可正常登錄。
+---
+---15:06---ADR-311匯出換頁字體修正
+category: bug_discovery
+Current status: 查看普通小說 PDF 發現換頁後段落縮字；新頁重新套用正文與圖說字體。
+Issues: 兩項像素回歸先重現失敗，修正後 Java 全套 203 項通過；重建下載三頁逐頁確認。
+affect scope: PDF 渲染；本機證據 .local/product-review/，未部署 VPS。
+---
+---15:06---ADR-311普通小說產品驗收
+category: refactor
+Current status: 新稿 nov_x2Zx6 共 535 漢字、兩角色、兩章、14 區塊；完整原文比對及閱讀限制編輯通過。
+Issues: Java 203、Node 188、介面資源 4 項通過；真實 GUI 9 情境 81 步驟，另查風格、公式及下載。
+affect scope: 驗收稿、瀏覽器斷言、skill 編輯指引及文件；先前全數驗收表述改為歷史測試紀錄。
+---

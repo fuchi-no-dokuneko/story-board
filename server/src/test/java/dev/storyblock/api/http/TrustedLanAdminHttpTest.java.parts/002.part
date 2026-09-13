@@ -1,9 +1,9 @@
                 .andExpect(jsonPath("$.idempotent_replay").value(false))
                 .andExpect(jsonPath("$.novel.novel_id").value(NOVEL_ID))
                 .andExpect(jsonPath("$.novel.han_character_count").value(10))
-                .andExpect(jsonPath("$.novel.zombie_count").value(1000))
-                .andExpect(jsonPath("$.novel.tnt_cannon_count").value(1000))
-                .andExpect(jsonPath("$.novel.main_characters", hasSize(5)));
+                .andExpect(jsonPath("$.novel.zombie_count").doesNotExist())
+                .andExpect(jsonPath("$.novel.tnt_cannon_count").doesNotExist())
+                .andExpect(jsonPath("$.novel.main_characters", hasSize(2)));
 
         mvc.perform(post("/v1/agent/novels")
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, "trusted-e2e-1")
@@ -13,11 +13,11 @@
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.idempotent_replay").value(true));
 
-        mvc.perform(get("/v1/admin/novels").queryParam("q", "方塊村"))
+        mvc.perform(get("/v1/admin/novels").queryParam("q", "雨後"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.total").value(1))
                 .andExpect(jsonPath("$.items", hasSize(1)))
-                .andExpect(jsonPath("$.items[0].title").value("方塊村防線"));
+                .andExpect(jsonPath("$.items[0].title").value("雨後的信"));
 
         mvc.perform(get("/v1/admin/novels").queryParam("q", "zh-hant"))
                 .andExpect(status().isOk())

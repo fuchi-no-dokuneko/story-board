@@ -36,10 +36,10 @@ Feature: Daily acceptance of the StoryBlock read-only novel library
     And CSS "#reader-title" contains environment variable "STORYBLOCK_UAT_NOVEL_TITLE"
     And CSS "#reader-id" contains environment variable "STORYBLOCK_UAT_NOVEL_ID"
     And CSS "#reader-registration" has text "Agent write registered"
-    And CSS "#stat-han" has text "10,000"
-    And CSS "#stat-zombies" has text "1,000"
-    And CSS "#stat-cannons" has text "1,000"
-    And exactly 5 elements match CSS "#character-list li"
+    And the reader matches the registered manuscript
     And at least 2 elements match CSS "#chapter-nav .chapter-link"
-    And at least 100 elements match CSS ".story-block"
+    And at least 2 elements match CSS ".story-block"
     And CSS "#chapter-content" contains environment variable "STORYBLOCK_UAT_TEXT_MARKER"
+    And JavaScript expression "document.getElementById('meta-han-hash').textContent.startsWith('sha256:')" returns true
+
+  Scenario: Search the catalog by a main-character name

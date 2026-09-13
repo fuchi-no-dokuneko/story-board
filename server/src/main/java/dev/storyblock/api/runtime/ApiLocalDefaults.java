@@ -12,6 +12,7 @@ public final class ApiLocalDefaults {
     public static Map<String, Object> prepare() {
         try {
             System.setProperty("java.net.preferIPv4Stack", "true");
+            System.setProperty("user.home", LocalRuntime.directory("").toString());
             System.setProperty("java.io.tmpdir", LocalRuntime.directory("tmp").toString());
             Path directory = LocalRuntime.directory("secrets");
             Path pepper = LocalRuntime.contained(directory.resolve("server-pepper"));
@@ -28,7 +29,7 @@ public final class ApiLocalDefaults {
             return Map.of(
                     "storyblock.trusted-lan.enabled", true,
                     "storyblock.security.pepper", Files.readString(pepper).strip(),
-                    "storyblock.database.path", LocalRuntime.directory("data").resolve("storyblock.db").toString());
+                    "storyblock.database.path", LocalRuntime.directory("").resolve("storyblock.db").toString());
         } catch (Exception failure) {
             throw new IllegalStateException("Cannot initialize repository-local defaults", failure);
         }

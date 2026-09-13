@@ -1,3 +1,9 @@
+                .andExpect(jsonPath("$.operation_id").value(operationId))
+                .andExpect(jsonPath("$.idempotent_replay").value(false))
+                .andReturn();
+        String committedRevision = stringField(object(first), "revision_id");
+
+        mvc.perform(post("/v1/novels/{novelId}/commits", novelId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, idempotencyKey)
                         .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
@@ -43,10 +49,3 @@
         byte[] profileBody = CanonicalJson.bytes(Map.of(
                 "name", "HTTP style baseline",
                 "scope", scope.canonicalValue(),
-                "provenance", "Generated fixture requiring explicit approval"
-        ));
-
-        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
-                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
-                                "style-http-profile")

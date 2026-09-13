@@ -44,11 +44,11 @@
   "$defs": {
     "novelId": {
       "type": "string",
-      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^nov_[A-Za-z0-9]{5}$"
     },
     "revisionId": {
       "type": "string",
-      "pattern": "^rev_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
     },
     "operationId": {
       "type": "string",
@@ -114,3 +114,8 @@
         "sequence"
       ],
       "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "document": {

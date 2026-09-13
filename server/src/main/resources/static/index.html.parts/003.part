@@ -1,3 +1,30 @@
+              <p>Lower distances mean closer features; compare each column separately.
+                數值越小代表特徵越接近，請逐欄比較。TXT 的敘事 metadata 有限。
+                <a href="/style-math.html" target="_blank" rel="noopener">Formulas / 計算公式</a></p>
+              <div class="style-table-scroll">
+                <table aria-label="Style scores / 風格分數">
+                  <thead><tr><th>風格 / Style</th><th>表層 / Surface</th><th>語法 / Grammar</th>
+                    <th>節奏 / Rhythm</th><th>敘事 / Narrative</th><th>詞彙 / Lexical</th></tr></thead>
+                  <tbody id="style-score-rows"></tbody>
+                </table>
+              </div>
+            </section>
+            <div class="character-strip">
+              <h3>Main characters</h3>
+              <ul id="character-list"></ul>
+            </div>
+
+            <div class="reader-body">
+              <nav id="chapter-nav" class="chapter-nav" aria-label="Chapters"></nav>
+              <div id="chapter-content" class="chapter-content"></div>
+            </div>
+
+            <details class="revision-details">
+              <summary>Revision metadata</summary>
+              <dl>
+                <div><dt>Revision</dt><dd id="meta-revision"></dd></div>
+                <div><dt>Updated</dt><dd id="meta-updated"></dd></div>
+                <div><dt>Content hash</dt><dd id="meta-hash"></dd></div>
                 <div><dt>Han text SHA-256</dt><dd id="meta-han-hash"></dd></div>
               </dl>
             </details>
@@ -29,20 +56,3 @@
             <input id="path" value="/actuator/health" aria-label="Request path" spellcheck="false">
             <button id="send" type="button">Send</button>
           </div>
-          <p class="console-auth-note">Requests connect directly to this server.</p>
-        </section>
-        <section class="response-panel" aria-labelledby="response-title">
-          <div class="response-heading">
-            <h3 id="response-title">Response</h3>
-            <output id="response-status"></output>
-          </div>
-          <pre id="response">Ready.</pre>
-        </section>
-      </div>
-    </section>
-  </main>
-
-  <script src="/auth.js" defer></script>
-  <script src="/app.js" defer></script>
-</body>
-</html>

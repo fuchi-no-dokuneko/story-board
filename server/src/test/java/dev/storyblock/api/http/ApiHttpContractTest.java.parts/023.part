@@ -1,3 +1,10 @@
+                "provenance", "Generated fixture requiring explicit approval"
+        ));
+
+        MvcResult profileResult = mvc.perform(post("/v1/style-profiles")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .header(MutationPreconditionFilter.IDEMPOTENCY_KEY,
+                                "style-http-profile")
                         .header(HttpHeaders.IF_MATCH, "*")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(profileBody))
@@ -44,12 +51,3 @@
                         StyleCorpusSourceKind.GENERATED,
                         "HTTP integration fixture",
                         "test-only",
-                        "test-owner"
-                )),
-                features,
-                windows,
-                calibration.canonicalValue()
-        );
-        MvcResult versionResult = mvc.perform(post(
-                        "/v1/style-profiles/{profileId}/versions", profileId
-                )

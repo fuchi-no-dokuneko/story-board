@@ -56,12 +56,11 @@ class OpenApiContractTest {
             "POST /novels/{novelId}/access-keys",
             "DELETE /access-keys/{keyId}",
             "POST /internal/jobs/claims",
-            "POST /internal/jobs/{jobId}/results"
+            "POST /internal/jobs/{jobId}/results",
+            "GET /novels/{novelId}/chapters",
+            "GET /novels/{novelId}/scenes",
+            "GET /novels/{novelId}/scenes/{sceneId}/blocks",
+            "GET /style/",
+            "POST /novels/{novelId}/style-comparisons"
     );
     private static final Set<String> ASYNC_OPERATIONS = Set.of(
-            "POST /rewrite-proposals",
-            "POST /novels/{novelId}/exports"
-    );
-    private static final Set<String> WILDCARD_CREATION_OPERATIONS = Set.of(
-            "POST /agent/novels",
-            "POST /novels",

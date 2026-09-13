@@ -44,6 +44,7 @@ final class CommitControllerCommitAction {
       );
     }
     Instant now = Instant.now(self.clock);
+    self.reads.require(operation);
     AuditContext auditContext = AccessPrincipalSupport.auditContext(
         authentication, servletRequest, now
     );

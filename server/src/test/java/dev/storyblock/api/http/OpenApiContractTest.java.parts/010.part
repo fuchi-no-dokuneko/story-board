@@ -1,3 +1,11 @@
+        if (!(value instanceof List<?> values)) {
+            throw new AssertionError("expected list, got " + value);
+        }
+        return values;
+    }
+
+    private static String string(Object value) {
+        if (!(value instanceof String text)) {
             throw new AssertionError("expected string, got " + value);
         }
         return text;

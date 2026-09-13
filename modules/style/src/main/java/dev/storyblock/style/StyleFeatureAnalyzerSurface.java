@@ -1,6 +1,6 @@
 package dev.storyblock.style;
 
-import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeText;
 import dev.storyblock.domain.UnicodeText;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,13 +8,13 @@ import java.util.Map;
 
 final class StyleFeatureAnalyzerSurface {
     static StyleFeatureVector surface(
-            List<NarrativeBlock> blocks,
+            List<? extends NarrativeText> blocks,
             StyleMaskingLexicon lexicon,
             StyleFeatureContract contract,
             String contractHash
     ) {
         Map<String, Long> counts = new LinkedHashMap<>();
-        for (NarrativeBlock block : blocks) {
+        for (NarrativeText block : blocks) {
             String masked = lexicon.mask(block.text());
             List<String> graphemes = UnicodeText.graphemes(masked).stream()
                     .filter(value -> !value.isBlank())

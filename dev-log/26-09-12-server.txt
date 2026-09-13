@@ -1,0 +1,27 @@
+---12:25---短識別與風格需求
+category: decision_make
+Current status: 開始十三項需求；Chromium 實際啟動成功。
+Apporch chosen: 全功能初版後整合驗證；比較完成回傳 200，無工作識別。
+Assumption made to chose this approch: 附件明訂版本綁定，保留小說版本檢查；不新增設定版本閘門。
+affect scope: 六種識別、切片、閱讀期限、風格、介面、資料路徑與 skill。
+---
+---12:33---ADR-293短識別初版
+category: api_schema_change
+Current status: 六類短識別與契約範例已更新；Java 初版編譯通過。
+Issues: 資料庫跨重啟防碰撞與完整測試仍待修訂。
+affect scope: 領域、CLI、OpenAPI、schema 與固定測試資料。
+---
+---12:34---ADR-298切片與閱讀
+category: api_schema_change
+Current status: 加入章節、場景、Block 切片與共用五分鐘閱讀檢查初版。
+Issues: 新端點契約、真實請求測試及併發驗證待後續階段。
+Apporch chosen: 只記錄已回傳正文的版本與位置；提交時檢查相關區塊。
+Assumption made to chose this approch: 閱讀不依身份；空場景以空切片登記。
+affect scope: API 查詢與提交；已有成功提交的重試保留冪等結果。
+---
+---13:01---ADR-304參考風格初版
+category: api_schema_change
+Current status: TXT 參考與 YAML 註冊、背景監看及多風格比較初版已編譯。
+Issues: 真實監看、併發與獨立客戶端驗證待進行。
+affect scope: 五種既有分析器與新 HTTP 比較；不保存小說比較結果。
+---

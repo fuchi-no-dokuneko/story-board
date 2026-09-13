@@ -10,14 +10,14 @@ import static dev.storyblock.style.StyleFeatureAnalyzer.SENTENCE_PUNCTUATION;
 import static dev.storyblock.style.StyleFeatureAnalyzer.CLAUSE_PUNCTUATION;
 
 final class StyleFeatureAnalyzerRhythm {
-  static StyleFeatureVector rhythm(List<NarrativeBlock> blocks, StyleFeatureContract contract, String contractHash)  {
+  static StyleFeatureVector rhythm(List<? extends NarrativeText> blocks, StyleFeatureContract contract, String contractHash)  {
     Map<String, Long> sentenceBuckets = new LinkedHashMap<>();
     List<Integer> sentenceLengths = new ArrayList<>();
     List<Integer> clauseLengths = new ArrayList<>();
     List<Integer> paragraphLengths = new ArrayList<>();
     long punctuation = 0;
     long graphemes = 0;
-    for (NarrativeBlock block : blocks) {
+    for (NarrativeText block : blocks) {
       TextAnalysis analysis = UnicodeText.analyze(block.text());
       paragraphLengths.add(analysis.graphemeCount());
       graphemes += analysis.graphemeCount();

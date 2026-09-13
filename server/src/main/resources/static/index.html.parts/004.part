@@ -1,0 +1,20 @@
+          <p class="console-auth-note">Requests connect directly to this server.</p>
+        </section>
+        <section class="response-panel" aria-labelledby="response-title">
+          <div class="response-heading">
+            <h3 id="response-title">Response</h3>
+            <output id="response-status"></output>
+          </div>
+          <pre id="response">Ready.</pre>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="/auth.js" defer></script>
+  <script src="/app.js" defer></script>
+  <script src="/reader-actions.js" defer></script>
+  <script src="/style-score-table.js" defer></script>
+  <script src="/style-comparison.js" defer></script>
+</body>
+</html>

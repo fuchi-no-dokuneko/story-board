@@ -1,0 +1,59 @@
+import { requireTypedId } from "./ids.mjs";
+import { readJsonFile, deriveIdempotencyKey } from "./json.mjs";
+import { UsageError } from "./problem.mjs";
+import { validateDto } from "./validation.mjs";
+
+export const narrativeOptions = {
+  chapters: ["novel-id", "revision-id"],
+  scenes: ["novel-id", "revision-id", "start", "end"],
+  blocks: ["novel-id", "revision-id", "scene-id", "start", "end"],
+  styles: [],
+  "compare-styles": ["novel-id", "file"],
+};
+
+export async function narrativeCommand(parsed, client) {
+  const need = name => {
+    const value = parsed.options.get(name);
+    if (!value) throw new UsageError(`--${name} is required`);
+    return value;
+  };
+  const id = (name, prefix) => requireTypedId(need(name), prefix, name);
+  const range = name => {
+    const value = need(name);
+    if (!/^\d+$/u.test(value) || !Number.isSafeInteger(Number(value)))
+      throw new UsageError(`--${name} must be a nonnegative integer`);
+    return value;
+  };
+  let request, dto;
+  if (parsed.command === "styles") {
+    request = { pathname: "/v1/style/" }; dto = "StyleList";
+  } else {
+    const novel = id("novel-id", "nov");
+    const path = `/v1/novels/${novel}`;
+    if (parsed.command === "compare-styles") {
+      const body = await readJsonFile(need("file"));
+      await validateDto("StyleComparisonRequest", body);
+      const head = (await client.request({ pathname: path })).data;
+      body.revision_id ??= head.head_revision_id;
+      const hash = body.revision_id === head.head_revision_id ? head.head_hash
+        : (await client.request({ pathname: `${path}/revisions/${body.revision_id}` })).headers.etag?.replace(/^"|"$/gu, "");
+      if (!hash) throw new UsageError("The selected revision did not return its ETag");
+      request = { method: "POST", pathname: `${path}/style-comparisons`, body,
+        headers: { "If-Match": `"${hash}"`, "Idempotency-Key": deriveIdempotencyKey("compare", body) } };
+      dto = "StyleComparisonResponse";
+    } else {
+      const query = new URLSearchParams({ revision_id: id("revision-id", "rev") });
+      let suffix = parsed.command;
+      if (parsed.command !== "chapters") {
+        const prefix = parsed.command === "scenes" ? "chapter_" : "";
+        query.set(`${prefix}start`, range("start")); query.set(`${prefix}end`, range("end"));
+      }
+      if (parsed.command === "blocks") suffix = `scenes/${id("scene-id", "scn")}/blocks`;
+      dto = { chapters: "ChapterList", scenes: "SceneList", blocks: "BlockSlice" }[parsed.command];
+      request = { pathname: `${path}/${suffix}?${query}` };
+    }
+  }
+  const response = await client.request(request);
+  await validateDto(dto, response.data);
+  return { value: { status: response.status, headers: response.headers, body: response.data } };
+}

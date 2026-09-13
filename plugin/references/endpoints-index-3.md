@@ -13,3 +13,8 @@ Select an entry.
 - [style-profiles.versions.create](endpoints/style-profiles.versions.create.md)
 - [style-profiles.versions.read](endpoints/style-profiles.versions.read.md)
 - [style-profiles.versions.transition](endpoints/style-profiles.versions.transition.md)
+- [novels.chapters.list](endpoints/novels.chapters.list.md)
+- [novels.scenes.list](endpoints/novels.scenes.list.md)
+- [novels.blocks.slice](endpoints/novels.blocks.slice.md)
+- [styles.list](endpoints/styles.list.md)
+- [novels.style-comparisons.create](endpoints/novels.style-comparisons.create.md)

@@ -1,82 +1,85 @@
-          enum: [normal, warning, rewrite_candidate, topic_shift_only, low_confidence]
-        reason:
+        - $ref: "#/components/schemas/StyleAnalysisJobFields"
+        - type: object
+          properties:
+            result:
+              $ref: "#/components/schemas/StyleAnalysisResult"
+            trace_uri:
+              type: string
+              format: uri-reference
+            windows_uri:
+              type: string
+              format: uri-reference
+      unevaluatedProperties: false
+    StyleAnalysisResult:
+      type: object
+      required: [analysis_id, completed_at, job_id, result_hash, summary, trace_artifact_id, trace_content_hash, trace_expires_at, trace_uncompressed_bytes]
+      properties:
+        analysis_id:
           type: string
-          enum: [within_calibrated_range, insufficient_calibration, token_channel_only, multi_channel_q95, sustained_multi_channel_q99, intentional_style_shift]
-        confidence:
+          pattern: '^ana_[0-9a-f-]{36}$'
+        completed_at:
           type: string
-          enum: [calibrated, low_confidence]
-        operational_window_id:
+          format: date-time
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        result_hash:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        independent_q99_channels:
-          type: array
-          uniqueItems: true
-          maxItems: 5
-          description: Independently gated calibrated channels above q99 in the operational window.
-          items:
-            type: string
-            enum: [surface, grammar, rhythm, narrative, lexical]
-        sustaining_window_ids:
-          type: array
-          uniqueItems: true
-          items:
-            type: string
-            pattern: '^sha256:[0-9a-f]{64}$'
-        localized_micro_window_ids:
-          type: array
-          uniqueItems: true
-          description: Localization evidence only; never sufficient for rewrite eligibility.
-          items:
-            type: string
-            pattern: '^sha256:[0-9a-f]{64}$'
-        intentional_shift_adjusted:
-          type: boolean
-        can_trigger_rewrite:
-          type: boolean
-          description: True only for a calibrated sustained rewrite_candidate.
+        summary:
+          $ref: "#/components/schemas/StyleAnalysisSummary"
+        trace_artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        trace_content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        trace_expires_at:
+          type: string
+          format: date-time
+        trace_uncompressed_bytes:
+          type: integer
+          minimum: 2
+          maximum: 16777216
       additionalProperties: false
-    ExportRequest:
+    StyleAnalysisSummary:
       type: object
-      required: [revision_id, format]
+      required: [analyzed_block_count, calibrated_window_count, decision_counts, operational_window_count]
       properties:
-        revision_id:
-          type: string
-        format:
-          type: string
-          enum: [canonical-revision, canonical-package]
+        analyzed_block_count:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        calibrated_window_count:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        decision_counts:
+          type: object
+          properties:
+            normal: {type: integer, minimum: 0}
+            warning: {type: integer, minimum: 0}
+            rewrite_candidate: {type: integer, minimum: 0}
+            topic_shift_only: {type: integer, minimum: 0}
+            low_confidence: {type: integer, minimum: 0}
+          additionalProperties: false
+        operational_window_count:
+          type: integer
+          minimum: 0
+          maximum: 1000
       additionalProperties: false
-    AccessKeyRequest:
+    StyleAnalysisWindowFinding:
       type: object
-      required: [actor_id, scopes, expires_at]
+      required: [block_ids, can_trigger_rewrite, confidence, decision_state, ordinal, payload, window_id]
       properties:
-        actor_id:
-          type: string
-          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
-        scopes:
+        block_ids:
           type: array
           minItems: 1
           uniqueItems: true
           items:
             type: string
-            enum: [novel:read, novel:analyze, novel:propose, novel:commit, novel:admin, style:analyze, style:admin, rewrite:propose, monitor:submit, worker:execute]
-        expires_at:
+            pattern: '^blk_[A-Za-z0-9]{5}$'
+        can_trigger_rewrite:
+          type: boolean
+        confidence:
           type: string
-          format: date-time
-      additionalProperties: false
-    AccessKeyCreated:
-      type: object
-      required: [key_id, novel_id, actor_id, scopes, expires_at, secret]
-      properties:
-        key_id:
-          type: string
-          pattern: '^key_[0-9a-f-]{36}$'
-        novel_id:
-          type: string
-          pattern: '^nov_[0-9a-f-]{36}$'
-        actor_id:
-          type: string
-          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
-        scopes:
-          type: array
-          items:
-            type: string

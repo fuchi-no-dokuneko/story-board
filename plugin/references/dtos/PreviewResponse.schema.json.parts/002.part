@@ -1,21 +1,6 @@
-              "meta": {
-              }
-            }
-          ]
-        }
-      },
-      "candidate_hash": "example-1",
-      "diff": {
-        "blockChanges": [
-
-        ],
-        "sceneSeedChanges": [
-
-        ]
-      },
       "render_packet": {
-        "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
-        "revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000001",
+        "novel_id": "nov_EUubI",
+        "revision_id": "rev_mG1Ct",
         "revision_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
         "renderer_version": "example-1",
         "range": {

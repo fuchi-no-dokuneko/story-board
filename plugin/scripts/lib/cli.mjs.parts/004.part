@@ -1,4 +1,7 @@
-    tnt_cannon_count: extensions["tnt-cannon-count"] === source.tnt_cannon_count,
+    han_sha256: actual.hash === expected.hash && extensions["han-text-sha256"] === expected.hash,
+    title: extensions.title === source.title,
+    language: extensions.language === source.language,
+    main_characters: stableStringify(extensions["main-characters"]) === stableStringify(source.main_characters),
     agent_registration: extensions["agent-write-registered"] === true,
   };
   return {
@@ -62,8 +65,3 @@ async function validateCallParameters(endpoint, params) {
     const group = params[groupName] ?? {};
     for (const descriptor of descriptors) {
       if (group[descriptor.name] === undefined) continue;
-      const values = Array.isArray(group[descriptor.name]) && descriptor.schema.type !== "array"
-        ? group[descriptor.name]
-        : [group[descriptor.name]];
-      for (const value of values) {
-        const result = await validateInline(value, descriptor.schema);

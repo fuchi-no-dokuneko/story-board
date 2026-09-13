@@ -1,0 +1,69 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "language": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ready",
+        "stale",
+        "unavailable"
+      ]
+    },
+    "reference_file_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reference_graphemes": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "benchmark_updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "error": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "description",
+    "language",
+    "status"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/RegisteredStyle.schema.json",
+  "title": "RegisteredStyle",
+  "description": "Registered reference benchmark status. Sources stay on the server.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java",
+    "server/src/main/java/dev/storyblock/api/style"
+  ],
+  "examples": [
+    {
+      "id": "lyrical",
+      "name": "抒情敘事",
+      "description": "環境與內心描寫",
+      "language": "zh-Hant",
+      "status": "ready",
+      "reference_file_count": 1,
+      "reference_graphemes": 100,
+      "benchmark_updated_at": "2026-09-12T12:00:00Z"
+    }
+  ]
+}

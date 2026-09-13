@@ -4,7 +4,7 @@ umask 077
 repo_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
 source "$repo_dir/scripts/server-arguments.sh"
 parse_server_arguments "$@"
-local_dir=$repo_dir/.local/storyblock
+local_dir=$repo_dir/server/data
 source "$repo_dir/scripts/repository-paths.sh"
 check_repository_state
 repository_path "$local_dir" >/dev/null

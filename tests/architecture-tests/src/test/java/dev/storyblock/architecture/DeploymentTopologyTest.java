@@ -27,10 +27,10 @@ class DeploymentTopologyTest {
         );
         String llmWorker = section(compose, "\n  llm-worker:", "\nnetworks:");
 
-        assertTrue(api.contains("./.local/container/api:/workspace/.local"));
-        assertFalse(styleWorker.contains("container/api"));
-        assertFalse(llmWorker.contains("container/api"));
-        assertTrue(api.contains("127.0.0.1"));
+        assertTrue(api.contains("./server/data:/workspace/server/data"));
+        assertFalse(styleWorker.contains("/workspace/server/data"));
+        assertFalse(llmWorker.contains("/workspace/server/data"));
+        assertTrue(api.contains("0.0.0.0"));
         assertTrue(api.contains("8443}:8443"));
         assertTrue(api.contains("STORYBLOCK_TRUSTED_LAN_ENABLED: \"true\""));
         assertFalse(compose.contains("\n  proxy:"));
@@ -39,7 +39,9 @@ class DeploymentTopologyTest {
         assertFalse(compose.contains("STORYBLOCK_SECURITY_OWNER_TOKEN: ${"));
         assertTrue(dockerfile.contains("USER storyblock"));
         assertTrue(dockerfile.contains("EXPOSE 8443"));
-        assertTrue(entrypoint.contains("exec java -jar"));
+        assertTrue(entrypoint.contains("exec java"));
+        assertTrue(entrypoint.contains("-Djava.io.tmpdir=$data_dir/tmp"));
+        assertTrue(entrypoint.contains("-jar /workspace/application.jar"));
         String tls = Files.readString(ROOT.resolve(
                 "server/src/main/java/dev/storyblock/api/runtime/LocalServerTls.java"));
         assertTrue(tls.contains("LocalTlsMaterial"));

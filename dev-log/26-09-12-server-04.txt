@@ -1,0 +1,42 @@
+---13:26---ADR-298登錄引號邊界
+category: bug_discovery
+Current status: GUI 驗收發現登錄分句會把右引號留在下一塊；已修正並通過回歸測試。
+Issues: 既有稿件不自動改寫；驗收稿中「離開三年」也觸發既有離場規則，已改成明確的「辭世」。
+affect scope: 新稿件登錄分句；保留原文，不改變既有編輯驗證器。
+---
+---14:01---ADR-298內附中文PDF字型
+category: bug_discovery
+Current status: 已內附 Noto Sans CJK 2.004 與完整 SIL 授權，操作人員不需另外安裝字型。
+Issues: 原渲染器依賴主機字型；乾淨 VPS 無中文字型時可能出現方框，已修正。
+affect scope: PDF 使用內附繁體字型；Java 字型快取與暫存留在各應用 data。
+---
+---14:05---ADR-298更新瀏覽器驗收
+category: bug_discovery
+Current status: 已修正舊驗收步驟仍要求 UUID 的遺漏；重新通過 9 情境、85 步驟。
+Issues: 使用五碼 ID 時，舊驗收的精確作品選取會拒絕有效 ID；產品端操作正常。
+affect scope: 新增可重跑的比較／下載／公式頁 Chromium 驗收；參考文字兩項邊界測試通過。
+---
+---14:08---ADR-311資料路徑驗收
+category: refactor
+Current status: 容器啟動包裝器改用各應用 data；資料連結例外同步涵蓋各應用。
+Issues: Docker 執行環境不可用；容器架構靜態檢查、Shell 語法、真實啟停及備份還原均通過。
+affect scope: server/data/storyblock.db、工作程式資料目錄與操作文件；既有 VPS 未變更。
+---
+---14:09---ADR-298需求完成核對
+category: decision_make
+Current status: 附件十三項需求皆有程式、測試或實際 HTTPS／GUI 證據；todo 與覆蓋清單已更新。
+Issues: 八個一萬字小說比較請求全部回 200；比較結果未新增資料庫工作或風格資料。
+affect scope: 更新驗收文件與獨立 skill；來源基準保留於記憶體，小說比較每次重算。
+---
+---14:11---ADR-298最後推送逾時
+category: devenv_change
+Current status: 最後批次 git push 超過五秒，timeout 以 124 結束；依使用者規則未重試。
+Issues: 唯讀 ls-remote 確認遠端仍為 d614c54，最後修訂及此紀錄尚未發布；未修改系統網路。
+TODO for human: 網路可用時手動推送 tickets/ADR-298-authoring-styles，或明確允許代理再試。
+affect scope: GitHub 交付；十三項功能與本機驗收均已完成。
+---
+
+---14:09---ADR-298紀錄時間更正
+category: decision_make
+Current status: 上筆推送逾時標記 14:11 為誤植；實際執行時間為 14:09 UTC，事件內容不變。
+---

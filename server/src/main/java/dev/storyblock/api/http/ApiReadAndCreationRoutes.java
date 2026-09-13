@@ -7,12 +7,15 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 final class ApiReadAndCreationRoutes {
   static void configure(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry routes) {
     routes
+            .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC).permitAll()
             .requestMatchers(
                 "/",
                 "/index.html",
                 "/auth.js",
                 "/app.js",
                 "/styles.css",
+                "/reader-actions.js", "/reader-tools.css", "/style-comparison.js",
+                "/style-score-table.js", "/style-math.html",
                 "/v1/openapi.yaml",
                 "/actuator/health"
             ).permitAll()

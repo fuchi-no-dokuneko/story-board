@@ -1,3 +1,9 @@
+                        "style:admin", "rewrite:propose", "monitor:submit",
+                        "worker:execute"
+                ),
+                list(scopeItems.get("enum"))
+        );
+
         Map<String, Object> createdProperties = map(
                 map(schemas.get("AccessKeyCreated")).get("properties")
         );
@@ -56,7 +62,3 @@
         ), strings(finding.get("required")));
         assertEquals(Set.of(
                 "LOCATION_CHANGED_WITHOUT_TRANSITION",
-                "CHARACTER_APPEARED_WITHOUT_ENTER",
-                "CHARACTER_DISAPPEARED_WITHOUT_EXIT",
-                "WEATHER_CHANGED_WITHOUT_EVIDENCE",
-                "TIME_DISCONTINUITY",

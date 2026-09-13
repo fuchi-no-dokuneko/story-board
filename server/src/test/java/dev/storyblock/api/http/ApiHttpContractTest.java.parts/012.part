@@ -1,3 +1,8 @@
+                                "image", wrongDimensions
+                        ))
+                )
+        );
+        mvc.perform(post("/v1/novels/{novelId}/commits", novelId)
                         .with(userWithScope("novel:commit"))
                         .header(MutationPreconditionFilter.IDEMPOTENCY_KEY, mismatchKey)
                         .header(HttpHeaders.IF_MATCH, quotedEtag(revision.contentHash()))
@@ -44,6 +49,3 @@
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.revision_id").value(resultRevisionId))
                 .andReturn();
-        String resultHash = stringField(object(committed), "content_hash");
-
-        byte[] renderBody = CanonicalJson.bytes(Map.of("revision_id", resultRevisionId));

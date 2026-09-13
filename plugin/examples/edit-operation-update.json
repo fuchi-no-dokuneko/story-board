@@ -1,19 +1,19 @@
 {
   "operation_id": "op_018f0f5e-7b4a-7c00-8000-000000000021",
   "idempotency_key": "example-update-001",
-  "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
-  "base_revision_id": "rev_018f0f5e-7b4a-7c00-8000-000000000002",
+  "novel_id": "nov_EUubI",
+  "base_revision_id": "rev_x4QZO",
   "expected_head_hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "type": "replace_block_range",
   "payload": {
     "range": {
-      "scene_id": "scn_018f0f5e-7b4a-7c00-8000-000000000003",
-      "first_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000004",
-      "last_block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000004",
+      "scene_id": "scn_I8ENj",
+      "first_block_id": "blk_4tJqQ",
+      "last_block_id": "blk_4tJqQ",
       "expected_blocks": [
         {
-          "block_id": "blk_018f0f5e-7b4a-7c00-8000-000000000004",
-          "block_version_id": "blv_018f0f5e-7b4a-7c00-8000-000000000005"
+          "block_id": "blk_4tJqQ",
+          "block_version_id": "blv_HOjjg"
         }
       ],
       "expected_range_hash": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
@@ -22,7 +22,7 @@
     },
     "new_blocks": [
       {
-        "id": "blk_018f0f5e-7b4a-7c00-8000-000000000024",
+        "id": "blk_NYJ64",
         "text": "洛恩悄悄推開了門。",
         "meta": {}
       }

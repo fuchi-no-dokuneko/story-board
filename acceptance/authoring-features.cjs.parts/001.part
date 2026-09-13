@@ -1,0 +1,39 @@
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { CdpDriver } = require('./cdp-driver.cjs');
+
+(async () => {
+  const [base, novel, destination = 'server/data/uat'] = process.argv.slice(2);
+  if (!base || !/^nov_[A-Za-z0-9]{5}$/.test(novel || ''))
+    throw Error('Usage: node acceptance/authoring-features.cjs https://host:port nov_Ab123 [output-directory]');
+  const target = new URL(base);
+  if (target.protocol !== 'https:' || target.hostname.includes(':')) throw Error('IPv4 HTTPS is required');
+  await fs.mkdir(destination, { recursive: true });
+  const output = await fs.mkdtemp(path.resolve(destination, 'authoring-'));
+  const driver = await CdpDriver.create({ headless: true });
+  try {
+    await driver.sendDevToolsCommand('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: output });
+    await driver.get(`${target.origin}/#${novel}`);
+    await driver.wait(() => driver.evaluate("!document.getElementById('reader-content').hidden"));
+    await driver.wait(() => driver.evaluate("document.querySelectorAll('#style-choices input:checked').length>=2"));
+    const [compare] = await driver.findElements('#compare-styles');
+    const inputs = await driver.findElements('#style-choices input:not(:disabled)');
+    for (const input of inputs.slice(1)) await input.click();
+    await compare.click();
+    await driver.wait(() => driver.evaluate("document.querySelectorAll('#style-score-rows tr').length===1"));
+    await inputs[1].click(); await compare.click();
+    await driver.wait(() => driver.evaluate("document.querySelectorAll('#style-score-rows tr').length>=2"));
+    const table = await driver.evaluate("document.getElementById('style-score-rows').innerText");
+    const title = await driver.evaluate("document.getElementById('reader-title').innerText");
+    const expected = await driver.evaluate(`({
+      stats: [...document.querySelectorAll('.novel-stats dt')].map(node => node.textContent),
+      rows: [...document.querySelectorAll('#style-score-rows tr')].map(row =>
+        [...row.querySelectorAll('td')].map(cell => Number(cell.textContent))),
+    })`);
+    assert.deepEqual(expected.stats, ['Han characters', 'Chapters', 'Scenes', 'Blocks']);
+    assert.equal(expected.rows.length, 2);
+    assert.ok(expected.rows.every(row => row.length === 5 && row.every(Number.isFinite)));
+    const canonicalText = await driver.evaluate(`window.StoryBlockFeatures.selected.revision.chapters
+      .map(chapter => [chapter.title || '', ...chapter.scenes.flatMap(scene => scene.blocks.map(block => block.text))].join('\\n')).join('\\n')`);
+    await fs.writeFile(path.join(output, 'comparison.png'), Buffer.from(await driver.takeScreenshot(), 'base64'));

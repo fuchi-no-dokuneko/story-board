@@ -1,3 +1,9 @@
+        Map<String, Object> scene = Map.of(
+                "id", Ids.SceneId.create().value(),
+                "chapter_id", chapterId,
+                "order_key", OrderKey.initial().value(),
+                "title", "Durability fixture",
+                "transition_mode", "opening",
                 "blocks", List.copyOf(blocks)
         );
         Map<String, Object> chapter = Map.of(
@@ -52,10 +58,3 @@
                 "title", "Second",
                 "transition_mode", "continuous",
                 "initial_meta", Map.of(
-                        "location", Map.of("mode", "explicit", "value", "room_b"),
-                        "present_character_ids", List.of()
-                ),
-                "blocks", List.of(secondBlock)
-        );
-        Map<String, Object> chapter = Map.of(
-                "id", chapterId,

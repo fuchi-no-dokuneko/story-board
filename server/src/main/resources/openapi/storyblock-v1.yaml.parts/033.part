@@ -1,83 +1,95 @@
-      required: [contract_hash, target_feature_set_hash, current_feature_set_hash, channels, token_kl_diagnostic_only]
-      properties:
-        contract_hash:
+        status:
+          const: queued
+        status_uri:
           type: string
+          format: uri-reference
+      additionalProperties: false
+    Job:
+      oneOf:
+        - $ref: "#/components/schemas/ExportJob"
+        - $ref: "#/components/schemas/StyleAnalysisJob"
+    ExportJob:
+      type: object
+      required: [job_id, novel_id, revision_id, kind, status, attempt, result_artifact_id, result_uri, created_at, updated_at]
+      properties:
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        novel_id:
+          type: string
+          pattern: '^nov_[A-Za-z0-9]{5}$'
+        revision_id:
+          type: string
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+        kind:
+          const: canonical-export
+        status:
+          const: succeeded
+        attempt:
+          const: 1
+        result_artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        result_uri:
+          type: string
+          format: uri-reference
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    StyleAnalysisJobFields:
+      type: object
+      required: [analysis_id, attempt, created_at, failure_code, job_id, kind, max_attempts, novel_id, result_artifact_id, result_hash, retention_until, revision_id, status, updated_at]
+      properties:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
+        attempt:
+          type: integer
+          minimum: 0
+          maximum: 20
+        created_at:
+          type: string
+          format: date-time
+        failure_code:
+          type: [string, "null"]
+          pattern: '^[a-z][a-z0-9._-]{1,63}$'
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        kind:
+          const: style-analysis
+        max_attempts:
+          type: integer
+          minimum: 1
+          maximum: 20
+        novel_id:
+          type: string
+          pattern: '^nov_[A-Za-z0-9]{5}$'
+        result_artifact_id:
+          type: [string, "null"]
+          pattern: '^art_[0-9a-f-]{36}$'
+        result_hash:
+          type: [string, "null"]
           pattern: '^sha256:[0-9a-f]{64}$'
-        target_feature_set_hash:
+        retention_until:
           type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        current_feature_set_hash:
+          format: date-time
+        revision_id:
           type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        channels:
-          type: array
-          minItems: 5
-          maxItems: 6
-          items:
-            $ref: "#/components/schemas/StyleChannelDistance"
-        token_kl_diagnostic_only:
-          const: true
-      additionalProperties: false
-    StyleProfileSelection:
-      type: object
-      required: [requested_stratum, selected_stratum, reason, calibration_available, confidence]
-      properties:
-        requested_stratum:
-          $ref: "#/components/schemas/StyleStratum"
-        selected_stratum:
-          $ref: "#/components/schemas/StyleStratum"
-        reason:
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+        status:
           type: string
-          enum: [exact, speaker_fallback, unavailable]
-        calibration_available:
-          type: boolean
-        confidence:
+          enum: [queued, running, succeeded, failed]
+        updated_at:
           type: string
-          enum: [calibrated, low_confidence]
-      additionalProperties: false
-    StyleCalibratedChannelScore:
-      type: object
-      required: [distance, percentile, robust_z, q95, q99, above_q95, above_q99]
-      properties:
-        distance:
-          $ref: "#/components/schemas/StyleChannelDistance"
-        percentile:
-          type: number
-          minimum: 0
-          maximum: 100
-        robust_z:
-          type: number
-          minimum: 0
-        q95:
-          type: number
-          minimum: 0
-        q99:
-          type: number
-          minimum: 0
-        above_q95:
-          type: boolean
-        above_q99:
-          type: boolean
-      additionalProperties: false
-    StyleWindowScore:
-      type: object
-      required: [window, profile_selection, distance_report, channels]
-      properties:
-        window:
-          $ref: "#/components/schemas/StyleWindow"
-        profile_selection:
-          $ref: "#/components/schemas/StyleProfileSelection"
-        distance_report:
-          $ref: "#/components/schemas/StyleDistanceReport"
-        channels:
-          type: array
-          maxItems: 6
-          items:
-            $ref: "#/components/schemas/StyleCalibratedChannelScore"
-      additionalProperties: false
-    StyleAnomalyDecision:
-      type: object
-      required: [state, reason, confidence, operational_window_id, independent_q99_channels, sustaining_window_ids, localized_micro_window_ids, intentional_shift_adjusted, can_trigger_rewrite]
-      properties:
-        state:
-          type: string
+          format: date-time
+    StyleAnalysisJob:
+      allOf:
+        - $ref: "#/components/schemas/StyleAnalysisJobFields"
+      unevaluatedProperties: false
+    StyleAnalysisView:
+      allOf:

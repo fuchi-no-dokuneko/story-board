@@ -29,7 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class TrustedLanAdminHttpTest {
     private static final String NOVEL_ID =
-            "nov_018f0f5e-7b4a-7c00-8000-000000000111";
+            "nov_0Veit";
     private static final String TEXT = "春夏秋冬東西南北天地。";
     private static final Path DATABASE_PATH = Path.of(
             "target", "trusted-lan-admin-" + UUID.randomUUID() + ".db"

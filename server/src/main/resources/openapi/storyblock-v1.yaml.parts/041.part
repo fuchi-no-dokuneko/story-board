@@ -1,0 +1,78 @@
+          type: boolean
+        above_q99:
+          type: boolean
+      additionalProperties: false
+    StyleWindowScore:
+      type: object
+      required: [window, profile_selection, distance_report, channels]
+      properties:
+        window:
+          $ref: "#/components/schemas/StyleWindow"
+        profile_selection:
+          $ref: "#/components/schemas/StyleProfileSelection"
+        distance_report:
+          $ref: "#/components/schemas/StyleDistanceReport"
+        channels:
+          type: array
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/StyleCalibratedChannelScore"
+      additionalProperties: false
+    StyleAnomalyDecision:
+      type: object
+      required: [state, reason, confidence, operational_window_id, independent_q99_channels, sustaining_window_ids, localized_micro_window_ids, intentional_shift_adjusted, can_trigger_rewrite]
+      properties:
+        state:
+          type: string
+          enum: [normal, warning, rewrite_candidate, topic_shift_only, low_confidence]
+        reason:
+          type: string
+          enum: [within_calibrated_range, insufficient_calibration, token_channel_only, multi_channel_q95, sustained_multi_channel_q99, intentional_style_shift]
+        confidence:
+          type: string
+          enum: [calibrated, low_confidence]
+        operational_window_id:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        independent_q99_channels:
+          type: array
+          uniqueItems: true
+          maxItems: 5
+          description: Independently gated calibrated channels above q99 in the operational window.
+          items:
+            type: string
+            enum: [surface, grammar, rhythm, narrative, lexical]
+        sustaining_window_ids:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            pattern: '^sha256:[0-9a-f]{64}$'
+        localized_micro_window_ids:
+          type: array
+          uniqueItems: true
+          description: Localization evidence only; never sufficient for rewrite eligibility.
+          items:
+            type: string
+            pattern: '^sha256:[0-9a-f]{64}$'
+        intentional_shift_adjusted:
+          type: boolean
+        can_trigger_rewrite:
+          type: boolean
+          description: True only for a calibrated sustained rewrite_candidate.
+      additionalProperties: false
+    ExportRequest:
+      type: object
+      required: [revision_id, format]
+      properties:
+        revision_id:
+          type: string
+        format:
+          type: string
+          enum: [canonical-revision, canonical-package]
+      additionalProperties: false
+    AccessKeyRequest:
+      type: object
+      required: [actor_id, scopes, expires_at]
+      properties:
+        actor_id:

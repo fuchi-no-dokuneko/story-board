@@ -1,3 +1,8 @@
+      if (endpoint.requestBody?.binary === true) {
+        throw new UsageError(`${endpoint.id} uses a binary body; use upload-image`);
+      }
+      const params = parsed.options.has("params") ? await readJsonFile(parsed.options.get("params")) : {};
+      await validateCallParameters(endpoint, params);
       const body = parsed.options.has("body") ? await readJsonFile(parsed.options.get("body")) : undefined;
       if (endpoint.requestBody?.required && body === undefined) throw new UsageError(`${endpoint.id} requires --body`);
       if (endpoint.requestBody && body !== undefined) await validateDto(endpoint.requestBody.dto, body);
@@ -35,8 +40,3 @@
       const page = integerOption(parsed, "page", 0, 0, Number.MAX_SAFE_INTEGER);
       const size = integerOption(parsed, "size", 25, 1, 100);
       const query = parsed.options.get("query") ?? "";
-      const search = new URLSearchParams({ page: String(page), size: String(size), q: query });
-      const response = await clientFor(parsed, context.clientOverrides).request({ pathname: `/v1/admin/novels?${search}` });
-      return { value: responseReport(response) };
-    }
-    case "read": {

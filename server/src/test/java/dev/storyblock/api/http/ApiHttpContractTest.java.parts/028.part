@@ -1,3 +1,10 @@
+                execution.tracePayload(),
+                completedAt,
+                persistedJob.retentionUntil()
+        );
+        resultBody.put("trace", Map.of(
+                "codec", StyleAnalysisTrace.CODEC,
+                "content_base64", Base64.getEncoder().encodeToString(
                         submittedTrace.compressedContent()
                 ),
                 "content_hash", submittedTrace.contentHash(),
@@ -41,10 +48,3 @@
                 .andExpect(jsonPath("$.result.summary.analyzed_block_count")
                         .value(1000))
                 .andExpect(jsonPath("$.result.summary.operational_window_count")
-                        .value(execution.windows().size()))
-                .andReturn();
-
-        MvcResult firstPage = mvc.perform(get(
-                        "/v1/style-analyses/{analysisId}/windows", analysisId
-                )
-                        .param("limit", "1")

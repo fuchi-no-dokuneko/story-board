@@ -25,4 +25,4 @@ not mount or read the server keystore.
 - Hostname or IP changes regenerate the leaf and invalidate prior trust.
 - Public mode listens on all IPv4 interfaces; local mode supports private tunnels.
 - Build, runtime state, secrets, and TLS files may stay entirely inside the
-  repository-local `.local/storyblock/` directory.
+  repository-local `server/data/` directory.

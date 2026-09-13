@@ -15,7 +15,7 @@
     },
     "novel_id": {
       "type": "string",
-      "pattern": "^nov_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+      "pattern": "^nov_[A-Za-z0-9]{5}$"
     },
     "actor_id": {
       "type": "string",
@@ -65,7 +65,7 @@
   "examples": [
     {
       "key_id": "key_018f0f5e-7b4a-7c00-8000-000000000001",
-      "novel_id": "nov_018f0f5e-7b4a-7c00-8000-000000000001",
+      "novel_id": "nov_EUubI",
       "actor_id": "example-1",
       "scopes": [
 

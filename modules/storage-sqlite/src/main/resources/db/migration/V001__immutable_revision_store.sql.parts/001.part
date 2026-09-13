@@ -1,3 +1,17 @@
+CREATE TABLE IF NOT EXISTS short_identifiers (
+    identifier TEXT PRIMARY KEY COLLATE BINARY,
+    allocation_key TEXT UNIQUE,
+    owner TEXT,
+    content_key TEXT,
+    CHECK (
+      (substr(identifier, 1, 4) IN ('nov_', 'scn_', 'blk_', 'blv_', 'rev_') AND length(identifier) = 9)
+      OR (substr(identifier, 1, 3) = 'ch_' AND length(identifier) = 8)
+    ),
+    CHECK (substr(identifier, instr(identifier, '_') + 1) NOT GLOB '*[^A-Za-z0-9]*')
+);
+
+CREATE INDEX IF NOT EXISTS short_identifiers_owner_idx ON short_identifiers(owner);
+
 CREATE TABLE IF NOT EXISTS novels (
     novel_id TEXT PRIMARY KEY,
     head_revision_id TEXT NOT NULL,
@@ -52,18 +66,3 @@ CREATE TABLE IF NOT EXISTS checkpoints (
     codec TEXT NOT NULL,
     uncompressed_bytes INTEGER NOT NULL CHECK (uncompressed_bytes > 0),
     compressed_json BLOB NOT NULL CHECK (length(compressed_json) > 0),
-    created_at TEXT NOT NULL,
-    PRIMARY KEY (novel_id, sequence),
-    FOREIGN KEY (novel_id) REFERENCES novels(novel_id),
-    FOREIGN KEY (revision_id) REFERENCES revisions(revision_id)
-);
-
-CREATE TABLE IF NOT EXISTS block_tombstones (
-    novel_id TEXT NOT NULL,
-    operation_id TEXT NOT NULL,
-    deleted_in_revision_id TEXT NOT NULL,
-    source_scene_id TEXT NOT NULL,
-    block_id TEXT NOT NULL,
-    block_version_id TEXT NOT NULL,
-    block_json TEXT NOT NULL CHECK (json_valid(block_json)),
-    PRIMARY KEY (operation_id, block_id),

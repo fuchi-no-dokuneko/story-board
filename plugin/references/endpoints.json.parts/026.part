@@ -1,30 +1,3 @@
-          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
-          "schema": {
-            "type": "string",
-            "writeOnly": true
-          }
-        },
-        {
-          "name": "If-Match",
-          "required": true,
-          "description": "A single quoted strong canonical SHA-256 ETag.",
-          "schema": {
-            "type": "string",
-            "pattern": "^\"sha256:[0-9a-f]{64}\"$"
-          }
-        },
-        {
-          "name": "Idempotency-Key",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 200
-          }
-        },
-        {
-          "name": "X-Request-Id",
-          "required": false,
           "description": "Caller request identifier; unsafe values are replaced by the server.",
           "schema": {
             "type": "string",
@@ -93,3 +66,28 @@
         {
           "status": "default",
           "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/OpenApiDocumentController.java",
+        "server/src/test/java/dev/storyblock/api/http/ApiHttpContractTest.java"
+      ]
+    },
+    {
+      "id": "rewrite-proposals.create",
+      "method": "POST",
+      "path": "/v1/rewrite-proposals",
+      "summary": "Submit a durable LLM rewrite proposal job",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "rewrite:propose"
+      ],
+      "roles": [],
+      "pathParameters": [],
+      "queryParameters": [],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,

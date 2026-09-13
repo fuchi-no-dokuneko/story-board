@@ -1,10 +1,109 @@
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[A-Za-z0-9]{5}$"
+          }
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "revision_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^rev_[A-Za-z0-9]{5}$"
+          }
+        }
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "X-Request-Id",
+          "required": false,
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
+      "responses": [
+        {
+          "status": 200,
+          "contentType": "application/json",
+          "dto": "ChapterList"
+        }
+      ],
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
       "confidence": "confirmed-from-code",
       "source": [
-        "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
-        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
-        "server/src/main/resources/openapi/storyblock-v1.yaml",
-        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+        "server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java"
       ]
-    }
-  ]
-}
+    },
+    {
+      "id": "novels.scenes.list",
+      "method": "GET",
+      "path": "/v1/novels/{novelId}/scenes",
+      "summary": "Scenes selected by a half-open chapter index slice. No body text.",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "novel:read"
+      ],
+      "roles": [],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[A-Za-z0-9]{5}$"
+          }
+        }
+      ],
+      "queryParameters": [
+        {
+          "name": "revision_id",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^rev_[A-Za-z0-9]{5}$"
+          }
+        },
+        {
+          "name": "chapter_start",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        {
+          "name": "chapter_end",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      ],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,

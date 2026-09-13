@@ -1,0 +1,45 @@
+package dev.storyblock.api.http;
+
+import dev.storyblock.contracts.*;
+import dev.storyblock.domain.*;
+import java.nio.file.Path;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.*;
+import org.springframework.test.web.servlet.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest(properties = "storyblock.trusted-lan.enabled=true")
+@AutoConfigureMockMvc
+class NarrativeFeatureHttpTest {
+    private static final Path DB = Path.of("target", "narrative-features-" + UUID.randomUUID() + ".db");
+    @DynamicPropertySource static void config(DynamicPropertyRegistry registry) {
+        registry.add("storyblock.database.path", DB::toString);
+        registry.add("storyblock.security.pepper", () -> "feature-http-test-pepper-at-least-32-characters");
+        registry.add("storyblock.styles.registry", () -> Path.of("config/content-config/styles.yaml").toAbsolutePath().toString());
+    }
+    @Autowired MockMvc mvc;
+    @Autowired dev.storyblock.api.style.StyleLibrary styles;
+
+    @Test void metadataAndPartialReadsDoNotPermitInsertionUntilBothNeighborsAreRead() throws Exception {
+        var revision = create(false); var body = NarrativeHttpFixture.insertion(revision);
+        String base = path(revision);
+        mvc.perform(get(base + "/chapters").param("revision_id", revision.id().value()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.chapter_count").value(1));
+        mvc.perform(get(base + "/scenes").param("revision_id", revision.id().value())
+                        .param("chapter_start", "0").param("chapter_end", "1"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.scenes[0].block_count").value(3))
+                .andExpect(jsonPath("$.scenes[0].total_text_graphemes").value(19))
+                .andExpect(jsonPath("$.scenes[0].text").doesNotExist());
+        commit(revision, body).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("RECENT_READ_REQUIRED"));
+        slice(revision, 0, 1).andExpect(status().isOk())
+                .andExpect(jsonPath("$.blocks[0].index").value(0));
+        commit(revision, body).andExpect(status().isConflict())
+                .andExpect(jsonPath("$.missing_block_ids[0]").value(revision.liveBlocks().get(1).id().value()));
+        slice(revision, 1, 2).andExpect(status().isOk());
