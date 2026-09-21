@@ -1,10 +1,10 @@
 # Novel maintenance / 小說維護 / 小说维护
 
-English: Build once with `./client-cli/install-local.sh`. Run scripts from the repository; `--database` selects an existing SQLite file (default `server/data/storyblock.db`). Keep the API stopped during deletion. Preview is the default; only `--apply` deletes. All selected novel records are deleted in one transaction; other novels and global profiles remain.
+English: Build once with `./client-cli/install-local.sh`. Run scripts from the repository; `--database` selects an existing SQLite file (default `server/data/storyblock.db`). Keep the API stopped during deletion. Preview is the default; only `--apply` deletes. Selected novel records are deleted in one transaction. References from retained data cause a rollback.
 
-繁體：先執行 `./client-cli/install-local.sh` 建置。腳本的 `--database` 指定既有 SQLite，預設為 `server/data/storyblock.db`。刪除時先停止 API。預設只預覽，加入 `--apply` 才執行；所選小說在同一交易中刪除，保留其他小說及全域風格。
+繁體：先執行 `./client-cli/install-local.sh` 建置。腳本的 `--database` 指定既有 SQLite，預設為 `server/data/storyblock.db`。刪除時先停止 API。預設只預覽，加入 `--apply` 才執行；所選小說在同一交易中刪除。若保留資料仍有引用，交易會回滾。
 
-简体：先执行 `./client-cli/install-local.sh` 构建。脚本的 `--database` 指定已有 SQLite，默认为 `server/data/storyblock.db`。删除时先停止 API。默认只预览，加入 `--apply` 才执行；所选小说在同一事务中删除，保留其他小说及全局风格。
+简体：先执行 `./client-cli/install-local.sh` 构建。脚本的 `--database` 指定已有 SQLite，默认为 `server/data/storyblock.db`。删除时先停止 API。默认只预览，加入 `--apply` 才执行；所选小说在同一事务中删除。如保留数据仍有引用，事务会回滚。
 
 ```sh
 ./server/delete-novels.sh --list
