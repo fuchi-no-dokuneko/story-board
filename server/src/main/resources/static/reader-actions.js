@@ -6,6 +6,7 @@
       this.selected = payload;
       status.textContent = '';
       window.StyleComparison?.select();
+      window.QualityReport?.select();
     },
     headers(revision) {
       return { ...authorizationHeaders(state.operatorToken),

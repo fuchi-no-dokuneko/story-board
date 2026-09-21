@@ -19,8 +19,9 @@ public class StyleWorkerApplication {
             StyleWorkerApplication.class
     );
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.setProperty("java.net.preferIPv4Stack", "true");
+        if (args.length > 0 && args[0].equals("--quality")) { QualityCommand.run(args); return; }
         SpringApplication application = new SpringApplication(
                 StyleWorkerApplication.class
         );

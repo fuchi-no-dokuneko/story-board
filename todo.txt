@@ -1,11 +1,12 @@
-ADR-311 product review / 產品重新驗收
+StoryBlock maintenance and quality / 維護與品質分析
 
-Completed / 已完成:
-1. Removed Zombies/TNT from UI, registration, catalog and Skill contracts. 已移除示範專用欄位。
-2. Removed fixed cast/Han restrictions; corrected English spacing and unrelated edit validation. 已解除固定角色／漢字限制，修正英文空格及無關編輯阻擋。
-3. Verified one ordinary novel through real GUI, guarded edits, styles and fresh PDF/TXT downloads. 已用一部普通小說完成真實介面、閱讀限制、風格及匯出驗證。
-4. Fixed PDF page-break fonts; updated coverage and product-review evidence. 已修正換頁字體並更新覆蓋與驗收證據。
+In progress / 進行中:
+1. Fix five audited replay, transfer and image bugs. 修正五項重播、傳輸及圖片錯誤。
+2. Novel deletion with list and preview. 小說刪除清單及預覽。
+3. Portable HTML/PDF batch export. 可攜式 HTML／PDF 批次匯出。
+4. Vendored Chinese tokenizer and five independent quality indices. 納管中文分詞與五項獨立品質指標。
+5. Regression, integration and browser verification. 回歸、整合及瀏覽器驗證。
+6. Merge main if conflict-free, then push without timeout. 無衝突後合併 main，再不限時推送。
 
-Pending implementation/verification: none for this review. 此次產品驗收無待完成實作或驗證。
-Delivery branch / 交付分支: tickets/ADR-311-remove-demo-metadata
-Installed build verified locally; VPS deployment is outside this review. 已驗證本機安裝版；此次未部署 VPS。
+Calibration / 校準:
+Human/AI reference corpora not supplied; implement configurable corpus fitting and explicit missing calibration. 未提供真人／AI語料；實作可設定校準及明確缺資料狀態。

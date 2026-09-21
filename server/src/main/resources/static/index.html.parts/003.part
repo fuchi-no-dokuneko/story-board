@@ -9,6 +9,22 @@
                 </table>
               </div>
             </section>
+            <section class="style-panel" aria-labelledby="quality-title">
+              <h3 id="quality-title">Quality indices / 品質指標</h3>
+              <label for="quality-names">Proper names, comma separated / 專名，以逗號分隔</label>
+              <input id="quality-names" type="text" placeholder="林小雨, 陳明">
+              <button id="analyze-quality" type="button">Analyze quality / 分析品質</button>
+              <button id="download-quality" type="button" disabled>Save report / 儲存報告</button>
+              <p id="quality-status" role="status"></p>
+              <label for="quality-window">Text range / 文本範圍</label>
+              <select id="quality-window"><option value="all">Whole text / 全文</option></select>
+              <div class="style-table-scroll"><table aria-label="Quality indices / 品質指標">
+                <thead><tr><th>Index / 指標</th><th>Value / 數值</th><th>Samples / 樣本</th><th>Percentile / 分位數</th><th>State / 狀態</th></tr></thead>
+                <tbody id="quality-score-rows"></tbody>
+              </table></div>
+              <p id="quality-statistics"></p>
+              <div id="quality-evidence"></div>
+            </section>
             <div class="character-strip">
               <h3>Main characters</h3>
               <ul id="character-list"></ul>
@@ -28,31 +44,3 @@
                 <div><dt>Han text SHA-256</dt><dd id="meta-han-hash"></dd></div>
               </dl>
             </details>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section id="console-view" class="view console-view" aria-labelledby="console-heading" hidden>
-      <div class="console-heading">
-        <div>
-          <h2 id="console-heading">API console</h2>
-          <p class="muted">Direct requests to this StoryBlock instance</p>
-        </div>
-        <div class="quick-requests" aria-label="Quick requests">
-          <button type="button" data-method="GET" data-path="/actuator/health">Health</button>
-          <button type="button" data-method="GET" data-path="/v1/openapi.yaml">OpenAPI</button>
-          <button type="button" data-method="GET" data-path="/v1/admin/novels">Novels</button>
-        </div>
-      </div>
-
-      <div class="console-grid">
-        <section class="request-panel" aria-labelledby="request-title">
-          <h3 id="request-title">Request</h3>
-          <div class="request-line">
-            <select id="method" aria-label="HTTP method">
-              <option>GET</option>
-            </select>
-            <input id="path" value="/actuator/health" aria-label="Request path" spellcheck="false">
-            <button id="send" type="button">Send</button>
-          </div>

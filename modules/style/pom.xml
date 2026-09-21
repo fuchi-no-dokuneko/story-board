@@ -12,6 +12,10 @@
   <dependencies>
     <dependency>
       <groupId>dev.storyblock</groupId>
+      <artifactId>storyblock-nlp-zh</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId>
       <artifactId>storyblock-domain</artifactId>
     </dependency>
     <dependency>
