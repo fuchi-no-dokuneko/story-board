@@ -1,0 +1,14 @@
+        var rhythm = report.metrics().stream().filter(m -> m.metric().equals("rhythm_predictability")).findFirst().orElseThrow();
+        assertEquals(1,rhythm.value(),1e-12);
+        assertEquals(2,report.calibration().shortMaximum()); assertEquals(4,report.calibration().mediumMaximum());
+        assertEquals(15,rhythm.validSamples());
+        String[] sentences = {"Rain fell.","She opened the door.","She walked slowly across the empty yard."};
+        int[] balanced = {0,0,1,0,2,1,1,2,2,0,0,1,0,2,1,1,2,2,0};
+        String text = Arrays.stream(balanced).mapToObj(i -> sentences[i]).collect(java.util.stream.Collectors.joining(" "));
+        var diverse = new QualityAnalyzer().analyze(text,contract,fit);
+        var unpredictable = diverse.metrics().stream().filter(m -> m.metric().equals("rhythm_predictability")).findFirst().orElseThrow();
+        assertEquals(0,unpredictable.value(),1e-12);
+        var identical = new QualityAnalyzer().analyze(human.texts().getFirst(),contract,fit);
+        assertEquals(0,identical.statistics().wordFrequencyJsd(),1e-12);
+    }
+}

@@ -1,0 +1,41 @@
+package dev.storyblock.style.quality;
+
+import dev.storyblock.nlp.zh.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class QualityMetricsTest {
+    private final QualityContract defaults = QualityContract.defaults();
+    private QualityIndexReport report(String text) { return new QualityAnalyzer().analyze(text,defaults,QualityCalibration.empty()); }
+    private QualityMetricResult metric(QualityIndexReport report, String name) {
+        return report.metrics().stream().filter(m -> m.metric().equals(name)).findFirst().orElseThrow();
+    }
+    @Test void overlappingRepeatedPhrasesCountEachLaterWordOnlyOnce() {
+        var report = report("She walked along the silent river bank. She walked along the silent river bank.");
+        var repeated = metric(report,"repeated_phrase_coverage");
+        assertEquals(14,repeated.validSamples()); assertEquals(0.5,repeated.value(),1e-12);
+        assertEquals(1,repeated.evidence().size());
+        assertEquals("She walked along the silent river bank",repeated.evidence().getFirst().text());
+        assertNull(repeated.referencePercentile());
+    }
+    @Test void openingNamesShareACategoryAndSkeletonsCollapseLexicalRuns() {
+        String text = String.join(" ",List.of("Alice quietly opened the door.","Bob quietly opened the gate.",
+                "Alice quietly opened the letter.","Bob quietly opened the window.","Alice quietly opened the box."));
+        var contract = defaults.withNames(Set.of("Alice","Bob"));
+        assertEquals(0.4,metric(report(text),"opening_collision").value(),1e-12);
+        var named = new QualityAnalyzer().analyze(text,contract,QualityCalibration.empty());
+        assertEquals(1,metric(named,"opening_collision").value(),1e-12);
+        var skeleton = report("如果下雨，就回家。如果天晴，就散步。如果有風，就關窗。如果肚餓，就吃飯。如果疲倦，就休息。");
+        assertEquals(0.8,metric(skeleton,"skeleton_reuse").value(),1e-12);
+        assertEquals(5,metric(skeleton,"skeleton_reuse").validSamples());
+    }
+    @Test void crossSentenceSupportCountsLaterOccurrencesInsideTheFirstSentence() {
+        var report = report("She opened the door, she opened the door. She opened the door.");
+        assertEquals(8.0/12,metric(report,"repeated_phrase_coverage").value(),1e-12);
+        assertEquals(0,metric(report("She opened the door, she opened the door."),"repeated_phrase_coverage").value(),1e-12);
+    }
+    @Test void mattrAveragesFixedWordWindows() {
+        var report = report("The quiet river carried old leaves under a pale sky. ".repeat(10));
+        assertEquals(51,report.statistics().mattrWindows());

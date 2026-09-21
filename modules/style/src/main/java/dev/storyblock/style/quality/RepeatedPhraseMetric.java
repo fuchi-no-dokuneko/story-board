@@ -3,14 +3,19 @@ package dev.storyblock.style.quality;
 import java.util.*;
 
 public final class RepeatedPhraseMetric implements QualityMetric {
+    private record First(int sentence, int word) { }
     public String id() { return "repeated_phrase_coverage"; }
     public QualityMetricResult measure(QualityWindow window, QualityContract contract, QualityCalibration calibration) {
-        var first = new HashMap<List<String>, Integer>();
+        var first = new HashMap<List<String>, First>();
+        var crossSentence = new HashSet<List<String>>();
         var covered = new BitSet();
         if (window.words().isEmpty()) return QualityMetricResult.unavailable(id(), QualityMetricResult.Status.INSUFFICIENT_DATA, 0);
         QualityPhrases.each(window, contract, phrase -> {
-            Integer sentence = first.putIfAbsent(phrase.key(), phrase.sentence());
-            if (sentence != null && sentence != phrase.sentence())
+            var original = first.putIfAbsent(phrase.key(), new First(phrase.sentence(),phrase.words().getFirst().wordIndex()));
+            if (original != null && original.sentence() != phrase.sentence()) crossSentence.add(phrase.key());
+        });
+        QualityPhrases.each(window, contract, phrase -> {
+            if (crossSentence.contains(phrase.key()) && first.get(phrase.key()).word() != phrase.words().getFirst().wordIndex())
                 phrase.words().forEach(word -> covered.set(word.wordIndex()));
         });
         var evidence = new ArrayList<QualityEvidence>();

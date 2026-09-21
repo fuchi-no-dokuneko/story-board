@@ -1,0 +1,40 @@
+package dev.storyblock.style.quality;
+
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class QualityCalibrationTest {
+    private final QualityContract contract = QualityContract.defaults();
+    private static QualityCorpusSource source(String id, QualityCorpusSource.Kind kind, String... texts) {
+        return new QualityCorpusSource(id,kind,List.of(texts));
+    }
+    @Test void formulaicWeightUsesEqualSourcesTwoAiSupportAndMaxTokenCoverage() {
+        String phrase = "The light at the end returned.";
+        var human = source("human",QualityCorpusSource.Kind.HUMAN,"Rain darkened every street outside.");
+        var ai1 = source("model-a",QualityCorpusSource.Kind.AI,phrase);
+        var ai2 = source("model-b",QualityCorpusSource.Kind.AI,phrase,"A boat moved slowly through water.");
+        var calibration = QualityCalibrator.fit(List.of(human,ai1,ai2),contract);
+        var report = new QualityAnalyzer().analyze(phrase,contract,calibration);
+        var bias = report.metrics().stream().filter(m -> m.metric().equals("formulaic_bias")).findFirst().orElseThrow();
+        assertEquals(Math.log((0.75+contract.epsilon())/contract.epsilon()),bias.value(),1e-12);
+        var single = QualityCalibrator.fit(List.of(human,ai1),contract);
+        assertTrue(single.phraseWeights().isEmpty());
+        assertTrue(report.statistics().wordFrequencyJsd() > 0 && report.statistics().wordFrequencyJsd() <= 1);
+        assertNotNull(bias.referencePercentile());
+    }
+    @Test void duplicatingDocumentsWithinOneSourceDoesNotIncreaseItsWeight() {
+        var human = source("human",QualityCorpusSource.Kind.HUMAN,"Rain darkened every street outside.");
+        String repeated = "The light at the end returned.";
+        var ai1 = source("a",QualityCorpusSource.Kind.AI,repeated);
+        var ai2 = source("b",QualityCorpusSource.Kind.AI,repeated);
+        var fit = QualityCalibrator.fit(List.of(human,ai1,ai2),contract);
+        var duplicate = source("a",QualityCorpusSource.Kind.AI,repeated,repeated,repeated);
+        assertEquals(fit.phraseWeights(),QualityCalibrator.fit(List.of(human,duplicate,ai2),contract).phraseWeights());
+    }
+    @Test void humanBoundariesRemainFixedWhenTestTextChangesAndAlternationIsPredictable() {
+        var human = source("author",QualityCorpusSource.Kind.HUMAN,
+                "Rain fell. She opened the door. She walked slowly across the empty yard.");
+        var fit = QualityCalibrator.fit(List.of(human),contract);
+        assertEquals(2,fit.shortMaximum()); assertEquals(4,fit.mediumMaximum());
+        var report = new QualityAnalyzer().analyze("Rain fell. She walked slowly across the empty yard. ".repeat(8),contract,fit);
