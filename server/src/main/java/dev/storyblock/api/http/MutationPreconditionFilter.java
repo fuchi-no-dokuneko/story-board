@@ -15,6 +15,12 @@ public final class MutationPreconditionFilter extends OncePerRequestFilter {
   public static final String IDEMPOTENCY_KEY = "Idempotency-Key";
   public static final long MAX_REQUEST_BYTES = 2L * 1024L * 1024L;
 
+  static long requestLimit(HttpServletRequest request) {
+    return "POST".equals(request.getMethod()) && "/v1/imports".equals(request.getRequestURI())
+        ? dev.storyblock.contracts.CanonicalNovelPackage.MAX_PACKAGE_BYTES + 1024L * 1024L
+        : MAX_REQUEST_BYTES;
+  }
+
   static final Set<String> MUTATION_METHODS = Set.of(
       HttpMethod.POST.name(),
       HttpMethod.PUT.name(),
@@ -71,7 +77,7 @@ public final class MutationPreconditionFilter extends OncePerRequestFilter {
         "Request too large",
         "request-too-large",
         "Request body exceeds the configured byte limit.",
-        java.util.Map.of("limit_bytes", MAX_REQUEST_BYTES),
+        java.util.Map.of("limit_bytes", requestLimit(request)),
         null
     ));
   }

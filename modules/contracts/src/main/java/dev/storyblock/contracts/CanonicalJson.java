@@ -12,7 +12,9 @@ import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 public final class CanonicalJson {
-    private static final ObjectMapper MAPPER = JsonMapper.builder()
+    private static final ObjectMapper MAPPER = JsonMapper.builder(tools.jackson.core.json.JsonFactory.builder()
+            .streamReadConstraints(tools.jackson.core.StreamReadConstraints.builder()
+                    .maxStringLength(24 * 1024 * 1024).build()).build())
             .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
             .enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
             .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)

@@ -26,9 +26,9 @@ final class CanonicalTransferServiceRequestExportAction {
               "Image-bearing revisions require canonical-package export"
           );
         }
-        yield NarrativeCanonicalMapper.toCanonical(
-            selectedRevision.manifest()
-        ).envelopeBytes();
+        var selected = selectedRevision.manifest();
+        yield NarrativeCanonicalMapper.toCanonical(new dev.storyblock.domain.RevisionManifest(
+            selected.id(), null, selected.createdAt(), selected.novel())).envelopeBytes();
       }
       case PACKAGE -> self.exportPackage(novelId);
     };

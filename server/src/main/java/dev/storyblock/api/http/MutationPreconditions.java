@@ -58,7 +58,8 @@ final class MutationPreconditions {
     }
 
     long contentLength = request.getContentLengthLong();
-    if (contentLength > MutationPreconditionFilter.MAX_REQUEST_BYTES) {
+    long limit = MutationPreconditionFilter.requestLimit(request);
+    if (contentLength > limit) {
       self.rejectTooLarge(request, response);
       return;
     }
@@ -66,9 +67,9 @@ final class MutationPreconditions {
     HttpServletRequest requestToUse = request;
     if (contentLength < 0) {
       byte[] body = request.getInputStream().readNBytes(
-          Math.toIntExact(MutationPreconditionFilter.MAX_REQUEST_BYTES + 1)
+          Math.toIntExact(limit + 1)
       );
-      if (body.length > MutationPreconditionFilter.MAX_REQUEST_BYTES) {
+      if (body.length > limit) {
         self.rejectTooLarge(request, response);
         return;
       }
