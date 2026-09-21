@@ -22,6 +22,7 @@ public final class StoryBlockCli {
     }
 
     static int run(String[] args, PrintStream output, PrintStream error) {
+        if (args.length > 0 && args[0].equals("export-books")) return BatchBookExport.run(args, output, error);
         if (args.length == 0 || (args.length == 1 && "--help".equals(args[0]))) {
             output.println("Usage: storyblock replay-verify <sqlite-database>");
             return 0;

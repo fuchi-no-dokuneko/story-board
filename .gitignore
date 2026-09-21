@@ -25,3 +25,6 @@ backups/
 *.sqlite-wal
 *.log
 /pom.xml
+/fan-in/
+/fan-out/
+/dev-log/
