@@ -19,7 +19,7 @@ final class ImageUploadServiceInspectFactory {
             throw new IllegalArgumentException("Only PNG and JPEG image uploads are supported");
         }
 
-        try (ImageInputStream input = ImageIO.createImageInputStream(
+        try (ImageInputStream input = new javax.imageio.stream.MemoryCacheImageInputStream(
                 new ByteArrayInputStream(content)
         )) {
             if (input == null) {
@@ -40,6 +40,10 @@ final class ImageUploadServiceInspectFactory {
                             "Image dimensions exceed the safety limit"
                     );
                 }
+                var decoded = reader.read(0);
+                if (decoded == null || decoded.getWidth() != width || decoded.getHeight() != height)
+                    throw new IllegalArgumentException("Image pixels could not be decoded");
+                decoded.flush();
                 return new ImageInfo(expectedMediaType, width, height);
             } finally {
                 reader.dispose();

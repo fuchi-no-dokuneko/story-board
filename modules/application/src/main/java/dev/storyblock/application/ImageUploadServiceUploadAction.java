@@ -30,6 +30,11 @@ final class ImageUploadServiceUploadAction {
         }
 
         ImageInfo info = ImageUploadService.inspect(safeContent);
+        Ids.ArtifactId artifactId = new Ids.ArtifactId(StableIds.derive(
+                "art", novelId.value(), "image-upload:" + idempotencyKey));
+        Result prior = ImageUploadReplay.find(self.store, artifactId, novelId,
+                expectedHeadHash, idempotencyKey, safeContent, info);
+        if (prior != null) return prior;
         RevisionRef head = self.store.getHead(novelId);
         if (!head.contentHash().equals(expectedHeadHash)) {
             throw new StaleHeadException(
@@ -37,9 +42,6 @@ final class ImageUploadServiceUploadAction {
                     head
             );
         }
-        Ids.ArtifactId artifactId = new Ids.ArtifactId(StableIds.derive(
-                "art", novelId.value(), "image-upload:" + idempotencyKey
-        ));
         StoredArtifact artifact = new StoredArtifact(
                 artifactId,
                 novelId,
