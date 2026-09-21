@@ -26,6 +26,7 @@
     <module>modules/validator</module>
     <module>modules/detector</module>
     <module>modules/style</module>
+    <module>modules/nlp-zh</module>
     <module>modules/security</module>
     <module>modules/storage-api</module>
     <module>modules/storage-sqlite</module>
@@ -52,6 +53,11 @@
     <dependencies>
       <dependency>
         <groupId>dev.storyblock</groupId>
+        <artifactId>storyblock-nlp-zh</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>dev.storyblock</groupId>
         <artifactId>storyblock-domain</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -70,9 +76,3 @@
         <artifactId>storyblock-renderer</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency>
-        <groupId>dev.storyblock</groupId>
-        <artifactId>storyblock-validator</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>

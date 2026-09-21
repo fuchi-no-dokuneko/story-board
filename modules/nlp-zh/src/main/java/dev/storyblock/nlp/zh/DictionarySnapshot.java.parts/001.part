@@ -1,0 +1,58 @@
+package dev.storyblock.nlp.zh;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.zip.GZIPInputStream;
+
+/** Jieba Trie/DAG dictionary adaptation. Apache-2.0; see META-INF/licenses/nlp-zh. */
+final class DictionarySnapshot {
+    private final int[] first, next, code;
+    private final double[] frequency;
+    private final Map<Integer, Integer> roots;
+    final double unknown;
+
+    private DictionarySnapshot(Builder b) {
+        first = Arrays.copyOf(b.first, b.size); next = Arrays.copyOf(b.next, b.size);
+        code = Arrays.copyOf(b.code, b.size); frequency = Arrays.copyOf(b.frequency, b.size);
+        roots = Map.copyOf(b.roots);
+        unknown = -Math.log(b.total);
+        for (int i = 0; i < frequency.length; i++)
+            frequency[i] = frequency[i] > 0 ? Math.log(frequency[i]) + unknown : Double.NEGATIVE_INFINITY;
+    }
+    int child(int parent, int cp) {
+        if (parent == 0) return roots.getOrDefault(cp, 0);
+        for (int n = first[parent]; n != 0; n = next[n]) if (code[n] == cp) return n;
+        return 0;
+    }
+    double score(int node) { return frequency[node]; }
+    static BufferedReader asset(String name) throws IOException {
+        var stream = DictionarySnapshot.class.getResourceAsStream("/nlp-zh/" + name + ".gz");
+        if (stream == null) throw new IOException("Missing bundled tokenizer asset: " + name);
+        return new BufferedReader(new InputStreamReader(new GZIPInputStream(stream), StandardCharsets.UTF_8));
+    }
+    static DictionarySnapshot load() {
+        var builder = new Builder();
+        try (var reader = asset("dict.txt.big")) {
+            for (String line; (line = reader.readLine()) != null;) {
+                String[] fields = line.split(" ");
+                if (fields.length >= 2) builder.add(fields[0], Double.parseDouble(fields[1]));
+            }
+            return new DictionarySnapshot(builder);
+        } catch (IOException e) { throw new UncheckedIOException(e); }
+    }
+    private static final class Builder {
+        int[] first = new int[1 << 20], next = new int[first.length], code = new int[first.length];
+        double[] frequency = new double[first.length];
+        int size = 1;
+        double total;
+        final Map<Integer, Integer> roots = new HashMap<>();
+        void add(String word, double count) {
+            if (count <= 0) return;
+            int parent = 0;
+            for (int cp : word.codePoints().toArray()) {
+                int found = parent == 0 ? roots.getOrDefault(cp, 0) : first[parent];
+                if (parent != 0) while (found != 0 && code[found] != cp) found = next[found];
+                if (found == 0) {
+                    if (size == first.length) {
+                        int cap = size * 2;

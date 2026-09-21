@@ -1,0 +1,55 @@
+package dev.storyblock.nlp.zh;
+
+import java.io.*;
+import java.util.*;
+import java.util.function.BiConsumer;
+
+/** Adapted from huaban/jieba-analysis FinalSeg (Apache-2.0), using code points. */
+final class HmmSegmenter {
+    // B, M, E, S; immutable probabilities shared by every analysis.
+    private static final double MIN = -3.14e100;
+    private static final int[][] PREV = {{2,3},{1,0},{0,1},{3,2}};
+    private static final double[] START = {-0.26268660809250016, MIN, MIN, -1.4652633398537678};
+    private static final double[][] TRANS = {
+        {MIN,-0.916290731874155,-0.510825623765990,MIN},
+        {MIN,-1.2603623820268226,-0.33344856811948514,MIN},
+        {-0.5897149736854513,MIN,MIN,-0.8085250474669937},
+        {-0.7211965654669841,MIN,MIN,-0.6658631448798212}};
+    private final List<Map<Integer, Double>> emission;
+    HmmSegmenter() {
+        var maps = new ArrayList<Map<Integer, Double>>();
+        for (int i = 0; i < 4; i++) maps.add(new HashMap<>());
+        try (var reader = DictionarySnapshot.asset("prob_emit.txt")) {
+            int state = -1;
+            for (String line; (line = reader.readLine()) != null;) {
+                if (line.length() == 1) state = "BMES".indexOf(line);
+                else if (!line.isBlank()) {
+                    var fields = line.split("\t");
+                    maps.get(state).put(fields[0].codePointAt(0), Double.parseDouble(fields[1]));
+                }
+            }
+        } catch (IOException e) { throw new UncheckedIOException(e); }
+        emission = maps.stream().map(Map::copyOf).toList();
+    }
+    void cut(int[] text, int start, int end, BiConsumer<Integer, Integer> output) {
+        int cursor = start;
+        while (cursor < end) {
+            if (!known(text[cursor])) { output.accept(cursor, cursor + 1); cursor++; continue; }
+            int last = cursor + 1;
+            while (last < end && known(text[last])) last++;
+            viterbi(text, cursor, last, output); cursor = last;
+        }
+    }
+    private boolean known(int cp) { return emission.stream().anyMatch(m -> m.containsKey(cp)); }
+    private void viterbi(int[] text, int start, int end, BiConsumer<Integer, Integer> output) {
+        int count = end - start;
+        byte[][] route = new byte[count][4];
+        double[] previous = new double[4];
+        for (int s = 0; s < 4; s++) previous[s] = START[s] + emission.get(s).getOrDefault(text[start], MIN);
+        for (int i = 1; i < count; i++) {
+            var current = new double[4];
+            for (int s = 0; s < 4; s++) {
+                double best = Double.NEGATIVE_INFINITY;
+                for (int p : PREV[s]) {
+                    double value = previous[p] + TRANS[p][s];
+                    if (value >= best) { best = value; route[i][s] = (byte) p; }

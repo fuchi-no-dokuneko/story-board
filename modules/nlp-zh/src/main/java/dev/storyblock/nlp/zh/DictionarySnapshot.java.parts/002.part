@@ -1,0 +1,13 @@
+                        first = Arrays.copyOf(first, cap); next = Arrays.copyOf(next, cap);
+                        code = Arrays.copyOf(code, cap); frequency = Arrays.copyOf(frequency, cap);
+                    }
+                    found = size++; code[found] = cp;
+                    next[found] = first[parent]; first[parent] = found;
+                    if (parent == 0) roots.put(cp, found);
+                }
+                parent = found;
+            }
+            total += count - frequency[parent]; frequency[parent] = count;
+        }
+    }
+}

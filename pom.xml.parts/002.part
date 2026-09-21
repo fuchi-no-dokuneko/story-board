@@ -1,3 +1,9 @@
+      <dependency>
+        <groupId>dev.storyblock</groupId>
+        <artifactId>storyblock-validator</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>dev.storyblock</groupId>
         <artifactId>storyblock-detector</artifactId>
         <version>${project.version}</version>
