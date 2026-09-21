@@ -3,11 +3,14 @@ import dev.storyblock.domain.*;
 import dev.storyblock.storage.StoredOperation;
 
 final class ReplayStep {
-  static RevisionManifest apply(Ids.NovelId novelId, long expectedSequence, StoredOperation stored, RevisionManifest current, String currentHash, NarrativeEditor editor) {
+  static RevisionManifest apply(Ids.NovelId novelId, long expectedSequence, StoredOperation stored, RevisionManifest current, String currentHash, NarrativeEditor editor, RevisionManifest expected) {
       if (stored.sequence() != expectedSequence) {
         throw ReplayServiceFailure.failure(novelId, expectedSequence, "Operation sequence is not contiguous");
       }
       EditOperation operation = stored.operation();
+      if (!stored.resultRevisionId().equals(expected.id())
+          || !stored.committedAt().equals(expected.createdAt()))
+          throw ReplayServiceFailure.failure(novelId, expectedSequence, "Replay result identity differs");
       if (!operation.context().novelId().equals(novelId)
           || !operation.context().baseRevisionId().equals(current.id())
           || !operation.context().expectedHeadHash().equals(currentHash)) {
@@ -18,11 +21,10 @@ final class ReplayStep {
         );
       }
       try {
-        current = editor.apply(
+        current = ReplayApplication.apply(editor,
             current,
             operation,
-            stored.resultRevisionId(),
-            stored.committedAt()
+            expected
         );
       } catch (RuntimeException exception) {
         throw new ReplayException(

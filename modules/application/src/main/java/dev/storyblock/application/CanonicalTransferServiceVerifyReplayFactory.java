@@ -36,11 +36,10 @@ final class CanonicalTransferServiceVerifyReplayFactory {
       CanonicalNovelPackage.RevisionEntry expected = document.revisions().get(index + 1);
       final RevisionManifest candidate;
       try {
-        candidate = editor.apply(
+        candidate = ReplayApplication.apply(editor,
             current,
             operation.operation(),
-            operation.resultRevisionId(),
-            operation.committedAt()
+            NarrativeCanonicalMapper.fromCanonical(expected.revision())
         );
       } catch (RuntimeException failure) {
         throw new CanonicalPackageException(

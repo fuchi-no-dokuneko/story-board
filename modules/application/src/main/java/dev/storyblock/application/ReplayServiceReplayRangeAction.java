@@ -30,7 +30,8 @@ final class ReplayServiceReplayRangeAction {
     NarrativeEditor editor = new NarrativeEditor(revisionLookup);
     long expectedSequence = startingSequence + 1;
     for (StoredOperation stored : operations) {
-      current = ReplayStep.apply(novelId, expectedSequence, stored, current, currentHash, editor);
+      StoredRevision relational = self.store.getRevisionAtSequence(novelId, expectedSequence);
+      current = ReplayStep.apply(novelId, expectedSequence, stored, current, currentHash, editor, relational.manifest());
       currentHash = NarrativeCanonicalMapper.toCanonical(current).contentHash();
       if (!currentHash.equals(stored.resultHash())) {
         throw ReplayServiceFailure.failure(
@@ -39,7 +40,6 @@ final class ReplayServiceReplayRangeAction {
             "Operation result hash does not match replayed content"
         );
       }
-      StoredRevision relational = self.store.getRevisionAtSequence(novelId, expectedSequence);
       if (!relational.manifest().equals(current)
           || !relational.contentHash().equals(currentHash)) {
         throw ReplayServiceFailure.failure(
