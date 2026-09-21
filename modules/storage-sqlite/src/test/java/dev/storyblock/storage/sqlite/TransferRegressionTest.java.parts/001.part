@@ -1,0 +1,49 @@
+package dev.storyblock.storage.sqlite;
+
+import dev.storyblock.application.*;
+import dev.storyblock.contracts.*;
+import dev.storyblock.domain.*;
+import java.nio.file.Path;
+import java.time.Instant;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import static org.junit.jupiter.api.Assertions.*;
+
+class TransferRegressionTest {
+    @TempDir Path directory;
+    @Test void collisionHistoryReplaysAfterExportImportAndReopen() throws Exception {
+        byte[] document;
+        var base = RevisionStoreTestFixture.genesis();
+        var operation = RevisionStoreTestFixture.replace(base,"collision-edit","第二句寫進了記憶。" );
+        var block = base.liveBlocks().getFirst();
+        String key = "blv\0" + operation.context().operationId().value() + "\0block-version:" + block.id().value();
+        String occupied = ShortIds.candidate("blv",key,0);
+        var head = Ids.RevisionId.create();
+        try (var source = SqliteRevisionStore.open(directory.resolve("source.db"))) {
+            source.createNovel(base,RevisionStoreTestFixture.hash(base));
+            source.write(connection -> {
+                try (var insert = connection.prepareStatement("INSERT INTO short_identifiers(identifier,allocation_key) VALUES (?,?)")) {
+                    insert.setString(1,occupied); insert.setString(2,"earlier-unrelated-allocation"); insert.executeUpdate();
+                }
+                return null;
+            });
+            try (var scope = ShortIdScope.open(new SqliteShortIds(source))) {
+                new CommitService(source).commit(operation,head,base.createdAt().plusSeconds(1));
+            }
+            var stored = source.getRevision(base.novel().id(),head);
+            assertNotEquals(occupied,stored.manifest().liveBlocks().getFirst().versionId().value());
+            assertEquals(stored.contentHash(),new ReplayService(source).materializeFull(base.novel().id(),head).contentHash());
+            document = new CanonicalTransferService(source).exportPackage(base.novel().id());
+        }
+        Path targetPath = directory.resolve("target.db");
+        try (var target = SqliteRevisionStore.open(targetPath)) {
+            try (var scope = ShortIdScope.open(new SqliteShortIds(target))) {
+                new CanonicalTransferService(target).importDocument(CanonicalExportFormat.PACKAGE,document,"restore",Instant.now());
+            }
+        }
+        try (var reopened = SqliteRevisionStore.open(targetPath)) {
+            assertTrue(new ReplayService(reopened).verifyAllHeads().valid());
+            assertArrayEquals(document,new CanonicalTransferService(reopened).exportPackage(base.novel().id()));
+        }
+    }
+    @Test void editedRevisionExportsAsImportableSnapshotWithoutChangingSourceHistory() throws Exception {

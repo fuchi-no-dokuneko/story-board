@@ -1,0 +1,20 @@
+        var base = RevisionStoreTestFixture.genesis();
+        try (var source = SqliteRevisionStore.open(directory.resolve("snapshot-source.db"));
+             var target = SqliteRevisionStore.open(directory.resolve("snapshot-target.db"))) {
+            source.createNovel(base,RevisionStoreTestFixture.hash(base));
+            var operation = RevisionStoreTestFixture.replace(base,"edit","她終於回來了。" );
+            var head = Ids.RevisionId.create();
+            new CommitService(source).commit(operation,head,base.createdAt().plusSeconds(1));
+            var stored = source.getRevision(base.novel().id(),head);
+            var job = new CanonicalTransferService(source).requestExport(base.novel().id(),head,stored.contentHash(),
+                    CanonicalExportFormat.REVISION,"snapshot",Instant.now());
+            byte[] exported = source.getArtifact(job.job().resultArtifactId()).content();
+            new CanonicalTransferService(target).importDocument(CanonicalExportFormat.REVISION,exported,"restore-snapshot",Instant.now());
+            var restored = target.getRevision(base.novel().id(),head).manifest();
+            assertNull(restored.parentId());
+            assertEquals(stored.manifest().novel(),restored.novel());
+            assertEquals(base.id(),source.getRevision(base.novel().id(),head).manifest().parentId());
+            assertTrue(new ReplayService(target).verifyAllHeads().valid());
+        }
+    }
+}
