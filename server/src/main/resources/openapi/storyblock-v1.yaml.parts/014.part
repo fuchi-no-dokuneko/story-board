@@ -37,6 +37,36 @@
           application/json:
             schema:
               $ref: '#/components/schemas/StyleComparisonRequest'
+  /novels/{novelId}/quality-reports:
+    post:
+      operationId: novels_quality-reports_create
+      x-required-scopes: ["style:analyze"]
+      summary: Independent quality indices with source evidence and reference percentiles.
+      parameters:
+      - name: novelId
+        required: true
+        schema:
+          type: string
+          pattern: ^nov_[A-Za-z0-9]{5}$
+        in: path
+      - $ref: '#/components/parameters/IfMatch'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Fresh uncached comparison returned after background calculation;
+            no task identifier or polling.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityReportResponse'
+        default:
+          $ref: '#/components/responses/Problem'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityReportRequest'
 components:
   securitySchemes:
     bearerAuth:
@@ -53,55 +83,6 @@ components:
         pattern: '^nov_[A-Za-z0-9]{5}$'
     RevisionId:
       name: revisionId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^rev_[A-Za-z0-9]{5}$'
-    AnalysisId:
-      name: analysisId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^ana_[0-9a-f-]{36}$'
-    ProposalId:
-      name: proposalId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^prp_[0-9a-f-]{36}$'
-    MonitorRunId:
-      name: monitorRunId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^mrun_[0-9a-f-]{36}$'
-    ProfileId:
-      name: profileId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^spf_[0-9a-f-]{36}$'
-    ProfileVersionId:
-      name: versionId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^spv_[0-9a-f-]{36}$'
-    JobId:
-      name: jobId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^job_[0-9a-f-]{36}$'
-    KeyId:
-      name: keyId
       in: path
       required: true
       schema:

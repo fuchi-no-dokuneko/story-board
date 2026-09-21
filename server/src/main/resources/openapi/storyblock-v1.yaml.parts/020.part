@@ -1,89 +1,92 @@
-            $ref: '#/components/schemas/StyleChannelDistance'
-          minItems: 5
-          maxItems: 5
-        reference_metadata:
-          const: text_only
-      required:
-      - id
-      - name
-      - description
-      - language
-      - status
-      - reference_file_count
-      - reference_graphemes
-      - benchmark_updated_at
-      - scores
-      - reference_metadata
-      additionalProperties: false
-      title: StyleComparisonItem
-      description: Five raw channel distances, not quality percentages; smaller means
-        closer. TXT has no narrative metadata.
-      x-confidence: confirmed-from-code
-      x-source:
-      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
-      - server/src/main/java/dev/storyblock/api/style
-      examples:
-      - id: lyrical
-        name: 抒情敘事
-        description: 環境與內心描寫
-        language: zh-Hant
-        status: ready
-        reference_file_count: 1
-        reference_graphemes: 100
-        benchmark_updated_at: '2026-09-12T12:00:00Z'
-        scores:
-        - channel: surface
-          channel_version: example-1
-          primary_metric: jensen_shannon_distance
-          primary_distance: 0
-          independent_gate_evidence: true
-          diagnostics: {}
-        - channel: grammar
-          channel_version: example-1
-          primary_metric: jensen_shannon_distance
-          primary_distance: 0
-          independent_gate_evidence: true
-          diagnostics: {}
-        - channel: rhythm
-          channel_version: example-1
-          primary_metric: wasserstein_distance
-          primary_distance: 0
-          independent_gate_evidence: true
-          diagnostics: {}
-        - channel: narrative
-          channel_version: example-1
-          primary_metric: robust_l1_input
-          primary_distance: 0
-          independent_gate_evidence: true
-          diagnostics: {}
-        - channel: lexical
-          channel_version: example-1
-          primary_metric: robust_l1_input
-          primary_distance: 0
-          independent_gate_evidence: true
-          diagnostics: {}
-        reference_metadata: text_only
-    StyleComparisonResponse:
-      type: object
-      properties:
-        novel_id:
-          type: string
-          pattern: ^nov_[A-Za-z0-9]{5}$
-        revision_id:
-          type: string
-          pattern: ^rev_[A-Za-z0-9]{5}$
-        revision_hash:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-        comparisons:
-          type: array
-          items:
-            $ref: '#/components/schemas/StyleComparisonItem'
-          minItems: 1
-      required:
-      - novel_id
-      - revision_id
-      - revision_hash
-      - comparisons
-      additionalProperties: false
-      title: StyleComparisonResponse
+          "metrics",
+          "statistics",
+          "windows"
+        ],
+        "additionalProperties": false,
+        "title": "QualityIndexReport",
+        "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+        "x-confidence": "confirmed-from-code",
+        "x-source": [
+          "modules/style/src/main/java/dev/storyblock/style/quality",
+          "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+        ],
+        "examples": [
+          {
+            "contract": {
+              "windowWords": 256,
+              "strideWords": 128,
+              "minPhraseWords": 4,
+              "maxPhraseWords": 8,
+              "openingWords": 3,
+              "minOpeningSentences": 5,
+              "minSkeletonSentences": 5,
+              "minRhythmTransitions": 10,
+              "mattrWords": 50,
+              "evidenceLimit": 20,
+              "epsilon": 0.001,
+              "functionWords": [
+                "如果",
+                "就"
+              ],
+              "properNames": []
+            },
+            "words": 1,
+            "sentences": 1,
+            "calibration": {
+              "humanSources": 0,
+              "aiSources": 0,
+              "shortMaximum": null,
+              "mediumMaximum": null
+            },
+            "metrics": [
+              {
+                "metric": "opening_collision",
+                "status": "INSUFFICIENT_DATA",
+                "value": null,
+                "validSamples": 1,
+                "referencePercentile": null,
+                "evidence": []
+              }
+            ],
+            "statistics": {
+              "wordFrequencyJsd": null,
+              "mattr": null,
+              "mattrWindows": 0
+            },
+            "windows": [
+              {
+                "start": 0,
+                "end": 4,
+                "words": 1,
+                "sentences": 1,
+                "metrics": [
+                  {
+                    "metric": "opening_collision",
+                    "status": "INSUFFICIENT_DATA",
+                    "value": null,
+                    "validSamples": 1,
+                    "referencePercentile": null,
+                    "evidence": []
+                  }
+                ],
+                "statistics": {
+                  "wordFrequencyJsd": null,
+                  "mattr": null,
+                  "mattrWindows": 0
+                }
+              }
+            ]
+          }
+        ]
+      }
+    QualityReportRequest:
+      {
+        "type": "object",
+        "properties": {
+          "revision_id": {
+            "type": "string",
+            "pattern": "^rev_[A-Za-z0-9]{5}$"
+          },
+          "proper_names": {
+            "type": "array",
+            "items": {

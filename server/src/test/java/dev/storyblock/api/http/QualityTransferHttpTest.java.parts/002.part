@@ -1,0 +1,22 @@
+                .contentType("application/json").content(body)).andExpect(status().isCreated());
+        assertArrayEquals(content,new CanonicalTransferService(target).exportPackage(base.novel().id()));
+        assertTrue(new ReplayService(target).verifyAllHeads().valid());
+    }
+    @Test void browserQualityRequestReturnsIndependentReportAndEvidenceWithoutChangingHead() throws Exception {
+        var revision = NarrativeHttpFixture.revision(false);
+        String hash = NarrativeHttpFixture.hash(revision);
+        target.createNovel(revision,hash);
+        MvcResult pending = mvc.perform(post("/v1/novels/{novelId}/quality-reports",revision.novel().id().value())
+                .header("If-Match","\""+hash+"\"").header("Idempotency-Key","quality-report")
+                .contentType("application/json").content(CanonicalJson.bytes(Map.of("proper_names",List.of("小雨")))))
+                .andExpect(request().asyncStarted()).andReturn();
+        mvc.perform(asyncDispatch(pending)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.quality_report.metrics.length()").value(5))
+                .andExpect(jsonPath("$.quality_report.calibration.humanSources").value(0))
+                .andExpect(jsonPath("$.quality_report.metrics[1].status").value("INSUFFICIENT_DATA"))
+                .andExpect(jsonPath("$.block_spans.length()").value(3))
+                .andExpect(jsonPath("$.offset_unit").value("UTF-16"));
+        assertEquals(revision.id(),target.getHead(revision.novel().id()).revisionId());
+        assertEquals(0,target.operationCount(revision.novel().id()));
+    }
+}

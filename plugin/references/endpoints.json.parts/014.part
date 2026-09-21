@@ -1,3 +1,8 @@
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
+        "server/src/main/java/dev/storyblock/api/http/AccessKeyController.java",
         "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
         "server/src/main/resources/openapi/storyblock-v1.yaml",
         "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
@@ -90,9 +95,3 @@
       "errors": [
         {
           "status": "default",
-          "contentType": "application/problem+json",
-          "dto": "ApiProblem"
-        }
-      ],
-      "confidence": "confirmed-from-code",
-      "source": [

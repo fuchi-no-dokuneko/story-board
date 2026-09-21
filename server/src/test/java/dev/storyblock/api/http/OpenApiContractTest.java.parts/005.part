@@ -1,3 +1,6 @@
+                list(operation("POST /imports").get("x-required-scopes"))
+        );
+        assertEquals(
                 List.of("worker:execute"),
                 list(operation("POST /internal/jobs/claims").get("x-required-scopes"))
         );
@@ -51,5 +54,3 @@
         );
         assertEquals(
                 List.of(
-                        "novel:read", "novel:analyze", "novel:propose",
-                        "novel:commit", "novel:admin", "style:analyze",

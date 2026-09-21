@@ -1,3 +1,6 @@
+        ), strings(finding.get("required")));
+        assertEquals(Set.of(
+                "LOCATION_CHANGED_WITHOUT_TRANSITION",
                 "CHARACTER_APPEARED_WITHOUT_ENTER",
                 "CHARACTER_DISAPPEARED_WITHOUT_EXIT",
                 "WEATHER_CHANGED_WITHOUT_EVIDENCE",
@@ -52,9 +55,3 @@
         );
         assertTrue(schemas.containsKey("MonitorEvidence"));
         assertTrue(schemas.containsKey("MonitorFindingOutput"));
-        assertTrue(schemas.containsKey("MonitorProposedOperationOutput"));
-    }
-
-    @Test
-    void styleContractMakesPromotionExplicitAndKlDiagnosticOnly() {
-        assertEquals(

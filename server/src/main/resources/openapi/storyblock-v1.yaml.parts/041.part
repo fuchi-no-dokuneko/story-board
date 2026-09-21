@@ -1,78 +1,84 @@
-          type: boolean
-        above_q99:
-          type: boolean
-      additionalProperties: false
-    StyleWindowScore:
+              $ref: "#/components/schemas/StyleAnalysisResult"
+            trace_uri:
+              type: string
+              format: uri-reference
+            windows_uri:
+              type: string
+              format: uri-reference
+      unevaluatedProperties: false
+    StyleAnalysisResult:
       type: object
-      required: [window, profile_selection, distance_report, channels]
+      required: [analysis_id, completed_at, job_id, result_hash, summary, trace_artifact_id, trace_content_hash, trace_expires_at, trace_uncompressed_bytes]
       properties:
-        window:
-          $ref: "#/components/schemas/StyleWindow"
-        profile_selection:
-          $ref: "#/components/schemas/StyleProfileSelection"
-        distance_report:
-          $ref: "#/components/schemas/StyleDistanceReport"
-        channels:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
+        completed_at:
+          type: string
+          format: date-time
+        job_id:
+          type: string
+          pattern: '^job_[0-9a-f-]{36}$'
+        result_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        summary:
+          $ref: "#/components/schemas/StyleAnalysisSummary"
+        trace_artifact_id:
+          type: string
+          pattern: '^art_[0-9a-f-]{36}$'
+        trace_content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        trace_expires_at:
+          type: string
+          format: date-time
+        trace_uncompressed_bytes:
+          type: integer
+          minimum: 2
+          maximum: 16777216
+      additionalProperties: false
+    StyleAnalysisSummary:
+      type: object
+      required: [analyzed_block_count, calibrated_window_count, decision_counts, operational_window_count]
+      properties:
+        analyzed_block_count:
+          type: integer
+          minimum: 1
+          maximum: 1000
+        calibrated_window_count:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        decision_counts:
+          type: object
+          properties:
+            normal: {type: integer, minimum: 0}
+            warning: {type: integer, minimum: 0}
+            rewrite_candidate: {type: integer, minimum: 0}
+            topic_shift_only: {type: integer, minimum: 0}
+            low_confidence: {type: integer, minimum: 0}
+          additionalProperties: false
+        operational_window_count:
+          type: integer
+          minimum: 0
+          maximum: 1000
+      additionalProperties: false
+    StyleAnalysisWindowFinding:
+      type: object
+      required: [block_ids, can_trigger_rewrite, confidence, decision_state, ordinal, payload, window_id]
+      properties:
+        block_ids:
           type: array
-          maxItems: 6
+          minItems: 1
+          uniqueItems: true
           items:
-            $ref: "#/components/schemas/StyleCalibratedChannelScore"
-      additionalProperties: false
-    StyleAnomalyDecision:
-      type: object
-      required: [state, reason, confidence, operational_window_id, independent_q99_channels, sustaining_window_ids, localized_micro_window_ids, intentional_shift_adjusted, can_trigger_rewrite]
-      properties:
-        state:
-          type: string
-          enum: [normal, warning, rewrite_candidate, topic_shift_only, low_confidence]
-        reason:
-          type: string
-          enum: [within_calibrated_range, insufficient_calibration, token_channel_only, multi_channel_q95, sustained_multi_channel_q99, intentional_style_shift]
+            type: string
+            pattern: '^blk_[A-Za-z0-9]{5}$'
+        can_trigger_rewrite:
+          type: boolean
         confidence:
           type: string
           enum: [calibrated, low_confidence]
-        operational_window_id:
+        decision_state:
           type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        independent_q99_channels:
-          type: array
-          uniqueItems: true
-          maxItems: 5
-          description: Independently gated calibrated channels above q99 in the operational window.
-          items:
-            type: string
-            enum: [surface, grammar, rhythm, narrative, lexical]
-        sustaining_window_ids:
-          type: array
-          uniqueItems: true
-          items:
-            type: string
-            pattern: '^sha256:[0-9a-f]{64}$'
-        localized_micro_window_ids:
-          type: array
-          uniqueItems: true
-          description: Localization evidence only; never sufficient for rewrite eligibility.
-          items:
-            type: string
-            pattern: '^sha256:[0-9a-f]{64}$'
-        intentional_shift_adjusted:
-          type: boolean
-        can_trigger_rewrite:
-          type: boolean
-          description: True only for a calibrated sustained rewrite_candidate.
-      additionalProperties: false
-    ExportRequest:
-      type: object
-      required: [revision_id, format]
-      properties:
-        revision_id:
-          type: string
-        format:
-          type: string
-          enum: [canonical-revision, canonical-package]
-      additionalProperties: false
-    AccessKeyRequest:
-      type: object
-      required: [actor_id, scopes, expires_at]
-      properties:
-        actor_id:

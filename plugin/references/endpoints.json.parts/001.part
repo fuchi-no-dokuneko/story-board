@@ -12,7 +12,8 @@
       "If-Match",
       "Idempotency-Key"
     ],
-    "problemDto": "ApiProblem"
+    "problemDto": "ApiProblem",
+    "maximumImportBodyBytes": 68157440
   },
   "endpoints": [
     {
@@ -89,4 +90,3 @@
         {
           "name": "Authorization",
           "required": false,
-          "description": "Bearer owner token unless trusted-LAN mode authenticates the reachable client as owner.",

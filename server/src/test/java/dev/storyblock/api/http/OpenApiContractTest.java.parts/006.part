@@ -1,3 +1,5 @@
+                        "novel:read", "novel:analyze", "novel:propose",
+                        "novel:commit", "novel:admin", "style:analyze",
                         "style:admin", "rewrite:propose", "monitor:submit",
                         "worker:execute"
                 ),
@@ -59,6 +61,3 @@
                 "finding_id", "code", "severity", "revision_id", "revision_hash",
                 "rule_version", "affected_block_ids", "affected_scene_ids",
                 "context_block_ids", "evidence"
-        ), strings(finding.get("required")));
-        assertEquals(Set.of(
-                "LOCATION_CHANGED_WITHOUT_TRANSITION",

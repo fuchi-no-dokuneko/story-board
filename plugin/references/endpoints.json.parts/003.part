@@ -1,3 +1,6 @@
+      "id": "metrics.read",
+      "method": "GET",
+      "path": "/actuator/metrics/{metricName}",
       "summary": "Read one exposed Micrometer metric",
       "auth": "operator-owner",
       "scopes": [],
@@ -94,8 +97,3 @@
           "required": false,
           "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
           "schema": {
-            "type": "string",
-            "writeOnly": true
-          }
-        },
-        {

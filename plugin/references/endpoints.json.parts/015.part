@@ -1,3 +1,9 @@
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
+      "confidence": "confirmed-from-code",
+      "source": [
         "server/src/main/java/dev/storyblock/api/http/CommitController.java",
         "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
         "server/src/main/resources/openapi/storyblock-v1.yaml",
@@ -88,5 +94,3 @@
       ],
       "confidence": "confirmed-from-code",
       "source": [
-        "server/src/main/java/dev/storyblock/api/http/DetectorController.java",
-        "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",

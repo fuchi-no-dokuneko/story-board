@@ -27,3 +27,5 @@
 /WorkerResultRequest.schema.json
 /StyleComparisonResponse.schema.json
 /StyleComparisonItem.schema.json
+/QualityIndexReport.schema.json
+/QualityReportResponse.schema.json

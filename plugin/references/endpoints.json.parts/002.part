@@ -1,3 +1,4 @@
+          "description": "Bearer owner token unless trusted-LAN mode authenticates the reachable client as owner.",
           "schema": {
             "type": "string",
             "writeOnly": true
@@ -88,6 +89,3 @@
       ]
     },
     {
-      "id": "metrics.read",
-      "method": "GET",
-      "path": "/actuator/metrics/{metricName}",

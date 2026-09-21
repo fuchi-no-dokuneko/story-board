@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "start": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "end": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "text": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "start",
+    "end",
+    "text",
+    "reason"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/QualityEvidence.schema.json",
+  "title": "QualityEvidence",
+  "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "modules/style/src/main/java/dev/storyblock/style/quality",
+    "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+  ],
+  "examples": [
+    {
+      "start": 0,
+      "end": 4,
+      "text": "下雨了。",
+      "reason": "repeated opening"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+      ],
+      "confidence": "confirmed-from-code",
       "source": [
         "server/src/main/java/dev/storyblock/api/http/StyleProfileController.java",
         "server/src/main/java/dev/storyblock/api/http/ApiSecurityConfiguration.java",
@@ -84,4 +86,3 @@
       "roles": [],
       "pathParameters": [
         {
-          "name": "profileId",

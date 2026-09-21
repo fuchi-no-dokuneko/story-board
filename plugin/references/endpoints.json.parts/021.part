@@ -1,3 +1,12 @@
+            "type": "string",
+            "pattern": "^nov_[A-Za-z0-9]{5}$"
+          }
+        }
+      ],
+      "queryParameters": [],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
           "required": false,
           "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
           "schema": {
@@ -84,11 +93,3 @@
       "scopes": [
         "novel:read"
       ],
-      "roles": [],
-      "pathParameters": [
-        {
-          "name": "novelId",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "pattern": "^nov_[A-Za-z0-9]{5}$"

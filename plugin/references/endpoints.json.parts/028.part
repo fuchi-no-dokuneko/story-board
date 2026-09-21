@@ -1,3 +1,6 @@
+        {
+          "name": "Authorization",
+          "required": false,
           "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
           "schema": {
             "type": "string",
@@ -80,6 +83,3 @@
           }
         }
       ],
-      "responses": [
-        {
-          "status": 200,

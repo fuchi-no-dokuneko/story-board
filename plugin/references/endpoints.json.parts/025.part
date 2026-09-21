@@ -1,6 +1,15 @@
           }
         },
         {
+          "name": "Idempotency-Key",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        {
           "name": "X-Request-Id",
           "required": false,
           "description": "Caller request identifier; unsafe values are replaced by the server.",
@@ -85,12 +94,3 @@
         {
           "name": "Idempotency-Key",
           "required": true,
-          "schema": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 200
-          }
-        },
-        {
-          "name": "X-Request-Id",
-          "required": false,

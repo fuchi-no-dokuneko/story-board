@@ -1,0 +1,71 @@
+{
+  "type": "object",
+  "properties": {
+    "start": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "end": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "words": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sentences": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "$ref": "QualityMetricResult.schema.json"
+      }
+    },
+    "statistics": {
+      "$ref": "QualityStatistics.schema.json"
+    }
+  },
+  "required": [
+    "start",
+    "end",
+    "words",
+    "sentences",
+    "metrics",
+    "statistics"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/QualityWindowReport.schema.json",
+  "title": "QualityWindowReport",
+  "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "modules/style/src/main/java/dev/storyblock/style/quality",
+    "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+  ],
+  "examples": [
+    {
+      "start": 0,
+      "end": 4,
+      "words": 1,
+      "sentences": 1,
+      "metrics": [
+        {
+          "metric": "opening_collision",
+          "status": "INSUFFICIENT_DATA",
+          "value": null,
+          "validSamples": 1,
+          "referencePercentile": null,
+          "evidence": []
+        }
+      ],
+      "statistics": {
+        "wordFrequencyJsd": null,
+        "mattr": null,
+        "mattrWindows": 0
+      }
+    }
+  ]
+}

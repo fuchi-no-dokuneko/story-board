@@ -57,6 +57,39 @@
         "contentType": "application/json",
         "dto": "StyleComparisonRequest"
       }
-    }
-  ]
-}
+    },
+    {
+      "id": "novels.quality-reports.create",
+      "method": "POST",
+      "path": "/v1/novels/{novelId}/quality-reports",
+      "summary": "Independent text quality indices, source evidence and corpus percentiles.",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "style:analyze"
+      ],
+      "roles": [],
+      "pathParameters": [
+        {
+          "name": "novelId",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "pattern": "^nov_[A-Za-z0-9]{5}$"
+          }
+        }
+      ],
+      "queryParameters": [],
+      "requestHeaders": [
+        {
+          "name": "Authorization",
+          "required": false,
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
+            "writeOnly": true
+          }
+        },
+        {
+          "name": "If-Match",
+          "required": true,
+          "description": "A single quoted strong canonical SHA-256 ETag.",

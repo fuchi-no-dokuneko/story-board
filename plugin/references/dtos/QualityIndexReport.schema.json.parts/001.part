@@ -1,0 +1,120 @@
+{
+  "type": "object",
+  "properties": {
+    "contract": {
+      "$ref": "QualityContract.schema.json"
+    },
+    "words": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "sentences": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "calibration": {
+      "type": "object",
+      "properties": {
+        "humanSources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "aiSources": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shortMaximum": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "mediumMaximum": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "humanSources",
+        "aiSources",
+        "shortMaximum",
+        "mediumMaximum"
+      ],
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "$ref": "QualityMetricResult.schema.json"
+      }
+    },
+    "statistics": {
+      "$ref": "QualityStatistics.schema.json"
+    },
+    "windows": {
+      "type": "array",
+      "items": {
+        "$ref": "QualityWindowReport.schema.json"
+      }
+    }
+  },
+  "required": [
+    "contract",
+    "words",
+    "sentences",
+    "calibration",
+    "metrics",
+    "statistics",
+    "windows"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/QualityIndexReport.schema.json",
+  "title": "QualityIndexReport",
+  "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "modules/style/src/main/java/dev/storyblock/style/quality",
+    "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+  ],
+  "examples": [
+    {
+      "contract": {
+        "windowWords": 256,
+        "strideWords": 128,
+        "minPhraseWords": 4,
+        "maxPhraseWords": 8,
+        "openingWords": 3,
+        "minOpeningSentences": 5,
+        "minSkeletonSentences": 5,
+        "minRhythmTransitions": 10,
+        "mattrWords": 50,
+        "evidenceLimit": 20,
+        "epsilon": 0.001,
+        "functionWords": [
+          "如果",
+          "就"
+        ],
+        "properNames": []
+      },
+      "words": 1,
+      "sentences": 1,
+      "calibration": {
+        "humanSources": 0,
+        "aiSources": 0,
+        "shortMaximum": null,
+        "mediumMaximum": null
+      },
+      "metrics": [
+        {
+          "metric": "opening_collision",
+          "status": "INSUFFICIENT_DATA",
+          "value": null,
+          "validSamples": 1,
+          "referencePercentile": null,
+          "evidence": []
+        }
+      ],
+      "statistics": {

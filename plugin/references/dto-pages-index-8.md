@@ -4,6 +4,14 @@ Select an entry.
 選擇項目。
 选择项目。
 
+- [SceneBoundaryContract](dto-pages/SceneBoundaryContract.md)
+- [SceneList](dto-pages/SceneList.md)
+- [SceneListItem](dto-pages/SceneListItem.md)
+- [SceneSeed](dto-pages/SceneSeed.md)
+- [SetSceneInitialMetaOperation](dto-pages/SetSceneInitialMetaOperation.md)
+- [SetSceneInitialMetaPayload](dto-pages/SetSceneInitialMetaPayload.md)
+- [SplitBlockOperation](dto-pages/SplitBlockOperation.md)
+- [SplitBlockPayload](dto-pages/SplitBlockPayload.md)
 - [StyleAnalysisAccepted](dto-pages/StyleAnalysisAccepted.md)
 - [StyleAnalysisBlock](dto-pages/StyleAnalysisBlock.md)
 - [StyleAnalysisJob](dto-pages/StyleAnalysisJob.md)
@@ -11,11 +19,3 @@ Select an entry.
 - [StyleAnalysisNarrativeBlock](dto-pages/StyleAnalysisNarrativeBlock.md)
 - [StyleAnalysisRequest](dto-pages/StyleAnalysisRequest.md)
 - [StyleAnalysisResult](dto-pages/StyleAnalysisResult.md)
-- [StyleAnalysisSnapshot](dto-pages/StyleAnalysisSnapshot.md)
-- [StyleAnalysisSummary](dto-pages/StyleAnalysisSummary.md)
-- [StyleAnalysisView](dto-pages/StyleAnalysisView.md)
-- [StyleAnalysisWindowFinding](dto-pages/StyleAnalysisWindowFinding.md)
-- [StyleAnalysisWindowPage](dto-pages/StyleAnalysisWindowPage.md)
-- [StyleAnomalyDecision](dto-pages/StyleAnomalyDecision.md)
-- [StyleCalibratedChannelScore](dto-pages/StyleCalibratedChannelScore.md)
-- [StyleCalibrationProfile](dto-pages/StyleCalibrationProfile.md)

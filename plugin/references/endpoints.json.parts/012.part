@@ -1,3 +1,10 @@
+          "description": "Caller request identifier; unsafe values are replaced by the server.",
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._:-]{1,128}$"
+          }
+        }
+      ],
       "requestBody": {
         "required": true,
         "contentType": "application/json",
@@ -90,12 +97,3 @@
           ]
         }
       ],
-      "errors": [
-        {
-          "status": "default",
-          "contentType": "application/problem+json",
-          "dto": "ApiProblem"
-        }
-      ],
-      "confidence": "confirmed-from-code",
-      "source": [

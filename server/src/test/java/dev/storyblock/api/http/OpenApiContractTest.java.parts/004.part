@@ -1,3 +1,4 @@
+        assertStrongEtag("POST /agent/novels", "201");
         assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
         assertStrongEtag("POST /novels", "201");
         assertStrongEtag("POST /imports", "201");
@@ -51,6 +52,3 @@
         );
         assertEquals(
                 List.of("novel:admin"),
-                list(operation("POST /imports").get("x-required-scopes"))
-        );
-        assertEquals(

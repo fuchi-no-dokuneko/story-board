@@ -1,3 +1,8 @@
+      "summary": "Claim one available or expired durable worker lease",
+      "auth": "bearer-or-trusted-lan-owner",
+      "scopes": [
+        "worker:execute"
+      ],
       "roles": [],
       "pathParameters": [],
       "queryParameters": [],
@@ -86,7 +91,3 @@
       "roles": [],
       "pathParameters": [
         {
-          "name": "jobId",
-          "required": true,
-          "schema": {
-            "type": "string",

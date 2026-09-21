@@ -4,6 +4,14 @@ Select an entry.
 選擇項目。
 选择项目。
 
+- [ReplaceBlockRangePayload](dto-pages/ReplaceBlockRangePayload.md)
+- [ResolvedBlockMetadata](dto-pages/ResolvedBlockMetadata.md)
+- [ResolvedMetadataState](dto-pages/ResolvedMetadataState.md)
+- [ResolvedSceneBoundary](dto-pages/ResolvedSceneBoundary.md)
+- [RestoreRevisionContentOperation](dto-pages/RestoreRevisionContentOperation.md)
+- [RestoreRevisionContentPayload](dto-pages/RestoreRevisionContentPayload.md)
+- [RevisionDiff](dto-pages/RevisionDiff.md)
+- [RevokeResponse](dto-pages/RevokeResponse.md)
 - [RewriteConstraints](dto-pages/RewriteConstraints.md)
 - [RewriteProposal](dto-pages/RewriteProposal.md)
 - [RewriteProposalAccepted](dto-pages/RewriteProposalAccepted.md)
@@ -11,11 +19,3 @@ Select an entry.
 - [RewriteProposalResponse](dto-pages/RewriteProposalResponse.md)
 - [RewriteSourceBlock](dto-pages/RewriteSourceBlock.md)
 - [RewriteWorkerInput](dto-pages/RewriteWorkerInput.md)
-- [SceneBoundaryContract](dto-pages/SceneBoundaryContract.md)
-- [SceneList](dto-pages/SceneList.md)
-- [SceneListItem](dto-pages/SceneListItem.md)
-- [SceneSeed](dto-pages/SceneSeed.md)
-- [SetSceneInitialMetaOperation](dto-pages/SetSceneInitialMetaOperation.md)
-- [SetSceneInitialMetaPayload](dto-pages/SetSceneInitialMetaPayload.md)
-- [SplitBlockOperation](dto-pages/SplitBlockOperation.md)
-- [SplitBlockPayload](dto-pages/SplitBlockPayload.md)

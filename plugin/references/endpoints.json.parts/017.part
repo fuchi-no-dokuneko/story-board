@@ -1,3 +1,9 @@
+        "server/src/main/resources/openapi/storyblock-v1.yaml",
+        "server/src/test/java/dev/storyblock/api/http/OpenApiContractTest.java"
+      ]
+    },
+    {
+      "id": "novels.exports.create",
       "method": "POST",
       "path": "/v1/novels/{novelId}/exports",
       "summary": "Submit a canonical JSON or package export job",
@@ -87,7 +93,3 @@
       ]
     },
     {
-      "id": "novels.monitor-packets.create",
-      "method": "POST",
-      "path": "/v1/novels/{novelId}/monitor-packets",
-      "summary": "Resolve a bounded read-only packet for one monitor target",

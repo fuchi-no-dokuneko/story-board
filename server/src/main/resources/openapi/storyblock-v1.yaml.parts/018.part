@@ -1,106 +1,103 @@
-      - index: 0
-        block_id: blk_Cc345
-        block_version_id: blv_Dd456
-        order_key: a0
-        text: 清晨下雨。
-        meta: {}
-        extensions: {}
-    BlockSlice:
-      type: object
-      properties:
-        novel_id:
-          type: string
-          pattern: ^nov_[A-Za-z0-9]{5}$
-        revision_id:
-          type: string
-          pattern: ^rev_[A-Za-z0-9]{5}$
-        revision_hash:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-        scene_id:
-          type: string
-          pattern: ^scn_[A-Za-z0-9]{5}$
-        chapter_id:
-          type: string
-          pattern: ^ch_[A-Za-z0-9]{5}$
-        block_count:
-          type: integer
-          minimum: 0
-        slice:
-          $ref: '#/components/schemas/IndexSlice'
-        blocks:
-          type: array
-          items:
-            $ref: '#/components/schemas/BlockSliceItem'
-      required:
-      - novel_id
-      - revision_id
-      - revision_hash
-      - scene_id
-      - chapter_id
-      - block_count
-      - slice
-      - blocks
-      additionalProperties: false
-      title: BlockSlice
-      description: Revision-bound scene block slice; [0,0) reads an empty scene.
-      x-confidence: confirmed-from-code
-      x-source:
-      - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
-      examples:
-      - novel_id: nov_Ab123
-        revision_id: rev_Cd456
-        revision_hash: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        scene_id: scn_Bb234
-        chapter_id: ch_Aa123
-        block_count: 1
-        slice:
-          start: 0
-          end: 1
-        blocks:
-        - index: 0
-          block_id: blk_Cc345
-          block_version_id: blv_Dd456
-          order_key: a0
-          text: 清晨下雨。
-          meta: {}
-          extensions: {}
-    RegisteredStyle:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        language:
-          type: string
-        status:
-          type: string
-          enum:
-          - ready
-          - stale
-          - unavailable
-        reference_file_count:
-          type: integer
-          minimum: 0
-        reference_graphemes:
-          type: integer
-          minimum: 0
-        benchmark_updated_at:
-          type: string
-          format: date-time
-        error:
-          type: string
-      required:
-      - id
-      - name
-      - description
-      - language
-      - status
-      additionalProperties: false
-      title: RegisteredStyle
-      description: Registered reference benchmark status. Sources stay on the server.
-      x-confidence: confirmed-from-code
-      x-source:
+          "validSamples",
+          "referencePercentile",
+          "evidence"
+        ],
+        "additionalProperties": false,
+        "title": "QualityMetricResult",
+        "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+        "x-confidence": "confirmed-from-code",
+        "x-source": [
+          "modules/style/src/main/java/dev/storyblock/style/quality",
+          "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+        ],
+        "examples": [
+          {
+            "metric": "opening_collision",
+            "status": "INSUFFICIENT_DATA",
+            "value": null,
+            "validSamples": 1,
+            "referencePercentile": null,
+            "evidence": []
+          }
+        ]
+      }
+    QualityStatistics:
+      {
+        "type": "object",
+        "properties": {
+          "wordFrequencyJsd": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "mattr": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "mattrWindows": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "wordFrequencyJsd",
+          "mattr",
+          "mattrWindows"
+        ],
+        "additionalProperties": false,
+        "title": "QualityStatistics",
+        "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+        "x-confidence": "confirmed-from-code",
+        "x-source": [
+          "modules/style/src/main/java/dev/storyblock/style/quality",
+          "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+        ],
+        "examples": [
+          {
+            "wordFrequencyJsd": null,
+            "mattr": null,
+            "mattrWindows": 0
+          }
+        ]
+      }
+    QualityWindowReport:
+      {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "words": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sentences": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityMetricResult"
+            }
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/QualityStatistics"
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "words",
+          "sentences",
+          "metrics",
+          "statistics"
+        ],

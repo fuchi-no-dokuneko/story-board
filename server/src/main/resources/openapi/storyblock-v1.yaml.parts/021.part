@@ -1,85 +1,92 @@
-      description: Fresh uncached comparison returned after background calculation; no
-        task identifier or polling.
-      x-confidence: confirmed-from-code
-      x-source:
-      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
-      - server/src/main/java/dev/storyblock/api/style
-      examples:
-      - novel_id: nov_Ab123
-        revision_id: rev_Cd456
-        revision_hash: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-        comparisons:
-        - id: lyrical
-          name: 抒情敘事
-          description: 環境與內心描寫
-          language: zh-Hant
-          status: ready
-          reference_file_count: 1
-          reference_graphemes: 100
-          benchmark_updated_at: '2026-09-12T12:00:00Z'
-          scores:
-          - channel: surface
-            channel_version: example-1
-            primary_metric: jensen_shannon_distance
-            primary_distance: 0
-            independent_gate_evidence: true
-            diagnostics: {}
-          - channel: grammar
-            channel_version: example-1
-            primary_metric: jensen_shannon_distance
-            primary_distance: 0
-            independent_gate_evidence: true
-            diagnostics: {}
-          - channel: rhythm
-            channel_version: example-1
-            primary_metric: wasserstein_distance
-            primary_distance: 0
-            independent_gate_evidence: true
-            diagnostics: {}
-          - channel: narrative
-            channel_version: example-1
-            primary_metric: robust_l1_input
-            primary_distance: 0
-            independent_gate_evidence: true
-            diagnostics: {}
-          - channel: lexical
-            channel_version: example-1
-            primary_metric: robust_l1_input
-            primary_distance: 0
-            independent_gate_evidence: true
-            diagnostics: {}
-          reference_metadata: text_only
-    Problem:
-      type: object
-      required: [type, title, status, code, detail, instance, request_id]
-      properties:
-        type:
-          type: string
-          format: uri
-        title:
-          type: string
-        status:
-          type: integer
-          minimum: 400
-          maximum: 599
-        code:
-          type: string
-          pattern: '^[A-Z][A-Z0-9_]{1,63}$'
-        detail:
-          type: string
-        instance:
-          type: string
-        request_id:
-          type: string
-        current_revision_id:
-          type: string
-        current_etag:
-          type: string
-      additionalProperties: true
-    CreateNovelRequest:
-      type: object
-      required: [initial_revision]
-      properties:
-        initial_revision:
-          $ref: "#/components/schemas/CanonicalRevision"
-      additionalProperties: false
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [],
+        "additionalProperties": false,
+        "title": "QualityReportRequest",
+        "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+        "x-confidence": "confirmed-from-code",
+        "x-source": [
+          "modules/style/src/main/java/dev/storyblock/style/quality",
+          "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+        ],
+        "examples": [
+          {}
+        ]
+      }
+    QualityReportResponse:
+      {
+        "type": "object",
+        "properties": {
+          "novel_id": {
+            "type": "string"
+          },
+          "revision_id": {
+            "type": "string"
+          },
+          "revision_hash": {
+            "type": "string"
+          },
+          "offset_unit": {
+            "const": "UTF-16"
+          },
+          "block_spans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "block_id": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "end": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "block_id",
+                "start",
+                "end"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "quality_report": {
+            "$ref": "#/components/schemas/QualityIndexReport"
+          }
+        },
+        "required": [
+          "novel_id",
+          "revision_id",
+          "revision_hash",
+          "offset_unit",
+          "block_spans",
+          "quality_report"
+        ],
+        "additionalProperties": false,
+        "title": "QualityReportResponse",
+        "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+        "x-confidence": "confirmed-from-code",
+        "x-source": [
+          "modules/style/src/main/java/dev/storyblock/style/quality",
+          "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+        ],
+        "examples": [
+          {
+            "novel_id": "nov_Ab123",
+            "revision_id": "rev_Cd456",
+            "revision_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+            "offset_unit": "UTF-16",
+            "block_spans": [
+              {
+                "block_id": "blk_Ef789",
+                "start": 0,
+                "end": 4
+              }

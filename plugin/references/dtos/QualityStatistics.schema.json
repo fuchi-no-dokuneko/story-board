@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "wordFrequencyJsd": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "mattr": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "mattrWindows": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "wordFrequencyJsd",
+    "mattr",
+    "mattrWindows"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/QualityStatistics.schema.json",
+  "title": "QualityStatistics",
+  "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "modules/style/src/main/java/dev/storyblock/style/quality",
+    "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+  ],
+  "examples": [
+    {
+      "wordFrequencyJsd": null,
+      "mattr": null,
+      "mattrWindows": 0
+    }
+  ]
+}

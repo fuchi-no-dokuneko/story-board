@@ -1,0 +1,49 @@
+package dev.storyblock.api.http;
+
+import dev.storyblock.application.*;
+import dev.storyblock.contracts.*;
+import dev.storyblock.domain.Ids;
+import dev.storyblock.storage.sqlite.SqliteRevisionStore;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.nio.file.*;
+import java.time.Instant;
+import java.util.*;
+import javax.imageio.ImageIO;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.*;
+import org.springframework.test.web.servlet.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest(properties = "storyblock.trusted-lan.enabled=true")
+@AutoConfigureMockMvc
+class QualityTransferHttpTest {
+    @Autowired MockMvc mvc;
+    @Autowired SqliteRevisionStore target;
+    @DynamicPropertySource static void properties(DynamicPropertyRegistry registry) {
+        registry.add("storyblock.database.path",() -> "target/quality-http-" + UUID.randomUUID() + ".db");
+        registry.add("storyblock.security.pepper",() -> "quality-http-test-pepper-at-least-thirty-two-bytes");
+    }
+    @Test void exportedImagePackageAboveTwoMiBImportsThroughHttp() throws Exception {
+        byte[] content;
+        var base = NarrativeHttpFixture.revision(false);
+        try (var source = SqliteRevisionStore.open(Path.of("target/large-package-" + UUID.randomUUID() + ".db"))) {
+            source.createNovel(base,NarrativeHttpFixture.hash(base));
+            var uploads = new ImageUploadService(source);
+            for (int i = 0; i < 2; i++) {
+                var pixels = new BufferedImage(640,640,BufferedImage.TYPE_INT_RGB);
+                var random = new Random(i);
+                for (int y = 0; y < 640; y++) for (int x = 0; x < 640; x++) pixels.setRGB(x,y,random.nextInt());
+                var bytes = new ByteArrayOutputStream(); ImageIO.write(pixels,"png",bytes);
+                uploads.upload(base.novel().id(),NarrativeHttpFixture.hash(base),"photo-"+i,bytes.toByteArray(),Instant.now());
+            }
+            content = new CanonicalTransferService(source).exportPackage(base.novel().id());
+        }
+        byte[] body = CanonicalJson.bytes(Map.of("format","canonical-package","document",CanonicalJson.parse(content,Map.class)));
+        assertTrue(body.length > MutationPreconditionFilter.MAX_REQUEST_BYTES);
+        mvc.perform(post("/v1/imports").header("If-Match","*").header("Idempotency-Key","large-package-import")

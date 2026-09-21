@@ -1,3 +1,6 @@
+      "errors": [
+        {
+          "status": "default",
           "contentType": "application/problem+json",
           "dto": "ApiProblem"
         }
@@ -92,5 +95,3 @@
           "contentType": "application/problem+json",
           "dto": "ApiProblem"
         }
-      ],
-      "confidence": "confirmed-from-code",

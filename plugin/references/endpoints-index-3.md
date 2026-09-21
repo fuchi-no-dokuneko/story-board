@@ -18,3 +18,4 @@ Select an entry.
 - [novels.blocks.slice](endpoints/novels.blocks.slice.md)
 - [styles.list](endpoints/styles.list.md)
 - [novels.style-comparisons.create](endpoints/novels.style-comparisons.create.md)
+- [novels.quality-reports.create](endpoints/novels.quality-reports.create.md)

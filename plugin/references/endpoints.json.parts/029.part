@@ -1,3 +1,6 @@
+      "responses": [
+        {
+          "status": 200,
           "description": "Analysis state and canonical result metadata",
           "contentType": "application/json",
           "dto": "StyleAnalysisView",
@@ -91,6 +94,3 @@
           "headers": []
         }
       ],
-      "errors": [
-        {
-          "status": "default",

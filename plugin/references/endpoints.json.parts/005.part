@@ -1,3 +1,6 @@
+          "description": "Bearer STORYBLOCK_ACCESS_KEY unless trusted-LAN mode authenticates reachable clients as owner.",
+          "schema": {
+            "type": "string",
             "writeOnly": true
           }
         },
@@ -85,12 +88,5 @@
           "headers": [
             "ETag"
           ]
-        }
-      ],
-      "errors": [
-        {
-          "status": "default",
-          "contentType": "application/problem+json",
-          "dto": "ApiProblem"
         }
       ],

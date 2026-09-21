@@ -61,6 +61,6 @@ class OpenApiContractTest {
             "GET /novels/{novelId}/scenes",
             "GET /novels/{novelId}/scenes/{sceneId}/blocks",
             "GET /style/",
-            "POST /novels/{novelId}/style-comparisons"
+            "POST /novels/{novelId}/style-comparisons",
+            "POST /novels/{novelId}/quality-reports"
     );
-    private static final Set<String> ASYNC_OPERATIONS = Set.of(

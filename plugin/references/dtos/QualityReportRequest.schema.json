@@ -1,0 +1,31 @@
+{
+  "type": "object",
+  "properties": {
+    "revision_id": {
+      "type": "string",
+      "pattern": "^rev_[A-Za-z0-9]{5}$"
+    },
+    "proper_names": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "required": [],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/QualityReportRequest.schema.json",
+  "title": "QualityReportRequest",
+  "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "modules/style/src/main/java/dev/storyblock/style/quality",
+    "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+  ],
+  "examples": [
+    {}
+  ]
+}

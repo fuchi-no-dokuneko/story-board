@@ -37,10 +37,10 @@ test("required offline commands work from a standalone folder copy", async () =>
     await execute(process.execPath, ["scripts/assemble.mjs"], { cwd: copy });
 
     const endpoints = JSON.parse((await command(copy, ["endpoints", "--json"])).stdout);
-    assert.equal(endpoints.endpoints.length, 44);
+    assert.equal(endpoints.endpoints.length, 45);
 
     const dtos = JSON.parse((await command(copy, ["dtos", "--json"])).stdout);
-    assert.equal(dtos.count, 152);
+    assert.equal(dtos.count, 160);
 
     const validation = JSON.parse((await command(copy, [
       "validate", "--dto", "ApiProblem", "--file", "examples/api-problem.json", "--json",

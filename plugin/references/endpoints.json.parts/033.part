@@ -1,3 +1,4 @@
+      "path": "/v1/style-profiles/{profileId}/versions/{versionId}",
       "summary": "Get an immutable profile version and append-only lifecycle",
       "auth": "bearer-or-trusted-lan-owner",
       "scopes": [

@@ -1,0 +1,106 @@
+{
+  "type": "object",
+  "properties": {
+    "windowWords": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "strideWords": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "minPhraseWords": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "maxPhraseWords": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "openingWords": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "minOpeningSentences": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "minSkeletonSentences": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "minRhythmTransitions": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "mattrWords": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "evidenceLimit": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "epsilon": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "functionWords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "properNames": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "windowWords",
+    "strideWords",
+    "minPhraseWords",
+    "maxPhraseWords",
+    "openingWords",
+    "minOpeningSentences",
+    "minSkeletonSentences",
+    "minRhythmTransitions",
+    "mattrWords",
+    "evidenceLimit",
+    "epsilon",
+    "functionWords",
+    "properNames"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/QualityContract.schema.json",
+  "title": "QualityContract",
+  "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "modules/style/src/main/java/dev/storyblock/style/quality",
+    "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+  ],
+  "examples": [
+    {
+      "windowWords": 256,
+      "strideWords": 128,
+      "minPhraseWords": 4,
+      "maxPhraseWords": 8,
+      "openingWords": 3,
+      "minOpeningSentences": 5,
+      "minSkeletonSentences": 5,
+      "minRhythmTransitions": 10,
+      "mattrWords": 50,
+      "evidenceLimit": 20,
+      "epsilon": 0.001,
+      "functionWords": [
+        "如果",
+        "就"
+      ],
+      "properNames": []
+    }
+  ]
+}

@@ -23,7 +23,7 @@ final class ApiMutationRoutes {
             .requestMatchers(HttpMethod.POST, "/v1/novels/*/monitor-runs")
             .hasAuthority(ApiSecurityConfigurationScope.scope("monitor:submit"))
             .requestMatchers(HttpMethod.POST, "/v1/novels/*/style-analyses",
-                "/v1/novels/*/style-comparisons")
+                "/v1/novels/*/style-comparisons", "/v1/novels/*/quality-reports")
             .hasAuthority(ApiSecurityConfigurationScope.scope("style:analyze"))
             .requestMatchers(HttpMethod.POST, "/v1/novels/*/access-keys")
             .hasAuthority(ApiSecurityConfigurationScope.scope("novel:admin"))

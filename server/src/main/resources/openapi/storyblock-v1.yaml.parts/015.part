@@ -1,4 +1,53 @@
         type: string
+        pattern: '^rev_[A-Za-z0-9]{5}$'
+    AnalysisId:
+      name: analysisId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^ana_[0-9a-f-]{36}$'
+    ProposalId:
+      name: proposalId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^prp_[0-9a-f-]{36}$'
+    MonitorRunId:
+      name: monitorRunId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^mrun_[0-9a-f-]{36}$'
+    ProfileId:
+      name: profileId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^spf_[0-9a-f-]{36}$'
+    ProfileVersionId:
+      name: versionId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^spv_[0-9a-f-]{36}$'
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^job_[0-9a-f-]{36}$'
+    KeyId:
+      name: keyId
+      in: path
+      required: true
+      schema:
+        type: string
         pattern: '^key_[0-9a-f-]{36}$'
     ArtifactId:
       name: artifactId
@@ -69,43 +118,3 @@
     ContentDisposition:
       description: Attachment filename for offline use.
       required: true
-      schema:
-        type: string
-  responses:
-    Problem:
-      description: RFC problem response with a stable machine code
-      content:
-        application/problem+json:
-          schema:
-            $ref: "#/components/schemas/Problem"
-    JobAccepted:
-      description: Durable job accepted
-      headers:
-        Location:
-          $ref: "#/components/headers/Location"
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/JobAccepted"
-  schemas:
-    IndexSlice:
-      type: object
-      properties:
-        start:
-          type: integer
-          minimum: 0
-        end:
-          type: integer
-          minimum: 0
-      required:
-      - start
-      - end
-      additionalProperties: false
-      title: IndexSlice
-      description: Zero-based half-open index range [start,end).
-      x-confidence: confirmed-from-code
-      x-source:
-      - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
-      examples:
-      - start: 0
-        end: 1

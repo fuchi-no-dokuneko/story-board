@@ -1,3 +1,7 @@
+    private static Map<String, Object> operation(String key) {
+        return operations.stream()
+                .filter(operation -> operation.key().equals(key))
+                .findFirst()
                 .orElseThrow(() -> new AssertionError("missing operation " + key))
                 .contract();
     }
@@ -61,11 +65,4 @@
     private static Map<String, Object> map(Object value) {
         if (!(value instanceof Map<?, ?>)) {
             throw new AssertionError("expected map, got " + value);
-        }
-        return (Map<String, Object>) value;
-    }
-
-    private static List<?> list(Object value) {
-        if (value == null) {
-            return List.of();
         }

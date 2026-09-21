@@ -1,3 +1,9 @@
+        assertTrue(schemas.containsKey("MonitorProposedOperationOutput"));
+    }
+
+    @Test
+    void styleContractMakesPromotionExplicitAndKlDiagnosticOnly() {
+        assertEquals(
                 List.of("style:admin"),
                 list(operation("POST /style-profiles/{profileId}/versions/{versionId}/transitions")
                         .get("x-required-scopes"))
@@ -52,7 +58,3 @@
         );
     }
 
-    private static Map<String, Object> operation(String key) {
-        return operations.stream()
-                .filter(operation -> operation.key().equals(key))
-                .findFirst()

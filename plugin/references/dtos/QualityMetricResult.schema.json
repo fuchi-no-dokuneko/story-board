@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "properties": {
+    "metric": {
+      "enum": [
+        "repeated_phrase_coverage",
+        "opening_collision",
+        "skeleton_reuse",
+        "rhythm_predictability",
+        "formulaic_bias"
+      ]
+    },
+    "status": {
+      "enum": [
+        "OK",
+        "INSUFFICIENT_DATA",
+        "UNCALIBRATED"
+      ]
+    },
+    "value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "validSamples": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "referencePercentile": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "QualityEvidence.schema.json"
+      }
+    }
+  },
+  "required": [
+    "metric",
+    "status",
+    "value",
+    "validSamples",
+    "referencePercentile",
+    "evidence"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://storyblock.local/plugin/dtos/QualityMetricResult.schema.json",
+  "title": "QualityMetricResult",
+  "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+  "x-confidence": "confirmed-from-code",
+  "x-source": [
+    "modules/style/src/main/java/dev/storyblock/style/quality",
+    "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+  ],
+  "examples": [
+    {
+      "metric": "opening_collision",
+      "status": "INSUFFICIENT_DATA",
+      "value": null,
+      "validSamples": 1,
+      "referencePercentile": null,
+      "evidence": []
+    }
+  ]
+}

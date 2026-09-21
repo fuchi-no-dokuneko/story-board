@@ -1,90 +1,95 @@
-          type: integer
-          minimum: 0
-        end_grapheme:
-          type: integer
-          minimum: 1
-        quote:
-          type: string
-          minLength: 1
-        quote_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-      additionalProperties: false
-    MonitorRunStatus:
-      type: object
-      required: [monitor_run_id, output_id, output_kind, novel_id, revision_id, revision_hash, target_block_id, neighbor_count, monitor_version, rule_version, affected_blocks, output, request_hash, submitted_at, state, stale_reasons, rebase_allowed]
-      properties:
-        monitor_run_id:
-          type: string
-          pattern: '^mrun_[0-9a-f-]{36}$'
-        output_id:
-          type: string
-          pattern: '^(mis|mpr)_[0-9a-f-]{36}$'
-        output_kind:
-          type: string
-          enum: [finding, proposed_operation]
-        novel_id:
-          type: string
-          pattern: '^nov_[A-Za-z0-9]{5}$'
-        revision_id:
-          type: string
-          pattern: '^rev_[A-Za-z0-9]{5}$'
-        revision_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        target_block_id:
-          type: string
-          pattern: '^blk_[A-Za-z0-9]{5}$'
-        neighbor_count:
-          type: integer
-          minimum: 1
-          maximum: 2
-        monitor_version:
-          type: string
-        rule_version:
-          type: string
-        affected_blocks:
+          $ref: "#/components/schemas/CanonicalPackageManifest"
+        revisions:
           type: array
           minItems: 1
-          maxItems: 5
-          uniqueItems: true
+          maxItems: 100000
           items:
-            $ref: "#/components/schemas/MonitorBlockFingerprint"
-        output:
-          oneOf:
-            - $ref: "#/components/schemas/MonitorFindingOutput"
-            - $ref: "#/components/schemas/MonitorProposedOperationOutput"
-        request_hash:
+            $ref: "#/components/schemas/CanonicalPackageRevision"
+        operations:
+          type: array
+          maxItems: 99999
+          items:
+            $ref: "#/components/schemas/CanonicalPackageOperation"
+        artifacts:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: "#/components/schemas/CanonicalPackageArtifact"
+      additionalProperties: false
+    CanonicalPackageManifest:
+      type: object
+      required: [novel_id, schema_version, head_revision_id, head_sequence, head_hash, revision_count, operation_count, artifact_count]
+      properties:
+        novel_id:
+          type: string
+        schema_version:
+          const: 1.0.0
+        head_revision_id:
+          type: string
+        head_sequence:
+          type: integer
+          minimum: 0
+        head_hash:
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
-        submitted_at:
+        revision_count:
+          type: integer
+          minimum: 1
+        operation_count:
+          type: integer
+          minimum: 0
+        artifact_count:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    CanonicalPackageRevision:
+      type: object
+      required: [sequence, document]
+      properties:
+        sequence:
+          type: integer
+          minimum: 0
+        document:
+          $ref: "#/components/schemas/CanonicalRevision"
+      additionalProperties: false
+    CanonicalPackageOperation:
+      type: object
+      required: [sequence, operation_hash, operation, result_revision_id, result_hash, committed_at]
+      properties:
+        sequence:
+          type: integer
+          minimum: 1
+        operation_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        result_revision_id:
+          type: string
+        result_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        committed_at:
           type: string
           format: date-time
-        state:
-          type: string
-          enum: [current, stale]
-        stale_reasons:
-          type: array
-          uniqueItems: true
-          items:
-            type: string
-            enum: [head_changed, affected_block_changed, affected_block_missing, rule_version_changed]
-        rebase_allowed:
-          const: false
-        idempotent_replay:
-          type: boolean
       additionalProperties: false
-    MonitorSubmissionResponse:
-      allOf:
-        - $ref: "#/components/schemas/MonitorRunStatus"
-        - type: object
-          required: [idempotent_replay]
-          properties:
-            idempotent_replay:
-              type: boolean
-    StyleAnalysisRequest:
+    CanonicalPackageArtifact:
       type: object
-      required: [revision_id, profile_id, profile_version_id]
+      required: [artifact_id, revision_id, kind, media_type, codec, content_hash, size_bytes, created_at, content_base64]
       properties:
+        artifact_id:
+          type: string
         revision_id:
           type: string
+        kind:
+          type: string
+        media_type:
+          type: string
+        codec:
+          type: string
+        content_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        size_bytes:
+          type: integer
+          minimum: 0

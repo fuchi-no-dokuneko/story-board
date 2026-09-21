@@ -1,96 +1,100 @@
-      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
-      - server/src/main/java/dev/storyblock/api/style
-      examples:
-      - id: lyrical
-        name: 抒情敘事
-        description: 環境與內心描寫
-        language: zh-Hant
-        status: ready
-        reference_file_count: 1
-        reference_graphemes: 100
-        benchmark_updated_at: '2026-09-12T12:00:00Z'
-    StyleList:
-      type: object
-      properties:
-        styles:
-          type: array
-          items:
-            $ref: '#/components/schemas/RegisteredStyle'
-        error:
-          type: string
-      required:
-      - styles
-      additionalProperties: false
-      title: StyleList
-      description: Available server-side reference styles. Registry errors are explicit.
-      x-confidence: confirmed-from-code
-      x-source:
-      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
-      - server/src/main/java/dev/storyblock/api/style
-      examples:
-      - styles:
-        - id: lyrical
-          name: 抒情敘事
-          description: 環境與內心描寫
-          language: zh-Hant
-          status: ready
-          reference_file_count: 1
-          reference_graphemes: 100
-          benchmark_updated_at: '2026-09-12T12:00:00Z'
-    StyleComparisonRequest:
-      type: object
-      properties:
-        style_ids:
-          type: array
-          items:
-            type: string
-          minItems: 1
-          uniqueItems: true
-        revision_id:
-          type: string
-          pattern: ^rev_[A-Za-z0-9]{5}$
-      required:
-      - style_ids
-      additionalProperties: false
-      title: StyleComparisonRequest
-      description: Compare one novel to multiple styles; revision defaults to current
-        head. Same HTTP request completes with 200; no job.
-      x-confidence: confirmed-from-code
-      x-source:
-      - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
-      - server/src/main/java/dev/storyblock/api/style
-      examples:
-      - style_ids:
-        - lyrical
-        revision_id: rev_Cd456
-    StyleComparisonItem:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        description:
-          type: string
-        language:
-          type: string
-        status:
-          type: string
-          enum:
-          - ready
-          - stale
-          - unavailable
-        reference_file_count:
-          type: integer
-          minimum: 0
-        reference_graphemes:
-          type: integer
-          minimum: 0
-        benchmark_updated_at:
-          type: string
-          format: date-time
-        error:
-          type: string
-        scores:
-          type: array
-          items:
+        "additionalProperties": false,
+        "title": "QualityWindowReport",
+        "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+        "x-confidence": "confirmed-from-code",
+        "x-source": [
+          "modules/style/src/main/java/dev/storyblock/style/quality",
+          "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+        ],
+        "examples": [
+          {
+            "start": 0,
+            "end": 4,
+            "words": 1,
+            "sentences": 1,
+            "metrics": [
+              {
+                "metric": "opening_collision",
+                "status": "INSUFFICIENT_DATA",
+                "value": null,
+                "validSamples": 1,
+                "referencePercentile": null,
+                "evidence": []
+              }
+            ],
+            "statistics": {
+              "wordFrequencyJsd": null,
+              "mattr": null,
+              "mattrWindows": 0
+            }
+          }
+        ]
+      }
+    QualityIndexReport:
+      {
+        "type": "object",
+        "properties": {
+          "contract": {
+            "$ref": "#/components/schemas/QualityContract"
+          },
+          "words": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sentences": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "calibration": {
+            "type": "object",
+            "properties": {
+              "humanSources": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "aiSources": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "shortMaximum": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "mediumMaximum": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "humanSources",
+              "aiSources",
+              "shortMaximum",
+              "mediumMaximum"
+            ],
+            "additionalProperties": false
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityMetricResult"
+            }
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/QualityStatistics"
+          },
+          "windows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityWindowReport"
+            }
+          }
+        },
+        "required": [
+          "contract",
+          "words",
+          "sentences",
+          "calibration",

@@ -1,3 +1,10 @@
+      "errors": [
+        {
+          "status": "default",
+          "contentType": "application/problem+json",
+          "dto": "ApiProblem"
+        }
+      ],
       "confidence": "confirmed-from-code",
       "source": [
         "server/src/main/java/dev/storyblock/api/http/AdminNovelController.java",
@@ -85,9 +92,3 @@
       "errors": [
         {
           "status": "default",
-          "contentType": "application/problem+json",
-          "dto": "ApiProblem"
-        }
-      ],
-      "confidence": "confirmed-from-code",
-      "source": [

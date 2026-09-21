@@ -1,0 +1,30 @@
+        "wordFrequencyJsd": null,
+        "mattr": null,
+        "mattrWindows": 0
+      },
+      "windows": [
+        {
+          "start": 0,
+          "end": 4,
+          "words": 1,
+          "sentences": 1,
+          "metrics": [
+            {
+              "metric": "opening_collision",
+              "status": "INSUFFICIENT_DATA",
+              "value": null,
+              "validSamples": 1,
+              "referencePercentile": null,
+              "evidence": []
+            }
+          ],
+          "statistics": {
+            "wordFrequencyJsd": null,
+            "mattr": null,
+            "mattrWindows": 0
+          }
+        }
+      ]
+    }
+  ]
+}

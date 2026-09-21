@@ -1,87 +1,95 @@
-          format: date-time
-        snapshot:
-          $ref: "#/components/schemas/StyleAnalysisSnapshot"
-        status_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-      additionalProperties: false
-    StyleAnalysisSnapshot:
+    StyleCorpusSource:
       type: object
-      required: [blocks, masking_lexicon, novel_id, profile_version, revision_hash, revision_id]
+      required: [source_id, content_hash, kind, provenance, license, ownership]
       properties:
-        blocks:
-          type: array
-          minItems: 1
-          maxItems: 1000
-          items:
-            $ref: "#/components/schemas/StyleAnalysisBlock"
-        masking_lexicon:
-          $ref: "#/components/schemas/StyleMaskingLexicon"
-        novel_id:
+        source_id:
           type: string
-          pattern: '^nov_[A-Za-z0-9]{5}$'
-        profile_version:
-          $ref: "#/components/schemas/StyleProfileVersion"
-        revision_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        revision_id:
-          type: string
-          pattern: '^rev_[A-Za-z0-9]{5}$'
-      additionalProperties: false
-    StyleAnalysisBlock:
-      type: object
-      required: [block, intentional_style_shift_reason, narrative_mode, pov, scene_id, speaker_id, stratum_kind]
-      properties:
-        block:
-          $ref: "#/components/schemas/StyleAnalysisNarrativeBlock"
-        intentional_style_shift_reason:
-          type: [string, "null"]
-          maxLength: 500
-        narrative_mode:
-          type: string
-          minLength: 1
-          maxLength: 128
-        pov:
-          type: string
-          minLength: 1
-          maxLength: 128
-        scene_id:
-          type: string
-          pattern: '^scn_[A-Za-z0-9]{5}$'
-        speaker_id:
-          type: [string, "null"]
           pattern: '^[A-Za-z0-9._:@-]{1,128}$'
-        stratum_kind:
+        content_hash:
           type: string
-          enum: [narration, dialogue]
-      additionalProperties: false
-    StyleAnalysisNarrativeBlock:
-      type: object
-      required: [block_version_id, extensions, id, metadata, order_key, text]
-      properties:
-        block_version_id:
+          pattern: '^sha256:[0-9a-f]{64}$'
+        kind:
           type: string
-          pattern: '^blv_[A-Za-z0-9]{5}$'
-        extensions:
-          type: object
-          additionalProperties: true
-        id:
-          type: string
-          pattern: '^blk_[A-Za-z0-9]{5}$'
-        metadata:
-          type: object
-          additionalProperties: true
-        order_key:
-          type: string
-          pattern: '^[0-9a-f]{32}$'
-        text:
+          enum: [owner, licensed, public_domain, generated, mixed]
+        provenance:
           type: string
           minLength: 1
-      additionalProperties: false
-    WorkerResultRequest:
-      type: object
-      required: [lease_owner, attempt, snapshot_hash, profile_version_hash, analyzer_contract_hash, window_configuration_hash, summary, windows, trace, completed_at]
-      properties:
-        lease_owner:
+          maxLength: 2000
+        license:
           type: string
+          minLength: 1
+          maxLength: 500
+        ownership:
+          type: string
+          minLength: 1
+          maxLength: 500
+      additionalProperties: false
+    StyleFeatureContract:
+      type: object
+      required: [analyzer_version, feature_schema_version, tokenizer_id, vocabulary_hash, normalizer_version, additive_smoothing_alpha, top_k]
+      properties:
+        analyzer_version:
+          type: string
+        feature_schema_version:
+          type: string
+        tokenizer_id:
+          type: string
+        vocabulary_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        normalizer_version:
+          type: string
+        additive_smoothing_alpha:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 1
+        top_k:
+          type: integer
+          minimum: 10
+          maximum: 10000
+      additionalProperties: false
+    StyleFeatureVector:
+      type: object
+      required: [channel, channel_version, contract_hash, distribution, measurements, embedding]
+      properties:
+        channel:
+          type: string
+          enum: [surface, grammar, rhythm, narrative, lexical, optional_embedding]
+        channel_version:
+          type: string
+        contract_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        distribution:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+        measurements:
+          type: object
+          additionalProperties:
+            type: number
+        embedding:
+          type: array
+          maxItems: 4096
+          items:
+            type: number
+      additionalProperties: false
+    StyleFeatureSet:
+      type: object
+      required: [source_hash, contract, channels]
+      properties:
+        source_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        contract:
+          $ref: "#/components/schemas/StyleFeatureContract"
+        channels:
+          type: array
+          minItems: 5
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/StyleFeatureVector"
+      additionalProperties: false
+    StyleWindowConfiguration:
+      type: object
