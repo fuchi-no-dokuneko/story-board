@@ -9,7 +9,7 @@
                 </table>
               </div>
             </section>
-            <section class="style-panel" aria-labelledby="quality-title">
+            <section class="style-panel quality-panel" aria-labelledby="quality-title">
               <h3 id="quality-title">Quality indices / 品質指標</h3>
               <label for="quality-names">Proper names, comma separated / 專名，以逗號分隔</label>
               <input id="quality-names" type="text" placeholder="林小雨, 陳明">
@@ -43,4 +43,3 @@
                 <div><dt>Content hash</dt><dd id="meta-hash"></dd></div>
                 <div><dt>Han text SHA-256</dt><dd id="meta-han-hash"></dd></div>
               </dl>
-            </details>

@@ -1,0 +1,36 @@
+const assert = require('node:assert/strict');
+const { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, statSync } = require('node:fs');
+const { resolve } = require('node:path');
+const { CdpDriver } = require('./cdp-driver.cjs');
+
+async function main() {
+  const [base, novel, destination] = process.argv.slice(2);
+  if (!base || !novel || !destination) throw Error('Usage: base-url novel-id output-directory');
+  const output = resolve(destination); mkdirSync(output,{recursive:true});
+  const driver = await CdpDriver.create(); const start = Date.now();
+  try {
+    await driver.cdp.send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:output});
+    await driver.get(new URL('/#'+novel,base).href);
+    assert.ok(await driver.evaluate('Boolean(window.QualityReport && window.QualityView)'), 'Quality scripts must load');
+    await driver.wait(() => driver.evaluate('Boolean(window.StoryBlockFeatures?.selected)'));
+    await driver.evaluate("document.getElementById('quality-names').value='林雨,周遠'");
+    await (await driver.findElements('#analyze-quality'))[0].click();
+    await driver.wait(() => driver.evaluate("document.querySelectorAll('#quality-score-rows tr').length===5"));
+    const rows = await driver.evaluate("[...document.querySelectorAll('#quality-score-rows tr')].map(r=>r.innerText)");
+    assert.ok(rows.some(r=>r.includes('No reference corpus')));
+    const file = resolve(output,novel+'-quality.json');
+    const oldJson = existsSync(file) ? statSync(file).mtimeMs : 0;
+    await (await driver.findElements('#download-quality'))[0].click();
+    await driver.wait(() => existsSync(file) && statSync(file).mtimeMs > oldJson);
+    const report = JSON.parse(readFileSync(file,'utf8'));
+    assert.equal(report.quality_report.metrics.length,5);
+    assert.equal(report.quality_report.calibration.humanSources,0);
+    assert.ok(report.quality_report.words > 100);
+    assert.ok(report.quality_report.metrics.every(m=>m.referencePercentile===null));
+    await driver.evaluate("document.getElementById('quality-window').value='0';document.getElementById('quality-window').dispatchEvent(new Event('change'))");
+    assert.equal(await driver.evaluate("document.querySelectorAll('#quality-score-rows tr').length"),5);
+    await driver.evaluate("document.getElementById('quality-title').scrollIntoView({block:'start'})");
+    writeFileSync(resolve(output,'quality-desktop.png'),Buffer.from(await driver.takeScreenshot(),'base64'));
+    const before = new Map(readdirSync(output).map(f => [f,statSync(resolve(output,f)).mtimeMs]));
+    await (await driver.findElements('#download-pdf'))[0].click();
+    await driver.wait(() => driver.evaluate("document.getElementById('reader-action-status').textContent.includes('Download ready')"));

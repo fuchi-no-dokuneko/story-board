@@ -14,7 +14,7 @@ English: Build once with `./client-cli/install-local.sh`. Run scripts from the r
 ./server/export-novels.sh --novel nov_XXXXXXXX --format html --output fan-out/books
 ```
 
-English: IDs above are placeholders; copy real IDs from the list. Repeat `--novel` for a selection, or use `--all`. Exports capture selected head revisions and produce ID-named files plus `index.html`. HTML embeds images for offline reading; PDFs embed the existing Chinese fonts. Output stays inside the repository, default `fan-out/novels`. An unknown ID or rendering failure exits nonzero; already completed files remain available.
+English: IDs above are placeholders; copy real IDs from the list. Repeat `--novel` for a selection, or use `--all`. Exports capture selected head revisions and produce ID-named files plus `index.html`. HTML embeds images for offline reading; PDFs render Chinese with bundled fonts. Output stays inside the repository, default `fan-out/novels`. An unknown ID or rendering failure exits nonzero; already completed files remain available.
 
 繁體：上例 ID 是佔位符，請從清單複製實際 ID。可重複 `--novel` 或用 `--all`。匯出所選最新修訂，產生 ID 命名檔及索引；HTML 內嵌圖片，PDF 使用既有中文字型。輸出限於儲存庫，預設 `fan-out/novels`。失敗時傳回非零狀態，已完成檔案仍保留。
 

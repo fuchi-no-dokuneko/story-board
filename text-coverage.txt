@@ -1,21 +1,18 @@
-ADR-311 coverage / 覆蓋
-Java baseline: 203 full-suite tests passed; 19 projects. Java基準：全套203項通過，19個建置項目。
-Domain/contracts: real codecs/property tests; no mocks. 領域／契約：真實物件、編碼及性質測試，無替身。
-Renderer/validator/detector: real implementations, golden fixtures, page-break pixel regression and inherited-presence validation. 渲染／驗證／偵測：真實實作、黃金範例、換頁像素及既有標註回歸。
-Monitor/style/rewrite: real analysis and planners; reference TXT filesystem fixtures. 監控／風格／改寫：真實分析、規劃及TXT檔案系統範例。
-Application: real editor, preview and package validation; fixed clock where needed. 應用：真實編輯、預覽、封裝驗證，部分固定時鐘。
-SQLite: real JDBC databases, concurrent writers, ID collision/reopen and process-crash tests. SQLite：真實資料庫、併發、識別碰撞／重啟及崩潰測試。
-HTTP: real Spring controllers/security and SQLite; MockMvc simulates servlet transport. HTTP：真實Spring、安全及SQLite，MockMvc模擬傳輸。
-Read ledger: real shared ledger and target selection; controlled expiry clock. 閱讀：真實共用紀錄與範圍選取，受控到期時鐘。
-Proposal read boundary: real controller/principal; RewriteGateService lookup mocked. 提案界線：真實控制器／身分，服務查詢替身。
-Workers: real Java HTTPS clients; model/API responses simulated by local self-signed servers. 工作程式：真實HTTPS客戶端，本機自簽伺服器模擬模型回應。
-Architecture: real module and installer assertions. 架構：模組界線及部署／安裝來源檢查通過。
-Plugin: 188 Node tests; real standalone assembly/validation, injected unit HTTP transport. 技能：188項，真實獨立組合／驗證，單元HTTP替身。
-Browser assets: 8 Node tests with DOM/storage fixtures. 介面資源：8項，DOM／儲存範例。
-GUI: real Chromium, HTTPS, SQLite; 9 scenarios/81 steps; reader/style/downloads. GUI：9情境81步驟，全文、風格及下載。
-Images / 圖片: docs/acceptance/reader-images.md
-GUI fault cases: degraded health response and offline browser network simulated. GUI故障情境：健康降級回應及瀏覽器斷線為模擬。
-Live authoring: real standalone CLI, revision slices, guarded edits and restart replay. 實際撰寫：獨立CLI、版本切片、閱讀限制與重啟重試。
-Live styles: real external directories, minute watcher, eight concurrent comparisons and SQLite storage inspection. 實際風格：外部目錄、分鐘檢查、八個併發比較及資料庫檢查。
-Lifecycle/backup: real JVM, SQLite, data symlink, keyless archives, restore, corruption rejection and retention. 生命週期／備份：真實JVM、SQLite、連結、無金鑰壓縮、還原及保留策略。
-Containers: static checks passed; Docker execution unavailable. 容器：靜態檢查通過，無Docker執行環境。
+Maintenance and quality coverage / 維護與品質驗證覆蓋
+Java: 224 tests across 20 projects. Java：20個建置項目，共224項通過。
+Domain/contracts: real objects, codecs and property tests; no mocks. 領域／契約：真實物件、編碼及性質測試，無替身。
+Rendering: real PDF/image rendering and page-break pixel fixtures. 渲染：真實PDF／圖片及換頁像素範例。
+Application: real edits, previews, packages and retry receipts; selected clocks fixed. 應用：真實編輯、預覽、套件及重試，部分固定時鐘。
+SQLite: real JDBC, collisions, reopen, concurrent writers and crash recovery. SQLite：真實資料庫、碰撞、重啟、併發及崩潰恢復。
+HTTP: real Spring routes and SQLite; MockMvc simulates servlet transport. HTTP：真實Spring及SQLite，MockMvc模擬傳輸。
+Workers: real HTTPS clients; local self-signed servers simulate model responses. 工作器：真實HTTPS客戶端，自簽伺服器模擬模型回應。
+Style/rewrite: real calculations, planners and reference files; proposal lookup mocked in boundary tests. 風格／改寫：真實計算、規劃及檔案；提案界線測試使用查詢替身。
+Architecture: module direction, TLS and repository-local installation assertions. 架構：模組方向、TLS及儲存庫內安裝檢查。
+Plugin: 196 tests; real assembly/validation, injected unit HTTP transport. 技能：196項通過，真實組合／驗證，單元HTTP替身。
+Browser assets: 8 tests with DOM/storage fixtures. 介面資源：8項通過，使用DOM／儲存範例。
+GUI: real Chromium/HTTPS/isolated SQLite; 9 scenarios, 81 steps plus quality, downloads and offline HTML. GUI：真實瀏覽器／HTTPS／獨立SQLite；9情境81步驟，另驗證品質、下載及離線HTML。
+GUI faults: health degradation and offline network simulated. GUI故障：模擬健康降級及斷線。
+NLP: bundled dictionary/HMM, Unicode offsets and concurrent names; no mocks. 分詞：內附詞典／HMM、碼點位置及並行專名，無替身。
+Quality: pure formulas, weighted calibration fixtures, JSD/MATTR; fixtures are not real reference evidence. 品質：純公式、等來源校準範例及JSD/MATTR；範例不代表實際語料。
+Maintenance: real SQLite/Python deletion, HTML/PDF and inline images. 維護：真實SQLite／Python刪除、HTML／PDF及內嵌圖片。
+Bug regressions: collision replay, edited snapshots, decoded pixels, upload retries and >2MiB HTTP imports. 回歸：碰撞重播、編輯快照、像素解碼、上傳重試及大型HTTP匯入。

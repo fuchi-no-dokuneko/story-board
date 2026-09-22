@@ -3,6 +3,8 @@
         assertTrue(new ReplayService(target).verifyAllHeads().valid());
     }
     @Test void browserQualityRequestReturnsIndependentReportAndEvidenceWithoutChangingHead() throws Exception {
+        for (String asset : List.of("/quality-view.js","/quality-report.js"))
+            mvc.perform(get(asset)).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Quality")));
         var revision = NarrativeHttpFixture.revision(false);
         String hash = NarrativeHttpFixture.hash(revision);
         target.createNovel(revision,hash);

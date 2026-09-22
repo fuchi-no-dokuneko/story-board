@@ -8,3 +8,5 @@
 /authoring-features.cjs
 /prepare-reader-images.mjs
 /reader-images.cjs
+
+/quality-report.cjs

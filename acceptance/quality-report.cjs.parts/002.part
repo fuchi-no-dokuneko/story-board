@@ -1,0 +1,10 @@
+    const changed = f => f.endsWith('.pdf') && statSync(resolve(output,f)).mtimeMs > (before.get(f) || 0);
+    await driver.wait(() => readdirSync(output).some(changed));
+    const pdf = readdirSync(output).find(changed);
+    assert.equal(readFileSync(resolve(output,pdf)).subarray(0,4).toString(),'%PDF');
+    writeFileSync(resolve(output,'browser-result.json'),JSON.stringify({passed:true,novel,rows,words:report.quality_report.words,
+      sentences:report.quality_report.sentences,windows:report.quality_report.windows.length,elapsedSeconds:(Date.now()-start)/1000},null,2));
+    console.log('PASS: browser quality report, windows, JSON and PDF downloads / 瀏覽器品質報告、視窗及下載通過');
+  } finally { await driver.quit(); }
+}
+main().catch(error=>{console.error(error);process.exitCode=1;});

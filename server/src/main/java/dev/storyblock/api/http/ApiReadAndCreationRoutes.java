@@ -15,7 +15,7 @@ final class ApiReadAndCreationRoutes {
                 "/app.js",
                 "/styles.css",
                 "/reader-actions.js", "/reader-tools.css", "/style-comparison.js",
-                "/style-score-table.js", "/style-math.html",
+                "/style-score-table.js", "/style-math.html", "/quality-view.js", "/quality-report.js",
                 "/reader-images.js", "/reader-images.css",
                 "/v1/openapi.yaml",
                 "/actuator/health"

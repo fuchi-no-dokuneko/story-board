@@ -7,6 +7,9 @@
 .style-panel table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
 .style-panel th, .style-panel td { text-align: left; border-bottom: 1px solid #d7dfe5; padding: .6rem; white-space: nowrap; }
 .style-panel a { text-decoration: underline; }
+.quality-panel th, .quality-panel td { white-space: normal; }
+.quality-panel th:first-child, .quality-panel td:first-child { min-width: 13rem; }
+.quality-panel th:last-child, .quality-panel td:last-child { min-width: 9rem; }
 #style-status, #reader-action-status { min-height: 1.4em; }
 
 .math-page { max-width: 900px; margin: 2rem auto; padding: 1rem; line-height: 1.8; }
