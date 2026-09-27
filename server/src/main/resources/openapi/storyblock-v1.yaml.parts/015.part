@@ -1,3 +1,38 @@
+      responses:
+        '200':
+          description: Fresh uncached comparison returned after background calculation;
+            no task identifier or polling.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualityReportResponse'
+        default:
+          $ref: '#/components/responses/Problem'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualityReportRequest'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: nv_<public-key-id>.<256-bit-secret>
+  parameters:
+    NovelId:
+      name: novelId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^nov_[A-Za-z0-9]{5}$'
+    RevisionId:
+      name: revisionId
+      in: path
+      required: true
+      schema:
         type: string
         pattern: '^rev_[A-Za-z0-9]{5}$'
     AnalysisId:
@@ -84,37 +119,4 @@
     IfMatchForCreation:
       name: If-Match
       in: header
-      required: true
-      description: Wildcard precondition for creation in a collection.
-      schema:
-        const: '*'
-    IdempotencyKey:
-      name: Idempotency-Key
-      in: header
-      required: true
-      schema:
-        type: string
-        minLength: 1
-        maxLength: 200
-  headers:
-    StrongEtag:
-      description: Quoted strong ETag of the canonical revision or immutable resource view.
-      required: true
-      schema:
-        type: string
-        pattern: '^"sha256:[0-9a-f]{64}"$'
-    Location:
-      description: Absolute or origin-relative durable resource URI.
-      required: true
-      schema:
-        type: string
-        format: uri-reference
-    ArtifactCodec:
-      description: Storage encoding applied to the returned bytes.
-      required: true
-      schema:
-        type: string
-        pattern: '^[a-z][a-z0-9.-]{1,63}$'
-    ContentDisposition:
-      description: Attachment filename for offline use.
       required: true

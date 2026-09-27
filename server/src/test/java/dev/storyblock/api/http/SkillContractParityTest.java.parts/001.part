@@ -1,0 +1,51 @@
+package dev.storyblock.api.http;
+
+import static org.junit.jupiter.api.Assertions.*;
+import dev.storyblock.contracts.CanonicalJson;
+import java.nio.file.*;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.yaml.snakeyaml.Yaml;
+
+class SkillContractParityTest {
+    private Map<String,Object> document;
+
+    @Test void namedRequestsResponsesStatusesAndMutationHeadersMatchTheSkill() throws Exception {
+        try (var input = getClass().getResourceAsStream("/openapi/storyblock-v1.yaml")) {
+            document = map(new Yaml().load(input));
+        }
+        var manifest = map(CanonicalJson.parse(Files.readAllBytes(
+                Path.of("../plugin/references/endpoints.json")), Map.class));
+        var operations = new HashMap<String,Map<String,Object>>();
+        map(document.get("paths")).forEach((path,item) -> map(item).forEach((verb,value) -> {
+            if (Set.of("get","post","put","patch","delete").contains(verb))
+                operations.put(verb.toUpperCase(Locale.ROOT)+" "+route(path),map(value));
+        }));
+        int checked = 0;
+        for (var endpoint : objects(manifest.get("endpoints"))) {
+            String path = endpoint.get("path").toString();
+            if (!path.startsWith("/v1/") || endpoint.get("id").equals("openapi.read")) continue;
+            String key = endpoint.get("method")+" "+route(path.substring(3));
+            var operation = operations.get(key);
+            assertNotNull(operation,key); checked++;
+            assertDto(resolve(operation.get("requestBody")),map(endpoint.get("requestBody")).get("dto"),key);
+            var responses = map(operation.get("responses"));
+            var statuses = new TreeSet<String>();
+            for (var response : objects(endpoint.get("responses"))) {
+                String status = response.get("status").toString(); statuses.add(status);
+                assertDto(resolve(responses.get(status)),response.get("dto"),key+" "+status);
+            }
+            assertEquals(statuses,new TreeSet<>(responses.keySet().stream().filter(s -> s.startsWith("2")).toList()),key);
+            var headers = new HashMap<String,Object>();
+            for (var parameter : objects(operation.get("parameters"))) {
+                var resolved = resolve(parameter);
+                if ("header".equals(resolved.get("in"))) headers.put(resolved.get("name").toString(),resolved.get("required"));
+            }
+            for (var header : objects(endpoint.get("requestHeaders"))) {
+                String name = header.get("name").toString();
+                if (Set.of("If-Match","Idempotency-Key").contains(name))
+                    assertEquals(header.get("required"),headers.get(name),key+" "+name);
+            }
+        }
+        assertEquals(operations.size(),checked);
+    }

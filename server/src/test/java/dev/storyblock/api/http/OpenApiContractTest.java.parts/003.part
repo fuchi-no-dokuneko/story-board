@@ -1,4 +1,3 @@
-                String expectedIfMatch = WILDCARD_CREATION_OPERATIONS.contains(
                         operation.key()
                 )
                         ? "#/components/parameters/IfMatchForCreation"
@@ -61,3 +60,4 @@
         assertStrongEtag("GET /novels/{novelId}", "200");
         assertStrongEtag("GET /admin/novels/{novelId}", "200");
         assertStrongEtag("POST /agent/novels", "200");
+        assertStrongEtag("POST /agent/novels", "201");

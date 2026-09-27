@@ -1,0 +1,47 @@
+      "source": [
+        "modules/style/src/main/java/dev/storyblock/style/quality",
+        "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+      ]
+    },
+    {
+      "name": "QualityReportRequest",
+      "file": "dtos/QualityReportRequest.schema.json",
+      "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "modules/style/src/main/java/dev/storyblock/style/quality",
+        "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+      ]
+    },
+    {
+      "name": "QualityReportResponse",
+      "file": "dtos/QualityReportResponse.schema.json",
+      "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "modules/style/src/main/java/dev/storyblock/style/quality",
+        "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+      ]
+    },
+    {
+      "name": "QualityStatistics",
+      "file": "dtos/QualityStatistics.schema.json",
+      "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "modules/style/src/main/java/dev/storyblock/style/quality",
+        "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+      ]
+    },
+    {
+      "name": "QualityWindowReport",
+      "file": "dtos/QualityWindowReport.schema.json",
+      "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+      "confidence": "confirmed-from-code",
+      "source": [
+        "modules/style/src/main/java/dev/storyblock/style/quality",
+        "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+      ]
+    }
+  ]
+}

@@ -1,3 +1,36 @@
+      description: Wildcard precondition for creation in a collection.
+      schema:
+        const: '*'
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 200
+  headers:
+    StrongEtag:
+      description: Quoted strong ETag of the canonical revision or immutable resource view.
+      required: true
+      schema:
+        type: string
+        pattern: '^"sha256:[0-9a-f]{64}"$'
+    Location:
+      description: Absolute or origin-relative durable resource URI.
+      required: true
+      schema:
+        type: string
+        format: uri-reference
+    ArtifactCodec:
+      description: Storage encoding applied to the returned bytes.
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-z][a-z0-9.-]{1,63}$'
+    ContentDisposition:
+      description: Attachment filename for offline use.
+      required: true
       schema:
         type: string
   responses:
@@ -72,33 +105,3 @@
             }
           },
           "properNames": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "windowWords",
-          "strideWords",
-          "minPhraseWords",
-          "maxPhraseWords",
-          "openingWords",
-          "minOpeningSentences",
-          "minSkeletonSentences",
-          "minRhythmTransitions",
-          "mattrWords",
-          "evidenceLimit",
-          "epsilon",
-          "functionWords",
-          "properNames"
-        ],
-        "additionalProperties": false,
-        "title": "QualityContract",
-        "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
-        "x-confidence": "confirmed-from-code",
-        "x-source": [
-          "modules/style/src/main/java/dev/storyblock/style/quality",
-          "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
-        ],
-        "examples": [

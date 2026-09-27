@@ -1,3 +1,29 @@
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfileVersionView"
+        "201":
+          description: Immutable DRAFT profile version created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StyleProfileVersionView"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-profiles/{profileId}/versions/{versionId}:
+    get:
+      operationId: getStyleProfileVersion
+      summary: Get an immutable profile version and append-only lifecycle
+      x-required-scopes: ["novel:read"]
+      parameters:
         - $ref: "#/components/parameters/ProfileId"
         - $ref: "#/components/parameters/ProfileVersionId"
       responses:
@@ -49,31 +75,3 @@
       x-required-scopes: ["novel:read"]
       parameters:
         - $ref: "#/components/parameters/JobId"
-      responses:
-        "200":
-          description: Durable job state
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Job"
-        default:
-          $ref: "#/components/responses/Problem"
-  /artifacts/{artifactId}:
-    get:
-      operationId: downloadArtifact
-      summary: Download a novel-scoped immutable result artifact
-      x-required-scopes: ["novel:read"]
-      parameters:
-        - $ref: "#/components/parameters/ArtifactId"
-      responses:
-        "200":
-          description: Immutable artifact bytes
-          headers:
-            ETag:
-              $ref: "#/components/headers/StrongEtag"
-            X-Artifact-Codec:
-              $ref: "#/components/headers/ArtifactCodec"
-            Content-Disposition:
-              $ref: "#/components/headers/ContentDisposition"
-          content:
-            application/vnd.storyblock.package+json:

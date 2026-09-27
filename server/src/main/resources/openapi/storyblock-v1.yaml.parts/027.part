@@ -1,3 +1,45 @@
+      - style_ids:
+        - lyrical
+        revision_id: rev_Cd456
+    StyleComparisonItem:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        language:
+          type: string
+        status:
+          type: string
+          enum:
+          - ready
+          - stale
+          - unavailable
+        reference_file_count:
+          type: integer
+          minimum: 0
+        reference_graphemes:
+          type: integer
+          minimum: 0
+        benchmark_updated_at:
+          type: string
+          format: date-time
+        error:
+          type: string
+        scores:
+          type: array
+          items:
+            $ref: '#/components/schemas/StyleChannelDistance'
+          minItems: 5
+          maxItems: 5
+        reference_metadata:
+          const: text_only
+      required:
+      - id
+      - name
       - description
       - language
       - status
@@ -52,34 +94,3 @@
           channel_version: example-1
           primary_metric: robust_l1_input
           primary_distance: 0
-          independent_gate_evidence: true
-          diagnostics: {}
-        reference_metadata: text_only
-    StyleComparisonResponse:
-      type: object
-      properties:
-        novel_id:
-          type: string
-          pattern: ^nov_[A-Za-z0-9]{5}$
-        revision_id:
-          type: string
-          pattern: ^rev_[A-Za-z0-9]{5}$
-        revision_hash:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-        comparisons:
-          type: array
-          items:
-            $ref: '#/components/schemas/StyleComparisonItem'
-          minItems: 1
-      required:
-      - novel_id
-      - revision_id
-      - revision_hash
-      - comparisons
-      additionalProperties: false
-      title: StyleComparisonResponse
-      description: Fresh uncached comparison returned after background calculation; no
-        task identifier or polling.
-      x-confidence: confirmed-from-code
-      x-source:

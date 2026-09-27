@@ -1,3 +1,18 @@
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportRequest"
+      responses:
+        "200":
+          description: Existing idempotent import result
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
             application/json:
               schema:
                 $ref: "#/components/schemas/NovelHead"
@@ -69,18 +84,3 @@
       responses:
         "200":
           description: Deterministic render packet
-          headers:
-            ETag:
-              $ref: "#/components/headers/StrongEtag"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RenderPacket"
-        default:
-          $ref: "#/components/responses/Problem"
-  /novels/{novelId}/pdf-renders:
-    post:
-      operationId: renderRevisionPdf
-      summary: Render a complete immutable revision as a deterministic PDF
-      x-required-scopes: ["novel:read"]
-      parameters:

@@ -1,3 +1,17 @@
+              schema:
+                $ref: "#/components/schemas/ImageUploadResponse"
+        "201":
+          description: Portable immutable image artifact created
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImageUploadResponse"
+        default:
           $ref: "#/components/responses/Problem"
   /novels/{novelId}/edit-previews:
     post:
@@ -66,19 +80,3 @@
       x-required-scopes: ["novel:propose"]
       parameters:
         - $ref: "#/components/parameters/NovelId"
-        - $ref: "#/components/parameters/IfMatch"
-        - $ref: "#/components/parameters/IdempotencyKey"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UndoPreviewRequest"
-      responses:
-        "200":
-          description: Restore operation preview
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PreviewResponse"
-        default:

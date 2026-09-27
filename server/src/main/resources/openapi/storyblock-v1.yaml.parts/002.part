@@ -49,9 +49,22 @@
             schema:
               $ref: "#/components/schemas/CreateNovelRequest"
       responses:
+        "200":
+          description: Existing idempotent novel creation result
+          headers:
+            Location:
+              $ref: "#/components/headers/Location"
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NovelHead"
         "201":
           description: Novel created
           headers:
+            Location:
+              $ref: "#/components/headers/Location"
             ETag:
               $ref: "#/components/headers/StrongEtag"
           content:
@@ -66,18 +79,3 @@
       summary: Import a versioned canonical JSON document or package
       x-required-scopes: ["novel:admin"]
       parameters:
-        - $ref: "#/components/parameters/IfMatchForCreation"
-        - $ref: "#/components/parameters/IdempotencyKey"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ImportRequest"
-      responses:
-        "200":
-          description: Existing idempotent import result
-          headers:
-            ETag:
-              $ref: "#/components/headers/StrongEtag"
-          content:

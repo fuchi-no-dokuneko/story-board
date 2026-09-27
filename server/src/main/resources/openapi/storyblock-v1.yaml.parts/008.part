@@ -1,3 +1,17 @@
+      operationId: getStyleAnalysis
+      summary: Get durable style analysis state and result metadata
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/AnalysisId"
+      responses:
+        "200":
+          description: Analysis state and canonical result metadata
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
                 $ref: "#/components/schemas/StyleAnalysisView"
         default:
           $ref: "#/components/responses/Problem"
@@ -22,7 +36,7 @@
   /rewrite-proposals:
     post:
       operationId: startRewriteProposal
-      summary: Submit a durable LLM rewrite proposal job
+      summary: Reserve an immutable rewrite candidate and worker input
       x-required-scopes: ["rewrite:propose"]
       parameters:
         - $ref: "#/components/parameters/IfMatch"
@@ -35,46 +49,31 @@
               $ref: "#/components/schemas/RewriteProposalRequest"
       responses:
         "202":
-          $ref: "#/components/responses/JobAccepted"
+          description: Rewrite candidate reserved
+          headers:
+            Location:
+              $ref: "#/components/headers/Location"
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewriteProposalAccepted"
         default:
           $ref: "#/components/responses/Problem"
   /rewrite-proposals/{proposalId}:
     get:
       operationId: getRewriteProposal
-      summary: Get an immutable rewrite proposal and its validation results
+      summary: Get an immutable rewrite reservation and its worker input
       x-required-scopes: ["novel:read"]
       parameters:
         - $ref: "#/components/parameters/ProposalId"
       responses:
         "200":
-          description: Rewrite proposal
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/RewriteProposal"
-        default:
-          $ref: "#/components/responses/Problem"
-  /style-profiles:
-    post:
-      operationId: createStyleProfile
-      summary: Create an immutable novel-scoped style profile
-      x-required-scopes: ["style:admin"]
-      parameters:
-        - $ref: "#/components/parameters/IfMatchForCreation"
-        - $ref: "#/components/parameters/IdempotencyKey"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/StyleProfileRequest"
-      responses:
-        "200":
-          description: Idempotent replay of the style profile creation
+          description: Rewrite reservation
           headers:
             ETag:
               $ref: "#/components/headers/StrongEtag"
-            Location:
-              $ref: "#/components/headers/Location"
           content:
             application/json:
+              schema:

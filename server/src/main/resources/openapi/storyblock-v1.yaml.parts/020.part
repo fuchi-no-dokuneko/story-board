@@ -1,3 +1,39 @@
+              "mediumMaximum": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "humanSources",
+              "aiSources",
+              "shortMaximum",
+              "mediumMaximum"
+            ],
+            "additionalProperties": false
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityMetricResult"
+            }
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/QualityStatistics"
+          },
+          "windows": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityWindowReport"
+            }
+          }
+        },
+        "required": [
+          "contract",
+          "words",
+          "sentences",
+          "calibration",
           "metrics",
           "statistics",
           "windows"
@@ -56,37 +92,3 @@
             "windows": [
               {
                 "start": 0,
-                "end": 4,
-                "words": 1,
-                "sentences": 1,
-                "metrics": [
-                  {
-                    "metric": "opening_collision",
-                    "status": "INSUFFICIENT_DATA",
-                    "value": null,
-                    "validSamples": 1,
-                    "referencePercentile": null,
-                    "evidence": []
-                  }
-                ],
-                "statistics": {
-                  "wordFrequencyJsd": null,
-                  "mattr": null,
-                  "mattrWindows": 0
-                }
-              }
-            ]
-          }
-        ]
-      }
-    QualityReportRequest:
-      {
-        "type": "object",
-        "properties": {
-          "revision_id": {
-            "type": "string",
-            "pattern": "^rev_[A-Za-z0-9]{5}$"
-          },
-          "proper_names": {
-            "type": "array",
-            "items": {

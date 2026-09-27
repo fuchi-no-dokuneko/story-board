@@ -1,3 +1,45 @@
+            "mattrWindows": 0
+          }
+        ]
+      }
+    QualityWindowReport:
+      {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "words": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sentences": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityMetricResult"
+            }
+          },
+          "statistics": {
+            "$ref": "#/components/schemas/QualityStatistics"
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "words",
+          "sentences",
+          "metrics",
+          "statistics"
+        ],
         "additionalProperties": false,
         "title": "QualityWindowReport",
         "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
@@ -62,39 +104,3 @@
                   "null"
                 ]
               },
-              "mediumMaximum": {
-                "type": [
-                  "integer",
-                  "null"
-                ]
-              }
-            },
-            "required": [
-              "humanSources",
-              "aiSources",
-              "shortMaximum",
-              "mediumMaximum"
-            ],
-            "additionalProperties": false
-          },
-          "metrics": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualityMetricResult"
-            }
-          },
-          "statistics": {
-            "$ref": "#/components/schemas/QualityStatistics"
-          },
-          "windows": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualityWindowReport"
-            }
-          }
-        },
-        "required": [
-          "contract",
-          "words",
-          "sentences",
-          "calibration",

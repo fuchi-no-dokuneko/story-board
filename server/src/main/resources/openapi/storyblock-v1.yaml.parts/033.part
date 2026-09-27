@@ -1,4 +1,36 @@
           type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        media_type:
+          type: string
+          enum: [image/png, image/jpeg]
+        width_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        height_px:
+          type: integer
+          minimum: 1
+          maximum: 8192
+        idempotent_replay:
+          type: boolean
+      additionalProperties: false
+    RenderPacket:
+      type: object
+      required: [novel_id, revision_id, revision_hash, renderer_version, range, rendered_text, blocks, resolved_meta, offset_map, scene_boundaries]
+      properties:
+        novel_id:
+          type: string
+        revision_id:
+          type: string
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        renderer_version:
+          type: string
+        range:
+          $ref: "#/components/schemas/RenderRange"
+        rendered_text:
+          type: string
         blocks:
           type: array
           items:
@@ -65,34 +97,3 @@
         location: {}
         weather: {}
         pov: {}
-        present_character_ids:
-          type: array
-          items:
-            type: string
-      additionalProperties: false
-    RenderOffset:
-      type: object
-      required: [block_id, rendered_start, rendered_end]
-      properties:
-        block_id:
-          type: string
-        rendered_start:
-          type: integer
-          minimum: 0
-        rendered_end:
-          type: integer
-          minimum: 0
-      additionalProperties: false
-    ResolvedSceneBoundary:
-      type: object
-      required: [scene_id, state_in, state_out]
-      properties:
-        scene_id:
-          type: string
-        state_in:
-          $ref: "#/components/schemas/ResolvedMetadataState"
-        state_out:
-          $ref: "#/components/schemas/ResolvedMetadataState"
-      additionalProperties: false
-    OperationEnvelope:
-      type: object

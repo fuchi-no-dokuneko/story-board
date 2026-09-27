@@ -1,3 +1,31 @@
+      responses:
+        "200":
+          description: Durable job state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        default:
+          $ref: "#/components/responses/Problem"
+  /artifacts/{artifactId}:
+    get:
+      operationId: downloadArtifact
+      summary: Download a novel-scoped immutable result artifact
+      x-required-scopes: ["novel:read"]
+      parameters:
+        - $ref: "#/components/parameters/ArtifactId"
+      responses:
+        "200":
+          description: Immutable artifact bytes
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            X-Artifact-Codec:
+              $ref: "#/components/headers/ArtifactCodec"
+            Content-Disposition:
+              $ref: "#/components/headers/ContentDisposition"
+          content:
+            application/vnd.storyblock.package+json:
               schema:
                 type: string
                 format: binary
@@ -55,31 +83,3 @@
       parameters:
         - $ref: "#/components/parameters/NovelId"
         - $ref: "#/components/parameters/IfMatch"
-        - $ref: "#/components/parameters/IdempotencyKey"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/AccessKeyRequest"
-      responses:
-        "201":
-          description: Credential issued; secret is returned only once
-          headers:
-            Cache-Control:
-              description: Prevent storage of the one-time credential response.
-              schema:
-                const: no-store
-            Pragma:
-              description: Legacy cache prevention for the one-time credential response.
-              schema:
-                const: no-cache
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AccessKeyCreated"
-        default:
-          $ref: "#/components/responses/Problem"
-  /access-keys/{keyId}:
-    delete:
-      operationId: revokeAccessKey

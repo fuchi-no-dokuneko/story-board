@@ -1,6 +1,8 @@
-        assertStrongEtag("POST /agent/novels", "201");
         assertStrongEtag("GET /novels/{novelId}/revisions/{revisionId}", "200");
+        assertStrongEtag("POST /novels", "200");
         assertStrongEtag("POST /novels", "201");
+        assertStrongEtag("POST /rewrite-proposals", "202");
+        assertStrongEtag("GET /rewrite-proposals/{proposalId}", "200");
         assertStrongEtag("POST /imports", "201");
         assertStrongEtag("POST /imports", "200");
         assertStrongEtag("POST /novels/{novelId}/renders", "200");
@@ -49,6 +51,3 @@
                 "operator",
                 string(operation("GET /admin/novels/{novelId}")
                         .get("x-required-role"))
-        );
-        assertEquals(
-                List.of("novel:admin"),

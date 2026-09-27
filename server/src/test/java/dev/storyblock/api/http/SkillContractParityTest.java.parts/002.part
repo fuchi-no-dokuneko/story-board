@@ -1,0 +1,26 @@
+
+    private void assertDto(Map<String,Object> body, Object expected, String context) {
+        for (var media : map(body.get("content")).values()) {
+            Object reference = map(map(media).get("schema")).get("$ref");
+            if (reference instanceof String ref)
+                assertEquals(expected,ref.substring(ref.lastIndexOf('/')+1),context);
+        }
+    }
+    private Map<String,Object> resolve(Object value) {
+        var result = map(value);
+        while (result.get("$ref") instanceof String ref) {
+            Object node = document;
+            for (String segment : ref.substring(2).split("/"))
+                node = map(node).get(segment.replace("~1","/").replace("~0","~"));
+            result = map(node);
+        }
+        return result;
+    }
+    private static String route(String value) { return value.replaceAll("\\{[^}]+}","{}"); }
+    @SuppressWarnings("unchecked") private static Map<String,Object> map(Object value) {
+        return value == null ? Map.of() : (Map<String,Object>)value;
+    }
+    @SuppressWarnings("unchecked") private static List<Map<String,Object>> objects(Object value) {
+        return value == null ? List.of() : (List<Map<String,Object>>)value;
+    }
+}

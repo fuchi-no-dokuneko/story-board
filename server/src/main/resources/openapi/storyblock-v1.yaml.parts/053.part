@@ -1,0 +1,84 @@
+        finding_ids:
+          type: array
+          minItems: 1
+          maxItems: 64
+          uniqueItems: true
+          items:
+            type: string
+            pattern: ^sha256:[0-9a-f]{64}$
+        novel_id:
+          type: string
+          pattern: ^nov_[A-Za-z0-9]{5}$
+        profile_version_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+        profile_version_id:
+          type: string
+          pattern: ^spv_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+        proposal_id:
+          type: string
+          pattern: ^prp_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+        revision_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+        revision_id:
+          type: string
+          pattern: ^rev_[A-Za-z0-9]{5}$
+        schema_version:
+          type: string
+        window_configuration_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+      additionalProperties: false
+      description: Code-derived StoryBlock Rewrite Worker Input JSON contract.
+    RewriteSourceBlock:
+      type: object
+      required:
+      - block_id
+      - block_version_id
+      - editable
+      - text
+      - text_hash
+      properties:
+        block_id:
+          type: string
+          pattern: ^blk_[A-Za-z0-9]{5}$
+        block_version_id:
+          type: string
+          pattern: ^blv_[A-Za-z0-9]{5}$
+        editable:
+          type: boolean
+        text:
+          type: string
+          minLength: 1
+        text_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+      additionalProperties: false
+      description: Code-derived StoryBlock Rewrite Source Block JSON contract.
+    RewriteConstraints:
+      type: object
+      required:
+      - max_changed_blocks
+      - max_output_graphemes
+      - style_directives
+      properties:
+        max_changed_blocks:
+          type: integer
+          minimum: 1
+          maximum: 5
+        max_output_graphemes:
+          type: integer
+          minimum: 1
+          maximum: 500
+        style_directives:
+          type: array
+          minItems: 1
+          maxItems: 16
+          uniqueItems: true
+          items:
+            type: string
+            minLength: 1
+            maxLength: 300
+      additionalProperties: false
+      description: Code-derived StoryBlock Rewrite Constraints JSON contract.

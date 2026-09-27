@@ -1,3 +1,44 @@
+              "skeleton_reuse",
+              "rhythm_predictability",
+              "formulaic_bias"
+            ]
+          },
+          "status": {
+            "enum": [
+              "OK",
+              "INSUFFICIENT_DATA",
+              "UNCALIBRATED"
+            ]
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "validSamples": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "referencePercentile": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QualityEvidence"
+            }
+          }
+        },
+        "required": [
+          "metric",
+          "status",
+          "value",
           "validSamples",
           "referencePercentile",
           "evidence"
@@ -59,45 +100,3 @@
           {
             "wordFrequencyJsd": null,
             "mattr": null,
-            "mattrWindows": 0
-          }
-        ]
-      }
-    QualityWindowReport:
-      {
-        "type": "object",
-        "properties": {
-          "start": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "end": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "words": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "sentences": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "metrics": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualityMetricResult"
-            }
-          },
-          "statistics": {
-            "$ref": "#/components/schemas/QualityStatistics"
-          }
-        },
-        "required": [
-          "start",
-          "end",
-          "words",
-          "sentences",
-          "metrics",
-          "statistics"
-        ],

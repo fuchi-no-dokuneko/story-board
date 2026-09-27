@@ -1,3 +1,17 @@
+          pattern: '^spf_[0-9a-f-]{36}$'
+        name:
+          type: string
+        scope:
+          $ref: "#/components/schemas/StyleProfileScope"
+        provenance:
+          type: string
+        created_by:
+          type: string
+          pattern: '^[A-Za-z0-9._:@-]{1,128}$'
+        created_at:
+          type: string
+          format: date-time
+      additionalProperties: false
     StyleCorpusSource:
       type: object
       required: [source_id, content_hash, kind, provenance, license, ownership]
@@ -81,15 +95,3 @@
       properties:
         source_hash:
           type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        contract:
-          $ref: "#/components/schemas/StyleFeatureContract"
-        channels:
-          type: array
-          minItems: 5
-          maxItems: 6
-          items:
-            $ref: "#/components/schemas/StyleFeatureVector"
-      additionalProperties: false
-    StyleWindowConfiguration:
-      type: object

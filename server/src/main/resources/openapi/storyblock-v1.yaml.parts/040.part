@@ -1,3 +1,40 @@
+      properties:
+        analysis_id:
+          type: string
+          pattern: '^ana_[0-9a-f-]{36}$'
+        novel_id:
+          type: string
+          pattern: '^nov_[A-Za-z0-9]{5}$'
+        revision_id:
+          type: string
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+        revision_hash:
+          type: string
+          pattern: '^sha256:[0-9a-f]{64}$'
+        finding_ids:
+          type: array
+          minItems: 1
+          maxItems: 64
+          uniqueItems: true
+          items:
+            type: string
+            pattern: '^sha256:[0-9a-f]{64}$'
+        cooldown_seconds:
+          type: integer
+          minimum: 300
+          maximum: 2592000
+          default: 86400
+      additionalProperties: false
+    JobAccepted:
+      type: object
+      required: [job_id, status, status_uri]
+      properties:
+        job_id:
+          type: string
+        status:
+          const: queued
+        status_uri:
+          type: string
           format: uri-reference
       additionalProperties: false
     Job:
@@ -60,36 +97,3 @@
           const: style-analysis
         max_attempts:
           type: integer
-          minimum: 1
-          maximum: 20
-        novel_id:
-          type: string
-          pattern: '^nov_[A-Za-z0-9]{5}$'
-        result_artifact_id:
-          type: [string, "null"]
-          pattern: '^art_[0-9a-f-]{36}$'
-        result_hash:
-          type: [string, "null"]
-          pattern: '^sha256:[0-9a-f]{64}$'
-        retention_until:
-          type: string
-          format: date-time
-        revision_id:
-          type: string
-          pattern: '^rev_[A-Za-z0-9]{5}$'
-        status:
-          type: string
-          enum: [queued, running, succeeded, failed]
-        updated_at:
-          type: string
-          format: date-time
-    StyleAnalysisJob:
-      allOf:
-        - $ref: "#/components/schemas/StyleAnalysisJobFields"
-      unevaluatedProperties: false
-    StyleAnalysisView:
-      allOf:
-        - $ref: "#/components/schemas/StyleAnalysisJobFields"
-        - type: object
-          properties:
-            result:

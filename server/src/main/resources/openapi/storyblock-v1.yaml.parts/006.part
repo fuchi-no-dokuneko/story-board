@@ -1,3 +1,19 @@
+        - $ref: "#/components/parameters/IfMatch"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UndoPreviewRequest"
+      responses:
+        "200":
+          description: Restore operation preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewResponse"
+        default:
           $ref: "#/components/responses/Problem"
   /novels/{novelId}/detector-runs:
     post:
@@ -62,20 +78,3 @@
         - $ref: "#/components/parameters/NovelId"
         - $ref: "#/components/parameters/IfMatch"
         - $ref: "#/components/parameters/IdempotencyKey"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/MonitorSubmissionRequest"
-      responses:
-        "200":
-          description: Existing idempotent monitor submission
-          headers:
-            ETag:
-              $ref: "#/components/headers/StrongEtag"
-            Location:
-              $ref: "#/components/headers/Location"
-          content:
-            application/json:
-              schema:

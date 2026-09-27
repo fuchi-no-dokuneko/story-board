@@ -1,3 +1,37 @@
+          type: string
+          pattern: ^scn_[A-Za-z0-9]{5}$
+        in: path
+      - name: revision_id
+        required: true
+        schema:
+          type: string
+          pattern: ^rev_[A-Za-z0-9]{5}$
+        in: query
+      - name: start
+        required: true
+        schema: *id001
+        in: query
+      - name: end
+        required: true
+        schema: *id001
+        in: query
+      responses:
+        '200':
+          description: Revision-bound scene block slice; [0,0) reads an empty scene.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockSlice'
+        default:
+          $ref: '#/components/responses/Problem'
+  /style/:
+    get:
+      operationId: styles_list
+      x-required-scopes: ["novel:read"]
+      summary: Available server-side reference styles. Registry errors are explicit.
+      parameters: []
+      responses:
+        '200':
           description: Available server-side reference styles. Registry errors are
             explicit.
           content:
@@ -51,38 +85,3 @@
         in: path
       - $ref: '#/components/parameters/IfMatch'
       - $ref: '#/components/parameters/IdempotencyKey'
-      responses:
-        '200':
-          description: Fresh uncached comparison returned after background calculation;
-            no task identifier or polling.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QualityReportResponse'
-        default:
-          $ref: '#/components/responses/Problem'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/QualityReportRequest'
-components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: nv_<public-key-id>.<256-bit-secret>
-  parameters:
-    NovelId:
-      name: novelId
-      in: path
-      required: true
-      schema:
-        type: string
-        pattern: '^nov_[A-Za-z0-9]{5}$'
-    RevisionId:
-      name: revisionId
-      in: path
-      required: true
-      schema:

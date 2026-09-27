@@ -1,3 +1,6 @@
+        );
+        assertEquals(
+                List.of("novel:admin"),
                 list(operation("POST /imports").get("x-required-scopes"))
         );
         assertEquals(
@@ -53,4 +56,3 @@
                 map(requestProperties.get("scopes")).get("items")
         );
         assertEquals(
-                List.of(

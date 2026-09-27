@@ -1,3 +1,4 @@
+                "context_block_ids", "evidence"
         ), strings(finding.get("required")));
         assertEquals(Set.of(
                 "LOCATION_CHANGED_WITHOUT_TRANSITION",

@@ -1,3 +1,30 @@
+                $ref: "#/components/schemas/RewriteProposalResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /style-profiles:
+    post:
+      operationId: createStyleProfile
+      summary: Create an immutable novel-scoped style profile
+      x-required-scopes: ["style:admin"]
+      parameters:
+        - $ref: "#/components/parameters/IfMatchForCreation"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StyleProfileRequest"
+      responses:
+        "200":
+          description: Idempotent replay of the style profile creation
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
               schema:
                 $ref: "#/components/schemas/StyleProfile"
         "201":
@@ -52,29 +79,3 @@
           description: Idempotent replay of profile version creation
           headers:
             ETag:
-              $ref: "#/components/headers/StrongEtag"
-            Location:
-              $ref: "#/components/headers/Location"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StyleProfileVersionView"
-        "201":
-          description: Immutable DRAFT profile version created
-          headers:
-            ETag:
-              $ref: "#/components/headers/StrongEtag"
-            Location:
-              $ref: "#/components/headers/Location"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/StyleProfileVersionView"
-        default:
-          $ref: "#/components/responses/Problem"
-  /style-profiles/{profileId}/versions/{versionId}:
-    get:
-      operationId: getStyleProfileVersion
-      summary: Get an immutable profile version and append-only lifecycle
-      x-required-scopes: ["novel:read"]
-      parameters:

@@ -1,3 +1,36 @@
+          maxLength: 2000
+        evidence:
+          $ref: "#/components/schemas/MonitorEvidenceList"
+      additionalProperties: false
+    MonitorProposedOperationOutput:
+      type: object
+      required: [kind, operation, evidence]
+      properties:
+        kind:
+          const: proposed_operation
+        operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        evidence:
+          $ref: "#/components/schemas/MonitorEvidenceList"
+      additionalProperties: false
+    MonitorEvidenceList:
+      type: array
+      minItems: 1
+      maxItems: 16
+      items:
+        $ref: "#/components/schemas/MonitorEvidence"
+    MonitorEvidence:
+      type: object
+      required: [block_id, start_grapheme, end_grapheme, quote, quote_hash]
+      properties:
+        block_id:
+          type: string
+          pattern: '^blk_[A-Za-z0-9]{5}$'
+        start_grapheme:
+          type: integer
+          minimum: 0
+        end_grapheme:
+          type: integer
           minimum: 1
         quote:
           type: string
@@ -54,36 +87,4 @@
           type: string
           pattern: '^sha256:[0-9a-f]{64}$'
         submitted_at:
-          type: string
-          format: date-time
-        state:
-          type: string
-          enum: [current, stale]
-        stale_reasons:
-          type: array
-          uniqueItems: true
-          items:
-            type: string
-            enum: [head_changed, affected_block_changed, affected_block_missing, rule_version_changed]
-        rebase_allowed:
-          const: false
-        idempotent_replay:
-          type: boolean
-      additionalProperties: false
-    MonitorSubmissionResponse:
-      allOf:
-        - $ref: "#/components/schemas/MonitorRunStatus"
-        - type: object
-          required: [idempotent_replay]
-          properties:
-            idempotent_replay:
-              type: boolean
-    StyleAnalysisRequest:
-      type: object
-      required: [revision_id, profile_id, profile_version_id]
-      properties:
-        revision_id:
-          type: string
-          pattern: '^rev_[A-Za-z0-9]{5}$'
-        profile_id:
           type: string

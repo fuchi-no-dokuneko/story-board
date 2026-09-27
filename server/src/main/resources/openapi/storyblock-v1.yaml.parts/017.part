@@ -1,3 +1,33 @@
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "windowWords",
+          "strideWords",
+          "minPhraseWords",
+          "maxPhraseWords",
+          "openingWords",
+          "minOpeningSentences",
+          "minSkeletonSentences",
+          "minRhythmTransitions",
+          "mattrWords",
+          "evidenceLimit",
+          "epsilon",
+          "functionWords",
+          "properNames"
+        ],
+        "additionalProperties": false,
+        "title": "QualityContract",
+        "description": "Independent quality analysis; UTF-16 source offsets and explicit missing calibration.",
+        "x-confidence": "confirmed-from-code",
+        "x-source": [
+          "modules/style/src/main/java/dev/storyblock/style/quality",
+          "server/src/main/java/dev/storyblock/api/http/QualityReportController.java"
+        ],
+        "examples": [
           {
             "windowWords": 256,
             "strideWords": 128,
@@ -68,44 +98,3 @@
             "enum": [
               "repeated_phrase_coverage",
               "opening_collision",
-              "skeleton_reuse",
-              "rhythm_predictability",
-              "formulaic_bias"
-            ]
-          },
-          "status": {
-            "enum": [
-              "OK",
-              "INSUFFICIENT_DATA",
-              "UNCALIBRATED"
-            ]
-          },
-          "value": {
-            "type": [
-              "number",
-              "null"
-            ]
-          },
-          "validSamples": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "referencePercentile": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "minimum": 0,
-            "maximum": 100
-          },
-          "evidence": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualityEvidence"
-            }
-          }
-        },
-        "required": [
-          "metric",
-          "status",
-          "value",

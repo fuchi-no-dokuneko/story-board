@@ -1,3 +1,31 @@
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccessKeyRequest"
+      responses:
+        "201":
+          description: Credential issued; secret is returned only once
+          headers:
+            Cache-Control:
+              description: Prevent storage of the one-time credential response.
+              schema:
+                const: no-store
+            Pragma:
+              description: Legacy cache prevention for the one-time credential response.
+              schema:
+                const: no-cache
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessKeyCreated"
+        default:
+          $ref: "#/components/responses/Problem"
+  /access-keys/{keyId}:
+    delete:
+      operationId: revokeAccessKey
       summary: Revoke a scoped bearer credential
       x-required-scopes: ["novel:admin"]
       parameters:
@@ -49,34 +77,3 @@
       parameters:
         - $ref: "#/components/parameters/JobId"
         - $ref: "#/components/parameters/IfMatch"
-        - $ref: "#/components/parameters/IdempotencyKey"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/WorkerResultRequest"
-      responses:
-        "200":
-          description: Result accepted or returned idempotently
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/WorkerResultResponse"
-        default:
-          $ref: "#/components/responses/Problem"
-  /novels/{novelId}/chapters:
-    get:
-      operationId: novels_chapters_list
-      x-required-scopes: ["novel:read"]
-      summary: All chapters at a fixed novel revision.
-      parameters:
-      - name: novelId
-        required: true
-        schema:
-          type: string
-          pattern: ^nov_[A-Za-z0-9]{5}$
-        in: path
-      - name: revision_id
-        required: true
-        schema:

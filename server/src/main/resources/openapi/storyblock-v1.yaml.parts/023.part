@@ -1,3 +1,43 @@
+                      "evidence": []
+                    }
+                  ],
+                  "statistics": {
+                    "wordFrequencyJsd": null,
+                    "mattr": null,
+                    "mattrWindows": 0
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    IndexSlice:
+      type: object
+      properties:
+        start:
+          type: integer
+          minimum: 0
+        end:
+          type: integer
+          minimum: 0
+      required:
+      - start
+      - end
+      additionalProperties: false
+      title: IndexSlice
+      description: Zero-based half-open index range [start,end).
+      x-confidence: confirmed-from-code
+      x-source:
+      - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
+      examples:
+      - start: 0
+        end: 1
+    ChapterListItem:
+      type: object
+      properties:
+        index:
+          type: integer
           minimum: 0
         chapter_id:
           type: string
@@ -64,41 +104,3 @@
           chapter_id: ch_Aa123
           title: 第一章
           scene_count: 1
-    SceneListItem:
-      type: object
-      properties:
-        scene_id:
-          type: string
-          pattern: ^scn_[A-Za-z0-9]{5}$
-        index:
-          type: integer
-          minimum: 0
-        chapter_id:
-          type: string
-          pattern: ^ch_[A-Za-z0-9]{5}$
-        chapter_index:
-          type: integer
-          minimum: 0
-        title:
-          type: string
-        block_count:
-          type: integer
-          minimum: 0
-        block_slice:
-          $ref: '#/components/schemas/IndexSlice'
-        total_text_graphemes:
-          type: integer
-          minimum: 0
-      required:
-      - scene_id
-      - index
-      - chapter_id
-      - chapter_index
-      - title
-      - block_count
-      - block_slice
-      - total_text_graphemes
-      additionalProperties: false
-      title: SceneListItem
-      description: Scene distribution; text length counts Unicode graphemes including
-        punctuation.

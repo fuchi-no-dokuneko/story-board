@@ -1,3 +1,34 @@
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkerResultRequest"
+      responses:
+        "200":
+          description: Result accepted or returned idempotently
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerResultResponse"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/chapters:
+    get:
+      operationId: novels_chapters_list
+      x-required-scopes: ["novel:read"]
+      summary: All chapters at a fixed novel revision.
+      parameters:
+      - name: novelId
+        required: true
+        schema:
+          type: string
+          pattern: ^nov_[A-Za-z0-9]{5}$
+        in: path
+      - name: revision_id
+        required: true
+        schema:
           type: string
           pattern: ^rev_[A-Za-z0-9]{5}$
         in: query
@@ -63,37 +94,3 @@
       - name: sceneId
         required: true
         schema:
-          type: string
-          pattern: ^scn_[A-Za-z0-9]{5}$
-        in: path
-      - name: revision_id
-        required: true
-        schema:
-          type: string
-          pattern: ^rev_[A-Za-z0-9]{5}$
-        in: query
-      - name: start
-        required: true
-        schema: *id001
-        in: query
-      - name: end
-        required: true
-        schema: *id001
-        in: query
-      responses:
-        '200':
-          description: Revision-bound scene block slice; [0,0) reads an empty scene.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BlockSlice'
-        default:
-          $ref: '#/components/responses/Problem'
-  /style/:
-    get:
-      operationId: styles_list
-      x-required-scopes: ["novel:read"]
-      summary: Available server-side reference styles. Registry errors are explicit.
-      parameters: []
-      responses:
-        '200':

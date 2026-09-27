@@ -1,3 +1,41 @@
+    SceneListItem:
+      type: object
+      properties:
+        scene_id:
+          type: string
+          pattern: ^scn_[A-Za-z0-9]{5}$
+        index:
+          type: integer
+          minimum: 0
+        chapter_id:
+          type: string
+          pattern: ^ch_[A-Za-z0-9]{5}$
+        chapter_index:
+          type: integer
+          minimum: 0
+        title:
+          type: string
+        block_count:
+          type: integer
+          minimum: 0
+        block_slice:
+          $ref: '#/components/schemas/IndexSlice'
+        total_text_graphemes:
+          type: integer
+          minimum: 0
+      required:
+      - scene_id
+      - index
+      - chapter_id
+      - chapter_index
+      - title
+      - block_count
+      - block_slice
+      - total_text_graphemes
+      additionalProperties: false
+      title: SceneListItem
+      description: Scene distribution; text length counts Unicode graphemes including
+        punctuation.
       x-confidence: confirmed-from-code
       x-source:
       - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
@@ -65,38 +103,3 @@
       properties:
         index:
           type: integer
-          minimum: 0
-        block_id:
-          type: string
-          pattern: ^blk_[A-Za-z0-9]{5}$
-        block_version_id:
-          type: string
-          pattern: ^blv_[A-Za-z0-9]{5}$
-        order_key:
-          type: string
-        text:
-          type: string
-        meta:
-          type: object
-        extensions:
-          type: object
-      required:
-      - index
-      - block_id
-      - block_version_id
-      - order_key
-      - text
-      - meta
-      - extensions
-      additionalProperties: false
-      title: BlockSliceItem
-      description: One live block at its scene-local index; successful response grants
-        shared reading for 300 seconds.
-      x-confidence: confirmed-from-code
-      x-source:
-      - server/src/main/java/dev/storyblock/api/http/NarrativeReadController.java
-      examples:
-      - index: 0
-        block_id: blk_Cc345
-        block_version_id: blv_Dd456
-        order_key: a0

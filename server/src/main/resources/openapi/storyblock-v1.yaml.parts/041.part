@@ -1,3 +1,36 @@
+          minimum: 1
+          maximum: 20
+        novel_id:
+          type: string
+          pattern: '^nov_[A-Za-z0-9]{5}$'
+        result_artifact_id:
+          type: [string, "null"]
+          pattern: '^art_[0-9a-f-]{36}$'
+        result_hash:
+          type: [string, "null"]
+          pattern: '^sha256:[0-9a-f]{64}$'
+        retention_until:
+          type: string
+          format: date-time
+        revision_id:
+          type: string
+          pattern: '^rev_[A-Za-z0-9]{5}$'
+        status:
+          type: string
+          enum: [queued, running, succeeded, failed]
+        updated_at:
+          type: string
+          format: date-time
+    StyleAnalysisJob:
+      allOf:
+        - $ref: "#/components/schemas/StyleAnalysisJobFields"
+      unevaluatedProperties: false
+    StyleAnalysisView:
+      allOf:
+        - $ref: "#/components/schemas/StyleAnalysisJobFields"
+        - type: object
+          properties:
+            result:
               $ref: "#/components/schemas/StyleAnalysisResult"
             trace_uri:
               type: string
@@ -55,30 +88,3 @@
           properties:
             normal: {type: integer, minimum: 0}
             warning: {type: integer, minimum: 0}
-            rewrite_candidate: {type: integer, minimum: 0}
-            topic_shift_only: {type: integer, minimum: 0}
-            low_confidence: {type: integer, minimum: 0}
-          additionalProperties: false
-        operational_window_count:
-          type: integer
-          minimum: 0
-          maximum: 1000
-      additionalProperties: false
-    StyleAnalysisWindowFinding:
-      type: object
-      required: [block_ids, can_trigger_rewrite, confidence, decision_state, ordinal, payload, window_id]
-      properties:
-        block_ids:
-          type: array
-          minItems: 1
-          uniqueItems: true
-          items:
-            type: string
-            pattern: '^blk_[A-Za-z0-9]{5}$'
-        can_trigger_rewrite:
-          type: boolean
-        confidence:
-          type: string
-          enum: [calibrated, low_confidence]
-        decision_state:
-          type: string

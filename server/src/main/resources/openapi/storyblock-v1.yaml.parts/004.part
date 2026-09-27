@@ -1,3 +1,18 @@
+          headers:
+            ETag:
+              $ref: "#/components/headers/StrongEtag"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RenderPacket"
+        default:
+          $ref: "#/components/responses/Problem"
+  /novels/{novelId}/pdf-renders:
+    post:
+      operationId: renderRevisionPdf
+      summary: Render a complete immutable revision as a deterministic PDF
+      x-required-scopes: ["novel:read"]
+      parameters:
         - $ref: "#/components/parameters/NovelId"
         - $ref: "#/components/parameters/IfMatch"
         - $ref: "#/components/parameters/IdempotencyKey"
@@ -70,17 +85,3 @@
               $ref: "#/components/headers/Location"
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/ImageUploadResponse"
-        "201":
-          description: Portable immutable image artifact created
-          headers:
-            ETag:
-              $ref: "#/components/headers/StrongEtag"
-            Location:
-              $ref: "#/components/headers/Location"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ImageUploadResponse"
-        default:

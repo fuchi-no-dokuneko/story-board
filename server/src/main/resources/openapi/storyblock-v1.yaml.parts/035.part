@@ -1,3 +1,36 @@
+      required: [base_revision_id, base_hash, normalized_operation, candidate_hash, diff, render_packet, violations, warnings, committable]
+      properties:
+        base_revision_id:
+          type: string
+        base_hash:
+          type: string
+        normalized_operation:
+          $ref: "#/components/schemas/OperationEnvelope"
+        candidate_hash:
+          type: string
+        diff:
+          type: object
+        render_packet:
+          oneOf:
+            - $ref: "#/components/schemas/RenderPacket"
+            - type: "null"
+        violations:
+          type: array
+          items:
+            type: object
+        warnings:
+          type: array
+          items:
+            type: object
+        committable:
+          type: boolean
+      additionalProperties: false
+    CommitResponse:
+      type: object
+      required: [revision_id, sequence, content_hash, operation_id, idempotent_replay]
+      properties:
+        revision_id:
+          type: string
         sequence:
           type: integer
           minimum: 1
@@ -53,40 +86,4 @@
         revision_id:
           type: string
         revision_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        rule_version:
-          type: string
-        affected_block_ids:
-          type: array
-          uniqueItems: true
-          items:
-            type: string
-        affected_scene_ids:
-          type: array
-          minItems: 1
-          uniqueItems: true
-          items:
-            type: string
-        context_block_ids:
-          type: array
-          maxItems: 3
-          uniqueItems: true
-          items:
-            type: string
-        evidence:
-          type: object
-          additionalProperties: true
-      additionalProperties: false
-    MonitorPacketRequest:
-      type: object
-      required: [revision_id, revision_hash, target_block_id, neighbor_count]
-      properties:
-        revision_id:
-          type: string
-          pattern: '^rev_[A-Za-z0-9]{5}$'
-        revision_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        target_block_id:
           type: string

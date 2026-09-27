@@ -1,3 +1,4 @@
+                List.of(
                         "novel:read", "novel:analyze", "novel:propose",
                         "novel:commit", "novel:admin", "style:analyze",
                         "style:admin", "rewrite:propose", "monitor:submit",
@@ -60,4 +61,3 @@
         assertEquals(Set.of(
                 "finding_id", "code", "severity", "revision_id", "revision_hash",
                 "rule_version", "affected_block_ids", "affected_scene_ids",
-                "context_block_ids", "evidence"

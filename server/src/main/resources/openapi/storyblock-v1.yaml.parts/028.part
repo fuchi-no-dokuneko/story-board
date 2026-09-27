@@ -1,3 +1,34 @@
+          independent_gate_evidence: true
+          diagnostics: {}
+        reference_metadata: text_only
+    StyleComparisonResponse:
+      type: object
+      properties:
+        novel_id:
+          type: string
+          pattern: ^nov_[A-Za-z0-9]{5}$
+        revision_id:
+          type: string
+          pattern: ^rev_[A-Za-z0-9]{5}$
+        revision_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+        comparisons:
+          type: array
+          items:
+            $ref: '#/components/schemas/StyleComparisonItem'
+          minItems: 1
+      required:
+      - novel_id
+      - revision_id
+      - revision_hash
+      - comparisons
+      additionalProperties: false
+      title: StyleComparisonResponse
+      description: Fresh uncached comparison returned after background calculation; no
+        task identifier or polling.
+      x-confidence: confirmed-from-code
+      x-source:
       - server/src/main/java/dev/storyblock/api/http/StyleComparisonController.java
       - server/src/main/java/dev/storyblock/api/style
       examples:
@@ -49,39 +80,3 @@
       type: object
       required: [type, title, status, code, detail, instance, request_id]
       properties:
-        type:
-          type: string
-          format: uri
-        title:
-          type: string
-        status:
-          type: integer
-          minimum: 400
-          maximum: 599
-        code:
-          type: string
-          pattern: '^[A-Z][A-Z0-9_]{1,63}$'
-        detail:
-          type: string
-        instance:
-          type: string
-        request_id:
-          type: string
-        current_revision_id:
-          type: string
-        current_etag:
-          type: string
-      additionalProperties: true
-    CreateNovelRequest:
-      type: object
-      required: [initial_revision]
-      properties:
-        initial_revision:
-          $ref: "#/components/schemas/CanonicalRevision"
-      additionalProperties: false
-    ImportRequest:
-      type: object
-      required: [format, document]
-      properties:
-        format:
-          type: string

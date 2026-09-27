@@ -1,3 +1,36 @@
+          type: integer
+          minimum: 1
+          maximum: 100
+        total:
+          type: integer
+          minimum: 0
+        total_pages:
+          type: integer
+          minimum: 0
+      additionalProperties: false
+    AdminNovelDetail:
+      type: object
+      required: [novel, revision, schema_version]
+      properties:
+        novel:
+          $ref: "#/components/schemas/AdminNovelSummary"
+        revision:
+          $ref: "#/components/schemas/CanonicalRevision"
+        schema_version:
+          const: admin-novel-reader-1.0.0
+      additionalProperties: false
+    AgentNovelRegistrationChapter:
+      type: object
+      required: [title, text]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        text:
+          type: string
+          minLength: 1
+      additionalProperties: false
     AgentNovelRegistrationRequest:
       type: object
       required: [novel_id, created_at, title, language, main_characters, expected_han_characters, chapters]
@@ -63,35 +96,3 @@
       additionalProperties: false
     CanonicalRevision:
       type: object
-      required: [schema_version, novel_id, revision_id, parent_revision_id, chapters, created_at, content_hash]
-      properties:
-        schema_version:
-          const: 1.0.0
-        novel_id:
-          type: string
-        revision_id:
-          type: string
-        parent_revision_id:
-          type: [string, "null"]
-        chapters:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
-        created_at:
-          type: string
-          format: date-time
-        content_hash:
-          type: string
-          pattern: '^sha256:[0-9a-f]{64}$'
-        extensions:
-          type: object
-          additionalProperties: true
-      additionalProperties: false
-    CanonicalPackage:
-      type: object
-      required: [package_version, manifest, revisions, operations, artifacts]
-      properties:
-        package_version:
-          const: 1.0.0
-        manifest:
