@@ -42,7 +42,9 @@ test('builds bearer headers without persisting or exposing the token', () => {
     () => auth.authorizationHeaders('secret\nInjected: value'),
     (error) => error.code === 'INVALID_BEARER_TOKEN',
   );
-  assert.doesNotMatch(appSource, /\b(?:localStorage|sessionStorage)\b/);
+  const legacySource = fs.readdirSync(path.join(staticDirectory, 'app.js.parts')).sort()
+    .map(name => fs.readFileSync(path.join(staticDirectory, 'app.js.parts', name), 'utf8')).join('');
+  assert.doesNotMatch(legacySource, /\b(?:localStorage|sessionStorage)\b/);
 });
 
 test('allows only URLs on the current StoryBlock origin', () => {

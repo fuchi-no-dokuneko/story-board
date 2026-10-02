@@ -1,10 +1,10 @@
 # Source layout / 來源配置 / 源码布局
 
-EN: Root applications are `server`, `client-cli`, `client-style-worker`, `client-llm-worker`, and `plugin`; shared Java libraries stay under `modules`. `skills/storyblock-author` is a compatibility link to `plugin`. Each application has its own local installation entry point. Shared tools live in `.local-tool`; acceptance-only dependencies live in `acceptance/.local-tool-app`.
+EN: Root applications are `server`, `client-web-v2`, `client-cli`, `client-style-worker`, `client-llm-worker`, and `plugin`; shared Java libraries stay under `modules`. `skills/storyblock-author` links to `plugin`. Each application has a local installation entry point. Shared tools live in `.local-tool`; acceptance dependencies live in `acceptance/.local-tool-app`.
 
-繁體中文：根目錄應用為 `server`、`client-cli`、`client-style-worker`、`client-llm-worker` 及 `plugin`；共用 Java 程式庫位於 `modules`。`skills/storyblock-author` 為指向 `plugin` 的相容連結。各應用有本機安裝入口。共用工具位於 `.local-tool`，驗收專用依賴位於 `acceptance/.local-tool-app`。
+繁體中文：根目錄應用為 `server`、`client-web-v2`、`client-cli`、`client-style-worker`、`client-llm-worker` 及 `plugin`；共用 Java 程式庫位於 `modules`。`skills/storyblock-author` 為指向 `plugin` 的相容連結。各應用有本機安裝入口。共用工具位於 `.local-tool`，驗收專用依賴位於 `acceptance/.local-tool-app`。
 
-简体中文：根目录应用为 `server`、`client-cli`、`client-style-worker`、`client-llm-worker` 及 `plugin`；共享 Java 库位于 `modules`。`skills/storyblock-author` 为指向 `plugin` 的兼容链接。各应用有本机安装入口。共享工具位于 `.local-tool`，验收专用依赖位于 `acceptance/.local-tool-app`。
+简体中文：根目录应用为 `server`、`client-web-v2`、`client-cli`、`client-style-worker`、`client-llm-worker` 及 `plugin`；共享 Java 库位于 `modules`。`skills/storyblock-author` 为指向 `plugin` 的兼容链接。各应用有本机安装入口。共享工具位于 `.local-tool`，验收专用依赖位于 `acceptance/.local-tool-app`。
 
 EN: Authored files stay below 3000 bytes. Large fixed contracts, browser assets, and integration scenarios use ordered `*.parts/*.part` source sections. Local installation and `mvnw` assemble the original filename without changing its bytes. Edit sections directly, or edit the assembled file and save it with the command below. Generated files are ignored by Git. Markdown pages also stay below 200 lines and provide three languages.
 

@@ -1,6 +1,7 @@
 StoryBlock maintenance and quality / 維護與品質分析
 
 Completed / 已完成:
+- V2 bookshelf, reader and analysis coexist with the original UI; packaged Firefox UAT passed. 新版書架、閱讀與分析和原版共存，封裝後Firefox驗收通過。
 - Five replay, transfer and image fixes. 五項重播、傳輸及圖片修正。
 - Novel deletion preview and batch HTML/PDF exports. 小說刪除預覽及HTML／PDF批次匯出。
 - Bundled Unicode Jieba tokenizer and five independent quality indices. 內附完整碼點分詞與五項獨立品質指標。

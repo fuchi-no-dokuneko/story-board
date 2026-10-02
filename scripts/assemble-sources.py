@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Assemble ordered source sections during repository-local installation."""
 import os
+import runpy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -24,3 +25,7 @@ for directory, children, _ in os.walk(ROOT):
         pending.replace(target)
         if data.startswith(b"#!"):
             target.chmod(0o755)
+
+frontend = ROOT / 'client-web-v2/build.py'
+if frontend.exists():
+    runpy.run_path(str(frontend), run_name='__main__')

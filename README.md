@@ -26,7 +26,8 @@ EN: Open `https://127.0.0.1:8443/` and accept the local certificate warning. Ins
 
 - [Install / 安裝 / 安装](docs/operations/local-installation.md)
 - [Ports and tunnel / 連接埠與通道 / 端口与通道](docs/operations/ports.md)
-- [Applications and sources / 應用與來源 / 应用与源码](docs/operations/source-layout.md)
+- [Apps / 應用 / 应用](docs/operations/source-layout.md)
+- [Reader v2 / 新版 / 新版](client-web-v2/README.md)
 - [Containers / 容器 / 容器](docs/operations/containers.md)
 - [Author tool / 作者工具 / 作者工具](plugin/README.md)
 - [Tests / 測試 / 测试](docs/operations/integration-security-tests.md)

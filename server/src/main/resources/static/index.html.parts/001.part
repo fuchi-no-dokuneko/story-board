@@ -21,6 +21,7 @@
       </div>
     </div>
     <div class="header-state">
+      <a class="readonly-badge" href="/?ui=v2">Reader v2</a>
       <span class="readonly-badge">Read only</span>
       <span class="service-status"><span id="status-dot"></span><span id="status-text">Checking service</span></span>
     </div>

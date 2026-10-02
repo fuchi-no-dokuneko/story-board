@@ -15,6 +15,7 @@
     history: { replaceState() {} },
     URL,
     URLSearchParams,
+    Option: function(text, value) { return { textContent: text, value }; },
     Intl,
     clearTimeout,
     setTimeout,

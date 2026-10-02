@@ -1,0 +1,22 @@
+.sb2 .sb-style-choice { display:flex; gap:12px; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--line); }
+.sb2 .sb-style-choice>span { min-width:0; }.sb2 .sb-style-choice small { display:block; margin-top:5px; }
+.sb2 .sb-channel { margin:24px 0; border-top:1px solid var(--line); padding-top:20px; }
+.sb2 .sb-channel h3 { font:600 20px var(--serif); }.sb2 .sb-channel>p { font-size:11px; margin:4px 0 16px; }
+.sb2 .sb-distance { margin:14px 0; }.sb2 .sb-distance>div { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; font-size:13px; }
+.sb2 .sb-distance>div>span:last-child { margin-left:auto; font:12px ui-monospace,monospace; }
+.sb2 .sb-distance meter { display:block; width:100%; height:7px; margin-top:6px; border:0; background:var(--line); }
+.sb2 .sb-distance meter::-moz-meter-bar { background:var(--muted); }
+.sb2 .sb-distance.closest meter::-moz-meter-bar { background:var(--accent); }
+.sb2 .sb-distance meter::-webkit-meter-optimum-value { background:var(--muted); }
+.sb2 .sb-distance.closest meter::-webkit-meter-optimum-value { background:var(--accent); }
+.sb2 .sb-badge { display:inline-block; font-size:11px; border-radius:5px; padding:3px 7px; color:var(--accent); background:var(--soft); }
+.sb2 .sb-metric { padding:22px 0; border-bottom:1px solid var(--line); }
+.sb2 .sb-metric>header { display:flex; gap:16px; align-items:baseline; justify-content:space-between; }
+.sb2 .sb-metric h3 { font:600 19px/1.4 var(--serif); }.sb2 .sb-metric>header>b { font:700 21px ui-monospace,monospace; }
+.sb2 .sb-metric>p { color:var(--muted); font-size:13px; margin:8px 0 12px; }
+.sb2 .sb-metric-meta { display:flex; flex-wrap:wrap; gap:10px; align-items:center; font-size:11px; color:var(--muted); }
+.sb2 .sb-evidence { margin-top:12px; }.sb2 .sb-evidence blockquote { margin:12px 0; padding:12px 14px; border-left:3px solid var(--accent); background:var(--paper); }
+.sb2 .sb-evidence p { font:16px/1.8 var(--serif); overflow-wrap:anywhere; }
+.sb2 .sb-evidence small { display:block; overflow-wrap:anywhere; margin:8px 0; }
+.sb2 .sb-evidence button { font-size:12px; }
+.sb2 #quality-statistics { margin-top:24px; }
