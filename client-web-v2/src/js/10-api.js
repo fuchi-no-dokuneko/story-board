@@ -22,16 +22,13 @@ function report(error, id = 'app-message') {
   const target = $(id);
   if (target) { target.hidden = false; target.textContent = error.message; }
   if (error.status === 401 || error.status === 403) {
-    $('connection-hint').hidden = false;
-    $('connection-hint').textContent = t('accessNeeded');
+    toast(t('accessNeeded'));
   }
 }
 async function health() {
   try { S.online = (await json('/actuator/health')).status === 'UP'; }
   catch { S.online = false; }
-  const target = $('status-text');
-  if (target) { target.textContent = t(S.online ? 'online' : 'offline');
-    $('service-pill').dataset.state = S.online ? 'up' : 'down'; }
+  updateHealth();
 }
 function downloadBlob(blob, name) {
   const url = URL.createObjectURL(blob), link = document.createElement('a');

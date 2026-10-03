@@ -1,0 +1,30 @@
+.picked summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;font-size:13.5px;font-weight:650;list-style:none}
+.picked summary::-webkit-details-marker{display:none}
+.picked summary span{color:var(--muted);font-weight:500}
+.picked[open] summary{border-bottom:1px solid var(--line)}
+.picked #style-choices{padding:10px 10px 2px}
+
+/* ---------- popovers & drawer ---------- */
+.pop{position:fixed;z-index:80;width:min(340px,calc(100vw - 20px));padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);box-shadow:0 18px 50px rgba(0,0,0,.22);font-family:var(--sans)}
+.pop h4{margin:0 0 10px;font-size:13px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}
+.row label{font-size:13.5px;font-weight:600}
+.pop .seg{border-radius:10px}.pop .seg button{border-radius:8px}
+input[type=range]{accent-color:var(--accent);width:150px}
+.menu{padding:6px}
+.menu button{display:flex;align-items:flex-start;gap:12px;width:100%;padding:10px;border:0;border-radius:10px;background:none;text-align:left}
+.menu button:hover:not(:disabled){background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.menu button:disabled{opacity:.45;cursor:not-allowed}
+.menu b{display:block;font-size:14px}.menu span{display:block;color:var(--muted);font-size:12.5px}
+.menu .ico{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:9px;background:var(--accent-soft);color:var(--accent);font:700 11px var(--mono)}
+.drawer{position:fixed;z-index:75;top:0;right:0;bottom:0;display:flex;flex-direction:column;width:min(470px,100vw);background:var(--card);border-left:1px solid var(--line);box-shadow:-18px 0 50px rgba(0,0,0,.18);transform:translateX(105%);transition:transform .25s ease;font-family:var(--sans)}
+.drawer.open{transform:none}
+.dhead{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 0}
+.dhead h3{margin:0;font-size:17px}
+.tabs{display:flex;gap:4px;padding:12px 14px 0;border-bottom:1px solid var(--line)}
+.tab{position:relative;height:40px;padding:0 12px;border:0;background:none;color:var(--muted);font-weight:650;font-size:14px}
+.tab[aria-selected=true]{color:var(--ink)}
+.tab[aria-selected=true]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
+.dbody{flex:1;overflow:auto;padding:18px 18px 40px}
+.lead{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+.lead a{color:var(--accent)}

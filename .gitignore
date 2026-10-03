@@ -28,3 +28,9 @@ backups/
 /fan-in/
 /fan-out/
 /dev-log/
+
+/client-web-v2/src/design/*.css
+/client-web-v2/src/design/*.html
+/client-web-v2/src/design/*-words.js
+/client-web-v2/src/desktop/render.js
+/client-web-v2/src/mobile/render.js

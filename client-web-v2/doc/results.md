@@ -1,31 +1,32 @@
 # Results / 驗證結果 / 验证结果
 
-EN: Verified on 2026-10-02: 225 Java tests, 17 browser logic tests, and seven
-Firefox 153 acceptance groups passed. The packaged API served both frontends.
-The inspected story's revision stayed unchanged throughout browser acceptance.
+EN: 2026-10-03: 225 Java tests, 18 JavaScript tests and all 11 Firefox 156
+acceptance groups passed. The installed HTTPS API served both frontends with
+real SQLite data. Browser tests left the selected revision unchanged.
 
-繁體：2026-10-02 驗證：225 項 Java、17 項前端邏輯測試及七組 Firefox 153 驗收通過。
-封裝後的 API 同時提供新舊前端；瀏覽器驗收期間，受測小說修訂未變更。
+繁體：2026-10-03：225 項 Java、18 項 JavaScript 及 11 組 Firefox 156 驗收通過。
+封裝 API 以真實 SQLite 提供兩版介面；瀏覽器測試未更改受測修訂。
 
-简体：2026-10-02 验证：225 项 Java、17 项前端逻辑测试及七组 Firefox 153 验收通过。
-打包后的 API 同时提供新旧前端；浏览器验收期间，受测小说修订未更改。
+简体：2026-10-03：225 项 Java、18 项 JavaScript 及 11 组 Firefox 156 验收通过。
+打包 API 使用真实 SQLite 提供两版界面；浏览器测试未更改受测修订。
 
-| Group / 組別 / 组别 | Evidence / 證據 / 证据 |
+| Evidence / 證據 / 证据 | Scope / 範圍 / 范围 |
 | --- | --- |
-| Library / 書庫 / 书库 | 14 stories; paging, search, language filter, empty result / 14 部、分頁、搜尋、篩選、空結果 / 14 部、分页、搜索、筛选、空结果 |
-| Reading / 閱讀 / 阅读 | Chapters, resume, three UI languages, PNG/JPEG, metadata / 章節、續讀、三語、圖片、資料 / 章节、续读、三语、图片、信息 |
-| Analysis / 分析 / 分析 | Five independent channels, tied minima, windows, exact source highlight / 五項獨立距離、並列最小值、視窗、原文標記 / 五项独立距离、并列最小值、窗口、原文标记 |
-| Downloads / 下載 / 下载 | Browser-saved PDF, complete TXT and matching JSON / 瀏覽器下載 PDF、完整 TXT、吻合的 JSON / 浏览器下载 PDF、完整 TXT、吻合的 JSON |
-| Layout / 版面 / 布局 | 320–1920 px; portrait/landscape, 2× DPI, 28 px text, night mode / 直橫向、高解析、放大文字、夜間 / 竖横向、高分辨率、放大文字、夜间 |
-| Original / 原版 / 原版 | Reading, images, analysis, console, mobile / 閱讀、圖片、分析、主控台、手機 / 阅读、图片、分析、控制台、手机 |
-| Recovery / 重試 / 重试 | Read/image failures recover; optional token stays in memory / 讀取與圖片重試、權杖不落地 / 读取与图片重试、令牌不落地 |
+| ZIP / 原稿 / 原稿 | A/D CSS preserved; computed reader styles and drawer width compared / 保留 CSS 並比對閱讀器樣式與抽屜寬度 / 保留 CSS 并比较阅读器样式与抽屉宽度 |
+| Catalog / 書庫 / 书库 | 15 novels, paging, search, filters / 15 部、分頁、搜尋、篩選 / 15 部、分页、搜索、筛选 |
+| Reading / 閱讀 / 阅读 | Resume paragraph/offset, images, languages, mobile screens / 段落位置、圖片、三語及手機畫面 / 段落位置、图片、三语及手机界面 |
+| Analysis / 分析 / 分析 | Five channels, tied minima, quality windows, exact evidence / 五項距離、並列最小值、品質視窗及證據 / 五项距离、并列最小值、品质窗口及证据 |
+| Exports / 匯出 / 导出 | Real PDF/TXT/JSON; visible mobile success/error / 真實下載及可見成功／失敗提示 / 真实下载及可见成功／失败提示 |
+| Layout / 版面 / 布局 | 320–1920 px, enlarged text, night contrast / 放大文字與夜間對比 / 放大文字与夜间对比 |
+| Long book / 長篇 / 长篇 | 30 chapters, 6,000 blocks / 30 章、6,000 段落 / 30 章、6,000 段落 |
+| v1 / 原版 / 原版 | Reading, analysis, images; book links bypass delayed catalog / 閱讀分析圖片、直連不等書庫 / 阅读分析图片、直连不等书库 |
 
-EN: API, SQLite, analysis, rendering, downloads and Firefox are real. Only the
-recovery group's temporary HTTP failures are intercepted. Unit tests inject
-transport/DOM/storage fixtures. No calibration corpus was invented.
+EN: Failure/delay tests intercept HTTP responses; other browser flows use the
+real API. Unit tests simulate transport/DOM/storage. Night mode adds a missing
+foreground binding; the ZIP's original stylesheet content stays intact.
 
-繁體：API、SQLite、分析、渲染、下載及 Firefox 均為實際執行；僅重試情境攔截暫時 HTTP 失敗。
-單元測試注入傳輸、DOM、儲存範例；未虛構校準語料。
+繁體：故障／延遲測試攔截 HTTP，其餘使用真實 API；單元測試模擬傳輸、DOM 及儲存。
+夜間模式補上缺少的前景色綁定；ZIP 原始樣式檔內容完整保留。
 
-简体：API、SQLite、分析、渲染、下载及 Firefox 均实际运行；仅重试场景拦截临时 HTTP 失败。
-单元测试注入传输、DOM、存储示例；未虚构校准语料。
+简体：故障／延迟测试拦截 HTTP，其余使用真实 API；单元测试模拟传输、DOM 及存储。
+夜间模式补上缺少的前景色绑定；ZIP 原始样式文件内容完整保留。

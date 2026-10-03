@@ -1,0 +1,12 @@
+document.querySelectorAll('link[href="/reader-tools.css"],link[href="/reader-images.css"]').forEach(el=>el.remove());
+window.addEventListener('popstate',route);
+window.addEventListener('pagehide',()=>{captureReading();releaseImages();});
+window.addEventListener('pageshow',e=>{if(e.persisted){renderApp(false);restoreReading(remembered().find(r=>r.id===S.book));}});
+matchMedia('(max-width:760px)').addEventListener('change',e=>{
+  captureReading();closeLayers();S.mobile=e.matches;
+  if(!S.mobile)S.view=S.selected&&S.view!=='library'?'reading':'library';
+  if(S.mobile&&S.view==='library'){S.stack=['lib'];S.mobileTab='lib';}
+  if(S.mobile&&S.view==='reading'){S.stack=['lib','book','read'];S.mobileTab='read';}
+  renderApp(false);restoreReading(remembered().find(r=>r.id===S.book));
+});
+renderApp(false);health();loadCatalog();route();

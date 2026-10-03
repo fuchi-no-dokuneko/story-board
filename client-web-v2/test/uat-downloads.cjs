@@ -10,13 +10,13 @@ module.exports=async({page,output,selected,id,quality,click,close,assert})=>{
     throw Error('Download missing: '+name);
   };
   for(const file of fs.readdirSync(directory))fs.unlinkSync(path.join(directory,file));
-  await click('.sb-reader-actions [data-action=export]');await click('#download-txt');
+  await click('#exportBtn');await click('#download-txt');
   const text=(await waitFile(selected.novel.title+'.txt')).toString('utf8');
   for(const chapter of selected.revision.chapters)
     for(const scene of chapter.scenes)for(const block of scene.blocks)assert.ok(text.includes(block.text));
-  await click('#download-pdf');const pdf=await waitFile(selected.novel.title+'.pdf');
+  await click('#exportBtn');await click('#download-pdf');const pdf=await waitFile(selected.novel.title+'.pdf');
   assert.equal(pdf.subarray(0,5).toString(),'%PDF-');assert.ok(pdf.length>1000);await close();
-  await click('.sb-reader-actions [data-action=style]');await click('[data-action=quality]');
+  await click('#exportBtn');
   await click('#download-quality');const report=JSON.parse((await waitFile(id+'-quality.json')).toString());
   assert.deepEqual(report,quality);await close();
 };

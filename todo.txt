@@ -7,7 +7,9 @@ Completed / 已完成:
 - Bundled Unicode Jieba tokenizer and five independent quality indices. 內附完整碼點分詞與五項獨立品質指標。
 - Full regression, HTTPS integration and browser acceptance. 全套回歸、HTTPS整合與瀏覽器驗收。
 
-Remaining implementation and local tests: none. 尚未完成的實作與本機測試：無。
+Deployment / 部署：
+- VPS SSH user/host and checkout path are still needed to deploy and verify remotely. 尚需 VPS SSH 使用者／主機及儲存庫位置，才能部署與正式站驗證。
+- Catalog server calculation remains slow; backend changes are outside the original authorized frontend scope. 書庫後端計算仍慢；原前端需求禁止更動後端。
 
 Calibration / 校準:
 Reference corpora were not supplied. Corpus loading/calibration is implemented; unavailable scores and percentiles remain explicit. 未提供參考語料；載入與校準已實作，缺少分數及分位數均明確標示。

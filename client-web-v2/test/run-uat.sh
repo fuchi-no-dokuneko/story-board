@@ -30,5 +30,6 @@ kill -0 "$uat_pid"
 node client-web-v2/test/fixture-images.cjs
 node client-web-v2/test/seed-reader.mjs
 node client-web-v2/test/seed-catalog.mjs
+node client-web-v2/test/seed-long.mjs
 node client-web-v2/test/run-browser.cjs
 echo "Evidence / 驗證紀錄: $UAT_OUTPUT"

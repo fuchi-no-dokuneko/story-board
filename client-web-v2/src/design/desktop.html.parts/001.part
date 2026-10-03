@@ -1,0 +1,41 @@
+
+<header class="top" id="topbar">
+  <button class="brand" type="button" id="home" aria-label="StoryBlock library">
+    <span class="seal" aria-hidden="true">書</span>
+    <span><b>StoryBlock</b><small data-i18n="tagline"></small></span>
+  </button>
+  <div class="search" role="search">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <label class="sr" for="catalog-search" data-i18n="search"></label>
+    <input id="catalog-search" type="search" autocomplete="off" data-i18n-ph="searchPh">
+    <kbd>/</kbd>
+  </div>
+  <div class="right">
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" data-lang-btn="en">EN</button><button type="button" data-lang-btn="zh">繁</button><button type="button" data-lang-btn="zhs">简</button>
+    </div>
+    <button class="pill" type="button" id="connBtn" aria-haspopup="dialog" aria-expanded="false">
+      <span class="dot" id="status-dot"></span><span id="status-text" data-i18n="online"></span><span class="ro readonly-badge" data-i18n="readOnly"></span>
+    </button>
+  </div>
+</header>
+
+<!-- =================== LIBRARY =================== -->
+<main id="library" class="wrap">
+  <section class="hero" id="hero" aria-labelledby="hero-title"></section>
+  <div class="libhead">
+    <div><h2 id="library-heading" data-i18n="library"></h2><p id="catalog-total"></p></div>
+    <div class="chips" id="filters" role="group" aria-label="Filter"></div>
+    <label><span class="sr" data-i18n="sort"></span>
+      <select class="sort" id="sort"><option value="updated" data-i18n="sortUpdated"></option><option value="title" data-i18n="sortTitle"></option><option value="length" data-i18n="sortLength"></option></select>
+    </label>
+  </div>
+  <p id="catalog-loading" role="status"></p><ol class="shelf" id="novel-list"></ol>
+  <p class="empty" id="catalog-empty" hidden data-i18n="noMatch"></p>
+  <nav class="pager" aria-label="Pagination"><button class="btn sm" id="page-previous" data-page="-1" disabled data-i18n="prev"></button><span id="page-label"></span><button class="btn sm" id="page-next" data-page="1" disabled data-i18n="next"></button></nav>
+</main>
+
+<!-- =================== READER =================== -->
+<div id="reader" hidden>
+  <div class="rbar">
+    <button class="ib" type="button" id="back" data-i18n-aria="backLib"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg><span class="lbl" data-i18n="library"></span></button>

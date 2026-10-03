@@ -1,0 +1,35 @@
+  const r = btn.getBoundingClientRect();
+  const el = document.createElement('div'); el.className = 'pop'; el.innerHTML = html;
+  el.style.top = `${r.bottom + 8}px`;
+  if (align === 'right') el.style.right = `${Math.max(10, innerWidth - r.right)}px`; else el.style.left = `${Math.max(10, r.left)}px`;
+  $('#layer').append(el);
+  setTimeout(() => addEventListener('click', function off(e) { if (!el.contains(e.target) && !btn.contains(e.target)) { el.remove(); btn.setAttribute('aria-expanded', 'false'); removeEventListener('click', off); } }), 0);
+  return el;
+}
+function dOpenAa(btn) {
+  const p = S.prefs;
+  const seg = (key, opts) => `<div class="seg" role="group">${opts.map((o) => `<button type="button" data-pref="${key}" data-val="${o}" aria-pressed="${p[key] === o}">${t(o)}</button>`).join('')}</div>`;
+  const el = dPopover(btn, `
+    <h4>${t('display')}</h4>
+    <div class="row"><label for="fs">${t('textSize')}</label><span data-css="display:flex;align-items:center;gap:8px"><small>A</small><input id="fs" type="range" min="15" max="24" value="${p.size}"><b data-css="font-size:18px">A</b></span></div>
+    <div class="row"><label>${t('spacing')}</label>${seg('lh', ['tight', 'normal', 'loose'])}</div>
+    <div class="row"><label>${t('typeface')}</label>${seg('font', ['serif', 'sans'])}</div>
+    <div class="row"><label>${t('width')}</label>${seg('width', ['narrow', 'wide'])}</div>
+    <div class="row"><label>${t('theme')}</label>${seg('theme', ['paper', 'white', 'night'])}</div>`);
+  if (!el) return;
+  el.querySelector('#fs').oninput = (e) => { p.size = +e.target.value; dApplyPrefs(); };
+  el.onclick = (e) => { const b = e.target.closest('[data-pref]'); if (!b) return; p[b.dataset.pref] = b.dataset.val; dApplyPrefs();
+    $$(`[data-pref=${b.dataset.pref}]`, el).forEach((x) => x.setAttribute('aria-pressed', String(x === b))); };
+}
+/* Export */
+function dOpenExport(btn) {
+  const el = dPopover(btn, `<div class="menu">
+    <button type="button" id="download-pdf" data-dl="pdf"><span class="ico">PDF</span><span><b>${t('pdf')}</b><span>${t('pdfSub')} · ${S.novel.head_revision_id}</span></span></button>
+    <button type="button" id="download-txt" data-dl="txt"><span class="ico">TXT</span><span><b>${t('txt')}</b><span>${t('txtSub')}</span></span></button>
+    <button type="button" id="download-quality" data-dl="json" ${S.analyzed ? '' : 'disabled'}><span class="ico">{ }</span><span><b>${t('qjson')}</b><span>${S.analyzed ? t('qjsonReady') : t('qjsonSub')}</span></span></button></div>`);
+  if (!el) return;
+}
+/* Connection */
+function dOpenConn(btn) {
+  const el = dPopover(btn, `
+    <h4>${t('conn')}</h4>

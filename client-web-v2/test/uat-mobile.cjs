@@ -1,0 +1,26 @@
+module.exports=async({page,base,id,click,shot,close,assert})=>{
+  await page.setViewport({width:390,height:844});await page.goto(base+'/?ui=v2');
+  await page.waitForSelector(`[data-book="${id}"]`);await click(`.novel-item[data-book="${id}"]`);
+  await page.waitForSelector('.bookhero');assert.equal(await page.$$eval('.stats>div',es=>es.length),4);
+  await shot('mobile-book');await click('.scroll>[data-go=read]');await page.waitForSelector('#rscroll');
+  assert.ok(await page.$eval('.story-block',e=>e.getBoundingClientRect().top<240));
+  await page.$eval('#rscroll',e=>{e.scrollTop=500});
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('sb2.recent'))[0].top>450);
+  await page.reload();await page.waitForFunction(()=>Math.abs(document.querySelector('#rscroll')?.scrollTop-500)<3);
+  await click('.story-block');assert.ok(await page.$eval('.reader',e=>e.classList.contains('immersive')));
+  await click('.story-block');await click('[data-sheet=toc]');await click('.sheet [data-chapter="1"]');
+  assert.ok(await page.$eval('#chapter-1',e=>e.hidden));assert.ok(await page.$eval('#chapter-2',e=>!e.hidden));
+  await page.$eval('.slider input',e=>{e.value=20;e.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.waitForFunction(()=>!document.querySelector('#chapter-1').hidden);
+  await click('[data-sheet=export]');await click('#download-txt');await page.waitForSelector('.toast');
+  assert.equal(await page.$('.sheet'),null);
+  assert.ok(await page.$eval('.toast',e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}));
+  await shot('mobile-export-feedback');await click('[data-tabgo=ins]');
+  await page.waitForFunction(()=>!document.querySelector('#compare-styles').disabled);
+  await click('#compare-styles');await page.waitForSelector('.icard');assert.equal(await page.$$eval('.icard',es=>es.length),5);
+  await click('[data-ins=quality]');await click('#analyze-quality');await page.waitForSelector('.mrow');
+  await click('[data-metric="0"]');assert.ok(await page.$('.sheet'));await close();
+  await click('[data-tabgo=set]');await click('[data-lang-btn=zhs]');assert.equal(await page.$eval('html',e=>e.lang),'zh-Hans');
+  await click('[data-lang-btn=en]');await click('#console-tab');await click('[data-path="/actuator/health"]');
+  await page.waitForFunction(()=>document.querySelector('#response').textContent.includes('UP'));
+};

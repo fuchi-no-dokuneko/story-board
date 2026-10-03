@@ -1,0 +1,17 @@
+      <button class="btn" type="button" data-go="read">${n.progress ? `${t('resume')} · ${Math.round(n.progress * 100)}%` : t('start')}</button>
+      <div class="two"><button class="btn sec" type="button" data-tabgo="ins">${mIc.ins.replace('<svg', '<svg width="20" height="20"')} ${t('insights')}</button><button class="btn sec" type="button" data-sheet="export">${mIc.share.replace('<svg', '<svg width="20" height="20"')} ${t('export')}</button></div>
+      <div class="sech"><h3>${t('contents')}</h3><span>${n.chapters}</span></div>
+      <ul class="card list chs" id="chapter-nav">${body.map((c, i) => `<li><button class="row chapter-link" type="button" data-chapter="${i}"><span data-css="color:var(--faint);font:700 13px var(--mono)">${String(i + 1).padStart(2, '0')}</span><span><b>${H.esc(c.title)}</b><small>${c.scenes.map((s) => `${H.transition(s.transition)} · ${H.esc(s.meta.time)} · ${H.esc(s.meta.location)}`).join(' / ')}</small></span><span class="chev">›</span></button></li>`).join('')}</ul>
+      ${body.length < n.chapters ? `<p class="excerpt">${t('excerpt')}</p>` : ''}
+      <div class="sech"><h3>${t('revision')}</h3></div>
+      <div class="card" data-css="padding:6px 16px">${[['ID', n.novel_id], [t('revision'), `${n.head_revision_id} · seq ${n.head_sequence}`], ['Hash', n.head_hash]].map(([k, v]) => `<div class="set"><span>${k}</span><span class="val" data-css="font:12.5px var(--mono);max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${H.esc(v)}</span></div>`).join('')}</div>
+    </div></div>`;
+}
+function mReadScreen() {
+  const n = mBook(), body = H.body(n.novel_id); let gi = 0;
+  const ch = body[S.chapter] || body[0] || {title:t('emptyRevision')};
+  return `<div class="screen reader ${S.immersive ? 'immersive' : ''}" id="reader-content">
+    <div class="rtop"><button class="nb" type="button" data-back>‹</button><div class="t"><b>${H.esc(n.title)}</b><small>${H.esc(ch.title)}</small></div><button class="nb icon" type="button" data-sheet="aa" aria-label="${t('display')}" data-css="font:700 17px var(--serif)">Aa</button></div>
+    <div class="scroll" id="rscroll"><div class="rtext" lang="${n.language === 'en' ? 'en' : n.language}" data-css="--fs:${S.fs}px;font-family:${S.font === 'serif' ? 'var(--serif)' : 'var(--sans)'}">
+      ${body.map((c, ci) => { const html = `<section class="chapter-section" id="chapter-${ci + 1}" ${ci === S.chapter ? '' : 'hidden'}><h2>${H.esc(c.title)}</h2>
+        ${c.scenes.map((s) => `<p class="meta">${H.transition(s.transition)} · ${H.esc(s.meta.time)} · ${H.esc(s.meta.location)} · ${H.esc(s.meta.weather)}</p>${s.blocks.map((b) => { const k = gi++;

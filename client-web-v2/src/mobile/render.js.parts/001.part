@@ -1,0 +1,21 @@
+const mIc = {
+  lib: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 19V5a1 1 0 0 1 1-1h4v16H5a1 1 0 0 1-1-1zM9 4h4v16H9zM14.5 5.2l3.8-1 3.2 14.6-3.8 1z"/></svg>',
+  read: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3 4.5v14c4 0 7 .5 9 2 2-1.5 5-2 9-2v-14c-4 0-7 .5-9 2zM12 6.5v14"/></svg>',
+  ins: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>',
+  set: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  toc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 3v12m0-12-4 4m4-4 4 4M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+};
+const mCover = (n, cls = '') => (cls === 'sm'
+  ? `<span class="cover sm" data-css="--h:${n.hue}"><span class="one">${H.esc(n.title[0])}</span></span>`
+  : `<span class="cover ${cls} ${/[㐀-鿿]/.test(n.title) ? '' : 'latin'}" data-css="--h:${n.hue}"><span>${H.esc(n.title)}</span></span>`);
+const mBook = () => H.novel(S.book);
+const mSize = (n) => (n.han ? `${H.num(n.han)} ${t('han')}` : `${H.num(n.blocks)} ${t('blocks').toLowerCase()}`);
+
+/* ---------- screens ---------- */
+function mLibScreen() {
+  const c = resumeBook();
+  const langs = [['all', t('all')], ['zh-Hant', '繁中'], ['zh-Hans', '简中'], ['yue-Hant', '粵語'], ['en', 'EN'], ['imported', t('imported')]];
+  const list=catalogMatches();
+  return `<div class="screen"><div class="scroll">
+    <div class="bigtitle"><h1>${t('library')}</h1><button class="chip" type="button" data-go="set" id="status-text"><i id="status-dot"></i>${t(S.online?'online':'offline')}</button></div>

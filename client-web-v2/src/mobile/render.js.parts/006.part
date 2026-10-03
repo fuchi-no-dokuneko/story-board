@@ -1,0 +1,18 @@
+function mSetScreen() {
+  const mini = (key, opts, cur) => `<div class="mini">${opts.map(([v, l]) => `<button type="button" data-${key}="${v}" aria-pressed="${cur === v}">${l}</button>`).join('')}</div>`;
+  return `<div class="screen"><div class="scroll"><h1 class="ptitle" data-css="margin-bottom:18px">${t('settings')}</h1>
+    <div class="group"><h5>${t('language')} · ${t('theme')}</h5><div class="card">
+      <div class="set"><span>${t('language')}</span>${mini('lang-btn', [['en', 'EN'], ['zh', '繁'], ['zhs', '简']], H.lang)}</div>
+      <div class="set"><span>${t('theme')}</span>${mini('thm', [['auto', t('system')], ['light', t('light')], ['dark', t('dark')]], S.theme)}</div></div></div>
+    <div class="group"><h5>${t('reader')}</h5><div class="card">
+      <div class="set"><span>${t('textSize')}</span>${mini('fs', [[17, 'A−'], [19, 'A'], [22, 'A+']], S.fs)}</div>
+      <div class="set"><span>${t('typeface')}</span>${mini('font', [['serif', t('serif')], ['sans', t('sans')]], S.font)}</div></div></div>
+    <div class="group"><h5>${t('connection')}</h5><div class="card">
+      <div class="set"><span>${t('lan')}<small>${t('lanSub')}</small></span><span class="chip" id="status-text">${t(S.online?'online':'offline')}</span></div>
+      <form class="tokenf" id="operator-form" autocomplete="off"><label for="operator-token" data-css="font-size:14px;font-weight:600">${t('token')}</label><input id="operator-token" type="password" autocomplete="off"><small data-css="color:var(--muted);font-size:12.5px">${t('tokenNote')}</small><button class="btn sm" id="operator-connect" type="submit" data-css="justify-self:start">${t('use')}</button></form></div></div>
+    <div class="group"><h5>${t('diag')}</h5><div class="card"><div class="set"><span>${t('console')}<small>GET · /actuator/health, /v1/openapi.yaml…</small></span><button class="link" type="button" id="console-tab" data-go="console">${H.lang === 'en' ? 'Open' : '開啟'} ›</button></div></div></div>
+    <div class="group"><h5>${t('about')}</h5><div class="card"><div class="set"><span>${t('service')}</span><span class="val">${SB.service.version}</span></div><div class="set"><span>${t('readonly')}</span><span class="val readonly-badge">${t('ro')}</span></div></div></div>
+  </div></div>`;
+}
+function mConsoleScreen() {
+  return `<div class="screen pushed" id="console-view"><nav class="nav"><button class="nb" type="button" data-back>‹ ${t('settings')}</button><b>${t('console')}</b><span data-css="width:60px"></span></nav>

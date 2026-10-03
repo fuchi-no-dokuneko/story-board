@@ -1,0 +1,30 @@
+.mbar .tr{height:10px;border-radius:9px;background:var(--line);overflow:hidden}.mbar .tr i{display:block;height:100%;border-radius:9px;background:color-mix(in srgb,var(--navy) 35%,transparent)}
+.mbar.best .tr i{background:var(--accent)}
+.mbar .v{font:12.5px var(--mono);color:var(--muted);text-align:right}.mbar.best .v{color:var(--ink);font-weight:700}
+.mrow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;width:100%;padding:14px 0;border:0;border-bottom:1px solid var(--line);background:none;text-align:left}
+.mrow:last-child{border-bottom:0}
+.mrow b{display:block;font-size:15px}.mrow small{display:block;color:var(--muted);font-size:12.5px}
+.mrow .v{font:700 16px var(--mono)}
+.stat{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11.5px;font-weight:700;background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--muted)}
+.stat.warn{background:var(--warn-soft);color:var(--warn)}
+.names{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px}
+.nm{display:inline-flex;align-items:center;gap:2px;height:34px;padding:0 4px 0 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font:650 14.5px var(--serif)}
+.nm button{width:28px;height:28px;border:0;background:none;color:inherit;font-size:16px}
+.nm.add{padding:0 12px;background:none;border:1.5px dashed var(--line);color:var(--muted);font-family:var(--sans)}
+
+/* settings */
+.group{margin:0 0 22px}
+.group h5{margin:0 6px 8px;color:var(--muted);font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.group .card{padding:4px 16px}
+.set{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;border-bottom:1px solid var(--line)}
+.set:last-child{border-bottom:0}
+.set span{font-size:15.5px}.set small{display:block;color:var(--muted);font-size:12.5px}
+.set .val{color:var(--muted);font-size:14.5px}
+.mini{display:inline-flex;padding:3px;border-radius:11px;background:color-mix(in srgb,var(--ink) 7%,transparent)}
+.mini button{height:30px;min-width:40px;padding:0 10px;border:0;border-radius:8px;background:none;font-weight:700;font-size:13.5px;color:var(--muted)}
+.mini button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tokenf{display:grid;gap:8px;padding:12px 0}
+.tokenf input{height:46px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.set a,.set .link{color:var(--accent);font-weight:600;border:0;background:none;font-size:15px}
+/* console */
+.qr{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}

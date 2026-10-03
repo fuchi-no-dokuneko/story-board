@@ -1,0 +1,39 @@
+          ? `<figure class="story-image" data-block-id="${b.id}"><img alt="${H.esc(b.alt)}" width="640" height="360"><figcaption data-text-block="${b.id}" class="story-block" data-css="text-indent:0">${H.esc(b.text)}</figcaption></figure>`
+          : `<p class="story-block" id="b${bi++}" data-block-id="${b.id}" data-text-block="${b.id}">${H.esc(b.text)}</p>`).join('')}`).join('')}
+      <nav class="chapter-end">${i > 0 ? `<button class="btn sm" type="button" data-jump="chapter-${i}">← ${t('prevCh')}</button>` : '<span></span>'}
+        ${i < body.length - 1 ? `<button class="btn sm" type="button" data-jump="chapter-${i + 2}">${t('nextCh')} →</button>` : ''}</nav>
+    </section>`).join('');
+  const excerpt = body.length < n.chapters ? `<p class="excerpt">${t('excerpt')}</p>` : '';
+  $('#reader-content').innerHTML = `
+    <header class="ahead">
+      <p class="eyebrow">${H.langName(n.language)} · ${n.registered ? t('registered') : t('imported')}</p>
+      <h1 id="reader-title">${H.esc(n.title)}</h1>
+      ${n.characters.length ? `<ul class="cast" id="character-list">${n.characters.map((c) => `<li>${H.esc(c)}</li>`).join('')}</ul>` : ''}
+      <p class="facts"><b>${H.num(n.han)}</b> ${t('han')} · <b>${n.chapters}</b> ${t('chapters')} · <b>${n.scenes}</b> ${t('scenes')} · <b>${n.blocks}</b> ${t('blocks')}</p>
+    </header>${chapters}${excerpt}`;
+  dApplyPrefs(); designStyles(); loadImages(); dTrackProgress();
+  if (S.drawer) {dRenderDrawer();if(!S.styles.length&&!S.stylesLoading)loadStyles();}
+}
+
+/* reading prefs */
+function dApplyPrefs() {
+  const r = $('#reader'), p = S.prefs;
+  r.style.setProperty('--rsize', `${p.size}px`);
+  r.style.setProperty('--rlh', { tight: 1.75, normal: 2, loose: 2.3 }[p.lh]);
+  r.style.setProperty('--rfont', p.font === 'serif' ? 'var(--serif)' : 'var(--sans)');
+  r.style.setProperty('--rw', p.width === 'narrow' ? '36em' : '46em');
+  r.dataset.rtheme = p.theme; prefs();
+}
+function dCloseAll(except) {
+  if (except !== 'pop') { $('#layer').innerHTML = ''; $$('[aria-expanded=true]').forEach((b) => b.setAttribute('aria-expanded', 'false')); }
+  if (except !== 'drawer') { $('#drawer').classList.remove('open'); document.body.classList.remove('drawer-open'); S.drawer = false; }
+  if (except !== 'toc') $('#toc').classList.remove('open');
+  $('.scrim')?.remove();
+}
+function dScrim(onClose) {
+  const s = document.createElement('div'); s.className = 'scrim'; s.onclick = onClose; document.body.append(s);
+}
+function dPopover(btn, html, { align = 'right' } = {}) {
+  const open = btn.getAttribute('aria-expanded') === 'true';
+  dCloseAll(); if (open) return null;
+  btn.setAttribute('aria-expanded', 'true');

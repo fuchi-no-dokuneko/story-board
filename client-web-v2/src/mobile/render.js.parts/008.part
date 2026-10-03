@@ -1,0 +1,18 @@
+  if (kind === 'metric') { const m = SB.quality.metrics[arg]; title = H.metric(m.metric);
+    html = `<p data-css="margin:0 0 10px;color:var(--muted);font-size:14px">${SB.metricsInfo[m.metric].hint}</p>
+      <div class="card" data-css="padding:4px 14px;box-shadow:none;border:1px solid var(--line)">${[[H.lang === 'en' ? 'Whole text' : '全文', m.value], ...SB.quality.windows.map((w, i) => [`W${i + 1} · ${w.start}–${w.end}`, w.values[m.metric]])].map(([k, v]) => `<div class="set" data-css="min-height:44px"><span data-css="font-size:14px">${k}</span><span class="val" data-css="font-family:var(--mono)">${H.d6(v)}</span></div>`).join('')}
+      <div class="set" data-css="min-height:44px"><span data-css="font-size:14px">${H.lang === 'en' ? 'Percentile' : '分位數'}</span><span class="val">${m.referencePercentile==null?'—':decimal(m.referencePercentile,1)+'%'}</span></div></div>
+      <div class="evs">${H.ev(S.book, m).length ? H.ev(S.book, m).map((e) => `<div class="ev"><small>#${e.block + 1} · ${H.esc(e.reason)}</small><p>${H.esc(e.text)}</p><button class="btn sm sec" type="button" data-evidence="${e.index}" data-metric="${arg}" data-text="${H.esc(e.text)}">${t('showInText')}</button></div>`).join('') : `<p data-css="color:var(--muted)">${t('noEv')}</p>`}</div>`; }
+  $('#overlay').innerHTML = `<div class="scrim" data-close></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${H.esc(title)}"><div class="grab"></div><div class="sh"><b>${H.esc(title)}</b><button class="nb" type="button" data-close>${t('done')}</button></div><div class="sb">${html}</div></div>`;
+}
+const mCloseSheet = () => { $('#overlay').innerHTML = ''; };
+const mTABS = { lib: ['lib'], read: ['lib', 'book', 'read'], ins: ['ins'], set: ['set'] };
+function mRender() {
+  const top = S.stack[S.stack.length - 1];
+  const screen = { lib: mLibScreen, book: mBookScreen, read: mReadScreen, ins: mInsScreen, set: mSetScreen, console: mConsoleScreen }[top]();
+  const showTabs = top !== 'read' && top !== 'console';
+  $('#app').innerHTML = screen + (showTabs ? `<nav class="tabbar" aria-label="Tabs">${[['lib', 'library', 'lib'], ['read', 'reading', 'read'], ['ins', 'insights', 'ins'], ['set', 'settings', 'set']]
+    .map(([k, l, i]) => `<button type="button" data-tabgo="${k}" aria-current="${S.mobileTab === k}">${mIc[i]}${t(l)}</button>`).join('')}</nav>` : '');
+  designStyles();loadImages();decorateAnalysis();
+  if (top === 'read') { const sc = $('#rscroll'); trackMobileProgress(); sc.onclick = (e) => { if (e.target.closest('button,mark,summary')||getSelection()?.toString()) return; S.immersive = !S.immersive; $('.reader').classList.toggle('immersive', S.immersive); }; }
+}

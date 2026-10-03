@@ -3,7 +3,7 @@ module.exports=async({page,base,click,shot,assert})=>{
   await page.waitForFunction(()=>document.querySelectorAll('.novel-item').length===12);
   assert.equal(await page.$eval('#page-label',e=>e.textContent),'1 / 2');
   await shot('desktop-library');await click('#page-next');
-  assert.equal(await page.$$eval('.novel-item',e=>e.length),2);
+  assert.equal(await page.$$eval('.novel-item',e=>e.length),3);
   await click('#page-previous');await page.type('#catalog-search','LAST TRAIN');
   assert.equal(await page.$$eval('.novel-item',e=>e.length),1);
   assert.match(await page.$eval('.novel-item',e=>e.textContent),/Last Train Home/);
@@ -12,6 +12,6 @@ module.exports=async({page,base,click,shot,assert})=>{
   await click('[data-filter=all]');await page.type('#catalog-search','no matching story');
   assert.ok(await page.$eval('#catalog-empty',e=>!e.hidden));
   await page.$eval('#catalog-search',e=>{e.value='';e.dispatchEvent(new Event('input',{bubbles:true}));});
-  await page.select('#catalog-sort','title');
+  await page.select('#sort','title');
   assert.equal(await page.$$eval('textarea,[contenteditable=true]',e=>e.length),0);
 };

@@ -1,0 +1,24 @@
+    return `<label class="opt ${off ? 'off' : ''}"><input type="checkbox" data-style="${s.id}" ${off||S.styleBusy||S.stylesLoading ? 'disabled' : ''} ${!off && S.picks.has(s.id) ? 'checked' : ''}>
+      <span data-css="flex:1;min-width:0"><span data-css="display:flex;justify-content:space-between;gap:8px"><b>${H.esc(s.name)}</b>
+        <span class="badge ${s.status === 'ready' ? 'ok' : s.status === 'stale' ? 'warn' : 'mute'}">${H.status(s.status)}</span></span>
+        <p>${H.esc(s.description)}</p>
+        <small>${s.error ? H.esc(s.error) : `${s.reference_file_count} ${t('files')} · ${H.num(s.reference_graphemes)} ${t('graphemes')}`}</small></span></label>`;
+  }).join('');
+  let results = '';
+  if (S.compared) {
+    const st = H.columnStats();
+    const ids = Object.keys(SB.comparison.rows).filter((id) => S.picks.has(id));
+    const closest = SB.channels.map((c) => `<div><small>${H.channel(c)}</small><b>${H.esc(H.styleName(st[c.id].closest))}</b></div>`).join('');
+    const body = S.raw
+      ? `<div data-css="overflow-x:auto"><table class="raw"><thead><tr><th></th>${SB.channels.map((c) => `<th>${H.channel(c)}</th>`).join('')}</tr></thead><tbody id="style-score-rows">
+          ${ids.map((id) => `<tr><td data-css="font-family:var(--serif);font-weight:700">${H.esc(H.styleName(id))}</td>${SB.channels.map((c) => { const v = SB.comparison.rows[id][c.id]; return `<td class="${v === st[c.id].min ? 'min' : ''}" title="${c.metric}">${H.d6(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table></div>`
+      : SB.channels.map((c) => {
+          const vals = ids.map((id) => [id, SB.comparison.rows[id][c.id]]).sort((a, b) => a[1] - b[1]);
+          return `<section class="chan"><header><b>${H.channel(c)}</b><span>${c.metric}</span></header>
+            ${vals.map(([id, v]) => `<div class="bar ${v === st[c.id].min ? 'min' : ''}"><span class="n">${H.esc(H.styleName(id))}</span><span class="track"><i data-css="width:${v==null?0:(v / st[c.id].max)*100}%"></i></span><span class="v" title="${H.d6(v)}">${decimal(v,4)}</span></div>`).join('')}
+            ${c.partial ? `<p class="field-hint">ⓘ ${t('partial')}</p>` : ''}</section>`;
+        }).join('');
+    results = `<div class="note info">✓ ${t('calcAt')} <b class="mono">${SB.comparison.revision_id}</b> · ${t('notStored')}</div>
+      <p class="eyebrow" data-css="margin-top:18px">${t('closestPer')}</p><div class="closest">${closest}</div>
+      <div data-css="display:flex;justify-content:flex-end;margin:-6px 0 10px"><button class="btn sm ghost" type="button" id="rawToggle">${S.raw ? t('bars') : t('table')}</button></div>${body}`;
+  }

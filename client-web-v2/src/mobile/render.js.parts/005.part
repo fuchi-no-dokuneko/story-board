@@ -1,0 +1,19 @@
+          ${c.partial ? `<p data-css="margin-top:8px;font-size:12px">* ${H.lang === 'en' ? 'TXT references have no narrative metadata.' : 'TXT 參考語料沒有敘事 metadata。'}</p>` : ''}</div>`; }).join('');
+    }
+    body = `<div class="explain">ⓘ<span>${t('styleExplain')}</span></div><div class="stylepick" id="style-choices">${pick}</div>
+      <button class="btn" type="button" id="compare-styles" ${S.picks.size ? '' : 'disabled'}>${S.compared ? '↻ ' : ''}${t('compare')} (${S.picks.size})</button><div data-css="height:14px"></div><div id="style-score-rows">${res}</div>`;
+  } else {
+    const Q = SB.quality;
+    const rows = S.analyzed ? `<div class="card" data-css="padding:0 16px;margin-top:14px" id="quality-score-rows">${Q.metrics.map((m, i) => `<button class="mrow" type="button" data-metric="${i}"><span><b>${H.metric(m.metric)}</b><small>${H.ev(S.book, m).length} ${t('evidence').toLowerCase()} · n=${m.validSamples}</small></span>
+      <span class="stat ${m.status === 'INSUFFICIENT_DATA' ? 'warn' : ''}">${m.status === 'INSUFFICIENT_DATA' ? H.status(m.status) : 'raw'}</span><span class="v">${m.value == null ? '—' : m.value.toFixed(3)}</span></button>`).join('')}</div>
+      <p data-css="margin:10px 4px;color:var(--muted);font-size:12.5px" id="quality-statistics">${Q.words} words · ${Q.sentences} sentences · MATTR ${H.d3(Q.statistics.mattr)}</p>` : '';
+    body = `<div class="explain warn">⚠<span>${qualityNoticeText()}</span></div>
+      <div data-css="margin:4px 4px 0;font-weight:700;font-size:14px">${t('names')}</div>
+      <div class="names">${S.names.map((x, i) => `<span class="nm">${H.esc(x)}<button type="button" data-unname="${i}" aria-label="remove">×</button></span>`).join('')}<button class="nm add" type="button" id="addname">${t('add')}</button></div>
+      <button class="btn" type="button" id="analyze-quality">${S.analyzed ? '↻ ' : ''}${t('analyze')}</button>${rows}`;
+  }
+  return `<div class="screen"><div class="scroll"><h1 class="ptitle">${t('insights')}</h1><p class="psub">${H.lang === 'en' ? 'Fresh on every run · never stored' : '每次即時計算 · 結果不保存'}</p>
+    <button class="card booksel" type="button" data-tabgo="lib">${mCover(n, 'sm')}<span data-css="flex:1"><b>${H.esc(n.title)}</b><small>${n.head_revision_id} · ${mSize(n)}</small></span><span class="chev" data-css="color:var(--faint)">⇅</span></button>
+    <div class="tabs2" role="tablist"><button type="button" data-ins="style" aria-pressed="${S.ins === 'style'}">${t('style')}</button><button type="button" data-ins="quality" aria-pressed="${S.ins === 'quality'}">${t('quality')}</button></div>
+    ${body}</div></div>`;
+}

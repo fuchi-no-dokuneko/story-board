@@ -1,0 +1,3 @@
+.toast{position:absolute;z-index:120;left:16px;right:16px;bottom:104px;display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:16px;background:var(--ink);color:var(--bg);font-weight:650;font-size:14.5px;box-shadow:0 14px 30px rgba(0,0,0,.3);animation:up2 .25s}
+@keyframes up2{from{transform:translateY(20px);opacity:0}}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}

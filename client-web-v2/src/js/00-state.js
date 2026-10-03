@@ -1,5 +1,8 @@
 const words = {};
-const $ = id => document.getElementById(id);
+const $ = (selector, root = document) => root === document
+  ? document.getElementById(selector) || document.querySelector(selector)
+  : root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const esc = value => String(value ?? '').replace(/[&<>"']/g,
   c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const readLocal = (key, fallback) => {
@@ -7,32 +10,29 @@ const readLocal = (key, fallback) => {
   catch { return fallback; }
 };
 const saveLocal = (key, value) => {
-  try { localStorage.setItem('sb2.' + key, JSON.stringify(value)); } catch { /* Optional storage. */ }
+  try { localStorage.setItem('sb2.' + key, JSON.stringify(value)); } catch {}
 };
-const saved = readLocal('preferences', {});
+const saved = readLocal('readerPreferences', {});
 const S = {
-  lang: ['en','zh-Hant','zh-Hans'].includes(saved.lang) ? saved.lang : 'en',
-  theme: ['paper','white','night'].includes(saved.theme) ? saved.theme : 'paper',
-  size: [18,20,22,24,28].includes(saved.size) ? saved.size : 20,
-  spacing: ['normal','loose'].includes(saved.spacing) ? saved.spacing : 'normal',
-  font: ['serif','sans'].includes(saved.font) ? saved.font : 'serif',
-  token: '', auth: 0, catalog: [], page: 0, query: '', filter: 'all', sort: 'updated',
-  selected: null, chapter: 0, view: 'library', panel: '', inspected: null,
-  catalogRequest: 0, novelRequest: 0, styleRequest: 0, qualityRequest: 0,
-  catalogAbort: null, novelAbort: null, imageViews: new Set(),
-  styles: [], picks: new Set(), comparison: null, quality: null, qualityWindow: 'all',
-  names: '', raw: false, online: null, loading: false, blocks: false,
+  lang: ['en','zh','zhs'].includes(saved.lang) ? saved.lang : 'en',
+  mobile: typeof matchMedia === 'function' && matchMedia('(max-width:760px)').matches,
+  prefs: {size:18,lh:'normal',font:'serif',theme:'paper',width:'narrow',...saved.desktop},
+  fs: saved.fs || 19, font:saved.font || 'serif', theme:saved.theme || 'auto',
+  token:'',auth:0,catalog:[],page:0,query:'',filter:'all',sort:'updated',
+  selected:null,chapter:0,view:'library',panel:'',inspected:null,
+  catalogRequest:0,novelRequest:0,styleRequest:0,qualityRequest:0,
+  catalogAbort:null,novelAbort:null,imageViews:new Set(),details:new Map(),
+  styles:[],picks:new Set(),comparison:null,quality:null,qualityWindow:'all',
+  names:[],raw:false,online:null,loading:false,blocks:false,
+  stack:['lib'],mobileTab:'lib',analysisTab:'style',ins:'style',drawer:false,
+  immersive:false,catalogError:'',styleError:'',qualityError:'',scrollCleanup:null,
 };
-const t = key => words[key]?.[['en','zh-Hant','zh-Hans'].indexOf(S.lang)] || key;
-const num = value => new Intl.NumberFormat(S.lang).format(Number(value) || 0);
-const btn = (action, label, extra = '') => `<button type="button" data-action="${action}" ${extra}>${label}</button>`;
-const icon = (symbol, label) => `<span aria-hidden="true">${symbol}</span><span>${label}</span>`;
+const locale = () => ({en:'en',zh:'zh-Hant',zhs:'zh-Hans'}[S.lang]);
+const t = key => (S.mobile ? mobileWords : desktopWords)[key]?.[S.lang]
+  || words[key]?.[['en','zh','zhs'].indexOf(S.lang)] || key;
+const num = value => new Intl.NumberFormat(locale()).format(Number(value) || 0);
 function prefs() {
-  document.documentElement.dataset.ui = 'v2';
-  document.documentElement.lang = S.lang;
-  document.body.dataset.theme = S.theme;
-  document.body.dataset.size = S.size;
-  document.body.dataset.spacing = S.spacing;
-  document.body.dataset.font = S.font;
-  saveLocal('preferences', {lang:S.lang,theme:S.theme,size:S.size,spacing:S.spacing,font:S.font});
+  document.documentElement.lang=locale();
+  document.documentElement.dataset.theme=S.mobile?S.theme:'light';
+  saveLocal('readerPreferences',{lang:S.lang,desktop:S.prefs,fs:S.fs,font:S.font,theme:S.theme});
 }

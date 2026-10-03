@@ -1,0 +1,35 @@
+  $('#novel-list').innerHTML = list.slice(S.page*12,S.page*12+12).map((n) => `
+    <li><button class="book novel-item" type="button" data-open="${n.novel_id}" data-novel-id="${n.novel_id}">
+      ${dCover(n)}
+      <h3>${H.esc(n.title)}</h3>
+      <div class="meta">${n.chapters} ${t('chapters')} · ${dSizeLine(n)}</div>
+      <div class="meta">${H.ago(n.updated_at)} ${n.registered ? '' : `· <span class="badge warn">${t('imported')}</span>`}</div>
+    </button></li>`).join('');
+  $('#catalog-empty').hidden = S.loading || !!S.catalogError || list.length > 0;
+  $('#catalog-loading').textContent=S.catalogError || (S.loading?t('loading'):'');
+  $('#catalog-total').textContent = `${list.length} / ${SB.novels.length} ${t('novels')}`;
+  $('#page-label').textContent=`${pages?S.page+1:0} / ${pages}`;
+  $('#page-previous').disabled=S.page===0;$('#page-next').disabled=S.page+1>=pages;
+}
+
+/* ---------------- Reader ---------------- */
+function dRenderReader() {
+  const n = S.novel, body = H.body(n.novel_id);
+  $('#rbar-title').textContent = n.title;
+  $('#reader-content').lang = n.language === 'en' ? 'en' : n.language === 'zh-Hans' ? 'zh-Hans' : 'zh-Hant';
+  $('#chapter-nav').innerHTML = body.map((c, i) => `<li><button class="chapter-link" type="button" data-jump="chapter-${i + 1}">${H.esc(c.title)}</button>
+      ${c.scenes.map((s) => `<div class="scn">${H.transition(s.transition)} · ${H.esc(s.meta.time)} · ${H.esc(s.meta.location)} · ${s.blocks.length} ${t('blocks')}</div>`).join('')}</li>`).join('');
+  $('#bookinfo').innerHTML = `<dl>
+      <dt>${t('han')}</dt><dd>${H.num(n.han)}</dd><dt>${H.lang === 'en' ? 'Chapters' : '章'}</dt><dd>${n.chapters}</dd>
+      <dt>${H.lang === 'en' ? 'Scenes' : t('scenes')}</dt><dd>${n.scenes}</dd><dt>${H.lang === 'en' ? 'Blocks' : t('blocks')}</dt><dd>${n.blocks}</dd>
+      <dt>${t('updated')}</dt><dd>${H.date(n.updated_at)}</dd><dt>${t('revision')}</dt><dd class="mono">${n.head_revision_id}</dd></dl>`;
+  let bi = 0;
+  const chapters = body.map((c, i) => `
+    <section class="chapter-section" id="chapter-${i + 1}" data-title="${H.esc(c.title)}">
+      <h2>${H.esc(c.title)}</h2>
+      ${c.scenes.map((s) => `
+        <p class="scene-meta" aria-label="Scene">
+          <span title="${H.transition(s.transition)}">${dIcons.scene}${H.transition(s.transition)}</span>
+          <span>${dIcons.clock}${H.esc(s.meta.time)}</span><span>${dIcons.pin}${H.esc(s.meta.location)}</span><span>${dIcons.rain}${H.esc(s.meta.weather)}</span>
+          ${s.meta.present.length ? `<span>${dIcons.people}${s.meta.present.map(H.esc).join('、')}</span>` : ''}</p>
+        ${s.blocks.map((b) => b.image

@@ -37,5 +37,8 @@ fetch('/actuator/health', { headers: { Accept: 'application/json' } })
   })
   .catch(() => setServiceStatus('down', 'Service unavailable'));
 
-state.selectedNovelId = location.hash ? decodeURIComponent(location.hash.slice(1)) : null;
-loadCatalog();
+try { state.selectedNovelId = location.hash ? decodeURIComponent(location.hash.slice(1)) : null; } catch {}
+if (state.selectedNovelId) {
+  selectNovel(state.selectedNovelId);
+  loadCatalog({ openSelection: false });
+} else loadCatalog();

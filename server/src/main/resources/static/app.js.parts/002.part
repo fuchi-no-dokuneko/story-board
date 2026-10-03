@@ -36,7 +36,7 @@ function updatePagination(payload) {
   elements['page-next'].disabled = payload.page + 1 >= payload.total_pages;
 }
 
-async function loadCatalog({ preserveSelection = true } = {}) {
+async function loadCatalog({ preserveSelection = true, openSelection = true } = {}) {
   const requestId = ++state.catalogRequestId;
   show(elements['catalog-loading'], true);
   show(elements['catalog-empty'], false);

@@ -15,9 +15,9 @@ const {launch,read}=require('./browser.cjs');
     const context={page,base,output,id,selected,assert,read,
       click:selector=>page.click(selector),
       shot:name=>page.screenshot({path:path.join(output,name+'.png')}),
-      close:()=>page.click('#tools-dialog [data-action=close]'),
+      close:()=>page.keyboard.press('Escape'),
     };
-    for(const name of ['library','reading','analysis','downloads','layouts','legacy','faults']){
+    for(const name of (process.env.UAT_GROUPS||'library,reading,analysis,downloads,layouts,mobile,long,fidelity,legacy,faults,delays').split(',')){
       await require(`./uat-${name}.cjs`)(context);results.push(name);console.log(`PASS ${name}`);
     }
     assert.deepEqual(errors,[],'No uncaught browser errors');

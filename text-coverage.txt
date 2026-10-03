@@ -9,10 +9,10 @@ Workers: real HTTPS clients; local self-signed servers simulate model responses.
 Style/rewrite: real calculations, planners and reference files; proposal lookup mocked in boundary tests. 風格／改寫：真實計算、規劃及檔案；提案界線測試使用查詢替身。
 Architecture: module direction, TLS and repository-local installation assertions. 架構：模組方向、TLS及儲存庫內安裝檢查。
 Plugin: 196 tests; real assembly/validation, injected unit HTTP transport. 技能：196項通過，真實組合／驗證，單元HTTP替身。
-Browser assets: 17 tests with transport/DOM/storage fixtures. 介面資源：17項通過，使用傳輸／DOM／儲存範例。
+Browser assets: 18 tests with transport/DOM/storage fixtures. 介面資源：18項通過，使用傳輸／DOM／儲存範例。
 GUI: real Chromium/HTTPS/isolated SQLite; 9 scenarios, 81 steps plus quality, downloads and offline HTML. GUI：真實瀏覽器／HTTPS／獨立SQLite；9情境81步驟，另驗證品質、下載及離線HTML。
 GUI faults: health degradation and offline network simulated. GUI故障：模擬健康降級及斷線。
-V2 GUI: real Firefox, packaged HTTPS API and SQLite; seven groups, 320–1920 px. Only read/image failures simulated. 新版GUI：真實Firefox、封裝HTTPS API與SQLite；七組、320–1920像素，僅模擬讀取與圖片失敗。
+V2 GUI: real Firefox/API/SQLite, 11 groups, ZIP CSS comparison, 6000 blocks; HTTP failures/delays simulated. 新版GUI：真實Firefox/API/SQLite、11組、原稿CSS比對、6000段落；模擬HTTP故障及延遲。
 NLP: bundled dictionary/HMM, Unicode offsets and concurrent names; no mocks. 分詞：內附詞典／HMM、碼點位置及並行專名，無替身。
 Quality: pure formulas, weighted calibration fixtures, JSD/MATTR; fixtures are not real reference evidence. 品質：純公式、等來源校準範例及JSD/MATTR；範例不代表實際語料。
 Maintenance: real SQLite/Python deletion, HTML/PDF and inline images. 維護：真實SQLite／Python刪除、HTML／PDF及內嵌圖片。

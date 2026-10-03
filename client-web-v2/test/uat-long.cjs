@@ -1,0 +1,20 @@
+const fs=require('fs'),path=require('path');
+module.exports=async({page,base,output,click,shot,assert})=>{
+  const fixture=JSON.parse(fs.readFileSync(path.join(output,'long-fixture.json')));
+  await page.setViewport({width:1440,height:1000});await page.goto(base+'/?ui=v2#'+fixture.novel_id);
+  await page.waitForSelector('.story-block');assert.equal(await page.$$eval('.chapter-section',es=>es.length),30);
+  assert.equal(await page.$$eval('.story-block',es=>es.length),6000);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await click('[data-jump=chapter-20]');await page.waitForFunction(()=>document.querySelector('#rbar-chapter').textContent.includes('20/30'));
+  await page.evaluate(()=>scrollBy(0,900));
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('sb2.recent'))[0].chapter===19);
+  const before=await page.evaluate(()=>scrollY);await click('#back');await click('#hero [data-open]');
+  await page.waitForFunction(y=>Math.abs(scrollY-y)<4,{},before);await shot('long-desktop');
+  await page.setViewport({width:390,height:844});await page.waitForSelector('.rtop');
+  assert.equal(await page.$$eval('.chapter-section:not([hidden])',es=>es.length),1);
+  assert.equal(await page.$eval('.chapter-section:not([hidden])',e=>e.id),'chapter-20');
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  await shot('long-mobile');
+  await click('[data-sheet=toc]');await click('.sheet [data-chapter="29"]');
+  await page.waitForFunction(()=>document.querySelector('.rtop small').textContent.includes('30'));
+};

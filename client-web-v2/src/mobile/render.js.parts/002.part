@@ -1,0 +1,14 @@
+    <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="catalog-search" type="search" placeholder="${t('search')}" value="${H.esc(S.q)}"></label>
+    ${c?`<button class="card cont" type="button" data-book="${c.novel_id}" data-then="read">${mCover(c)}<span><p class="kicker">${t('continue')}</p><h2>${H.esc(c.title)}</h2><p>${H.esc(c.chapterTitle || H.body(c.novel_id)[0]?.title || t('start'))} · ${Math.round(c.progress * 100)}%</p><div class="bar"><i data-css="width:${c.progress * 100}%"></i></div></span></button>`:''}
+    <div class="segs">${langs.map(([k, l]) => `<button type="button" data-filter="${k}" aria-pressed="${S.filter === k}">${l}</button>`).join('')}</div>
+    <div class="sech"><h3>${t('allBooks')}</h3><span id="catalog-total">${list.length}</span></div>
+    <p id="catalog-loading" role="status">${esc(S.catalogError||(S.loading?t('loading'):!list.length?t('noMatch'):''))}</p><ul class="card list" id="novel-list">${list.map((n) => `<li><button class="row novel-item" type="button" data-book="${n.novel_id}" data-novel-id="${n.novel_id}">${mCover(n, 'sm')}
+      <span><b>${H.esc(n.title)}${n.registered ? '' : `<span class="tagw">${t('imported')}</span>`}</b><small>${{'zh-Hant':'繁中','zh-Hans':'简中','yue-Hant':'粵語',en:'English'}[n.language]} · ${n.chapters} ${H.lang === 'en' ? 'ch' : '章'} · ${mSize(n)}</small><small>${H.ago(n.updated_at)}</small></span><span class="chev">›</span></button></li>`).join('')}</ul>
+  </div></div>`;
+}
+function mBookScreen() {
+  const n = mBook(), body = H.body(n.novel_id);
+  return `<div class="screen pushed"><nav class="nav"><button class="nb" type="button" data-back>‹ ${t('library')}</button><b></b><button class="nb icon" type="button" data-sheet="export" aria-label="${t('export')}">${mIc.share}</button></nav>
+    <div class="scroll"><div class="bookhero">${mCover(n, 'lg')}<h1 id="reader-title">${H.esc(n.title)}</h1><p>${H.langName(n.language)} · ${n.registered ? t('registered') : t('imported')} · ${H.ago(n.updated_at)}</p>
+      ${n.characters.length ? `<div class="cast" id="character-list">${n.characters.map((c) => `<span>${H.esc(c)}</span>`).join('')}</div>` : ''}</div>
+      <div class="card stats"><div><b>${H.num(n.han)}</b><small>${t('han')}</small></div><div><b>${n.chapters}</b><small>${t('chapters')}</small></div><div><b>${n.scenes}</b><small>${t('scenes')}</small></div><div><b>${n.blocks}</b><small>${t('blocks')}</small></div></div>

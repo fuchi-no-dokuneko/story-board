@@ -3,6 +3,7 @@
       return true;
     }
     payload.items.forEach((novel) => elements['novel-list'].append(catalogItem(novel)));
+    if (!openSelection) return true;
     if (!preserveSelection || !state.selectedNovelId) {
       await selectNovel(payload.items[0].novel_id);
     } else {
@@ -16,7 +17,7 @@
     elements['catalog-empty'].textContent = `Catalog unavailable: ${error.message}`;
     elements['catalog-total'].textContent = 'Unable to load catalog';
     updatePagination({ page: 0, total_pages: 0 });
-    clearReader();
+    if (openSelection) clearReader();
     if (!reportAuthenticationError(error)) {
       setServiceStatus('down', 'Service unavailable');
       setOperatorStatus('error', 'Could not load protected library data');

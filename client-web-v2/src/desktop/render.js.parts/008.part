@@ -1,0 +1,22 @@
+      }).join('')}</div>
+      <p class="stats" id="quality-statistics"><span>${Q.words} ${t('words')}</span><span>${Q.sentences} ${t('sentences')}</span><span>MATTR ${H.d3(Q.statistics.mattr)}</span><span>JSD ${H.d3(Q.statistics.wordFrequencyJsd)}</span></p>
+      <div class="actions"><button class="btn sm" type="button" id="saveq">${t('save')}</button></div>`;
+  }
+  return `<p class="lead">${t('qLead')}</p>
+    <label class="row" for="quality-names" data-css="margin:0 0 6px"><span>${t('names')}</span></label>
+    <div class="tokens">${toks}<input id="quality-names" data-i18n-ph="addName" placeholder="${t('addName')}"></div>
+    <p class="field-hint">${t('namesHint')}</p>
+    <div class="actions"><button class="btn accent" type="button" id="analyze-quality">${t('analyze')}</button></div>
+    <div id="quality-results">${results}</div>`;
+}
+function dAboutTab() {
+  const n = S.novel;
+  const row = (k, v, copy) => `<dt>${t(k)}</dt><dd><code title="${H.esc(v)}">${H.esc(v)}</code>${copy ? `<button class="copy" type="button" data-copy="${H.esc(v)}">${t('copy')}</button>` : ''}</dd>`;
+  return `<p class="lead">${t('aboutLead')}</p>
+    <dl class="kv">${row('novelId', n.novel_id, 1)}${row('headRev', n.head_revision_id, 1)}${row('parent', n.parent_revision_id || '—')}${row('seq', String(n.head_sequence))}
+      <dt>${t('updated')}</dt><dd>${new Date(n.updated_at).toLocaleString()}</dd>
+      <dt>${t('registration')}</dt><dd><span id="reader-registration" class="badge ${n.registered ? 'ok' : 'warn'}">${n.registered ? t('registered') : t('imported')}</span></dd>
+      ${row('contentHash', n.head_hash, 1)}${row('hanHash', n.han_hash, 1)}</dl>`;
+}
+
+/* Evidence → highlight in reader */

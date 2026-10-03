@@ -1,0 +1,19 @@
+          return b.image ? `<figure class="story-image" data-block-id="${b.id}"><img alt="${H.esc(b.alt)}"><figcaption data-text-block="${b.id}">${H.esc(b.text)}</figcaption></figure>` : `<p class="story-block" data-block-id="${b.id}" data-text-block="${b.id}" id="pb${k}">${H.esc(b.text)}</p>`; }).join('')}`).join('')}
+        ${ci < body.length - 1 ? `<div class="endnav"><button class="btn sm" type="button" data-chapter="${ci + 1}">${t('next')} ›</button></div>` : body.length < n.chapters ? `<p class="excerpt">${t('excerpt')}</p>` : ''}</section>`; return html; }).join('')}
+    </div></div>
+    <div class="rbot"><div class="slider"><span>${S.chapter + 1}/${n.chapters}</span><input type="range" min="0" max="100" value="${Math.round(n.progress * 100) || 0}" aria-label="Progress"><span id="pct">${Math.round(n.progress * 100) || 0}%</span></div>
+      <div class="tools"><button type="button" data-sheet="toc">${mIc.toc}${t('contents')}</button><button type="button" data-sheet="aa"><span data-css="font:700 19px var(--serif);height:22px">Aa</span>${t('display')}</button><button type="button" data-tabgo="ins">${mIc.ins}${t('insights')}</button><button type="button" data-sheet="export">${mIc.share}${t('export')}</button></div></div>
+  </div>`;
+}
+function mInsScreen() {
+  const n = mBook();
+  let body;
+  if (S.ins === 'style') {
+    const pick = SB.styles.map((s) => `<button class="sp" type="button" data-pick="${s.id}" aria-pressed="${s.status === 'ready' && S.picks.has(s.id)}" ${s.status === 'ready' ? '' : 'disabled'}>${H.esc(s.name)}${s.status === 'ready' ? '' : ` <small>· ${H.status(s.status)}</small>`}</button>`).join('');
+    let res = '';
+    if (S.compared) {
+      const st = H.columnStats(), ids = Object.keys(SB.comparison.rows).filter((i) => S.picks.has(i));
+      res = SB.channels.map((c) => { const rows = ids.map((id) => [id, SB.comparison.rows[id][c.id]]).sort((a, b) => a[1] - b[1]);
+        return `<div class="card icard"><div class="win"><span data-css="background:none;color:var(--muted);padding:0;font-size:13px">${H.channel(c)}${c.partial ? ' *' : ''}</span></div>
+          <div class="win" data-css="padding-top:0"><b>${H.esc(H.styleName(st[c.id].closest))}</b><span>${t('closest')}</span></div>
+          ${rows.map(([id, v], k) => `<div class="mbar ${v === st[c.id].min ? 'best' : ''}"><span class="n">${H.esc(H.styleName(id))}</span><span class="tr"><i data-css="width:${v==null?0:(v / st[c.id].max)*100}%"></i></span><span class="v" title="${H.d6(v)}">${decimal(v,3)}</span></div>`).join('')}

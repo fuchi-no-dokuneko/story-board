@@ -1,0 +1,29 @@
+.tok button{width:22px;height:22px;border:0;border-radius:50%;background:none;color:var(--muted)}
+.tokens input{flex:1;min-width:90px;border:0;background:none;height:30px;outline:0}
+.field-hint{margin:6px 0 0;color:var(--faint);font-size:12px}
+.metric{padding:13px 0;border-bottom:1px solid var(--line)}
+.metric .mh{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.metric .mh b{font-size:14px}
+.metric .val{font:700 18px var(--mono)}
+.metric p{margin:2px 0 6px;color:var(--muted);font-size:12.5px}
+.metric .sub{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;color:var(--faint);font-size:12px}
+.ev{margin-top:8px}
+.ev summary{cursor:pointer;color:var(--accent);font-size:12.5px;font-weight:650}
+.ev ul{margin:8px 0 0;padding:0;list-style:none}
+.ev li{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:7px 9px;border-radius:8px;background:color-mix(in srgb,var(--ink) 4%,transparent);margin-bottom:5px;font-size:13px}
+.ev li q{font-family:var(--serif);quotes:"「" "」"}
+.ev li small{color:var(--faint)}
+.stats{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;color:var(--muted);font-size:12.5px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:0;margin:0}
+.kv dt{padding:10px 12px 10px 0;border-bottom:1px solid var(--line);color:var(--muted);font-size:13px}
+.kv dd{display:flex;align-items:center;justify-content:flex-end;gap:6px;min-width:0;margin:0;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;text-align:right}
+.kv dd code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:12px var(--mono)}
+.copy{flex:none;height:26px;padding:0 8px;border:1px solid var(--line-strong);border-radius:6px;background:none;font-size:11.5px;font-weight:650;color:var(--muted)}
+.toast{position:fixed;z-index:95;left:50%;bottom:28px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:12px;background:var(--ink);color:var(--paper);font:600 13.5px var(--sans);box-shadow:0 12px 30px rgba(0,0,0,.25)}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* console modal */
+.modal{position:fixed;inset:0;z-index:90;display:grid;place-items:center;padding:16px;background:rgba(20,15,5,.4)}
+.modal .box{display:flex;flex-direction:column;width:min(860px,100%);max-height:88vh;border-radius:16px;background:var(--card);box-shadow:0 30px 80px rgba(0,0,0,.35);overflow:hidden}
+.modal header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;border-bottom:1px solid var(--line)}

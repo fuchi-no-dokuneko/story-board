@@ -1,0 +1,18 @@
+/* Real-data states and safe wrapping; design declarations remain in design/. */
+.cover .t{max-height:100%;max-width:100%;overflow:hidden}
+.hero>div{min-width:0}.hero h2,.ahead h1{overflow-wrap:anywhere}
+.toast{overflow-wrap:anywhere;max-width:calc(100vw - 32px)}
+.drawer:not(.open){visibility:hidden}.drawer.open{visibility:visible}
+.toc:not(.open){visibility:hidden}
+@media(min-width:1280px){.toc:not(.open){visibility:visible}}
+.toc.open{visibility:visible}
+#catalog-loading:empty{display:none}
+#catalog-loading:not(:empty){color:var(--muted);font-size:14px}
+.story-image [role=status]{font:14px var(--sans);color:var(--muted)}
+.story-image img{height:auto}
+.chan .bar .v{white-space:nowrap}
+.pill [data-state=down]{color:var(--warn)}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+#status-dot[data-state=down]{background:var(--warn)}
+#reader{color:var(--ink)}

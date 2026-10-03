@@ -1,0 +1,11 @@
+  aboutLead:{en:'Everything below comes from the stored canonical revision, so you audit what was actually saved.',zh:'以下資料均來自已儲存的標準版本，可核對實際寫入的內容。',zhs:'以下数据均来自已保存的标准版本，可核对实际写入的内容。'},
+  conn:{en:'Connection',zh:'連線',zhs:'连接'}, lan:{en:'Trusted-LAN access active',zh:'內聯網信任存取中',zhs:'内网信任访问中'},
+  lanSub:{en:'This device is trusted by default. Nothing to configure.',zh:'此裝置預設受信任，無須設定。',zhs:'此设备默认受信任，无需设置。'},
+  token:{en:'Use an owner token instead',zh:'改用擁有者權杖',zhs:'改用所有者令牌'}, tokenPh:{en:'Paste owner token',zh:'貼上擁有者權杖',zhs:'粘贴所有者令牌'},
+  tokenNote:{en:'Kept in this page’s memory only — cleared on reload.',zh:'只保存在此頁面記憶體，重新整理即清除。',zhs:'只保存在此页面内存，刷新即清除。'},
+  use:{en:'Use token',zh:'使用權杖',zhs:'使用令牌'}, clear:{en:'Clear',zh:'清除',zhs:'清除'},
+  language:{en:'Language',zh:'語言',zhs:'语言'},
+  service:{en:'Service',zh:'服務',zhs:'服务'}, console:{en:'Open API console',zh:'開啟 API 主控台',zhs:'打开 API 控制台'},
+  consoleSub:{en:'GET-only diagnostics for this StoryBlock instance',zh:'此 StoryBlock 的唯讀（GET）診斷',zhs:'此 StoryBlock 的只读（GET）诊断'},
+  send:{en:'Send',zh:'送出',zhs:'发送'},
+}

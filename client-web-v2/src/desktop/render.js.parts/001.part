@@ -1,0 +1,30 @@
+const dIcons = {
+  clock: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  pin: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 1 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  rain: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 15a4 4 0 1 1 1-7.9A6 6 0 0 1 19 9a3.5 3.5 0 0 1-1 6.9H7z"/><path d="M9 19l-1 2m5-2-1 2m5-2-1 2"/></svg>',
+  people: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></svg>',
+  scene: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4zM4 9h16"/></svg>',
+};
+
+function dCover(n, extra = '') {
+  const latin = !/[㐀-鿿]/.test(n.title);
+  const stamp = { 'zh-Hant': '繁', 'zh-Hans': '简', 'yue-Hant': '粵', en: 'EN' }[n.language] || n.language;
+  return `<span class="cover ${latin ? 'latin' : ''} ${extra}" data-css="--h:${n.hue}"><span class="t">${H.esc(n.title)}</span><span class="stamp">${stamp}</span>${n.images ? `<span class="img">▣ ${n.images}</span>` : ''}</span>`;
+}
+const dSizeLine = (n) => n.han ? `${H.num(n.han)} ${H.lang === 'en' ? 'Han' : t('han')}` : `${H.num(n.blocks)} ${t('blocks')}`;
+
+/* ---------------- Library ---------------- */
+function dRenderLibrary() {
+  const last = resumeBook();
+  $('#hero').hidden=!last;
+  if(last)
+  $('#hero').innerHTML = `
+    ${dCover(last)}
+    <div><p class="eyebrow">${t('continue')}</p><h2 id="hero-title">${H.esc(last.title)}</h2>
+      <p class="sub">${H.esc(last.chapterTitle || H.body(last.novel_id)[0]?.title || t('start'))} · ${Math.round(last.progress * 100)}% · ${H.langName(last.language)}</p>
+      <div class="prog"><i data-css="width:${last.progress * 100}%"></i></div></div>
+    <div class="cta"><button class="btn accent" type="button" data-open="${last.novel_id}">${t('continue')} →</button></div>`;
+  const langs = [['all', t('all')], ['zh-Hant', '繁中'], ['zh-Hans', '简中'], ['yue-Hant', H.langName('yue-Hant')], ['en', 'English'], ['imported', t('imported')]];
+  $('#filters').innerHTML = langs.map(([k, l]) => `<button class="chip" type="button" data-filter="${k}" aria-pressed="${S.filter === k}">${l}</button>`).join('');
+  const list=catalogMatches(),pages=Math.ceil(list.length/12);
+  S.page=Math.min(S.page,Math.max(0,pages-1));

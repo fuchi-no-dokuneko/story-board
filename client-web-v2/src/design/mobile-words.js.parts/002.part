@@ -1,0 +1,10 @@
+  evidence:{en:'Evidence',zh:'證據',zhs:'证据'}, showInText:{en:'Show in text',zh:'在文中顯示',zhs:'在文中显示'}, noEv:{en:'No evidence spans for this index.',zh:'此指標沒有證據片段。',zhs:'此指标没有证据片段。'},
+  language:{en:'Language',zh:'語言',zhs:'语言'}, reader:{en:'Reading',zh:'閱讀',zhs:'阅读'}, connection:{en:'Connection',zh:'連線',zhs:'连接'},
+  lan:{en:'Trusted-LAN access',zh:'內聯網信任存取',zhs:'内网信任访问'}, lanSub:{en:'Active · nothing to configure',zh:'使用中 · 無須設定',zhs:'使用中 · 无需设置'},
+  token:{en:'Owner token (optional)',zh:'擁有者權杖（選填）',zhs:'所有者令牌（选填）'}, tokenNote:{en:'Kept in memory only; cleared when you close the page.',zh:'只保存在記憶體，關閉頁面即清除。',zhs:'只保存在内存，关闭页面即清除。'}, use:{en:'Use token',zh:'使用權杖',zhs:'使用令牌'},
+  diag:{en:'Diagnostics',zh:'診斷',zhs:'诊断'}, console:{en:'API console',zh:'API 主控台',zhs:'API 控制台'}, about:{en:'About',zh:'關於',zhs:'关于'}, service:{en:'Service',zh:'服務',zhs:'服务'}, readonly:{en:'Library access',zh:'書庫權限',zhs:'书库权限'}, ro:{en:'Read-only',zh:'唯讀',zhs:'只读'},
+  pdfSub:{en:'Deterministic render of this revision',zh:'以此版本確定性排版',zhs:'以此版本确定性排版'}, txtSub:{en:'UTF-8 plain text',zh:'UTF-8 純文字',zhs:'UTF-8 纯文本'}, qSub:{en:'Run a quality analysis first',zh:'請先執行品質分析',zhs:'请先运行质量分析'}, qReady:{en:'JSON with evidence',zh:'含證據的 JSON',zhs:'含证据的 JSON'},
+  preparing:{en:'Preparing…',zh:'正在準備…',zhs:'正在准备…'}, ready:{en:'Saved to Downloads',zh:'已儲存至下載',zhs:'已保存到下载'},
+  revision:{en:'Revision',zh:'版本',zhs:'版本'}, excerpt:{en:'Mockup excerpt — remaining chapters omitted.',zh:'示意稿摘錄 — 其餘章節省略。',zhs:'示意稿摘录 — 其余章节省略。'},
+  tapHint:{en:'Tap the page to hide controls',zh:'點一下頁面可隱藏工具列',zhs:'点一下页面可隐藏工具栏'}, send:{en:'Send',zh:'送出',zhs:'发送'}, done:{en:'Done',zh:'完成',zhs:'完成'},
+}
