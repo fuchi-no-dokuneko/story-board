@@ -11,6 +11,8 @@ The target port for this deployment is 8444.
 此次部署使用 8444 端口。
 
 ```bash
+git fetch origin
+git switch main
 git pull --ff-only
 ./scripts/local-server.sh stop
 ./install.sh
