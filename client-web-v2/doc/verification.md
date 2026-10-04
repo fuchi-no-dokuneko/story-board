@@ -1,33 +1,36 @@
 # Verification / 驗證 / 验证
 
-EN: The original UI at `/` and v2 at `/?ui=v2` share the existing API. No Java,
-API schema, database migration, or listener logic changed. V2 packages through
-the existing asset URLs and preserves the original CSP.
+EN: The original UI at `/` and v2 at `/?ui=v2` share the existing API.
+Java read/analysis caches preserve response contracts, database schema and
+listener behavior. V2 keeps the existing asset URLs and CSP.
 
-繁體：原版 `/` 與新版 `/?ui=v2` 共用既有 API。未變更 Java、API 結構、資料庫遷移或監聽邏輯。
-新版使用既有資源網址封裝，保留原有 CSP。
+繁體：兩版共用既有 API；Java 讀取／分析快取保留回應契約、資料庫結構及監聽行為。
+新版沿用資源網址及 CSP。
 
-简体：原版 `/` 与新版 `/?ui=v2` 共用现有 API。未更改 Java、API 结构、数据库迁移或监听逻辑。
-新版使用现有资源网址打包，保留原有 CSP。
+简体：两版共用现有 API；Java 读取／分析缓存保留响应契约、数据库结构及监听行为。
+新版沿用资源网址及 CSP。
 
 ```bash
 ./client-web-v2/install-local.sh
 node --test server/src/test/js/*.test.cjs client-web-v2/test/*.test.cjs
-./mvnw --batch-mode test
+./mvnw --batch-mode verify
 ./install.sh
 ./client-web-v2/test/run-uat.sh
 ```
 
 EN: UAT starts the installed API with a fresh SQLite database and public HTTPS
-on port 9443. Set `UAT_PORT` to change that port. It creates 15 real stories (including a 30-chapter, 6,000-block novel)
+on port 9443. Set `UAT_PORT` to change it. It creates 16 stories, including a
+30-chapter, 6,000-block novel and a real 714-window analysis fixture,
 and PNG/JPEG illustrations through existing endpoints. Evidence stays in the printed
 `.local/frontend-v2-uat-*` directory. The script stops its API and Firefox.
 
 繁體：UAT 使用全新 SQLite 資料庫，以 public HTTPS 9443 啟動已安裝的 API；可用 `UAT_PORT` 改埠。
-測試建立 15 部小說（含 30 章、6,000 段落長篇）及 PNG／JPEG 圖片。紀錄留在輸出的 `.local/frontend-v2-uat-*` 目錄；結束後關閉測試 API 與 Firefox。
+建立 16 部小說（含 6,000 段長篇及真實 714 視窗範例）與 PNG／JPEG 圖片。
+紀錄留在輸出的 `.local/frontend-v2-uat-*`；結束後關閉 API 與 Firefox。
 
 简体：UAT 使用全新 SQLite 数据库，以 public HTTPS 9443 启动已安装的 API；可用 `UAT_PORT` 改端口。
-测试创建 15 部小说（含 30 章、6,000 段落长篇）及 PNG／JPEG 图片。记录保留在输出的 `.local/frontend-v2-uat-*` 目录；结束后关闭测试 API 与 Firefox。
+创建 16 部小说（含 6,000 段长篇及真实 714 窗口范例）与 PNG／JPEG 图片。
+记录保留在输出的 `.local/frontend-v2-uat-*`；结束后关闭 API 与 Firefox。
 
 EN: Firefox defaults to `~/UAT-firefox/firefox/firefox`; override with `FIREFOX_BINARY`.
 Puppeteer uses this app's local tools or the existing `~/UAT-firefox/automation`

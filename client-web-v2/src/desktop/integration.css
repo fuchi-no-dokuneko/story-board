@@ -16,3 +16,4 @@
 
 #status-dot[data-state=down]{background:var(--warn)}
 #reader{color:var(--ink)}
+.win-band.first{scroll-margin-top:80px}

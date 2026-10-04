@@ -1,14 +1,14 @@
 # Reader v2 / 新版閱讀器 / 新版阅读器
 
 EN: Open `https://<server-ip>:8443/?ui=v2`; v1 remains at `/`.
-V2 imports the ZIP's concept A desktop styles and concept D mobile styles.
-The original screens use real API data and actions. No backend logic changes.
+V2 follows `v2-fixes.zip`, using real API data and actions.
+Read and analysis caches are documented in [cache.md](../server/doc/cache.md).
 
 繁體：開啟 `https://<server-ip>:8443/?ui=v2`；v1 保留於 `/`。
-新版直接採用 ZIP A 桌面及 D 手機樣式，原稿畫面接上真實資料及操作；未更改後端邏輯。
+新版依照 `v2-fixes.zip` 接上真實資料及操作；讀取與分析快取見上述文件。
 
 简体：打开 `https://<server-ip>:8443/?ui=v2`；v1 保留在 `/`。
-新版直接采用 ZIP A 桌面及 D 手机样式，原稿界面接入真实数据及操作；未更改后端逻辑。
+新版按照 `v2-fixes.zip` 接入真实数据及操作；读取与分析缓存见上述文档。
 
 ```bash
 ./client-web-v2/install-local.sh

@@ -1,3 +1,10 @@
+  noCorpus:{en:'No reference corpus is configured (human 0 · AI 0). Values are raw; percentiles are unavailable.',zh:'尚未設定參考語料（真人 0 · AI 0）。數值為原始值，無法提供分位數。',zhs:'尚未设置参考语料（真人 0 · AI 0）。数值为原始值，无法提供分位数。'},
+  range:{en:'Text range',zh:'文本範圍',zhs:'文本范围'}, whole:{en:'Whole text',zh:'全文',zhs:'全文'}, win:{en:'Window',zh:'窗口',zhs:'窗口'}, words:{en:'words',zh:'詞',zhs:'词'},
+  samples:{en:'samples',zh:'樣本',zhs:'样本'}, evidence:{en:'Evidence',zh:'證據',zhs:'证据'}, showInText:{en:'Show in text',zh:'在文中顯示',zhs:'在文中显示'},
+  sentences:{en:'sentences',zh:'句',zhs:'句'}, save:{en:'Save report (JSON)',zh:'儲存報告（JSON）',zhs:'保存报告（JSON）'},
+  headRev:{en:'Head revision',zh:'目前版本',zhs:'当前版本'}, parent:{en:'Parent',zh:'上一版本',zhs:'上一版本'}, seq:{en:'Sequence',zh:'序號',zhs:'序号'},
+  contentHash:{en:'Content hash',zh:'內容雜湊',zhs:'内容哈希'}, hanHash:{en:'Han text SHA-256',zh:'漢字文本 SHA-256',zhs:'汉字文本 SHA-256'}, novelId:{en:'Novel ID',zh:'小說識別碼',zhs:'小说标识'},
+  registration:{en:'Registration',zh:'登錄方式',zhs:'登记方式'}, copy:{en:'Copy',zh:'複製',zhs:'复制'}, copied:{en:'Copied',zh:'已複製',zhs:'已复制'},
   aboutLead:{en:'Everything below comes from the stored canonical revision, so you audit what was actually saved.',zh:'以下資料均來自已儲存的標準版本，可核對實際寫入的內容。',zhs:'以下数据均来自已保存的标准版本，可核对实际写入的内容。'},
   conn:{en:'Connection',zh:'連線',zhs:'连接'}, lan:{en:'Trusted-LAN access active',zh:'內聯網信任存取中',zhs:'内网信任访问中'},
   lanSub:{en:'This device is trusted by default. Nothing to configure.',zh:'此裝置預設受信任，無須設定。',zhs:'此设备默认受信任，无需设置。'},
@@ -6,6 +13,3 @@
   use:{en:'Use token',zh:'使用權杖',zhs:'使用令牌'}, clear:{en:'Clear',zh:'清除',zhs:'清除'},
   language:{en:'Language',zh:'語言',zhs:'语言'},
   service:{en:'Service',zh:'服務',zhs:'服务'}, console:{en:'Open API console',zh:'開啟 API 主控台',zhs:'打开 API 控制台'},
-  consoleSub:{en:'GET-only diagnostics for this StoryBlock instance',zh:'此 StoryBlock 的唯讀（GET）診斷',zhs:'此 StoryBlock 的只读（GET）诊断'},
-  send:{en:'Send',zh:'送出',zhs:'发送'},
-}

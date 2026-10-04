@@ -3,7 +3,7 @@
     <div class="segs">${langs.map(([k, l]) => `<button type="button" data-filter="${k}" aria-pressed="${S.filter === k}">${l}</button>`).join('')}</div>
     <div class="sech"><h3>${t('allBooks')}</h3><span id="catalog-total">${list.length}</span></div>
     <p id="catalog-loading" role="status">${esc(S.catalogError||(S.loading?t('loading'):!list.length?t('noMatch'):''))}</p><ul class="card list" id="novel-list">${list.map((n) => `<li><button class="row novel-item" type="button" data-book="${n.novel_id}" data-novel-id="${n.novel_id}">${mCover(n, 'sm')}
-      <span><b>${H.esc(n.title)}${n.registered ? '' : `<span class="tagw">${t('imported')}</span>`}</b><small>${{'zh-Hant':'繁中','zh-Hans':'简中','yue-Hant':'粵語',en:'English'}[n.language]} · ${n.chapters} ${H.lang === 'en' ? 'ch' : '章'} · ${mSize(n)}</small><small>${H.ago(n.updated_at)}</small></span><span class="chev">›</span></button></li>`).join('')}</ul>
+      <span><b>${H.esc(n.title)}${n.registered ? '' : `<span class="tagw">${t('imported')}</span>`}</b><small>${{'zh-Hant':'繁中','zh-Hans':'简中','yue-Hant':'粵語',en:'English'}[n.language]} · ${FX.count(n.chapters,'chapter')} · ${mSize(n)}</small><small>${H.ago(n.updated_at)}</small></span><span class="chev">›</span></button></li>`).join('')}</ul>
   </div></div>`;
 }
 function mBookScreen() {

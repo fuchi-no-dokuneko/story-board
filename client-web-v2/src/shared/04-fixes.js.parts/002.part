@@ -1,0 +1,50 @@
+      const v = values.map((x, i) => [x, i]).filter(([x]) => x != null).sort((a, b) => a[0] - b[0]);
+      if (!v.length) return null;
+      return { min: v[0][0], minAt: v[0][1], max: v.at(-1)[0], maxAt: v.at(-1)[1], median: v[Math.floor(v.length / 2)][0] };
+    },
+    /* SVG sparkline: one x unit per window; non-scaling strokes keep lines crisp at any width */
+    sparkline(values, cursor) {
+      const n = values.length, s = FX.stats(values);
+      if (!s) return '';
+      const span = s.max - s.min || 1, y = (v) => (96 - ((v - s.min) / span) * 88).toFixed(2);
+      let line = '', area = '', open = false;
+      values.forEach((v, i) => {
+        if (v == null) { open = false; return; }
+        line += `${open ? 'L' : 'M'}${i + 0.5},${y(v)}`; open = true;
+      });
+      area = `M0.5,100 ${values.map((v, i) => (v == null ? '' : `L${i + 0.5},${y(v)}`)).join('')} L${n - 0.5},100Z`;
+      const cur = cursor == null ? '' : `<line class="spark-cursor" x1="${cursor + 0.5}" x2="${cursor + 0.5}" y1="0" y2="100" vector-effect="non-scaling-stroke"/>`;
+      const peak = `<line class="spark-peak" x1="${s.maxAt + 0.5}" x2="${s.maxAt + 0.5}" y1="0" y2="8" vector-effect="non-scaling-stroke"/>`;
+      return `<svg class="spark" viewBox="0 0 ${n} 100" preserveAspectRatio="none" aria-hidden="true">
+        <path class="spark-area" d="${area}"/><path class="spark-line" d="${line}" vector-effect="non-scaling-stroke"/>${peak}${cur}</svg>`;
+    },
+    /* map a pointer x position over the chart to a window index */
+    indexAt(el, clientX, n) {
+      const r = el.getBoundingClientRect();
+      return Math.max(0, Math.min(n - 1, Math.floor(((clientX - r.left) / r.width) * n)));
+    },
+    /* evidence whose block falls inside a window (uses chapter/paragraph location) */
+    inWindow(novelId, w, blockIndex) {
+      let g = 0;
+      for (const [ci, c] of H.body(novelId).entries()) {
+        const k = c.scenes.reduce((a, s) => a + s.blocks.length, 0);
+        if (blockIndex < g + k) {
+          const ch = ci + 1, p = blockIndex - g + 1;
+          const afterStart = ch > w.chFrom || (ch === w.chFrom && p >= w.pFrom);
+          const beforeEnd = ch < w.chTo || (ch === w.chTo && p <= w.pTo);
+          return afterStart && beforeEnd;
+        }
+        g += k;
+      }
+      return false;
+    },
+    /* global block index of chapter/paragraph, or -1 when outside the loaded text */
+    blockIndex(novelId, ch, p) {
+      let g = 0;
+      for (const [ci, c] of H.body(novelId).entries()) {
+        const k = c.scenes.reduce((a, s) => a + s.blocks.length, 0);
+        if (ci + 1 === ch) return p <= k ? g + p - 1 : -1;
+        g += k;
+      }
+      return -1;
+    },

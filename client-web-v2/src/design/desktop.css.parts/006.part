@@ -1,3 +1,5 @@
+@media (min-width:1280px){body.drawer-open .rlayout{grid-template-columns:260px minmax(0,1fr)}}
+.picked{margin-bottom:14px;border:1px solid var(--line);border-radius:12px}
 .picked summary{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 13px;cursor:pointer;font-size:13.5px;font-weight:650;list-style:none}
 .picked summary::-webkit-details-marker{display:none}
 .picked summary span{color:var(--muted);font-weight:500}
@@ -26,5 +28,3 @@ input[type=range]{accent-color:var(--accent);width:150px}
 .tab[aria-selected=true]{color:var(--ink)}
 .tab[aria-selected=true]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--accent)}
 .dbody{flex:1;overflow:auto;padding:18px 18px 40px}
-.lead{margin:0 0 14px;color:var(--muted);font-size:13.5px}
-.lead a{color:var(--accent)}

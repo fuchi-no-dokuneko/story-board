@@ -7,7 +7,7 @@ const base=process.env.UAT_BASE_URL||'https://127.0.0.1:9443';
 const output=resolve(process.env.UAT_OUTPUT||'.local/frontend-v2');
 mkdirSync(output,{recursive:true});
 const file=resolve(output,'catalog-fixture.json');
-const titles=['雨停之前','遠方的信','旧书店的灯','沿海公路','月台上的咖啡',
+const titles=['第7號月台','遠方的信','旧书店的灯','沿海公路','月台上的咖啡',
   '山城慢行','Last Train Home','冬日来信','海邊散步','午後的車站','窗外的雨','霧中的燈塔','The Quiet Library'];
 const english='Lin waited at the quiet station. The last train had not arrived.\n\n'+
   'A letter rested beside her coffee. She opened it and began to read.';

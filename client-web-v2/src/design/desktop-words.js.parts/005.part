@@ -1,0 +1,3 @@
+  consoleSub:{en:'GET-only diagnostics for this StoryBlock instance',zh:'此 StoryBlock 的唯讀（GET）診斷',zhs:'此 StoryBlock 的只读（GET）诊断'},
+  send:{en:'Send',zh:'送出',zhs:'发送'},
+}

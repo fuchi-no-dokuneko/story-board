@@ -1,0 +1,46 @@
+const FX = (() => {
+  const METRIC_LABELS = {                                    // F4: API primary_metric id → readable label
+    jensen_shannon_distance: { en: 'Jensen–Shannon distance', zh: 'Jensen–Shannon 距離', zhs: 'Jensen–Shannon 距离' },
+    wasserstein_distance: { en: 'Wasserstein distance', zh: 'Wasserstein 距離', zhs: 'Wasserstein 距离' },
+    robust_l1_input: { en: 'L1 distance', zh: 'L1 距離', zhs: 'L1 距离' },
+  };
+  const API_METRIC = { surface: 'jensen_shannon_distance', grammar: 'jensen_shannon_distance', rhythm: 'wasserstein_distance', narrative: 'robust_l1_input', lexical: 'robust_l1_input' };
+  const NOUNS = {
+    chapter: { en: ['chapter', 'chapters'], zh: '章', zhs: '章' },
+    scene: { en: ['scene', 'scenes'], zh: '個場景', zhs: '个场景' },
+    block: { en: ['block', 'blocks'], zh: '段', zhs: '段' },
+    novel: { en: ['novel', 'novels'], zh: '本小說', zhs: '本小说' },
+    window: { en: ['window', 'windows'], zh: '個視窗', zhs: '个窗口' },
+    evidence: { en: ['evidence', 'evidence'], zh: '項證據', zhs: '项证据' },
+  };
+  const esc = (s) => H.esc(s);
+
+  return {
+    quality: () => SB.quality,
+    metricLabel: (apiId) => (METRIC_LABELS[apiId] ? H.pick(METRIC_LABELS[apiId]) : apiId),
+    channelMetric: (channelId) => API_METRIC[channelId],
+    /* F5: English plurals; Chinese uses a measure word */
+    count(n, noun) {
+      const e = NOUNS[noun];
+      if (H.lang === 'en') return `${H.num(n)} ${n === 1 ? e.en[0] : e.en[1]}`;
+      return `${H.num(n)} ${e[H.lang]}`;
+    },
+    /* F5: keep 1–2 digit runs upright inside vertical titles */
+    tcy: (title) => String(title).split(/([0-9]+)/).map(s => /^[0-9]{1,2}$/.test(s)?`<span class="tcy">${s}</span>`:esc(s)).join(''),
+    /* F2: only the scene facts that have a value */
+    sceneFacts(meta) {
+      const parts = [];
+      if (meta.time) parts.push(['time', meta.time]);
+      if (meta.location) parts.push(['location', meta.location]);
+      if (meta.weather) parts.push(['weather', meta.weather]);
+      if (meta.present?.length) parts.push(['people', meta.present.join('、')]);
+      return parts;
+    },
+    theme: { get: () => S.theme, set(v) { S.theme=v;prefs(); } },
+    /* F1: window location in reader terms instead of raw UTF-16 offsets */
+    where(w) {
+      const ch = (c) => (H.lang === 'en' ? `Ch. ${c}` : `第${c}章`);
+      return w.chFrom === w.chTo ? `${ch(w.chFrom)} · ¶${w.pFrom}–${w.pTo}` : `${ch(w.chFrom)} ¶${w.pFrom} – ${ch(w.chTo)} ¶${w.pTo}`;
+    },
+    series(report, metric) { return report.windows.map((w) => w.values[metric]); },
+    stats(values) {

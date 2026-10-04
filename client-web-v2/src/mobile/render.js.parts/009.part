@@ -1,0 +1,15 @@
+      <div class="chart" id="win-chart" data-testid="window-chart" data-metric-index="${arg}" role="slider" tabindex="0" aria-label="${t('windowN')}" aria-valuemin="1" aria-valuemax="${count}" aria-valuenow="${(w?.i ?? 0) + 1}">${FX.sparkline(series, w?.i)}</div>
+      <div class="range"><span>min ${FX.fmt(st.min)}</span><span>med ${FX.fmt(st.median)}</span><span>max ${FX.fmt(st.max)}</span></div>
+      <div class="stepper"><button type="button" data-mstep="-1" data-testid="window-prev" aria-label="Previous window" ${w?.i === 0 ? 'disabled' : ''}>‹</button>
+        <div class="where" data-testid="window-label">${w ? `<b>${t('windowN')} ${w.i + 1} ${t('of')} ${count}</b><span>${FX.where(w)}</span>` : `<b>${t('wholeText')}</b><span>${t('tapChart')}</span>`}</div>
+        <button type="button" data-mstep="1" data-testid="window-next" aria-label="Next window" ${w?.i === count - 1 ? 'disabled' : ''}>›</button></div>
+      <div class="chips2"><button class="btn sm sec" type="button" data-mwin="${st.maxAt}" data-testid="window-jump-max">↑ ${t('highest')}</button><button class="btn sm sec" type="button" data-mwin="${st.minAt}" data-testid="window-jump-min">↓ ${t('lowest')}</button>
+        ${w ? `<button class="btn sm sec" type="button" data-mwin="all">${t('wholeText')}</button><button class="btn sm" type="button" data-mshow="1" data-testid="window-show">${t('showInText')}</button>` : ''}</div></div>`;
+  } else if (st) {
+    across = `<div class="across" data-testid="window-chips"><h6>${t('acrossBook')} · ${FX.count(count, 'window')}</h6>
+      <button class="wrow" type="button" data-mwin="all" aria-pressed="${!w}"><span>${t('wholeText')}</span><span class="v">${FX.fmt(m.value, 4)}</span></button>
+      ${Q.windows.map((x) => `<button class="wrow" type="button" data-mwin="${x.i}" aria-pressed="${w?.i === x.i}"><span>W${x.i + 1} · ${FX.where(x)}</span><span class="v">${FX.fmt(x.values[m.metric], 4)}</span></button>`).join('')}
+      ${w ? `<div class="chips2"><button class="btn sm" type="button" data-mshow="1" data-testid="window-show">${t('showInText')}</button></div>` : ''}</div>`;
+  }
+  const list = count > 12 && st ? `<div class="across"><h6>${t('allWindows')} · ${FX.count(count, 'window')}</h6>
+      ${S.mlist ? Q.windows.slice(0, S.mlist).map((x) => `<button class="wrow" type="button" data-mwin="${x.i}" aria-pressed="${w?.i === x.i}"><span>W${x.i + 1} · ${FX.where(x)}</span><span class="v">${FX.fmt(x.values[m.metric])}</span></button>`).join('') : ''}

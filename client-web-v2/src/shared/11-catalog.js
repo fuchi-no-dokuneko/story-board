@@ -21,12 +21,7 @@ async function loadCatalog(){
 }
 function refreshLibrary(){
   if(S.mobile){
-    if(S.stack.at(-1)==='lib'){
-      const input=$('#catalog-search'),focused=input===document.activeElement;
-      const scroll=$('.screen .scroll')?.scrollTop||0;
-      mRender();if($('.screen .scroll'))$('.screen .scroll').scrollTop=scroll;
-      if(focused)$('#catalog-search')?.focus({preventScroll:true});
-    }
+    if(S.stack.at(-1)==='lib')refreshMobileLibrary();
   }else if($('#library')){dRenderLibrary();H.apply();designStyles();updateHealth();}
   const host=$('#catalog-loading');
   if(host&&S.catalogError){

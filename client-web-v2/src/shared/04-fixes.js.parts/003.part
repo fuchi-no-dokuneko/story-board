@@ -1,0 +1,8 @@
+    fmt: (v, d = 3) => (v == null ? '—' : Number(v).toFixed(d)),
+    delta(v, whole) {
+      if (v == null || whole == null) return '';
+      const d = v - whole;
+      return `${d >= 0 ? '+' : '−'}${Math.abs(d).toFixed(3)}`;
+    },
+  };
+})();

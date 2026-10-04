@@ -1,3 +1,9 @@
+            ${c.partial ? `<p class="field-hint">ⓘ ${t('partial')}</p>` : ''}</section>`;
+        }).join('');
+    results = `<div class="note info">✓ ${t('resultFor')} <b class="mono">${SB.comparison.revision_id}</b> · ${t('cachedNote')}</div>
+      <p class="eyebrow" data-css="margin-top:18px">${t('closestPer')}</p><div class="closest">${closest}</div>
+      <div data-css="display:flex;justify-content:flex-end;margin:-6px 0 10px"><button class="btn sm ghost" type="button" id="rawToggle">${S.raw ? t('bars') : t('table')}</button></div>${body}`;
+  }
   return `<p class="lead">${t('styleLead')} <a href="/style-math.html" target="_blank" rel="noopener">${t('formulas')} ↗</a></p>
     ${S.compared
       ? `<details class="picked"><summary>${t('refStyles')} <span>${n} / ${SB.styles.length} · ${t('change')} ▾</span></summary><div id="style-choices">${opts}</div></details>`
@@ -6,20 +12,21 @@
     <div id="style-results">${results}</div>`;
 }
 function dQualityTab() {
-  const Q = {...SB.quality,...currentQuality(),windows:SB.quality.windows};
+  const id=S.book,Q=SB.quality;
   const toks = S.names.map((nm, i) => `<span class="tok">${H.esc(nm)}<button type="button" data-untok="${i}" aria-label="Remove ${H.esc(nm)}">×</button></span>`).join('');
   let results = '';
   if (S.analyzed) {
-    const w = S.win === 'all' ? null : Q.windows[+S.win];
-    const ranges = [['all', t('whole')], ...Q.windows.map((x, i) => [String(i), `${t('win')} ${i + 1} · ${x.start}–${x.end}`])];
-    results = `${qualityNotice()}
-      <div class="row"><label>${t('range')}</label></div>
-      <div class="seg" role="group" data-css="border-radius:10px;flex-wrap:wrap">${ranges.map(([k, l]) => `<button type="button" data-win="${k}" aria-pressed="${S.win === k}" data-css="border-radius:8px">${l}</button>`).join('')}</div>
-      <div id="quality-score-rows">${Q.metrics.map((m, mi) => {
-        const v = w ? w.values[m.metric] : m.value;
-        return `<div class="metric"><div class="mh"><b>${H.metric(m.metric)}</b><span class="val">${v == null ? '—' : v.toFixed(4)}</span></div>
-          <p>${SB.metricsInfo[m.metric].hint}</p>
-          <div class="sub"><span class="badge ${m.status === 'OK' ? 'ok' : m.status === 'UNCALIBRATED' ? 'mute' : 'warn'}">${H.status(m.status)}</span>
-            <span>${m.validSamples} ${t('samples')}</span><span>${H.lang === 'en' ? 'Percentile' : '分位數'}: ${m.referencePercentile==null?'—':decimal(m.referencePercentile,1)+'%'}</span><span class="mono" title="${H.d6(v)}">${H.d6(v)}</span></div>
-          ${H.ev(S.novel.novel_id, m).length ? `<details class="ev"><summary>${t('evidence')} (${H.ev(S.novel.novel_id, m).length})</summary><ul>${H.ev(S.novel.novel_id, m).map((e) => `
-            <li><span><q>${H.esc(e.text)}</q> <small>${H.esc(e.reason)}</small></span><button class="btn sm" type="button" data-evidence="${e.index}" data-metric="${mi}" data-text="${H.esc(e.text)}">${t('showInText')}</button></li>`).join('')}</ul></details>` : ''}</div>`;
+    const n = Q.windows.length, w = S.win === 'all' ? null : Q.windows[+S.win];
+    const plottable = Q.metrics.filter((m) => FX.series(Q, m.metric).some((v) => v != null));
+    if (!plottable.some((m) => m.metric === S.winMetric)) S.winMetric = plottable[0]?.metric;
+    const series = FX.series(Q, S.winMetric), st = FX.stats(series);
+    let across;
+    if (!st && n > 12) {
+      across=`<div class="across"><header><b>${t('acrossBook')}</b></header><p>${t('noValues')}</p></div>`;
+    } else if (n <= 12) {
+      /* few windows: plain chips, no chart (F1 rule: chart only above 12 windows) */
+      across = `<div class="across" data-testid="window-chips"><header><b>${t('acrossBook')} · ${FX.count(n, 'window')}</b></header>
+        <div class="wchips" role="group" aria-label="${t('range')}"><button type="button" data-win="all" aria-pressed="${!w}">${t('whole')}</button>
+        ${Q.windows.map((x) => `<button type="button" data-win="${x.i}" aria-pressed="${w?.i === x.i}" title="${FX.where(x)}">W${x.i + 1} · ${FX.where(x)}</button>`).join('')}</div></div>`;
+    } else {
+      const cur = w ? w.i : null;

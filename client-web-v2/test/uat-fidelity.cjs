@@ -4,8 +4,8 @@ module.exports=async({page,base,id,output,click,assert})=>{
   await page.evaluate(()=>localStorage.removeItem('sb2.readerPreferences'));
   await page.reload();
   const checks=[];
-  for(const [mode,file,width,height] of [['desktop','concept-a-reader.html',1440,1000],['mobile','concept-d-pocket.html',390,844]]){
-    const html=execFileSync('unzip',['-p','storyblock-ui-concepts.zip',file],{encoding:'utf8'});
+  for(const [mode,file,width,height] of [['desktop','v2-fix-desktop.html',1440,1000],['mobile','v2-fix-mobile.html',390,844]]){
+    const html=execFileSync('unzip',['-p','v2-fixes.zip',file],{encoding:'utf8'});
     const css=html.match(/<style>([\s\S]*?)<\/style>/)[1];
     const folder=`client-web-v2/src/design/${mode}.css.parts`;
     assert.equal(fs.readdirSync(folder).sort().map(f=>fs.readFileSync(path.join(folder,f),'utf8')).join(''),css);
@@ -16,7 +16,7 @@ module.exports=async({page,base,id,output,click,assert})=>{
       if(mode==='desktop')await ref.click('[data-open]');else await ref.click('[data-then=read]');
       await ref.waitForSelector(mode==='desktop'?'.story-block':'.rtop');
       await page.setViewport({width,height});await page.goto(base+'/?ui=v2#'+id);await page.waitForSelector(mode==='desktop'?'.rbar':'.rtop');
-      const targets=mode==='desktop'?['.rbar','.page','.story-block','.scene-meta']:['.rtop','.rbot','.rtext','.rtext p:not(.meta)'];
+      const targets=mode==='desktop'?['.rbar','.page','.story-block']:['.rtop','.rbot','.rtext','.rtext p:not(.meta)'];
       for(const selector of targets){
         const measure=e=>{const s=getComputedStyle(e);return Object.fromEntries(['height','maxWidth','paddingLeft','paddingRight','fontFamily','fontSize','lineHeight','textIndent','textAlign','color','backgroundColor'].filter(k=>k!=='height'||e.matches('.rbar,.rtop,.rbot')).map(k=>[k,s[k]]));};
         const expected=await ref.$eval(selector,measure),actual=await page.$eval(selector,measure);

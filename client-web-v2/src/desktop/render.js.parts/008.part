@@ -1,22 +1,18 @@
-      }).join('')}</div>
-      <p class="stats" id="quality-statistics"><span>${Q.words} ${t('words')}</span><span>${Q.sentences} ${t('sentences')}</span><span>MATTR ${H.d3(Q.statistics.mattr)}</span><span>JSD ${H.d3(Q.statistics.wordFrequencyJsd)}</span></p>
-      <div class="actions"><button class="btn sm" type="button" id="saveq">${t('save')}</button></div>`;
-  }
-  return `<p class="lead">${t('qLead')}</p>
-    <label class="row" for="quality-names" data-css="margin:0 0 6px"><span>${t('names')}</span></label>
-    <div class="tokens">${toks}<input id="quality-names" data-i18n-ph="addName" placeholder="${t('addName')}"></div>
-    <p class="field-hint">${t('namesHint')}</p>
-    <div class="actions"><button class="btn accent" type="button" id="analyze-quality">${t('analyze')}</button></div>
-    <div id="quality-results">${results}</div>`;
-}
-function dAboutTab() {
-  const n = S.novel;
-  const row = (k, v, copy) => `<dt>${t(k)}</dt><dd><code title="${H.esc(v)}">${H.esc(v)}</code>${copy ? `<button class="copy" type="button" data-copy="${H.esc(v)}">${t('copy')}</button>` : ''}</dd>`;
-  return `<p class="lead">${t('aboutLead')}</p>
-    <dl class="kv">${row('novelId', n.novel_id, 1)}${row('headRev', n.head_revision_id, 1)}${row('parent', n.parent_revision_id || '—')}${row('seq', String(n.head_sequence))}
-      <dt>${t('updated')}</dt><dd>${new Date(n.updated_at).toLocaleString()}</dd>
-      <dt>${t('registration')}</dt><dd><span id="reader-registration" class="badge ${n.registered ? 'ok' : 'warn'}">${n.registered ? t('registered') : t('imported')}</span></dd>
-      ${row('contentHash', n.head_hash, 1)}${row('hanHash', n.han_hash, 1)}</dl>`;
-}
-
-/* Evidence → highlight in reader */
+      across = `<div class="across"><header><b>${t('acrossBook')} · ${FX.count(n, 'window')}</b>
+          <label><span class="sr">${t('chartOf')}</span><select id="win-metric" data-testid="window-metric">${plottable.map((m) => `<option value="${m.metric}" ${m.metric === S.winMetric ? 'selected' : ''}>${H.metric(m.metric)}</option>`).join('')}</select></label></header>
+        <div class="chart" id="win-chart" data-testid="window-chart" tabindex="0" role="slider" aria-label="${t('windowN')}" aria-valuemin="1" aria-valuemax="${n}" aria-valuenow="${(cur ?? 0) + 1}"
+          aria-valuetext="${w ? `${t('windowN')} ${w.i + 1} ${t('of')} ${n}, ${FX.where(w)}, ${FX.fmt(w.values[S.winMetric])}` : t('whole')}">${FX.sparkline(series, cur)}</div>
+        <div class="range"><span>min ${FX.fmt(st.min)}</span><span>median ${FX.fmt(st.median)}</span><span>max ${FX.fmt(st.max)} · W${st.maxAt + 1}</span></div>
+        <div class="stepper"><button class="btn sm" type="button" data-step="-1" data-testid="window-prev" aria-label="Previous window" ${cur === 0 ? 'disabled' : ''}>‹</button>
+          <div class="where" data-testid="window-label">${w ? `<b>${t('windowN')} ${w.i + 1} ${t('of')} ${n}</b><span>${FX.where(w)} · ${H.num(w.words)} ${t('words')}</span>` : `<b>${t('whole')}</b><span>${t('pickWindow')}</span>`}</div>
+          <button class="btn sm" type="button" data-step="1" data-testid="window-next" aria-label="Next window" ${cur === n - 1 ? 'disabled' : ''}>›</button></div>
+        <div class="jumps"><button class="btn sm ghost" type="button" data-jump-win="${st.maxAt}" data-testid="window-jump-max">↑ ${t('highest')}</button><button class="btn sm ghost" type="button" data-jump-win="${st.minAt}" data-testid="window-jump-min">↓ ${t('lowest')}</button>
+          ${w ? `<button class="btn sm" type="button" id="show-window" data-testid="window-show">${t('showWindow')}</button>` : ''}</div></div>`;
+    }
+    const scope = w ? `<div class="scope" data-testid="window-scope"><span>${t('windowScope')} ${w.i + 1} · ${FX.where(w)}</span><button type="button" data-win="all" data-testid="window-scope-clear" aria-label="${t('backWhole')}">✕ ${t('backWhole')}</button></div>` : '';
+    results = `${qualityNotice()}${across}${scope}
+      <div id="quality-score-rows">${Q.metrics.map((m,mi) => {
+        const v = w ? w.values[m.metric] : m.value;
+        const ev = H.ev(id, m).filter((e) => evidenceInWindow(e,w));
+        return `<div class="metric"><div class="mh"><b>${H.metric(m.metric)}</b><span class="val">${v == null ? '—' : v.toFixed(4)}</span></div>
+          <p>${SB.metricsInfo[m.metric].hint}</p>

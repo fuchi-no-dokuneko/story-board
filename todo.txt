@@ -1,6 +1,7 @@
 StoryBlock maintenance and quality / 維護與品質分析
 
 Completed / 已完成:
+- ZIP F1–F6 UI fixes and bounded, input-aware server caches. 原稿 F1–F6 介面修正及依輸入更新的有上限伺服器快取。
 - V2 bookshelf, reader and analysis coexist with the original UI; packaged Firefox UAT passed. 新版書架、閱讀與分析和原版共存，封裝後Firefox驗收通過。
 - Five replay, transfer and image fixes. 五項重播、傳輸及圖片修正。
 - Novel deletion preview and batch HTML/PDF exports. 小說刪除預覽及HTML／PDF批次匯出。
@@ -9,7 +10,6 @@ Completed / 已完成:
 
 Deployment / 部署：
 - VPS SSH user/host and checkout path are still needed to deploy and verify remotely. 尚需 VPS SSH 使用者／主機及儲存庫位置，才能部署與正式站驗證。
-- Catalog server calculation remains slow; backend changes are outside the original authorized frontend scope. 書庫後端計算仍慢；原前端需求禁止更動後端。
 
 Calibration / 校準:
 Reference corpora were not supplied. Corpus loading/calibration is implemented; unavailable scores and percentiles remain explicit. 未提供參考語料；載入與校準已實作，缺少分數及分位數均明確標示。

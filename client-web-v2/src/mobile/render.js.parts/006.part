@@ -1,3 +1,6 @@
+    <div class="tabs2" role="tablist"><button type="button" data-ins="style" aria-pressed="${S.ins === 'style'}">${t('style')}</button><button type="button" data-ins="quality" aria-pressed="${S.ins === 'quality'}">${t('quality')}</button></div>
+    ${body}</div></div>`;
+}
 function mSetScreen() {
   const mini = (key, opts, cur) => `<div class="mini">${opts.map(([v, l]) => `<button type="button" data-${key}="${v}" aria-pressed="${cur === v}">${l}</button>`).join('')}</div>`;
   return `<div class="screen"><div class="scroll"><h1 class="ptitle" data-css="margin-bottom:18px">${t('settings')}</h1>
@@ -15,4 +18,3 @@ function mSetScreen() {
   </div></div>`;
 }
 function mConsoleScreen() {
-  return `<div class="screen pushed" id="console-view"><nav class="nav"><button class="nb" type="button" data-back>‹ ${t('settings')}</button><b>${t('console')}</b><span data-css="width:60px"></span></nav>

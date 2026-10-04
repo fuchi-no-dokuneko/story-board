@@ -9,9 +9,9 @@ const dIcons = {
 function dCover(n, extra = '') {
   const latin = !/[㐀-鿿]/.test(n.title);
   const stamp = { 'zh-Hant': '繁', 'zh-Hans': '简', 'yue-Hant': '粵', en: 'EN' }[n.language] || n.language;
-  return `<span class="cover ${latin ? 'latin' : ''} ${extra}" data-css="--h:${n.hue}"><span class="t">${H.esc(n.title)}</span><span class="stamp">${stamp}</span>${n.images ? `<span class="img">▣ ${n.images}</span>` : ''}</span>`;
+  return `<span class="cover ${latin ? 'latin' : ''} ${extra}" data-css="--h:${n.hue}"><span class="t">${FX.tcy(n.title)}</span><span class="stamp">${stamp}</span>${n.images ? `<span class="img">▣ ${n.images}</span>` : ''}</span>`;
 }
-const dSizeLine = (n) => n.han ? `${H.num(n.han)} ${H.lang === 'en' ? 'Han' : t('han')}` : `${H.num(n.blocks)} ${t('blocks')}`;
+const dSizeLine = (n) => n.han ? `${H.num(n.han)} ${H.lang === 'en' ? 'Han' : t('han')}` : FX.count(n.blocks,'block');
 
 /* ---------------- Library ---------------- */
 function dRenderLibrary() {

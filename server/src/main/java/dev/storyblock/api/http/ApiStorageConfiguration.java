@@ -29,8 +29,11 @@ public class ApiStorageConfiguration {
   }
 
   @Bean
-  NovelCatalogService novelCatalogService(SqliteRevisionStore store) {
-    return new NovelCatalogService(store);
+  NovelReadCache novelReadCache(SqliteRevisionStore store) { return new NovelReadCache(store); }
+
+  @Bean
+  NovelCatalogService novelCatalogService(SqliteRevisionStore store, NovelReadCache reads) {
+    return new NovelCatalogService(store, reads);
   }
 
   @Bean

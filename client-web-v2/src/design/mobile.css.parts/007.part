@@ -25,3 +25,6 @@
 .ev{padding:12px 14px;border-radius:14px;background:var(--bg)}
 .ev p{margin:0 0 8px;font:15.5px/1.75 var(--serif)}
 .ev small{display:block;color:var(--faint);font-size:12px;margin-bottom:8px}
+.tcy{text-combine-upright:all;-webkit-text-combine:horizontal}
+.mval{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:12px 0 4px}
+.mval b{font:700 26px var(--mono)} .mval small{color:var(--muted);font-size:13px}

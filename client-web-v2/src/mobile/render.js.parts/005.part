@@ -1,3 +1,4 @@
+          ${rows.map(([id, v], k) => `<div class="mbar ${v === st[c.id].min ? 'best' : ''}"><span class="n">${H.esc(H.styleName(id))}</span><span class="tr"><i data-css="width:${v==null?0:(v / st[c.id].max)*100}%"></i></span><span class="v" title="${H.d6(v)}">${decimal(v,3)}</span></div>`).join('')}
           ${c.partial ? `<p data-css="margin-top:8px;font-size:12px">* ${H.lang === 'en' ? 'TXT references have no narrative metadata.' : 'TXT 參考語料沒有敘事 metadata。'}</p>` : ''}</div>`; }).join('');
     }
     body = `<div class="explain">ⓘ<span>${t('styleExplain')}</span></div><div class="stylepick" id="style-choices">${pick}</div>
@@ -12,8 +13,5 @@
       <div class="names">${S.names.map((x, i) => `<span class="nm">${H.esc(x)}<button type="button" data-unname="${i}" aria-label="remove">×</button></span>`).join('')}<button class="nm add" type="button" id="addname">${t('add')}</button></div>
       <button class="btn" type="button" id="analyze-quality">${S.analyzed ? '↻ ' : ''}${t('analyze')}</button>${rows}`;
   }
-  return `<div class="screen"><div class="scroll"><h1 class="ptitle">${t('insights')}</h1><p class="psub">${H.lang === 'en' ? 'Fresh on every run · never stored' : '每次即時計算 · 結果不保存'}</p>
+  return `<div class="screen"><div class="scroll"><h1 class="ptitle">${t('insights')}</h1><p class="psub">${t('cachedSub')}</p>
     <button class="card booksel" type="button" data-tabgo="lib">${mCover(n, 'sm')}<span data-css="flex:1"><b>${H.esc(n.title)}</b><small>${n.head_revision_id} · ${mSize(n)}</small></span><span class="chev" data-css="color:var(--faint)">⇅</span></button>
-    <div class="tabs2" role="tablist"><button type="button" data-ins="style" aria-pressed="${S.ins === 'style'}">${t('style')}</button><button type="button" data-ins="quality" aria-pressed="${S.ins === 'quality'}">${t('quality')}</button></div>
-    ${body}</div></div>`;
-}

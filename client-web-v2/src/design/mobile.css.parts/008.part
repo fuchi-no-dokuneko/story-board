@@ -1,3 +1,21 @@
+.across{margin:12px 0;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--bg)}
+.across h6{margin:0 0 8px;font-size:13px;color:var(--muted)}
+.chart{position:relative;height:64px;border-radius:10px;background:var(--card);border:1px solid var(--line);touch-action:none}
+.spark{position:absolute;inset:5px 0 3px;width:100%;height:calc(100% - 8px)}
+.spark-area{fill:color-mix(in srgb,var(--accent) 16%,transparent)} .spark-line{fill:none;stroke:var(--accent);stroke-width:1.4}
+.spark-cursor{stroke:var(--ink);stroke-width:2} .spark-peak{stroke:var(--warn);stroke-width:3}
+.range{display:flex;justify-content:space-between;gap:6px;margin-top:6px;color:var(--muted);font:11.5px var(--mono)}
+.stepper{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px;margin-top:10px}
+.stepper button{height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);font-size:20px}
+.stepper button:disabled{opacity:.4}
+.stepper .where{text-align:center;font-size:13px;line-height:1.35;min-width:0}
+.stepper .where b{display:block;font-size:14.5px}
+.stepper .where span{color:var(--muted);font-size:12.5px}
+.wrow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;width:100%;min-height:46px;padding:8px 2px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font-size:14px}
+.wrow[aria-pressed=true]{color:var(--accent);font-weight:700}
+.wrow .v{font-family:var(--mono);color:var(--muted)}
+.chips2{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.win-band{background:color-mix(in srgb,var(--accent) 10%,transparent)}
 .toast{position:absolute;z-index:120;left:16px;right:16px;bottom:104px;display:flex;align-items:center;gap:10px;padding:13px 16px;border-radius:16px;background:var(--ink);color:var(--bg);font-weight:650;font-size:14.5px;box-shadow:0 14px 30px rgba(0,0,0,.3);animation:up2 .25s}
 @keyframes up2{from{transform:translateY(20px);opacity:0}}
 .spin{display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:sp .8s linear infinite}@keyframes sp{to{transform:rotate(360deg)}}

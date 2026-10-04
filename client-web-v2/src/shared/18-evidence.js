@@ -3,7 +3,7 @@ function evidenceOverlaps(spans,start,end){
     start:Math.max(0,start-s.start),end:Math.min(s.end-s.start,end-s.start)}));
 }
 function showEvidence(metricIndex,evidenceIndex){
-  const report=S.mobile?S.quality?.quality_report:currentQuality();
+  const report=S.quality?.quality_report;
   const evidence=report?.metrics[metricIndex]?.evidence[evidenceIndex];
   if(!evidence||S.quality.revision_id!==S.selected?.revision.revision_id)return;
   const overlaps=evidenceOverlaps(S.quality.block_spans,evidence.start,evidence.end);

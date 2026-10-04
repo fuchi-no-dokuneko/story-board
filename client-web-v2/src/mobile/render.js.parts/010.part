@@ -1,0 +1,8 @@
+      <div class="chips2">${S.mlist < count ? `<button class="btn sm sec" type="button" data-mlist="more" data-testid="window-list-more">${S.mlist ? t('more50') : t('showList')}</button>` : ''}${S.mlist ? `<button class="btn sm sec" type="button" data-mlist="hide">${t('hideList')}</button>` : ''}</div></div>` : '';
+  return `<p data-css="margin:0 0 4px;color:var(--muted);font-size:14px">${SB.metricsInfo[m.metric].hint}</p>
+    <div class="mval"><b>${FX.fmt(v, 4)}</b><small>${w ? `${t('windowN')} ${w.i + 1} · ${FX.delta(v, m.value)} ${t('vsWhole')}` : `${t('wholeText')} · ${H.status(m.status)}`}</small></div>
+    ${across}
+    <h6 data-css="margin:14px 2px 8px;font-size:13px;color:var(--muted)">${t('evidence')} (${ev.length}${w ? ` ${t('inWindow')}` : ''})</h6>
+    <div class="evs">${ev.length ? ev.map((e) => `<div class="ev"><small>#${e.block + 1} · ${H.esc(e.reason)}</small><p>${evidenceExcerpt(e)}</p><button class="btn sm sec" type="button" data-show="${e.block}" data-metric="${arg}" data-evidence="${e.index}" data-text="${H.esc(e.text)}">${t('showInText')}</button></div>`).join('') : `<p data-css="color:var(--muted)">${t(w ? 'noEvWin' : 'noEv')}</p>`}</div>
+    ${list}`;
+}

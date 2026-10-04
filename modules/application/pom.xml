@@ -10,6 +10,7 @@
   <artifactId>storyblock-application</artifactId>
   <name>StoryBlock Application</name>
   <dependencies>
+    <dependency><groupId>dev.storyblock</groupId><artifactId>storyblock-cache</artifactId></dependency>
     <dependency>
       <groupId>dev.storyblock</groupId>
       <artifactId>storyblock-domain</artifactId>

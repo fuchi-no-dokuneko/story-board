@@ -3,18 +3,22 @@ package dev.storyblock.application;
 import dev.storyblock.contracts.CanonicalRevision;
 import dev.storyblock.contracts.NarrativeCanonicalMapper;
 import dev.storyblock.domain.Ids;
-import dev.storyblock.storage.RevisionRef;
 import dev.storyblock.storage.RevisionStore;
-import dev.storyblock.storage.StoredRevision;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public final class NovelCatalogService {
     private final RevisionStore store;
+    private final NovelReadCache reads;
+    private final dev.storyblock.cache.MemoCache<NovelReadCache.Key, NovelCatalogSnapshot> entries = new dev.storyblock.cache.MemoCache<>(128);
 
     public NovelCatalogService(RevisionStore store) {
-        this.store = Objects.requireNonNull(store, "store");
+        this(store, new NovelReadCache(store));
+    }
+
+    public NovelCatalogService(RevisionStore store, NovelReadCache reads) {
+        this.store = Objects.requireNonNull(store, "store"); this.reads = reads;
     }
 
     public List<NovelCatalogEntry> list(String query) {
@@ -34,16 +38,15 @@ public final class NovelCatalogService {
     }
 
     public NovelCatalogEntry get(Ids.NovelId novelId) {
-        RevisionRef head = store.getHead(novelId);
-        StoredRevision stored = store.getRevision(novelId, head.revisionId());
-        return NovelCatalogServiceDescribe.describe(stored.manifest(), head);
+        return read(novelId).novel();
     }
 
-    public CanonicalRevision revision(Ids.NovelId novelId) {
-        RevisionRef head = store.getHead(novelId);
-        return NarrativeCanonicalMapper.toCanonical(
-                store.getRevision(novelId, head.revisionId()).manifest()
-        );
-    }
+    public CanonicalRevision revision(Ids.NovelId novelId) { return read(novelId).revision(); }
 
+    public NovelCatalogSnapshot read(Ids.NovelId novelId) {
+        var value = reads.read(novelId, null);
+        return entries.get(value.key(), () -> new NovelCatalogSnapshot(
+                NovelCatalogServiceDescribe.describe(value.revision().manifest(), value.key().head()),
+                NarrativeCanonicalMapper.toCanonical(value.revision().manifest())));
+    }
 }

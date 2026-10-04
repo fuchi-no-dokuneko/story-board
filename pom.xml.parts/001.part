@@ -19,6 +19,7 @@
   <description>Immutable, evidence-bound narrative editing engine</description>
 
   <modules>
+    <module>modules/cache</module>
     <module>modules/domain</module>
     <module>modules/contracts</module>
     <module>modules/application</module>
@@ -51,6 +52,7 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency><groupId>dev.storyblock</groupId><artifactId>storyblock-cache</artifactId><version>${project.version}</version></dependency>
       <dependency>
         <groupId>dev.storyblock</groupId>
         <artifactId>storyblock-nlp-zh</artifactId>

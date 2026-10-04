@@ -12,7 +12,10 @@ module.exports=function source(files,names,extras={}) {
       querySelectorAll:()=>[],documentElement:{dataset:{}},body:{dataset:{}}},
     location:{origin:'https://127.0.0.1:9443'},history:{pushState(){},replaceState(){}},
     window:{scrollTo(){}},desktopWords:{},mobileWords:{},...extras};
-  const code=files.map(f=>fs.readFileSync(path.join(directory,f.includes('/')?f:'js/'+f),'utf8')).join('\n');
+  const code=files.map(f=>{
+    const p=path.join(directory,f.includes('/')?f:'js/'+f);
+    return fs.existsSync(p+'.parts')?fs.readdirSync(p+'.parts').sort().map(n=>fs.readFileSync(path.join(p+'.parts',n),'utf8')).join(''):fs.readFileSync(p,'utf8');
+  }).join('\n');
   vm.runInNewContext(code+`\nglobalThis.subject={${names.join(',')}};`,context);
   return {...context.subject,context,elements,storage};
 };

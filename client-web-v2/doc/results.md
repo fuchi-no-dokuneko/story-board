@@ -1,32 +1,37 @@
 # Results / 驗證結果 / 验证结果
 
-EN: 2026-10-03: 225 Java tests, 18 JavaScript tests and all 11 Firefox 156
-acceptance groups passed. The installed HTTPS API served both frontends with
-real SQLite data. Browser tests left the selected revision unchanged.
+EN: 2026-10-04: 231 Java tests, 22 JavaScript tests and 12 Firefox 156
+acceptance groups passed. All 27 supplied ZIP assertions and 15 additional
+checks passed with real HTTPS/API/SQLite data; no uncaught browser errors.
 
-繁體：2026-10-03：225 項 Java、18 項 JavaScript 及 11 組 Firefox 156 驗收通過。
-封裝 API 以真實 SQLite 提供兩版介面；瀏覽器測試未更改受測修訂。
+繁體：231 項 Java、22 項 JavaScript、12 組 Firefox 驗收通過。
+ZIP 的 27 項及額外 15 項檢查全部使用真實 HTTPS／API／SQLite，無未捕捉瀏覽器錯誤。
 
-简体：2026-10-03：225 项 Java、18 项 JavaScript 及 11 组 Firefox 156 验收通过。
-打包 API 使用真实 SQLite 提供两版界面；浏览器测试未更改受测修订。
+简体：231 项 Java、22 项 JavaScript、12 组 Firefox 验收通过。
+ZIP 的 27 项及额外 15 项检查全部使用真实 HTTPS／API／SQLite，无未捕获浏览器错误。
 
 | Evidence / 證據 / 证据 | Scope / 範圍 / 范围 |
 | --- | --- |
-| ZIP / 原稿 / 原稿 | A/D CSS preserved; computed reader styles and drawer width compared / 保留 CSS 並比對閱讀器樣式與抽屜寬度 / 保留 CSS 并比较阅读器样式与抽屉宽度 |
-| Catalog / 書庫 / 书库 | 15 novels, paging, search, filters / 15 部、分頁、搜尋、篩選 / 15 部、分页、搜索、筛选 |
-| Reading / 閱讀 / 阅读 | Resume paragraph/offset, images, languages, mobile screens / 段落位置、圖片、三語及手機畫面 / 段落位置、图片、三语及手机界面 |
-| Analysis / 分析 / 分析 | Five channels, tied minima, quality windows, exact evidence / 五項距離、並列最小值、品質視窗及證據 / 五项距离、并列最小值、品质窗口及证据 |
-| Exports / 匯出 / 导出 | Real PDF/TXT/JSON; visible mobile success/error / 真實下載及可見成功／失敗提示 / 真实下载及可见成功／失败提示 |
-| Layout / 版面 / 布局 | 320–1920 px, enlarged text, night contrast / 放大文字與夜間對比 / 放大文字与夜间对比 |
-| Long book / 長篇 / 长篇 | 30 chapters, 6,000 blocks / 30 章、6,000 段落 / 30 章、6,000 段落 |
-| v1 / 原版 / 原版 | Reading, analysis, images; book links bypass delayed catalog / 閱讀分析圖片、直連不等書庫 / 阅读分析图片、直连不等书库 |
+| ZIP CSS | Original styles preserved verbatim / 原稿樣式完整保留 / 原稿样式完整保留 |
+| F1 | 714 real windows, chart, keys, drag, evidence, bands, paging / 真實視窗、圖表、鍵盤、拖曳、證據、標示、分頁 / 真实窗口、图表、键盘、拖曳、证据、标示、分页 |
+| F2–F5 | Empty facts, appearance, metric labels, plurals, upright digits / 空欄位、外觀、標籤、複數、直排數字 / 空字段、外观、标签、复数、直排数字 |
+| F6 | Reopen performs one novel GET / 重開只下載一次 / 重开只下载一次 |
+| Cache / 快取 / 缓存 | Concurrent load sharing; revision/name/reference refresh; retry / 並行共用、輸入更新、重試 / 并发共用、输入更新、重试 |
+| Regression / 回歸 / 回归 | v1, images, exports, 320–1920 px, 6000 blocks / 圖片、匯出、多尺寸、長篇 / 图片、导出、多尺寸、长篇 |
 
-EN: Failure/delay tests intercept HTTP responses; other browser flows use the
-real API. Unit tests simulate transport/DOM/storage. Night mode adds a missing
-foreground binding; the ZIP's original stylesheet content stays intact.
+EN: On a local 16-novel fixture, first request → median of 5 repeats (ms):
+catalog 1113 → 10.8; detail 104.9 → 40.7; quality 662.3 → 39.2;
+style 642.5 → 5.0. All repeated responses were identical; 12 concurrent
+HTTP readers also matched. These timings are local measurements.
 
-繁體：故障／延遲測試攔截 HTTP，其餘使用真實 API；單元測試模擬傳輸、DOM 及儲存。
-夜間模式補上缺少的前景色綁定；ZIP 原始樣式檔內容完整保留。
+繁體：本機 16 部小說的首次／重複五次中位數如上，回應均相同；12 個並行 HTTP 讀取也一致。
 
-简体：故障／延迟测试拦截 HTTP，其余使用真实 API；单元测试模拟传输、DOM 及存储。
-夜间模式补上缺少的前景色绑定；ZIP 原始样式文件内容完整保留。
+简体：本机 16 部小说的首次／重复五次中位数如上，响应均相同；12 个并发 HTTP 读取也一致。
+
+EN: Quality fixtures are synthetic test texts, not reference corpora. Faults
+and delays are simulated. VPS deployment is separate; local success does not
+update the remote process. See [deployment](deploy.md) and [cache](../../server/doc/cache.md).
+
+繁體：品質範例為合成測試文字，不是參考語料；故障／延遲使用替身。本機通過不代表 VPS 已部署。
+
+简体：品质范例为合成测试文字，不是参考语料；故障／延迟使用替身。本机通过不代表 VPS 已部署。

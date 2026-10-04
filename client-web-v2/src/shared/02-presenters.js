@@ -31,6 +31,6 @@ const H={
     }));
   },
   ev:(id,metric)=>(metric.evidence||[]).map((e,i)=>({...e,index:i,
-    block:H.blocksOf(id).findIndex(b=>b.id===S.quality?.block_spans.find(s=>s.start<e.end&&s.end>e.start)?.block_id)})),
+    block:S.quality?.block_spans.findIndex(s=>s.start<e.end&&s.end>e.start)??-1})),
 };
 function decimal(value,digits=4){return value==null||!Number.isFinite(Number(value))?'—':Number(value).toFixed(digits);}

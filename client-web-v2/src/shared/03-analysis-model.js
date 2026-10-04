@@ -12,8 +12,7 @@ const SB={
   get quality(){
     const report=S.quality?.quality_report;
     if(!report)return {metrics:[],windows:[],statistics:{},calibration:{}};
-    return {...report,windows:report.windows.map(w=>({...w,
-      values:Object.fromEntries(w.metrics.map(m=>[m.metric,m.value]))}))};
+    return {...report,windows:windowLocations(report)};
   },
 };
 function currentQuality(){

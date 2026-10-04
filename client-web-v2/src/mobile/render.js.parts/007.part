@@ -1,3 +1,4 @@
+  return `<div class="screen pushed" id="console-view"><nav class="nav"><button class="nb" type="button" data-back>‹ ${t('settings')}</button><b>${t('console')}</b><span data-css="width:60px"></span></nav>
     <div class="scroll"><div class="card" data-css="display:flex;gap:8px;padding:8px"><span data-css="display:grid;place-items:center;padding:0 10px;border-radius:10px;background:var(--ok-soft);color:var(--ok);font:800 12px var(--mono)" id="method">GET</span><input id="path" value="/actuator/health" data-css="flex:1;min-width:0;height:42px;border:0;background:none;font:14px var(--mono);outline:0"><button class="btn sm" type="button" id="send">${t('send')}</button></div>
     <div class="qr quick-requests">${['/actuator/health', '/v1/openapi.yaml', '/v1/admin/novels', '/v1/style/'].map((p) => `<button type="button" data-method="GET" data-path="${p}">${p}</button>`).join('')}</div>
     <p id="response-status" data-css="margin:0 4px 6px;color:var(--muted);font:12.5px var(--mono)"></p><pre class="cres" id="response">Ready.</pre></div></div>`;
@@ -14,4 +15,3 @@ function mSheet(kind, arg) {
       .map(([k, l, o, c]) => `<div class="set"><span>${l}</span><div class="mini">${o.map(([v, x]) => `<button type="button" data-${k}="${v}" aria-pressed="${c === v}">${x}</button>`).join('')}</div></div>`).join('')}
       <p data-css="margin:12px 0 0;color:var(--muted);font-size:13px;text-align:center">${t('tapHint')}</p></div>`; }
   if (kind === 'toc') { title = t('contents');
-    html = H.body(n.novel_id).map((c, i) => `<button class="act" type="button" data-chapter="${i}"><span class="i" data-css="background:${i === S.chapter ? 'var(--accent)' : ''};color:${i === S.chapter ? '#fff' : ''}">${i + 1}</span><span><b data-css="font-family:var(--serif)">${H.esc(c.title)}</b><small>${c.scenes.map((s) => `${H.transition(s.transition)} · ${H.esc(s.meta.location)}`).join(' / ')}</small></span></button>`).join(''); }

@@ -23,7 +23,7 @@ const S = {
   catalogRequest:0,novelRequest:0,styleRequest:0,qualityRequest:0,
   catalogAbort:null,novelAbort:null,imageViews:new Set(),details:new Map(),
   styles:[],picks:new Set(),comparison:null,quality:null,qualityWindow:'all',
-  names:[],raw:false,online:null,loading:false,blocks:false,
+  names:[],winMetric:'repeated_phrase_coverage',mwin:null,mlist:0,marg:0,raw:false,online:null,loading:false,blocks:false,
   stack:['lib'],mobileTab:'lib',analysisTab:'style',ins:'style',drawer:false,
   immersive:false,catalogError:'',styleError:'',qualityError:'',scrollCleanup:null,
 };
@@ -33,6 +33,7 @@ const t = key => (S.mobile ? mobileWords : desktopWords)[key]?.[S.lang]
 const num = value => new Intl.NumberFormat(locale()).format(Number(value) || 0);
 function prefs() {
   document.documentElement.lang=locale();
-  document.documentElement.dataset.theme=S.mobile?S.theme:'light';
+  if(S.theme==='auto')delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme=S.theme;
   saveLocal('readerPreferences',{lang:S.lang,desktop:S.prefs,fs:S.fs,font:S.font,theme:S.theme});
 }

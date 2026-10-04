@@ -6,14 +6,16 @@ async function openNovel(id,options={}){
   S.stack=S.view==='reading'?['lib','book','read']:['lib','book'];
   S.mobileTab=S.view==='reading'?'read':'lib';renderApp(false);
   try{
-    let payload=await json(`/v1/admin/novels/${encodeURIComponent(id)}`,{signal:S.novelAbort.signal});
+    const cached=S.details.get(id),head=S.catalog.find(n=>n.novel_id===id)?.head_revision_id;
+    let payload=cached&&cached.revision.revision_id===head?cached:
+      await json(`/v1/admin/novels/${encodeURIComponent(id)}`,{signal:S.novelAbort.signal});
     if(payload.novel.head_revision_id!==payload.revision.revision_id)
       payload=await json(`/v1/admin/novels/${encodeURIComponent(id)}`,{signal:S.novelAbort.signal});
     if(ticket!==S.novelRequest)return;
     if(payload.novel.head_revision_id!==payload.revision.revision_id)throw new Error(t('revisionChanged'));
     S.selected=payload;S.details.set(id,payload);S.comparison=S.quality=null;
     S.styleBusy=S.qualityBusy=S.stylesLoading=false;S.styleError=S.qualityError='';
-    S.names=[...(payload.novel.main_characters||[])];S.win='all';
+    S.names=[...(payload.novel.main_characters||[])];S.win='all';S.mwin=null;S.mlist=0;
     const recent=remembered().find(r=>r.id===id);
     S.chapter=Math.max(0,Math.min(recent?.chapter||0,payload.revision.chapters.length-1));
     if(!options.fromHistory)history.pushState(null,'',`?ui=v2#${encodeURIComponent(id)}`);

@@ -8,9 +8,9 @@ const mIc = {
 };
 const mCover = (n, cls = '') => (cls === 'sm'
   ? `<span class="cover sm" data-css="--h:${n.hue}"><span class="one">${H.esc(n.title[0])}</span></span>`
-  : `<span class="cover ${cls} ${/[㐀-鿿]/.test(n.title) ? '' : 'latin'}" data-css="--h:${n.hue}"><span>${H.esc(n.title)}</span></span>`);
+  : `<span class="cover ${cls} ${/[㐀-鿿]/.test(n.title) ? '' : 'latin'}" data-css="--h:${n.hue}"><span>${FX.tcy(n.title)}</span></span>`);
 const mBook = () => H.novel(S.book);
-const mSize = (n) => (n.han ? `${H.num(n.han)} ${t('han')}` : `${H.num(n.blocks)} ${t('blocks').toLowerCase()}`);
+const mSize = (n) => (n.han ? `${H.num(n.han)} ${t('han')}` : FX.count(n.blocks,'block'));
 
 /* ---------- screens ---------- */
 function mLibScreen() {

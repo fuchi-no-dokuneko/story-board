@@ -1,3 +1,10 @@
+    <button type="button" id="download-quality" data-dl="json" ${S.analyzed ? '' : 'disabled'}><span class="ico">{ }</span><span><b>${t('qjson')}</b><span>${S.analyzed ? t('qjsonReady') : t('qjsonSub')}</span></span></button></div>`);
+  if (!el) return;
+}
+/* Connection */
+function dOpenConn(btn) {
+  const el = dPopover(btn, `
+    <h4>${t('conn')}</h4>
     <div class="note" data-css="background:var(--ok-soft);color:var(--ok)"><span class="dot" data-css="margin-top:5px"></span><div><b>${t('lan')}</b><br>${t('lanSub')}</div></div>
     <details><summary data-css="cursor:pointer;font-weight:650;font-size:13.5px">${t('token')}</summary>
       <form id="operator-form" data-css="margin-top:10px" autocomplete="off">
@@ -6,7 +13,8 @@
         <div class="actions"><button class="btn sm primary" id="operator-connect" type="submit">${t('use')}</button><button class="btn sm" type="button" id="operator-clear" ${S.token?'':'disabled'}>${t('clear')}</button>
         <output id="operator-status" data-css="font-size:12px;color:var(--muted)"></output></div></form></details>
     <div class="row" data-css="border-top:1px solid var(--line);padding-top:12px"><span data-css="color:var(--muted);font-size:13px">${t('language')}</span><div class="seg" role="group">${[['en','EN'],['zh','繁'],['zhs','简']].map(([k,l])=>`<button type="button" data-lang-btn="${k}" aria-pressed="${H.lang===k}">${l}</button>`).join('')}</div></div>
-    <div class="row"><span data-css="color:var(--muted);font-size:13px">${t('service')}</span><b data-css="font-size:13px">${esc(SB.service.version)}</b></div>
+    <div class="row"><span data-css="color:var(--muted);font-size:13px">${t('appearance')}</span><div class="seg" role="group" data-testid="appearance">${['auto','light','dark'].map((k)=>`<button type="button" data-appearance="${k}" aria-pressed="${FX.theme.get()===k}">${t(k)}</button>`).join('')}</div></div>
+    <div class="row"><span data-css="color:var(--muted);font-size:13px">${t('service')}</span><b data-css="font-size:13px">${SB.service.version}</b></div>
     <button class="btn" type="button" id="console-tab" data-css="width:100%">${t('console')}</button>`);
   if (!el) return;
   el.querySelector('#console-tab').onclick = dOpenConsole;
@@ -16,14 +24,3 @@ function dOpenDrawer(tab) {
   const wasOpen = S.drawer; dCloseAll('drawer');
   S.drawer = !wasOpen || !!tab; $('#drawer').classList.toggle('open', S.drawer); document.body.classList.toggle('drawer-open', S.drawer);
   $('#insightsBtn').setAttribute('aria-expanded', String(S.drawer));
-  if (S.drawer) {dRenderDrawer();if(!S.styles.length&&!S.stylesLoading)loadStyles();}
-}
-function dRenderDrawer() {
-  $$('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === S.analysisTab)));
-  $('#dbody').innerHTML = { style: dStyleTab, quality: dQualityTab, about: dAboutTab }[S.analysisTab]();
-  decorateAnalysis();designStyles();
-}
-function dStyleTab() {
-  const n = SB.styles.filter((s) => s.status === 'ready' && S.picks.has(s.id)).length;
-  const opts = SB.styles.map((s) => {
-    const off = s.status !== 'ready';

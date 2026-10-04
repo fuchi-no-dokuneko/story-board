@@ -1,0 +1,27 @@
+          <div class="sub"><span class="badge ${m.status === 'OK' ? 'ok' : m.status === 'UNCALIBRATED' ? 'mute' : 'warn'}">${H.status(m.status)}</span>
+            <span>${H.num(m.validSamples)} ${t('samples')}</span>${w ? `<span class="whole">${t('wholeShort')} ${FX.fmt(m.value, 4)} · ${FX.delta(v, m.value)}</span>` : `<span class="mono" title="${H.d6(v)}">${H.d6(v)}</span>`}</div>
+          ${ev.length ? `<details class="ev"><summary>${t('evidence')} (${ev.length}${w ? ` ${t('inWindow')}` : ''})</summary><ul>${ev.map((e) => `
+            <li><span><q>${H.esc(e.text)}</q> <small>${H.esc(e.reason)}</small></span><button class="btn sm" type="button" data-show="${e.block}" data-metric="${mi}" data-evidence="${e.index}" data-text="${H.esc(e.text)}">${t('showInText')}</button></li>`).join('')}</ul></details>` : ''}</div>`;
+      }).join('')}</div>
+      <p class="stats" id="quality-statistics"><span>${H.num(Q.words)} ${t('words')}</span><span>${H.num(Q.sentences)} ${t('sentences')}</span><span>MATTR ${H.d3(Q.statistics.mattr)}</span></p>
+      <p class="field-hint">✓ ${t('resultFor')} <span class="mono">${S.novel.head_revision_id}</span> · ${t('cachedNote')}</p>
+      <div class="actions"><button class="btn sm" type="button" id="saveq">${t('save')}</button></div>`;
+  }
+  return `<p class="lead">${t('qLead')}</p>
+    <label class="row" for="quality-names" data-css="margin:0 0 6px"><span>${t('names')}</span></label>
+    <div class="tokens">${toks}<input id="quality-names" data-i18n-ph="addName" placeholder="${t('addName')}"></div>
+    <p class="field-hint">${t('namesHint')}</p>
+    <div class="actions"><button class="btn accent" type="button" id="analyze-quality">${t('analyze')}</button></div>
+    <div id="quality-results">${results}</div>`;
+}
+function dAboutTab() {
+  const n = S.novel;
+  const row = (k, v, copy) => `<dt>${t(k)}</dt><dd><code title="${H.esc(v)}">${H.esc(v)}</code>${copy ? `<button class="copy" type="button" data-copy="${H.esc(v)}">${t('copy')}</button>` : ''}</dd>`;
+  return `<p class="lead">${t('aboutLead')}</p>
+    <dl class="kv">${row('novelId', n.novel_id, 1)}${row('headRev', n.head_revision_id, 1)}${row('parent', n.parent_revision_id || '—')}${row('seq', String(n.head_sequence))}
+      <dt>${t('updated')}</dt><dd>${new Date(n.updated_at).toLocaleString()}</dd>
+      <dt>${t('registration')}</dt><dd><span id="reader-registration" class="badge ${n.registered ? 'ok' : 'warn'}">${n.registered ? t('registered') : t('imported')}</span></dd>
+      ${row('contentHash', n.head_hash, 1)}${row('hanHash', n.han_hash, 1)}</dl>`;
+}
+
+/* Evidence → highlight in reader */

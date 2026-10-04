@@ -17,13 +17,14 @@ function handleClick(e){
   if(d.jump?.startsWith('chapter-'))return jumpChapter(Number(d.jump.slice(8))-1);
   if(d.sheet)return mSheet(d.sheet);
   if(d.metric!==undefined&&d.evidence!==undefined)return showEvidence(Number(d.metric),Number(d.evidence));
-  if(d.metric!==undefined)return mSheet('metric',Number(d.metric));
+  if(d.metric!==undefined){S.mwin=null;S.mlist=0;return mSheet('metric',Number(d.metric));}
   if(d.dl)return exportNovel(d.dl);
   if(d.copy)return copyValue(d.copy);
   if(d.action==='retryImage')return loadImage(b.closest('figure'));
   if(d.ins){S.ins=d.ins;return renderPanel();}
   if(d.tab){S.analysisTab=d.tab;return renderPanel();}
-  if(d.win){S.win=d.win;return renderPanel();}
+  if(d.win)return selectWindow(d.win);
+  if(d.appearance){FX.theme.set(d.appearance);$$('[data-appearance]').forEach(e=>e.setAttribute('aria-pressed',String(e.dataset.appearance===d.appearance)));return;}
   if(d.pick){if(S.styleBusy)return;S.picks.has(d.pick)?S.picks.delete(d.pick):S.picks.add(d.pick);S.comparison=null;return renderPanel();}
   if(d.untok!==undefined||d.unname!==undefined){S.names.splice(Number(d.untok??d.unname),1);return renderPanel();}
   if(d.thm||d.font||d.fs){
@@ -32,5 +33,6 @@ function handleClick(e){
     if(S.view==='reading')restoreReading(remembered().find(r=>r.id===S.book));
     if(sheet)mSheet('aa');return;
   }
+  if(d.step||d.jumpWin!==undefined||d.mwin!==undefined||d.mstep||d.mlist||d.mshow||b.id==='show-window')return windowClick(b);
   return clickId(b.id,d);
 }

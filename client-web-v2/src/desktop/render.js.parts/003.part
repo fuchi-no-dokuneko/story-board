@@ -9,7 +9,7 @@
       <p class="eyebrow">${H.langName(n.language)} · ${n.registered ? t('registered') : t('imported')}</p>
       <h1 id="reader-title">${H.esc(n.title)}</h1>
       ${n.characters.length ? `<ul class="cast" id="character-list">${n.characters.map((c) => `<li>${H.esc(c)}</li>`).join('')}</ul>` : ''}
-      <p class="facts"><b>${H.num(n.han)}</b> ${t('han')} · <b>${n.chapters}</b> ${t('chapters')} · <b>${n.scenes}</b> ${t('scenes')} · <b>${n.blocks}</b> ${t('blocks')}</p>
+      <p class="facts"><b>${H.num(n.han)}</b> ${t('han')} · ${FX.count(n.chapters,'chapter')} · ${FX.count(n.scenes,'scene')} · ${FX.count(n.blocks,'block')}</p>
     </header>${chapters}${excerpt}`;
   dApplyPrefs(); designStyles(); loadImages(); dTrackProgress();
   if (S.drawer) {dRenderDrawer();if(!S.styles.length&&!S.stylesLoading)loadStyles();}
@@ -37,3 +37,4 @@ function dPopover(btn, html, { align = 'right' } = {}) {
   const open = btn.getAttribute('aria-expanded') === 'true';
   dCloseAll(); if (open) return null;
   btn.setAttribute('aria-expanded', 'true');
+  const r = btn.getBoundingClientRect();

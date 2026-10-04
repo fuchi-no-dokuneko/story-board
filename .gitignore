@@ -34,3 +34,4 @@ backups/
 /client-web-v2/src/design/*-words.js
 /client-web-v2/src/desktop/render.js
 /client-web-v2/src/mobile/render.js
+/client-web-v2/src/shared/04-fixes.js
