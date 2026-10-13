@@ -2,6 +2,7 @@ package dev.storyblock.contracts;
 
 import dev.storyblock.domain.BlockDraft;
 import dev.storyblock.domain.BlockImage;
+import dev.storyblock.domain.BlockHidden;
 import dev.storyblock.domain.BlockMetadata;
 import dev.storyblock.domain.Ids;
 import java.util.LinkedHashMap;
@@ -13,7 +14,7 @@ final class EditOperationCanonicalMapperParseDraft {
         EditOperationCanonicalMapperRequireKeys.requireKeys(
                 value,
                 Set.of("id", "text", "meta"),
-                Set.of("extensions", "image"),
+                Set.of("extensions", "image", "hidden"),
                 "block_draft"
         );
         Map<String, Object> extensions = value.containsKey("extensions")
@@ -25,6 +26,12 @@ final class EditOperationCanonicalMapperParseDraft {
             throw new IllegalArgumentException(
                     "block_draft must declare storyblock.image through the image field"
             );
+        }
+        if (extensions.containsKey(BlockHidden.EXTENSION_KEY)) {
+            throw BlockHidden.unsupported("block_draft must declare storyblock.hidden through the hidden field");
+        }
+        if (value.containsKey("hidden")) {
+            extensions.put(BlockHidden.EXTENSION_KEY, value.get("hidden"));
         }
         if (value.containsKey("image")) {
             extensions.put(

@@ -49,6 +49,7 @@ class DeterministicValidatorGoldenTest {
                     .add(golden.expectedViolation());
         }
 
+        outcomes.putAll(HiddenValidationGoldenCases.exercise());
         assertEquals(Set.of(ValidationCode.values()), outcomes.keySet());
         outcomes.forEach((code, values) -> assertEquals(Set.of(false, true), values, code.name()));
     }

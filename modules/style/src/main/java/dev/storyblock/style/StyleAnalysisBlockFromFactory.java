@@ -1,12 +1,13 @@
 package dev.storyblock.style;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.NarrativeScene;
 import java.util.Map;
 
 final class StyleAnalysisBlockFromFactory {
     static StyleAnalysisBlock from(NarrativeScene scene, NarrativeBlock block)  {
-        if (!scene.blocks().contains(block)) {
+        if (!NarrativeView.visibleBlocks(scene).contains(block)) {
             throw new IllegalArgumentException("Style block does not belong to its scene");
         }
         Map<String, Object> metadata = block.metadata().fields();

@@ -1,5 +1,6 @@
 package dev.storyblock.renderer;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.BlockImage;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.NarrativeChapter;
@@ -32,7 +33,7 @@ final class DeterministicPdfRendererRenderAction {
                 if (scene.title() != null && !scene.title().equals(chapter.title())) {
                     pages.scene(scene.title());
                 }
-                for (NarrativeBlock block : scene.blocks()) {
+                for (NarrativeBlock block : NarrativeView.visibleBlocks(scene)) {
                     if (block.image().isPresent()) {
                         BlockImage descriptor = block.image().orElseThrow();
                         pages.image(DeterministicPdfRendererDecodeImage.decodeImage(descriptor, imageResolver.resolve(descriptor)));

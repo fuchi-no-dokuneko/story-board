@@ -1,5 +1,6 @@
 package dev.storyblock.rewrite.policy;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.rewrite.RewriteCandidateBlock;
@@ -29,7 +30,7 @@ final class RewriteNearCopyCheckerCheckAction {
       for (StyleCorpusSource source : approved) {
         RewriteReferenceCorpus corpus = supplied.get(source.sourceId());
         Set<String> reference = new HashSet<>();
-        for (NarrativeBlock block : corpus.blocks()) {
+        for (NarrativeBlock block : NarrativeView.visibleBlocks(corpus.blocks())) {
           if (!block.id().equals(candidate.blockId())) {
             reference.addAll(RewriteNearCopyCheckerNgrams.ngrams(RewriteNearCopyCheckerNormalized.normalized(block.text())));
           }

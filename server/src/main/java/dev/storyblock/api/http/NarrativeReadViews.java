@@ -41,7 +41,7 @@ final class NarrativeReadViews {
                         "chapter_id", chapter.id().value(), "chapter_index", c,
                         "title", Objects.toString(scene.title(), ""), "block_count", scene.blocks().size(),
                         "block_slice", Map.of("start", 0, "end", scene.blocks().size()),
-                        "total_text_graphemes", scene.blocks().stream()
+                        "total_text_graphemes", NarrativeView.visibleBlocks(scene).stream()
                             .mapToLong(b -> UnicodeText.graphemeCount(b.text())).sum()));
             }
         }

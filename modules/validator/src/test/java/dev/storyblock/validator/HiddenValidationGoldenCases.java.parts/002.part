@@ -1,0 +1,6 @@
+        assertEquals(ValidationCode.HIDDEN_BLOCK_UNSUPPORTED,
+                validator.validateOperation(revision,hash,extend).violations().getFirst().code());
+        outcomes.put(ValidationCode.HIDDEN_BLOCK_UNSUPPORTED,Set.of(false,true));
+        return outcomes;
+    }
+}

@@ -17,3 +17,6 @@
 #status-dot[data-state=down]{background:var(--warn)}
 #reader{color:var(--ink)}
 .win-band.first{scroll-margin-top:80px}
+
+.story-hidden{scroll-margin-top:80px;margin:1.2em 0;padding:.8em 1em;border-left:3px solid var(--faint);background:var(--card);color:var(--muted);font:85%/1.65 var(--sans);text-indent:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.story-hidden header{font-weight:700;margin-bottom:.4em;white-space:normal}

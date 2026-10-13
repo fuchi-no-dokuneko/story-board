@@ -2,6 +2,7 @@ package dev.storyblock.validator;
 
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.RevisionManifest;
 import dev.storyblock.renderer.RenderPacket;
 import dev.storyblock.renderer.RenderRange;
@@ -10,12 +11,13 @@ import java.util.Set;
 
 final class PriorPresence {
     static Set<String> presenceBefore(DeterministicValidator self, RevisionManifest base, String baseHash, NarrativeScene scene, int index)  {
-        if (index == 0) {
+        var preceding = NarrativeView.previousVisible(scene, index);
+        if (preceding.isEmpty()) {
             return scene.initialMeta() == null
                     ? Set.of()
                     : DeterministicValidatorStrings.strings(scene.initialMeta().fields().get("present_character_ids"));
         }
-        Ids.BlockId previous = scene.blocks().get(index - 1).id();
+        Ids.BlockId previous = preceding.orElseThrow().id();
         RenderPacket packet = self.renderer.render(base, baseHash, RenderRange.all());
         for (ResolvedBlockMetadata metadata : packet.resolvedMetadata()) {
             if (metadata.blockId().equals(previous)) {

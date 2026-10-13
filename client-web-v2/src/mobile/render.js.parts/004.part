@@ -1,4 +1,4 @@
-        ${c.scenes.map((s) => `${(() => {const f=FX.sceneFacts(s.meta);return f.length?`<p class="meta">${H.transition(s.transition)} · ${f.map(([,v])=>H.esc(v)).join(' · ')}</p>`:'';})()}${s.blocks.map((b) => { const k = gi++;
+        ${c.scenes.map((s) => `${(() => {const f=FX.sceneFacts(s.meta);return f.length?`<p class="meta">${H.transition(s.transition)} · ${f.map(([,v])=>H.esc(v)).join(' · ')}</p>`:'';})()}${s.blocks.map((b) => { if(b.hidden)return hiddenBlockNote(b); const k = gi++;
           return b.image ? `<figure class="story-image" data-block-id="${b.id}"><img alt="${H.esc(b.alt)}"><figcaption data-text-block="${b.id}">${H.esc(b.text)}</figcaption></figure>` : `<p class="story-block" data-block-id="${b.id}" data-text-block="${b.id}" id="pb${k}">${H.esc(b.text)}</p>`; }).join('')}`).join('')}
         ${ci < body.length - 1 ? `<div class="endnav"><button class="btn sm" type="button" data-chapter="${ci + 1}">${t('next')} ›</button></div>` : body.length < n.chapters ? `<p class="excerpt">${t('excerpt')}</p>` : ''}</section>`; return html; }).join('')}
     </div></div>

@@ -15,15 +15,19 @@ public record NarrativeBlock(
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(versionId, "versionId");
         Objects.requireNonNull(orderKey, "orderKey");
-        UnicodeText.validateBlock(text);
         Objects.requireNonNull(metadata, "metadata");
         extensions = CanonicalValues.freezeMap(extensions, "block.extensions");
+        BlockHidden.validate(extensions, metadata);
+        if (BlockHidden.isHidden(extensions)) text = HiddenText.validate(text);
+        else UnicodeText.validateBlock(text);
         BlockImage.fromExtensions(extensions);
     }
 
     public java.util.Optional<BlockImage> image() {
         return BlockImage.fromExtensions(extensions);
     }
+
+    public boolean isHidden() { return BlockHidden.isHidden(extensions); }
 
     public static NarrativeBlock create(
             Ids.BlockId id,

@@ -10,3 +10,6 @@
 #status-text[data-state=down]{background:var(--warn-soft);color:var(--warn)}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
 .win-band.first{scroll-margin-top:76px}
+
+.story-hidden{scroll-margin-top:76px;margin:1.2em 0;padding:.8em 1em;border-left:3px solid var(--faint);background:var(--card);color:var(--muted);font:85%/1.65 var(--sans);text-indent:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.story-hidden header{font-weight:700;margin-bottom:.4em;white-space:normal}

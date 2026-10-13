@@ -1,5 +1,6 @@
 package dev.storyblock.style;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.contracts.CanonicalJson;
 import dev.storyblock.domain.NarrativeText;
 import java.math.BigDecimal;
@@ -46,7 +47,7 @@ public final class StyleFeatureAnalyzer {
     }
 
     public static String sourceHash(List<? extends NarrativeText> blocks) {
-        blocks = List.copyOf(blocks);
+        blocks = NarrativeView.visibleBlocks(blocks);
         if (blocks.isEmpty()) {
             throw new IllegalArgumentException(
                     "Style source hash requires at least one text block"

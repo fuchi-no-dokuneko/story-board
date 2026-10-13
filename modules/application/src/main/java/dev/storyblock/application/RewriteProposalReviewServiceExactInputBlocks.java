@@ -1,5 +1,6 @@
 package dev.storyblock.application;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.rewrite.RewriteTextProposal;
@@ -13,7 +14,7 @@ final class RewriteProposalReviewServiceExactInputBlocks {
             List<NarrativeBlock> snapshot
     ) {
         Map<Ids.BlockId, NarrativeBlock> values = new HashMap<>();
-        snapshot.forEach(block -> values.put(block.id(), block));
+        NarrativeView.visibleBlocks(snapshot).forEach(block -> values.put(block.id(), block));
         return proposal.input().blocks().stream().map(binding -> {
             NarrativeBlock block = values.get(binding.blockId());
             if (block == null) {

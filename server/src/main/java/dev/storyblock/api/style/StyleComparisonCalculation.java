@@ -1,5 +1,6 @@
 package dev.storyblock.api.style;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.application.NovelReadCache;
 import dev.storyblock.style.*;
 import java.util.*;
@@ -9,7 +10,7 @@ final class StyleComparisonCalculation {
         var revision = read.revision();
         var analyzer = new StyleFeatureAnalyzer();
         var lexicon = StyleMaskingLexicon.empty();
-        var features = analyzer.extract(revision.manifest().liveBlocks(), lexicon,
+        var features = analyzer.extract(NarrativeView.visibleBlocks(revision.manifest()), lexicon,
                 StyleFeatureContract.defaults(lexicon.vocabularyHash()));
         var results = new ArrayList<Map<String, Object>>();
         for (var baseline : baselines) {

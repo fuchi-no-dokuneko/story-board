@@ -1,5 +1,6 @@
 package dev.storyblock.style;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.RevisionManifest;
@@ -14,7 +15,7 @@ final class StyleRollingWindowAnalyzerAnalyzeAction {
     static List<StyleWindowFeatures> analyze(StyleRollingWindowAnalyzer self, RevisionManifest revision, StyleMaskingLexicon lexicon, StyleFeatureContract contract, StyleWindowConfiguration configuration, Map<String, List<BigDecimal>> contentReducedEmbeddingsByWindow)  {
         Objects.requireNonNull(revision, "revision");
         Map<Ids.BlockId, NarrativeBlock> blocks = new LinkedHashMap<>();
-        revision.liveBlocks().forEach(block -> blocks.put(block.id(), block));
+        NarrativeView.visibleBlocks(revision).forEach(block -> blocks.put(block.id(), block));
         return self.analyze(
                 self.planner.plan(revision, configuration),
                 blocks,

@@ -2,6 +2,7 @@ package dev.storyblock.detector;
 
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.NarrativeView;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,11 +13,13 @@ final class AdjacentMetadataDetectorBoundaryBlockIds {
             NarrativeScene current
     ) {
         Set<Ids.BlockId> result = new LinkedHashSet<>();
-        if (!previous.blocks().isEmpty()) {
-            result.add(previous.blocks().getLast().id());
+        var previousVisible = NarrativeView.visibleBlocks(previous);
+        var currentVisible = NarrativeView.visibleBlocks(current);
+        if (!previousVisible.isEmpty()) {
+            result.add(previousVisible.getLast().id());
         }
-        if (!current.blocks().isEmpty()) {
-            result.add(current.blocks().getFirst().id());
+        if (!currentVisible.isEmpty()) {
+            result.add(currentVisible.getFirst().id());
         }
         return List.copyOf(result);
     }

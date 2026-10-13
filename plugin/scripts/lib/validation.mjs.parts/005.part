@@ -1,3 +1,14 @@
+        issues.push(...validateNode(value[name], member, { ...context, path: `${context.path}/${name}` }));
+      }
+    }
+    if (schema.propertyNames) {
+      for (const name of Object.keys(value)) {
+        issues.push(...validateNode(name, schema.propertyNames, { ...context, path: `${context.path}/${name}` }));
+      }
+    }
+    const known = knownProperties(schema, context.root, context.schemas);
+    const additional = Object.keys(value).filter((name) => !known.has(name));
+    if (schema.additionalProperties === false || schema.unevaluatedProperties === false) {
       for (const name of additional) issue(`contains unknown property ${name}`, `${context.path}/${name}`);
     } else if (schema.additionalProperties && typeof schema.additionalProperties === "object") {
       for (const name of additional) {
@@ -39,12 +50,3 @@ function registrationIssues(value) {
       if (chapter && typeof chapter.text === "string") {
         for (const sentence of registrationSentences(chapter.text)) {
           if (graphemeLength(sentence) > 100) {
-            issues.push({ path: `#/chapters/${index}/text`, message: "contains a sentence longer than 100 grapheme clusters" });
-            break;
-          }
-        }
-      }
-    });
-    const complete = value.chapters.map((chapter) => typeof chapter?.text === "string" ? chapter.text : "").join("");
-    const actual = countHanCodePoints(complete);
-    if (Number.isSafeInteger(value.expected_han_characters) && actual !== value.expected_han_characters) {

@@ -1,5 +1,6 @@
 package dev.storyblock.renderer;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.NarrativeChapter;
 import dev.storyblock.domain.NarrativeScene;
 import dev.storyblock.domain.RevisionManifest;
@@ -15,7 +16,7 @@ final class DeterministicPdfRendererVisibleText {
                 if (scene.title() != null) {
                     text.append(scene.title());
                 }
-                scene.blocks().forEach(block -> text.append(block.text()));
+                NarrativeView.visibleBlocks(scene).forEach(block -> text.append(block.text()));
             }
         }
         return text.toString();

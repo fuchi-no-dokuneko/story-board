@@ -28,7 +28,7 @@ function mapChapters(id) {
     const seed=s.initial_meta||{};
     return {...s,transition:s.transition_mode,meta:{time:valueLabel(seed.time),
       location:valueLabel(seed.location),weather:valueLabel(seed.weather),present:seed.present_character_ids||[]},
-      blocks:s.blocks.map(b=>({...b,image:!!b.extensions?.['storyblock.image'],
+      blocks:s.blocks.map(b=>({...b,hidden:!!b.extensions?.['storyblock.hidden'],image:!!b.extensions?.['storyblock.image'],
         alt:b.extensions?.['storyblock.image']?.alt_text||''}))};
   })}));
 }

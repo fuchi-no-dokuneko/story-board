@@ -1,5 +1,6 @@
 package dev.storyblock.api.quality;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.application.NovelReadCache;
 import dev.storyblock.cache.MemoCache;
@@ -26,7 +27,7 @@ public final class NovelQualityService {
         var revision = read.revision();
         var text = new StringBuilder();
         var spans = new ArrayList<Map<String,Object>>();
-        for (var block : revision.manifest().liveBlocks()) {
+        for (var block : NarrativeView.visibleBlocks(revision.manifest())) {
             if (!text.isEmpty()) text.append('\n');
             int start = text.length(); text.append(block.text());
             spans.add(Map.of("block_id",block.id().value(),"start",start,"end",text.length()));

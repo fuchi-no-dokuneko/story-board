@@ -2,6 +2,7 @@ package dev.storyblock.contracts;
 
 import dev.storyblock.domain.BlockDraft;
 import dev.storyblock.domain.BlockImage;
+import dev.storyblock.domain.BlockHidden;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -12,8 +13,10 @@ final class EditOperationCanonicalMapperDraft {
         result.put("text", draft.text());
         result.put("meta", draft.metadata().fields());
         draft.image().ifPresent(image -> result.put("image", image.canonicalValue()));
+        if (draft.isHidden()) result.put("hidden", true);
         Map<String, Object> publicExtensions = new LinkedHashMap<>(draft.extensions());
         publicExtensions.remove(BlockImage.EXTENSION_KEY);
+        publicExtensions.remove(BlockHidden.EXTENSION_KEY);
         if (!publicExtensions.isEmpty()) {
             result.put("extensions", Map.copyOf(publicExtensions));
         }

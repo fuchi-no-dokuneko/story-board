@@ -2,6 +2,7 @@ package dev.storyblock.detector;
 
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.NarrativeScene;
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.renderer.RenderPacket;
 import dev.storyblock.renderer.RenderedBlock;
 import dev.storyblock.renderer.ResolvedBlockMetadata;
@@ -18,8 +19,9 @@ final class AdjacentMetadataDetectorBlockContexts {
         int globalIndex = 0;
         for (int sceneIndex = 0; sceneIndex < scenes.size(); sceneIndex++) {
             NarrativeScene scene = scenes.get(sceneIndex);
-            for (int blockIndex = 0; blockIndex < scene.blocks().size(); blockIndex++) {
-                NarrativeBlock block = scene.blocks().get(blockIndex);
+            var visible = NarrativeView.visibleBlocks(scene);
+            for (int blockIndex = 0; blockIndex < visible.size(); blockIndex++) {
+                NarrativeBlock block = visible.get(blockIndex);
                 RenderedBlock rendered = packet.blocks().get(globalIndex);
                 ResolvedBlockMetadata resolved = packet.resolvedMetadata().get(globalIndex);
                 if (!block.id().equals(rendered.blockId())

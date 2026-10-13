@@ -16,6 +16,10 @@ final class EditOperationValidatorValidateFactory {
             case EditOperation.SplitBlock split -> EditOperationValidatorValidateSplit.validateSplit(base, split);
             case EditOperation.MergeBlocks merge -> {
                 RangeLocation range = EditOperationValidator.validateRange(base, merge.range());
+                if (range.blocks().stream().anyMatch(NarrativeBlock::isHidden)
+                        || merge.newBlock().isHidden()) {
+                    throw BlockHidden.unsupported("merge_blocks does not support hidden blocks");
+                }
                 if (range.blocks().stream().anyMatch(block -> block.image().isPresent())
                         || merge.newBlock().image().isPresent()) {
                     throw EditOperationValidatorInvalid.invalid("merge_blocks does not support image blocks");

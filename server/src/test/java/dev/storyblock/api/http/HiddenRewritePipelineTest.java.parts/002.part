@@ -1,0 +1,5 @@
+                    assertThrows(HiddenBlockException.class,() -> gate.reserve(job.analysisId(),job.statusHash(),
+                            List.of(crossing.windowId()),Duration.ofMinutes(5),"crossing",AuditContext.system("crossing",now.plusSeconds(4)))).code());
+        }
+    }
+}

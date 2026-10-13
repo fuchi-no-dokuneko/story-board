@@ -14,7 +14,7 @@ const H={
   },
   novel:id=>mapBook(S.details.get(id)?.novel||S.catalog.find(n=>n.novel_id===id)),
   body:mapChapters,
-  blocksOf:id=>mapChapters(id).flatMap(c=>c.scenes.flatMap(s=>s.blocks)),
+  blocksOf:id=>mapChapters(id).flatMap(c=>c.scenes.flatMap(s=>visibleTextBlocks(s.blocks))),
   styleName:id=>S.styles.find(s=>s.id===id)?.name||id,
   apply(dict,root=document){
     $$('[data-i18n]',root).forEach(el=>{el.textContent=t(el.dataset.i18n);});

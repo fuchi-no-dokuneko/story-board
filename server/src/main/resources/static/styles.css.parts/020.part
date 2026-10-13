@@ -1,0 +1,3 @@
+
+.story-hidden{margin:1.2em 0;padding:.8em 1em;border-left:3px solid var(--border-strong);background:var(--surface-subtle);color:var(--muted);font:85%/1.65 ui-sans-serif,system-ui,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere}
+.story-hidden header{font-weight:700;margin-bottom:.4em;white-space:normal}

@@ -12,12 +12,7 @@
     },
     "text": {
       "type": "string",
-      "minLength": 1,
-      "x-storyblock-max-graphemes": 100,
-      "x-storyblock-sentence-count": [
-        1,
-        2
-      ]
+      "minLength": 1
     },
     "meta": {
       "$ref": "BlockMetadata.schema.json"
@@ -25,7 +20,8 @@
     "extensions": {
       "type": "object",
       "properties": {
-        "storyblock.image": false
+        "storyblock.image": false,
+        "storyblock.hidden": false
       },
       "propertyNames": {
         "pattern": "^[a-z][a-z0-9.-]{1,63}$"
@@ -33,6 +29,9 @@
     },
     "image": {
       "$ref": "BlockImage.schema.json"
+    },
+    "hidden": {
+      "const": true
     }
   },
   "additionalProperties": false,
@@ -51,8 +50,38 @@
     {
       "id": "blk_49pHt",
       "text": "春風到了。",
+      "meta": {}
+    }
+  ],
+  "if": {
+    "required": [
+      "hidden"
+    ]
+  },
+  "then": {
+    "properties": {
+      "text": {
+        "x-storyblock-hidden-text": true
+      },
       "meta": {
+        "type": "object",
+        "properties": {
+          "provenance": {}
+        },
+        "additionalProperties": false
+      },
+      "image": false
+    }
+  },
+  "else": {
+    "properties": {
+      "text": {
+        "x-storyblock-max-graphemes": 100,
+        "x-storyblock-sentence-count": [
+          1,
+          2
+        ]
       }
     }
-  ]
+  }
 }

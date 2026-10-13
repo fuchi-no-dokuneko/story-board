@@ -4,6 +4,10 @@
   if (schema.not && validateNode(value, schema.not, context).length === 0) {
     issue("must not match the prohibited schema");
   }
+  if (schema.if) {
+    const branch = validateNode(value, schema.if, context).length === 0 ? schema.then : schema.else;
+    if (branch) issues.push(...validateNode(value, branch, context));
+  }
 
   if (Object.hasOwn(schema, "const") && !deepEqual(value, schema.const)) {
     issue(`must equal ${JSON.stringify(schema.const)}`);
@@ -19,6 +23,14 @@
   }
 
   if (typeof value === "string") {
+    if (schema["x-storyblock-hidden-text"]) {
+      const normalized = value.normalize("NFC").trim();
+      const count = [...new Intl.Segmenter("und", {granularity:"grapheme"}).segment(normalized)].length;
+      if (!normalized || count > 2000) issue("hidden text must contain 1 to 2000 graphemes after NFC normalization and stripping");
+    }
+    if (schema["x-storyblock-normalized-stripped"] && value !== value.normalize("NFC").trim()) {
+      issue("must use NFC text with leading and trailing whitespace stripped");
+    }
     const length = codePointLength(value);
     if (schema.minLength !== undefined && length < schema.minLength) issue(`must contain at least ${schema.minLength} Unicode code points`);
     if (schema.maxLength !== undefined && length > schema.maxLength) issue(`must contain at most ${schema.maxLength} Unicode code points`);
@@ -43,15 +55,3 @@
     if (schema.format === "uri-reference" && /[\u0000-\u0020]/u.test(value)) issue("must be a URI reference");
     if (schema["x-storyblock-max-graphemes"] !== undefined
       && graphemeLength(value) > schema["x-storyblock-max-graphemes"]) {
-      issue(`must contain at most ${schema["x-storyblock-max-graphemes"]} grapheme clusters`);
-    }
-    if (schema["x-storyblock-sentence-count"] !== undefined) {
-      const shape = sentenceShape(value);
-      const configured = schema["x-storyblock-sentence-count"];
-      const allowed = Array.isArray(configured) ? configured : [configured];
-      if (!allowed.includes(shape.count)) issue(`must contain ${allowed.join(" or ")} complete sentences (found ${shape.count})`);
-      if (!shape.complete) issue("must end at a recognized complete sentence boundary");
-    }
-  }
-
-  if (typeof value === "number" && Number.isFinite(value)) {

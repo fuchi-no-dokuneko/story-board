@@ -1,6 +1,7 @@
 package dev.storyblock.validator;
 
 import dev.storyblock.domain.EditInvariantException;
+import dev.storyblock.domain.HiddenBlockException;
 import dev.storyblock.domain.EditOperation;
 import dev.storyblock.domain.EditOperationValidator;
 import dev.storyblock.domain.RevisionManifest;
@@ -28,6 +29,10 @@ final class OperationValidation {
                             "base_revision_id", base.id().value()
                     )
             )));
+        } catch (HiddenBlockException exception) {
+            return DeterministicValidatorErrors.errors(List.of(ValidationIssue.error(
+                    ValidationCode.valueOf(exception.code().name()), null,
+                    exception.getMessage(), Map.of("operation_type", operation.type().canonicalName()))));
         } catch (IllegalArgumentException exception) {
             return DeterministicValidatorErrors.errors(List.of(ValidationIssue.error(
                     ValidationCode.INVALID_BLOCK_ADJACENCY,

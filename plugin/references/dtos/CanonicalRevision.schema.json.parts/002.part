@@ -41,12 +41,9 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "time": {
-        },
-        "location": {
-        },
-        "weather": {
-        },
+        "time": {},
+        "location": {},
+        "weather": {},
         "present_character_ids": {
           "type": "array",
           "items": {
@@ -78,50 +75,55 @@
         },
         "text": {
           "type": "string",
-          "minLength": 1,
-          "x-storyblock-max-graphemes": 100,
-          "x-storyblock-sentence-count": [
-            1,
-            2
-          ]
+          "minLength": 1
         },
         "meta": {
           "$ref": "#/$defs/blockMeta"
         },
         "extensions": {
-          "$ref": "#/$defs/extensions"
+          "allOf": [
+            {
+              "$ref": "#/$defs/extensions"
+            },
+            {
+              "properties": {
+                "storyblock.hidden": {
+                  "const": true
+                }
+              }
+            }
+          ]
         }
-      }
-    },
-    "blockMeta": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "time": {
-        },
-        "location": {
-        },
-        "weather": {
-        },
-        "speech": {
-        },
-        "actions": {
-          "type": "array"
-        },
-        "presence_events": {
-          "type": "array"
-        },
-        "pov": {
-        },
-        "narrative_mode": {
-        },
-        "provenance": {
+      },
+      "if": {
+        "required": [
+          "extensions"
+        ],
+        "properties": {
+          "extensions": {
+            "required": [
+              "storyblock.hidden"
+            ]
+          }
         }
-      }
-    }
-  },
-  "description": "Code-derived StoryBlock Canonical Revision JSON contract.",
-  "x-confidence": "confirmed-from-code",
-  "x-source": [
-    "server/src/main/java/dev/storyblock/api/http/CanonicalTransferController.java",
-    "server/src/main/java/dev/storyblock/api/http/NovelController.java",
+      },
+      "then": {
+        "properties": {
+          "text": {
+            "x-storyblock-hidden-text": true,
+            "x-storyblock-normalized-stripped": true
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "provenance": {}
+            },
+            "additionalProperties": false
+          },
+          "extensions": {
+            "properties": {
+              "storyblock.image": false
+            }
+          }
+        }
+      },

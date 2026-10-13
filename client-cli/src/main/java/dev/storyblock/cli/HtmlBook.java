@@ -15,7 +15,7 @@ final class HtmlBook {
             for (var scene : chapter.scenes()) {
                 if (scene.title() != null && !scene.title().equals(chapter.title()))
                     html.append("<h3>").append(escape(scene.title())).append("</h3>");
-                for (var block : scene.blocks()) {
+                for (var block : NarrativeView.visibleBlocks(scene)) {
                     block.image().ifPresent(image -> {
                         var artifact = store.getArtifact(image.artifactId());
                         if (!artifact.novelId().equals(revision.novel().id())

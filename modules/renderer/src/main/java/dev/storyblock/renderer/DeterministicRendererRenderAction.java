@@ -1,6 +1,7 @@
 package dev.storyblock.renderer;
 
 import dev.storyblock.domain.RevisionManifest;
+import dev.storyblock.domain.NarrativeView;
 import java.util.List;
 import java.util.Objects;
 import static dev.storyblock.renderer.DeterministicRenderer.ResolvedEntry;
@@ -13,6 +14,8 @@ final class DeterministicRendererRenderAction {
       throw new IllegalArgumentException("Revision hash must be lowercase SHA-256");
     }
     Objects.requireNonNull(requestedRange, "requestedRange");
+    NarrativeView.requireRenderable(revision, requestedRange.fromBlockId());
+    NarrativeView.requireRenderable(revision, requestedRange.toBlockId());
 
     Resolution resolution = DeterministicRendererResolveAll.resolveAll(revision);
     List<ResolvedEntry> resolved = resolution.entries();

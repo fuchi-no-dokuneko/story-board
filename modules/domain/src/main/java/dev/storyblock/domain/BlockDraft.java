@@ -8,12 +8,14 @@ public record BlockDraft(
         String text,
         BlockMetadata metadata,
         Map<String, Object> extensions
-) {
+) implements NarrativeText {
     public BlockDraft {
         Objects.requireNonNull(id, "id");
         Objects.requireNonNull(text, "text");
         Objects.requireNonNull(metadata, "metadata");
         extensions = CanonicalValues.freezeMap(extensions, "block_draft.extensions");
+        BlockHidden.validate(extensions, metadata);
+        if (BlockHidden.isHidden(extensions)) text = HiddenText.validate(text);
         BlockImage.fromExtensions(extensions);
     }
 
@@ -35,6 +37,8 @@ public record BlockDraft(
     public java.util.Optional<BlockImage> image() {
         return BlockImage.fromExtensions(extensions);
     }
+
+    public boolean isHidden() { return BlockHidden.isHidden(extensions); }
 
     public NarrativeBlock materialize(OrderKey orderKey) {
         return materialize(orderKey, Ids.BlockVersionId.create());

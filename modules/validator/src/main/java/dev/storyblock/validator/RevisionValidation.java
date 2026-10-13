@@ -1,5 +1,6 @@
 package dev.storyblock.validator;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.RevisionManifest;
@@ -28,7 +29,7 @@ final class RevisionValidation {
 
         List<ValidationIssue> issues = new ArrayList<>();
         List<ValidationIssue> warnings = new ArrayList<>();
-        for (NarrativeBlock block : candidate.liveBlocks()) {
+        for (NarrativeBlock block : NarrativeView.visibleBlocks(candidate)) {
             ResolvedBlockMetadata state = resolved.get(block.id());
             Set<String> presentBefore = DeterministicValidatorStrings.strings(state.before().get("present_character_ids"));
             NarrativeBlock old = baseline.get(block.id());

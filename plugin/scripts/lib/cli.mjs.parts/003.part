@@ -54,6 +54,7 @@ function manuscriptAnalysis(manuscript) {
 function persistedText(revision) {
   return revision.chapters.flatMap((chapter) => chapter.scenes)
     .flatMap((scene) => scene.blocks)
+    .filter((block) => block.extensions?.["storyblock.hidden"] !== true)
     .map((block) => block.text)
     .join("");
 }

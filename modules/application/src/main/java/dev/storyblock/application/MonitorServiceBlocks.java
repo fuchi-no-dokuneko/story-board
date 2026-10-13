@@ -1,5 +1,6 @@
 package dev.storyblock.application;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.NarrativeChapter;
@@ -13,7 +14,7 @@ final class MonitorServiceBlocks {
         Map<Ids.BlockId, NarrativeBlock> result = new LinkedHashMap<>();
         for (NarrativeChapter chapter : revision.novel().chapters()) {
             for (NarrativeScene scene : chapter.scenes()) {
-                for (NarrativeBlock block : scene.blocks()) {
+                for (NarrativeBlock block : NarrativeView.visibleBlocks(scene)) {
                     result.put(block.id(), block);
                 }
             }

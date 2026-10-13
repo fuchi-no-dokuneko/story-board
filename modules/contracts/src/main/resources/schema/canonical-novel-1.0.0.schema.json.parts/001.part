@@ -14,22 +14,41 @@
     "schema_version"
   ],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
-    "novel_id": {"$ref": "#/$defs/novelId"},
-    "revision_id": {"$ref": "#/$defs/revisionId"},
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "novel_id": {
+      "$ref": "#/$defs/novelId"
+    },
+    "revision_id": {
+      "$ref": "#/$defs/revisionId"
+    },
     "parent_revision_id": {
       "oneOf": [
-        {"$ref": "#/$defs/revisionId"},
-        {"type": "null"}
+        {
+          "$ref": "#/$defs/revisionId"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "content_hash": {"$ref": "#/$defs/contentHash"},
-    "created_at": {"type": "string", "format": "date-time"},
+    "content_hash": {
+      "$ref": "#/$defs/contentHash"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "chapters": {
       "type": "array",
-      "items": {"$ref": "#/$defs/chapter"}
+      "items": {
+        "$ref": "#/$defs/chapter"
+      }
     },
-    "extensions": {"$ref": "#/$defs/extensions"}
+    "extensions": {
+      "$ref": "#/$defs/extensions"
+    }
   },
   "$defs": {
     "novelId": {
@@ -66,26 +85,48 @@
     },
     "extensions": {
       "type": "object",
-      "propertyNames": {"pattern": "^[a-z][a-z0-9.-]{1,63}$"}
+      "propertyNames": {
+        "pattern": "^[a-z][a-z0-9.-]{1,63}$"
+      }
     },
     "chapter": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "order_key", "scenes"],
+      "required": [
+        "id",
+        "order_key",
+        "scenes"
+      ],
       "properties": {
-        "id": {"$ref": "#/$defs/chapterId"},
-        "order_key": {"$ref": "#/$defs/orderKey"},
-        "title": {"type": "string"},
+        "id": {
+          "$ref": "#/$defs/chapterId"
+        },
+        "order_key": {
+          "$ref": "#/$defs/orderKey"
+        },
+        "title": {
+          "type": "string"
+        },
         "scenes": {
           "type": "array",
-          "items": {"$ref": "#/$defs/scene"}
+          "items": {
+            "$ref": "#/$defs/scene"
+          }
         },
-        "extensions": {"$ref": "#/$defs/extensions"}
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
       }
     },
     "scene": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["blocks", "chapter_id", "id", "order_key", "transition_mode"],
+      "required": [
+        "blocks",
+        "chapter_id",
+        "id",
+        "order_key",
+        "transition_mode"
+      ],
       "properties": {
-        "id": {"$ref": "#/$defs/sceneId"},
+        "id": {

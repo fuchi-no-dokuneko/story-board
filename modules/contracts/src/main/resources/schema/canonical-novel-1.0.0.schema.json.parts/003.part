@@ -1,0 +1,30 @@
+            "x-storyblock-max-graphemes": 100,
+            "x-storyblock-sentence-count": [
+              1,
+              2
+            ]
+          }
+        }
+      }
+    },
+    "blockMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "time": {},
+        "location": {},
+        "weather": {},
+        "speech": {},
+        "actions": {
+          "type": "array"
+        },
+        "presence_events": {
+          "type": "array"
+        },
+        "pov": {},
+        "narrative_mode": {},
+        "provenance": {}
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@ function windowLocations(report){
   const spans=S.quality?.block_spans||[],positions=new Map();
   S.selected?.revision.chapters.forEach((c,ci)=>{
     let paragraph=0;
-    for(const scene of c.scenes)for(const block of scene.blocks)
+    for(const scene of c.scenes)for(const block of visibleTextBlocks(scene.blocks))
       positions.set(block.id,{chapter:ci+1,paragraph:++paragraph});
   });
   function at(offset){

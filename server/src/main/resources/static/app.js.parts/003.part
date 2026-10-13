@@ -1,3 +1,4 @@
+    if (payload.items.length === 0) {
       show(elements['catalog-empty'], true);
       if (!preserveSelection) clearReader();
       return true;
@@ -72,4 +73,3 @@ function renderChapters(chapters) {
     navButton.type = 'button';
     navButton.className = 'chapter-link';
     navButton.textContent = `${index + 1}. ${title}`;
-    navButton.addEventListener('click', () => document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' }));

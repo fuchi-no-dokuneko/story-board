@@ -1,5 +1,6 @@
 package dev.storyblock.application;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeChapter;
 import dev.storyblock.domain.NarrativeScene;
@@ -15,10 +16,12 @@ final class StyleAnalysisServiceSelectBlocks {
             Ids.BlockId fromBlockId,
             Ids.BlockId toBlockId
     ) {
+        NarrativeView.requireRenderable(stored.manifest(), fromBlockId);
+        NarrativeView.requireRenderable(stored.manifest(), toBlockId);
         List<StyleAnalysisBlock> all = new ArrayList<>();
         for (NarrativeChapter chapter : stored.manifest().novel().chapters()) {
             for (NarrativeScene scene : chapter.scenes()) {
-                scene.blocks().forEach(block -> all.add(
+                NarrativeView.visibleBlocks(scene).forEach(block -> all.add(
                         StyleAnalysisBlock.from(scene, block)
                 ));
             }

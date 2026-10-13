@@ -6,6 +6,7 @@ import dev.storyblock.rewrite.policy.RewriteCandidateReservationSaveResult;
 import dev.storyblock.rewrite.policy.RewriteEligibilityPolicy;
 import dev.storyblock.rewrite.policy.RewriteReservationStore;
 import dev.storyblock.security.AuditContext;
+import dev.storyblock.storage.RevisionStore;
 import dev.storyblock.style.StyleAnalysisStore;
 import dev.storyblock.style.StyleAnalysisWindowFinding;
 import dev.storyblock.style.StyleProfileStore;
@@ -18,24 +19,28 @@ public final class RewriteGateService {
     final StyleProfileStore profiles;
     final RewriteReservationStore reservations;
     final RewriteEligibilityPolicy eligibilityPolicy;
+    final RevisionStore revisions;
 
     public RewriteGateService(
             StyleAnalysisStore analyses,
             StyleProfileStore profiles,
-            RewriteReservationStore reservations
+            RewriteReservationStore reservations,
+            RevisionStore revisions
     ) {
-        this(analyses, profiles, reservations, new RewriteEligibilityPolicy());
+        this(analyses, profiles, reservations, revisions, new RewriteEligibilityPolicy());
     }
 
     RewriteGateService(
             StyleAnalysisStore analyses,
             StyleProfileStore profiles,
             RewriteReservationStore reservations,
+            RevisionStore revisions,
             RewriteEligibilityPolicy eligibilityPolicy
     ) {
         this.analyses = Objects.requireNonNull(analyses, "analyses");
         this.profiles = Objects.requireNonNull(profiles, "profiles");
         this.reservations = Objects.requireNonNull(reservations, "reservations");
+        this.revisions = Objects.requireNonNull(revisions, "revisions");
         this.eligibilityPolicy = Objects.requireNonNull(
                 eligibilityPolicy, "eligibilityPolicy"
         );

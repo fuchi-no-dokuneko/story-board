@@ -1,10 +1,10 @@
 # Authoring / 撰寫 / 编写
 
-EN: For a new complete manuscript, use the seven-field `AgentNovelRegistrationRequest`, a list of distinct main characters (empty is allowed), canonical UTC time, and exact Han code-point count. Generate a fresh typed novel ID once. Validate, register, then verify. A timeout is retried with the same source and idempotency key.
+EN: Register a complete manuscript with the seven-field `AgentNovelRegistrationRequest`, distinct main characters (empty allowed), canonical UTC time, exact Han code-point count and one fresh novel ID. Validate, register and verify; retry timeouts with identical source and idempotency key.
 
-繁體中文：新完整稿件使用七欄的 `AgentNovelRegistrationRequest`、不重複的主角列表（可為空）、標準 UTC 時間及正確漢字碼點數。只產生一次新作品 ID。先驗證、登錄，再驗證保存結果；逾時使用相同來源與冪等鍵重試。
+繁體中文：完整稿件使用七欄登錄請求、主角列表（可空）、標準 UTC 時間、正確漢字碼點數及新作品 ID。驗證、登錄、確認保存；逾時以相同來源及冪等鍵重試。
 
-简体中文：新完整稿件使用七字段的 `AgentNovelRegistrationRequest`、不重复的主角列表（可为空）、标准 UTC 时间及正确汉字码点数。只生成一次新作品 ID。先验证、登记，再验证保存结果；超时使用相同源码与幂等键重试。
+简体中文：完整稿件使用七字段登记请求、主角列表（可空）、标准 UTC 时间、正确汉字码点数及新作品 ID。验证、登记、确认保存；超时以相同来源及幂等键重试。
 
 ```bash
 node scripts/storyblock-author.mjs validate --dto AgentNovelRegistrationRequest --file manuscript.json
@@ -12,11 +12,11 @@ node scripts/storyblock-author.mjs register --source manuscript.json --json
 node scripts/storyblock-author.mjs verify --source manuscript.json --json
 ```
 
-EN: For an existing novel, read the live head and revision. Use one of the ten `OperationEnvelope` variants and live scene/block/version IDs. Preview the request, inspect violations, and commit only the identical operation, candidate ID, and time. If the head changes, read again and prepare a new operation. Export uses the exact revision ETag; package transfer includes history and image artifacts.
+EN: Read an existing novel's live head, target and neighbors. Use a normal `OperationEnvelope` with live IDs; preview, inspect violations and commit identical operation, candidate ID and time. If the head changes, reread and prepare again. Export pins the revision ETag; transfers keep history, images and hidden blocks.
 
-繁體中文：既有作品先讀取即時版本頭與修訂。採用十種 `OperationEnvelope` 之一及真實場景、區塊、版本 ID。預覽並檢查違規，僅提交相同操作、候選 ID 與時間；版本頭變更時重新讀取及建立操作。匯出使用精確修訂 ETag，封裝轉移包含歷史與圖片產物。
+繁體中文：既有作品先讀版本頭、目標及鄰塊。使用正常編輯請求與真實 ID，預覽並檢查違規，提交相同操作、候選 ID 與時間；版本頭變更時重讀及重建。匯出固定版本 ETag，轉移保留歷史、圖片及隱藏區塊。
 
-简体中文：既有作品先读取实时版本头与修订。采用十种 `OperationEnvelope` 之一及真实场景、区块、版本 ID。预览并检查违规，仅提交相同操作、候选 ID 与时间；版本头变更时重新读取及创建操作。导出使用精确修订 ETag，封装转移包含历史与图片产物。
+简体中文：已有作品先读版本头、目标及邻块。使用正常编辑请求与真实 ID，预览并检查违规，提交相同操作、候选 ID 与时间；版本头变更时重读及重建。导出固定版本 ETag，转移保留历史、图片及隐藏区块。
 
 ```bash
 node scripts/storyblock-author.mjs read --novel-id nov_Ab123 --json
@@ -24,6 +24,10 @@ node scripts/storyblock-author.mjs preview-edit --novel-id nov_Ab123 --file edit
 node scripts/storyblock-author.mjs commit --novel-id nov_Ab123 --file edit.json --json
 ```
 
-[DTOs / 綱要 / 纲要](dtos.md) · [Images / 圖片 / 图片](images-pdf.md)
+EN: Insert `hidden: true` after the passage it explains. Record what readers are not told: subtext, foreshadowing and payoff chapter/scene, symbolism, motive and scene purpose. Read these notes before editing/continuing; align new prose and update changed plot design.
 
-[Edit validation / 編輯驗證 / 编辑验证](edit-validation.md)
+繁體中文：在原段後插入 `hidden: true`，記錄讀者未獲告知的潛台詞、伏筆與回收章節／場景、象徵、動機及場景作用。編輯／續寫前閱讀，保持正文一致，劇情變更時同步更新。
+
+简体中文：在原段后插入 `hidden: true`，记录读者未获告知的潜台词、伏笔与回收章节／场景、象征、动机及场景作用。编辑／续写前阅读，保持正文一致，剧情变更时同步更新。
+
+[DTOs / 綱要 / 纲要](dtos.md) · [Validation / 驗證 / 验证](edit-validation.md)

@@ -18,7 +18,7 @@ function dRenderReader() {
   $('#rbar-title').textContent = n.title;
   $('#reader-content').lang = n.language === 'en' ? 'en' : n.language === 'zh-Hans' ? 'zh-Hans' : 'zh-Hant';
   $('#chapter-nav').innerHTML = body.map((c, i) => `<li><button class="chapter-link" type="button" data-jump="chapter-${i + 1}">${H.esc(c.title)}</button>
-      ${c.scenes.map((s) => { const f = FX.sceneFacts(s.meta); return `<div class="scn">${f.length ? `${H.transition(s.transition)} · ${f.slice(0, 2).map(([, v]) => H.esc(v)).join(' · ')} · ` : ''}${FX.count(s.blocks.length, 'block')}</div>`; }).join('')}</li>`).join('');
+      ${c.scenes.map((s) => { const f = FX.sceneFacts(s.meta); return `<div class="scn">${f.length ? `${H.transition(s.transition)} · ${f.slice(0, 2).map(([, v]) => H.esc(v)).join(' · ')} · ` : ''}${FX.count(visibleTextBlocks(s.blocks).length, 'block')}</div>`; }).join('')}</li>`).join('');
   $('#bookinfo').innerHTML = `<dl>
       <dt>${t('han')}</dt><dd>${H.num(n.han)}</dd><dt>${H.lang === 'en' ? 'Chapters' : '章'}</dt><dd>${n.chapters}</dd>
       <dt>${H.lang === 'en' ? 'Scenes' : t('scenes')}</dt><dd>${n.scenes}</dd><dt>${H.lang === 'en' ? 'Blocks' : t('blocks')}</dt><dd>${n.blocks}</dd>
@@ -30,4 +30,4 @@ function dRenderReader() {
       ${c.scenes.map((s) => `
         ${(() => { const f = FX.sceneFacts(s.meta); if (!f.length) return ''; const ic = { time: dIcons.clock, location: dIcons.pin, weather: dIcons.rain, people: dIcons.people };
           return `<p class="scene-meta" aria-label="Scene"><span>${dIcons.scene}${H.transition(s.transition)}</span>${f.map(([k, v]) => `<span>${ic[k]}${H.esc(v)}</span>`).join('')}</p>`; })()}
-        ${s.blocks.map((b) => b.image
+        ${s.blocks.map((b) => b.hidden ? hiddenBlockNote(b) : b.image

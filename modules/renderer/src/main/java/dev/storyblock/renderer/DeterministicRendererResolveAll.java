@@ -1,5 +1,6 @@
 package dev.storyblock.renderer;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.DerivedSceneBoundary;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.NarrativeChapter;
@@ -21,7 +22,7 @@ final class DeterministicRendererResolveAll {
                         scene.initialMeta()
                 );
                 var stateIn = state.snapshot();
-                for (NarrativeBlock block : scene.blocks()) {
+                for (NarrativeBlock block : NarrativeView.visibleBlocks(scene)) {
                     var before = state.snapshot();
                     var events = state.apply(block.metadata());
                     var after = state.snapshot();

@@ -6,7 +6,7 @@ async function exportNovel(format){
   try{
     const r=selected.revision;let blob;
     if(format==='txt'){
-      const text=r.chapters.map(c=>[c.title||'',...c.scenes.map(s=>s.blocks.map(b=>b.text).join('\n'))].join('\n\n')).join('\n\n');
+      const text=r.chapters.map(c=>[c.title||'',...c.scenes.map(s=>visibleTextBlocks(s.blocks).map(b=>b.text).join('\n'))].join('\n\n')).join('\n\n');
       blob=new Blob([text],{type:'text/plain;charset=utf-8'});
     }else{
       const options=revisionPost(r,{});options.headers.Accept='application/pdf';

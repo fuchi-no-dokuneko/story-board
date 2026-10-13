@@ -86,7 +86,7 @@ public class ApiStorageConfiguration {
 
   @Bean
   RewriteGateService rewriteGateService(SqliteRevisionStore store) {
-    return new RewriteGateService(store, store, store);
+    return new RewriteGateService(store, store, store, store);
   }
 
   @Bean

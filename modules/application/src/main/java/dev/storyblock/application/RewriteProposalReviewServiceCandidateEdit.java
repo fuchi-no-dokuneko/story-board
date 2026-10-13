@@ -14,26 +14,12 @@ import static dev.storyblock.application.RewriteProposalReviewService.CandidateE
 final class RewriteProposalReviewServiceCandidateEdit {
   static CandidateEdit candidateEdit(StoredRevision stored, RewriteCandidateReservation reservation, RewriteTextProposal proposal, Instant reviewedAt)  {
     List<Ids.BlockId> affected = reservation.eligibility().affectedBlockIds();
-    NarrativeScene scene = null;
-    for (NarrativeChapter chapter : stored.manifest().novel().chapters()) {
-      for (NarrativeScene candidate : chapter.scenes()) {
-        if (candidate.blocks().stream().anyMatch(block ->
-            block.id().equals(affected.getFirst()))) {
-          scene = candidate;
-        }
-      }
-    }
-    if (scene == null || !scene.blocks().stream().map(NarrativeBlock::id)
-        .toList().containsAll(affected)) {
-      throw new IllegalArgumentException(
-          "Rewrite affected range must remain inside one scene"
-      );
-    }
-    NarrativeScene selectedScene = scene;
+    BlockRangeGuard guard = RewriteVisibleRange.require(stored.manifest(), affected);
+    NarrativeScene selectedScene = stored.manifest().requireScene(guard.sceneId());
     Map<Ids.BlockId, RewriteCandidateBlock> replacements = new HashMap<>();
     proposal.candidates().forEach(value -> replacements.put(value.blockId(), value));
     List<BlockDraft> drafts = affected.stream().map(blockId -> {
-      NarrativeBlock source = selectedScene.blocks().stream()
+      NarrativeBlock source = NarrativeView.visibleBlocks(selectedScene).stream()
           .filter(block -> block.id().equals(blockId)).findFirst().orElseThrow();
       RewriteCandidateBlock replacement = replacements.get(blockId);
       return new BlockDraft(
@@ -54,9 +40,7 @@ final class RewriteProposalReviewServiceCandidateEdit {
     return new CandidateEdit(
         new EditOperation.ReplaceBlockRange(
             context,
-            BlockRangeGuard.capture(
-                selectedScene, affected.getFirst(), affected.getLast()
-            ),
+            guard,
             drafts
         ),
         candidateRevisionId

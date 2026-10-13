@@ -1,5 +1,6 @@
 package dev.storyblock.application;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.NarrativeNovel;
 import dev.storyblock.domain.RevisionManifest;
 import dev.storyblock.storage.RevisionRef;
@@ -14,9 +15,7 @@ final class NovelCatalogServiceDescribe {
         int sceneCount = novel.chapters().stream()
                 .mapToInt(chapter -> chapter.scenes().size())
                 .sum();
-        String text = novel.chapters().stream()
-                .flatMap(chapter -> chapter.scenes().stream())
-                .flatMap(scene -> scene.blocks().stream())
+        String text = NarrativeView.visibleBlocks(manifest).stream()
                 .map(block -> block.text())
                 .collect(java.util.stream.Collectors.joining());
         Map<String, Object> extensions = novel.extensions();
@@ -30,7 +29,7 @@ final class NovelCatalogServiceDescribe {
                 manifest.createdAt(),
                 novel.chapters().size(),
                 sceneCount,
-                manifest.liveBlocks().size(),
+                NarrativeView.visibleBlocks(manifest).size(),
                 HanText.count(text),
                 HanText.sha256(text),
                 NovelCatalogServiceStringListExtension.stringListExtension(extensions, "main-characters"),

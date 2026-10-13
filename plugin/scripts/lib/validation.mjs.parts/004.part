@@ -1,3 +1,15 @@
+      issue(`must contain at most ${schema["x-storyblock-max-graphemes"]} grapheme clusters`);
+    }
+    if (schema["x-storyblock-sentence-count"] !== undefined) {
+      const shape = sentenceShape(value);
+      const configured = schema["x-storyblock-sentence-count"];
+      const allowed = Array.isArray(configured) ? configured : [configured];
+      if (!allowed.includes(shape.count)) issue(`must contain ${allowed.join(" or ")} complete sentences (found ${shape.count})`);
+      if (!shape.complete) issue("must end at a recognized complete sentence boundary");
+    }
+  }
+
+  if (typeof value === "number" && Number.isFinite(value)) {
     if (schema.minimum !== undefined && value < schema.minimum) issue(`must be at least ${schema.minimum}`);
     if (schema.maximum !== undefined && value > schema.maximum) issue(`must be at most ${schema.maximum}`);
     if (schema.exclusiveMinimum !== undefined && value <= schema.exclusiveMinimum) issue(`must be greater than ${schema.exclusiveMinimum}`);
@@ -32,14 +44,3 @@
     const properties = schema.properties ?? {};
     for (const [name, member] of Object.entries(properties)) {
       if (Object.hasOwn(value, name)) {
-        issues.push(...validateNode(value[name], member, { ...context, path: `${context.path}/${name}` }));
-      }
-    }
-    if (schema.propertyNames) {
-      for (const name of Object.keys(value)) {
-        issues.push(...validateNode(name, schema.propertyNames, { ...context, path: `${context.path}/${name}` }));
-      }
-    }
-    const known = knownProperties(schema, context.root, context.schemas);
-    const additional = Object.keys(value).filter((name) => !known.has(name));
-    if (schema.additionalProperties === false || schema.unevaluatedProperties === false) {

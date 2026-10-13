@@ -1,3 +1,12 @@
+            issues.push({ path: `#/chapters/${index}/text`, message: "contains a sentence longer than 100 grapheme clusters" });
+            break;
+          }
+        }
+      }
+    });
+    const complete = value.chapters.map((chapter) => typeof chapter?.text === "string" ? chapter.text : "").join("");
+    const actual = countHanCodePoints(complete);
+    if (Number.isSafeInteger(value.expected_han_characters) && actual !== value.expected_han_characters) {
       issues.push({ path: "#/expected_han_characters", message: `declares ${value.expected_han_characters}, but chapter text contains ${actual} Han code points` });
     }
   }

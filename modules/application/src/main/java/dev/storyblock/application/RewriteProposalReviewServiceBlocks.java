@@ -1,5 +1,6 @@
 package dev.storyblock.application;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.storage.StoredRevision;
@@ -11,7 +12,7 @@ final class RewriteProposalReviewServiceBlocks {
         Map<Ids.BlockId, NarrativeBlock> result = new HashMap<>();
         revision.manifest().novel().chapters().forEach(chapter ->
                 chapter.scenes().forEach(scene ->
-                        scene.blocks().forEach(block -> result.put(block.id(), block))
+                        NarrativeView.visibleBlocks(scene).forEach(block -> result.put(block.id(), block))
                 )
         );
         return result;

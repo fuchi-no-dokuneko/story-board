@@ -1,10 +1,10 @@
 # Context reads / 上下文閱讀 / 上下文阅读
 
-EN: IDs identify entities; indexes locate positions. `nov_`, `ch_`, `scn_`, `blk_`, `blv_`, `rev_` use five case-sensitive alphanumeric characters. Every scene numbers live blocks from zero. Pin `revision-id` while using slices; indices change after edits. Chapter and scene lists contain metadata only. Scenes report `block_count`, `[0,N)` and `total_text_graphemes` including punctuation, not LLM tokens.
+EN: IDs identify entities; indexes locate positions. `nov_`, `ch_`, `scn_`, `blk_`, `blv_`, `rev_` use five case-sensitive alphanumeric characters. Pin `revision-id`: edits change indices. Scenes number all blocks from zero; `block_count` and [0,N) include hidden blocks. `total_text_graphemes` counts visible prose including punctuation, not tokens.
 
-繁體中文：ID 識別實體，index 表示位置。上述六類 ID 後接五個區分大小寫的英數字元。每個場景的區塊從零編號；切片須固定版本，編輯後位置可改變。章節與場景列表只有資料，包含區塊數、[0,N) 及含標點的字素總數，不是 LLM token 數。
+繁體中文：六類 ID 使用五位區分大小寫英數後綴。切片固定版本，編輯會改變 index。場景從零編號，`block_count` 與 [0,N) 包含隱藏區塊；`total_text_graphemes` 只計可見正文及標點，不是 token。
 
-简体中文：ID 标识实体，index 表示位置。上述六类 ID 后接五个区分大小写的英数字符。每个场景的区块从零编号；切片须固定版本，编辑后位置可改变。章节与场景列表只有资料，包含区块数、[0,N) 及含标点的字素总数，不是 LLM token 数。
+简体中文：六类 ID 使用五位区分大小写英数后缀。切片固定版本，编辑会改变 index。场景从零编号，`block_count` 与 [0,N) 包含隐藏区块；`total_text_graphemes` 只计可见正文及标点，不是 token。
 
 ```bash
 node scripts/storyblock-author.mjs chapters --novel-id nov_Ab123 --revision-id rev_Cd456 --json
@@ -12,8 +12,14 @@ node scripts/storyblock-author.mjs scenes --novel-id nov_Ab123 --revision-id rev
 node scripts/storyblock-author.mjs blocks --novel-id nov_Ab123 --revision-id rev_Cd456 --scene-id scn_Ef789 --start 0 --end 3 --json
 ```
 
-EN: `scenes` slices chapters; `blocks` slices one scene. Both use [start,end). Reading records are shared without user/IP tracking. Read the body of the edit target and immediate neighbors within 300 seconds at the edit revision. Insertions read adjacent existing blocks; empty scenes require [0,0). Metadata lists never grant reading. On HTTP 409 `RECENT_READ_REQUIRED`, read the returned `read_requests` and inspect the text before retrying. Do not silently auto-read only to bypass the rule.
+EN: `scenes` slices chapters; `blocks` slices one scene, both [start,end). Records are shared without user/IP tracking. Within 300 seconds, read the edit target and immediate neighbors at its revision, including hidden neighbors. Empty scenes require [0,0). Lists never grant reading. On 409 `RECENT_READ_REQUIRED`, inspect returned `read_requests` and text before retrying; do not auto-read merely to bypass the guard.
 
-繁體中文：`scenes` 切章節，`blocks` 切單一場景，均採 [start,end)。閱讀紀錄共用，不追蹤身份。編輯前 300 秒內讀取同版本目標與鄰塊正文，插入讀兩側既有塊，空場景讀 [0,0)。只有資料的列表不計。409 錯誤時依 `read_requests` 重讀並理解正文，再重試；勿自動空讀繞過規則。
+繁體中文：`scenes` 切章節，`blocks` 切場景，均採 [start,end)。紀錄共用且不追蹤身份。編輯前 300 秒內讀取同版本目標及鄰塊（含隱藏區塊）；空場景讀 [0,0)，資料列表不算。409 時依 `read_requests` 重讀並理解正文，再重試，勿空讀繞過守衛。
 
-简体中文：`scenes` 切章节，`blocks` 切单一场景，均采用 [start,end)。阅读记录共用，不追踪身份。编辑前 300 秒内读取同版本目标与邻块正文，插入读两侧已有块，空场景读 [0,0)。只有资料的列表不计。409 错误时依 `read_requests` 重读并理解正文，再重试；勿自动空读绕过规则。
+简体中文：`scenes` 切章节，`blocks` 切场景，均采用 [start,end)。记录共用且不追踪身份。编辑前 300 秒内读取同版本目标及邻块（含隐藏区块）；空场景读 [0,0)，资料列表不算。409 时依 `read_requests` 重读并理解正文，再重试，勿空读绕过守卫。
+
+EN: Slices return `extensions["storyblock.hidden"]: true`. Read a scene's hidden meaning before edits; keep new prose consistent and update notes when plot design changes. Position ties each note to its preceding passage.
+
+繁體中文：切片會回傳隱藏旗標。編輯前閱讀場景隱藏含義，保持新正文一致，劇情變更時更新記錄；位置對應前一段。
+
+简体中文：切片会返回隐藏旗标。编辑前阅读场景隐藏含义，保持新正文一致，剧情变更时更新记录；位置对应前一段。

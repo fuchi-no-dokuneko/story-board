@@ -1,0 +1,38 @@
+package dev.storyblock.validator;
+
+import dev.storyblock.contracts.NarrativeCanonicalMapper;
+import dev.storyblock.domain.*;
+import java.time.Instant;
+import java.util.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+final class HiddenValidationGoldenCases {
+    static Map<ValidationCode,Set<Boolean>> exercise() {
+        var outcomes = new EnumMap<ValidationCode,Set<Boolean>>(ValidationCode.class);
+        var meta = BlockMetadata.empty(); var flags = Map.<String,Object>of(BlockHidden.EXTENSION_KEY,true);
+        assertDoesNotThrow(() -> new BlockDraft(Ids.BlockId.create(),"Motive",meta,flags));
+        var failure = assertThrows(HiddenBlockException.class,
+                () -> new BlockDraft(Ids.BlockId.create()," \n ",meta,flags));
+        outcomes.put(ValidationCode.valueOf(failure.code().name()),Set.of(false,true));
+        var note = NarrativeBlock.create(Ids.BlockId.create(),OrderKey.initial(),"Motive",meta,flags);
+        var chapterId = Ids.ChapterId.create();
+        var scene = new NarrativeScene(Ids.SceneId.create(),chapterId,OrderKey.initial(),"Scene",
+                TransitionMode.OPENING,SceneSeed.empty(),List.of(note),Map.of());
+        var revision = new RevisionManifest(Ids.RevisionId.create(),null,Instant.now(),new NarrativeNovel(
+                Ids.NovelId.create(),List.of(new NarrativeChapter(chapterId,OrderKey.initial(),"Chapter",List.of(scene),Map.of())),Map.of()));
+        String hash = NarrativeCanonicalMapper.toCanonical(revision).contentHash();
+        var context = new EditContext(Ids.OperationId.create(),"hidden-golden",revision.novel().id(),revision.id(),hash);
+        var validator = new DeterministicValidator();
+        var allowed = new EditOperation.CorrectBlockMeta(context,scene.id(),BlockVersionRef.from(note),
+                new BlockMetadata(Map.of("provenance",Map.of("author","Lin"))));
+        var denied = new EditOperation.CorrectBlockMeta(context,scene.id(),BlockVersionRef.from(note),
+                new BlockMetadata(Map.of("weather","rain")));
+        assertTrue(validator.validateOperation(revision,hash,allowed).committable());
+        assertEquals(ValidationCode.HIDDEN_BLOCK_META_NOT_ALLOWED,
+                validator.validateOperation(revision,hash,denied).violations().getFirst().code());
+        outcomes.put(ValidationCode.HIDDEN_BLOCK_META_NOT_ALLOWED,Set.of(false,true));
+        var guard = BlockRangeGuard.capture(scene,note.id(),note.id());
+        var draft = new BlockDraft(note.id(),"Updated motive",meta,flags);
+        assertTrue(validator.validateOperation(revision,hash,
+                new EditOperation.ReplaceBlockRange(context,guard,List.of(draft))).committable());
+        var extend = new EditOperation.ExtendBlock(context,guard,EditOperation.ExtensionPosition.AFTER,draft);

@@ -1,0 +1,38 @@
+package dev.storyblock.api.http;
+import dev.storyblock.application.*;
+import dev.storyblock.contracts.CanonicalJson;
+import dev.storyblock.domain.*;
+import dev.storyblock.security.AuditContext;
+import dev.storyblock.storage.sqlite.SqliteRevisionStore;
+import dev.storyblock.style.*;
+import java.nio.file.*;
+import java.time.*;
+import java.util.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import static org.junit.jupiter.api.Assertions.*;
+class HiddenRewritePipelineTest {
+    @TempDir Path root;
+    @Test void rewriteExcludesNotes() throws Exception {
+      try (var store = SqliteRevisionStore.open(root.resolve("rewrite.db"))) {
+            var revision = HiddenRewriteFixture.revision();
+        String hash = CacheRevisionFixture.hash(revision); store.createNovel(revision,hash);
+            var profile = HiddenStyleFixture.ready(store,revision).profileVersion();
+            var service = new StyleAnalysisService(store,store,store); var now = revision.createdAt();
+            var queued = service.request(revision.novel().id(),revision.id(),hash,profile.profileId(),profile.versionId(),
+                    null,null,StyleMaskingLexicon.empty(),3,Duration.ofDays(30),"analysis",AuditContext.system("request",now)).job();
+            var lease = service.claim(revision.novel().id(),"worker",Duration.ofMinutes(5),"claim",now.plusSeconds(1)).orElseThrow();
+            service.execute(lease,"complete",now.plusSeconds(2));
+            var job = store.getStyleAnalysis(queued.analysisId());
+            var findings = service.windows(job.analysisId(),null,200).items().stream().filter(StyleAnalysisWindowFinding::canTriggerRewrite).toList();
+            assertFalse(findings.isEmpty());
+            var gate = new RewriteGateService(store,store,store,store);
+            var reservation = gate.reserve(job.analysisId(),job.statusHash(),List.of(findings.getFirst().windowId()),
+                    Duration.ofMinutes(5),"reserve",AuditContext.system("reserve",now.plusSeconds(3))).reservation();
+            assertFalse(CanonicalJson.string(reservation.workerInput().modelValue()).contains(HiddenHttpFixture.SENTINEL));
+            assertTrue(reservation.workerInput().blocks().stream().allMatch(b -> !revision.requireBlock(b.blockId()).isHidden()));
+            var scene = revision.novel().chapters().getFirst().scenes().getFirst();
+            var afterNote = scene.blocks().get(71).id(); var beforeNote = scene.blocks().get(69).id();
+            var crossing = findings.stream().filter(f -> f.blockIds().contains(beforeNote)&&f.blockIds().contains(afterNote))
+                    .findFirst().orElseThrow();
+            assertEquals(HiddenBlockException.Code.HIDDEN_BLOCK_UNSUPPORTED,

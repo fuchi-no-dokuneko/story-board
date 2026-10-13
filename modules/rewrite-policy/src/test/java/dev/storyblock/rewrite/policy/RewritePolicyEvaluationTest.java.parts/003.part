@@ -22,7 +22,7 @@
         return result;
     }
 
-    private static RewriteTextProposal proposal(
+    static RewriteTextProposal proposal(
             NarrativeBlock source,
             String proposedText,
             StyleProfileVersionView profile
@@ -53,7 +53,7 @@
         );
     }
 
-    private static ReadyProfile readyProfile(NarrativeBlock reference) {
+    static ReadyProfile readyProfile(NarrativeBlock reference) {
         StyleMaskingLexicon lexicon = StyleMaskingLexicon.empty();
         var features = new StyleFeatureAnalyzer().extract(
                 List.of(reference),

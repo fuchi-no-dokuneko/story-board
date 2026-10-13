@@ -1,3 +1,4 @@
+    navButton.addEventListener('click', () => document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' }));
     elements['chapter-nav'].append(navButton);
 
     const section = document.createElement('section');
@@ -7,6 +8,15 @@
     heading.textContent = title;
     section.append(heading);
     chapterBlocks(chapter).forEach((block) => {
+      if (block.extensions?.['storyblock.hidden'] === true) {
+        const note = document.createElement('aside');
+        note.className = 'story-hidden'; note.setAttribute('role', 'note');
+        note.dataset.hiddenBlockId = block.id;
+        const header = document.createElement('header');
+        header.textContent = 'Hidden meaning / 隱藏含義 / 隐藏含义';
+        const body = document.createElement('div'); body.textContent = block.text;
+        note.append(header, body); section.append(note); return;
+      }
       const illustration = window.StoryBlockImages?.render(block, state.operatorToken);
       if (illustration) {
         section.append(illustration);
@@ -46,17 +56,3 @@ async function selectNovel(novelId) {
   window.StoryBlockImages?.clear();
   const authRevision = state.authRevision;
   state.selectedNovelId = novelId;
-  document.querySelectorAll('.novel-item').forEach((button) => {
-    const selected = button.dataset.novelId === novelId;
-    button.classList.toggle('selected', selected);
-    button.setAttribute('aria-pressed', String(selected));
-  });
-  show(elements['reader-empty'], false);
-  show(elements['reader-loading'], true);
-  show(elements['reader-content'], false);
-  try {
-    const payload = await fetchJson(`/v1/admin/novels/${encodeURIComponent(novelId)}`);
-    if (state.selectedNovelId !== novelId || authRevision !== state.authRevision) return;
-    renderNovel(payload);
-    show(elements['reader-loading'], false);
-    show(elements['reader-content'], true);

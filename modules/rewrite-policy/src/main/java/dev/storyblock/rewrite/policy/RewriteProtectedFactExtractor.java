@@ -1,6 +1,7 @@
 package dev.storyblock.rewrite.policy;
 
 import dev.storyblock.domain.NarrativeBlock;
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.style.StyleMaskingLexicon;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +32,9 @@ public final class RewriteProtectedFactExtractor {
             String text,
             StyleMaskingLexicon lexicon
     ) {
+        if (NarrativeView.visibleBlocks(List.of(block)).isEmpty()) {
+            return new RewriteProtectedFactSnapshot(block.id(), List.of(), List.of());
+        }
         return RewriteProtectedFactExtractorSnapshotAction.snapshot(this, block, text, lexicon);
     }
 

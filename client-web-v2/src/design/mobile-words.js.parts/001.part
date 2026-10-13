@@ -1,4 +1,5 @@
 {
+  hiddenMeaning:{en:'Hidden meaning',zh:'隱藏含義',zhs:'隐藏含义'},
   acrossBook:{en:'Across the book',zh:'全書分布',zhs:'全书分布'}, windowN:{en:'Window',zh:'視窗',zhs:'窗口'}, of:{en:'of',zh:'／',zhs:'／'},
   highest:{en:'Highest',zh:'最高',zhs:'最高'}, lowest:{en:'Lowest',zh:'最低',zhs:'最低'}, wholeText:{en:'Whole text',zh:'全文',zhs:'全文'},
   tapChart:{en:'Tap or drag the chart to inspect a window.',zh:'點按或拖動圖表檢視個別視窗。',zhs:'点按或拖动图表查看单个窗口。'},

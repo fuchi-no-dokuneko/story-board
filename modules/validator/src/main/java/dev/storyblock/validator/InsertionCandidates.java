@@ -1,5 +1,6 @@
 package dev.storyblock.validator;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.BlockDraft;
 import dev.storyblock.domain.Ids;
 import dev.storyblock.domain.NarrativeBlock;
@@ -21,7 +22,7 @@ final class InsertionCandidates {
             current.put(block.id(), block);
         }
         List<Candidate> result = new ArrayList<>();
-        for (BlockDraft draft : drafts) {
+        for (BlockDraft draft : NarrativeView.visibleBlocks(drafts)) {
             NarrativeBlock old = current.get(draft.id());
             result.add(new Candidate(
                     draft.id(),

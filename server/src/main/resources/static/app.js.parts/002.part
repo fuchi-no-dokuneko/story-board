@@ -58,4 +58,3 @@ async function loadCatalog({ preserveSelection = true, openSelection = true } = 
       state.operatorToken ? 'Owner token active' : 'Trusted-LAN access active',
     );
     elements['operator-clear'].disabled = !state.operatorToken;
-    if (payload.items.length === 0) {

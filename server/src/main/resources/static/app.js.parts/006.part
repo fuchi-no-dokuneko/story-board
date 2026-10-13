@@ -1,3 +1,22 @@
+    const responseText = await result.text();
+    elements['response-status'].textContent = `${result.status} ${result.statusText}`;
+    try {
+      elements.response.textContent = JSON.stringify(JSON.parse(responseText), null, 2);
+    } catch {
+      elements.response.textContent = responseText || '(empty response)';
+    }
+  } catch (error) {
+    elements['response-status'].textContent = error.code
+      ? 'Request blocked'
+      : 'Network error';
+    elements.response.textContent = error.message;
+  }
+}
+
+let searchTimer;
+elements['catalog-search'].addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
     state.query = elements['catalog-search'].value.trim();
     state.page = 0;
     loadCatalog({ preserveSelection: false });

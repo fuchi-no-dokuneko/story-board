@@ -1,5 +1,5 @@
-Maintenance and quality coverage / 維護與品質驗證覆蓋
-Java: 231 tests across 21 projects. Java：21個建置項目，共231項通過。
+Coverage / 驗證覆蓋
+Java: 256 passing tests across the Maven reactor. Java：Maven 全套256項通過。
 Domain/contracts: real objects, codecs and property tests; no mocks. 領域／契約：真實物件、編碼及性質測試，無替身。
 Rendering: real PDF/image rendering and page-break pixel fixtures. 渲染：真實PDF／圖片及換頁像素範例。
 Application: real edits, previews, packages and retry receipts; selected clocks fixed. 應用：真實編輯、預覽、套件及重試，部分固定時鐘。
@@ -8,13 +8,14 @@ HTTP: real Spring routes and SQLite; MockMvc simulates servlet transport. HTTP�
 Workers: real HTTPS clients; local self-signed servers simulate model responses. 工作器：真實HTTPS客戶端，自簽伺服器模擬模型回應。
 Style/rewrite: real calculations, planners and reference files; proposal lookup mocked in boundary tests. 風格／改寫：真實計算、規劃及檔案；提案界線測試使用查詢替身。
 Architecture: module direction, TLS and repository-local installation assertions. 架構：模組方向、TLS及儲存庫內安裝檢查。
-Plugin: 196 tests; real assembly/validation, injected unit HTTP transport. 技能：196項通過，真實組合／驗證，單元HTTP替身。
-Browser assets: 22 tests; transport/DOM/storage fixtures. 介面資源：22項，傳輸／DOM／儲存範例。
+Plugin: 199 tests; real assembly/validation, injected unit HTTP transport. 技能：199項通過，真實組合／驗證，單元HTTP替身。
+Browser assets: 8 tests; transport/DOM/storage fixtures. 介面資源：8項，傳輸／DOM／儲存範例。
 Legacy GUI: real Chromium/HTTPS/SQLite, 9 scenarios and 81 steps. 原有GUI：真實瀏覽器、HTTPS、SQLite；9情境81步驟。
 GUI faults: health degradation and offline network simulated. GUI故障：模擬健康降級及斷線。
 V2 GUI: real Firefox/API/SQLite, 12 groups, 27 ZIP checks, 714 windows, 6000 blocks; HTTP faults/delays simulated. 新版GUI：12組、27項原稿檢查、714視窗及6000段；HTTP故障／延遲使用替身。
 NLP: bundled dictionary/HMM, Unicode offsets and concurrent names; no mocks. 分詞：內附詞典／HMM、碼點位置及並行專名，無替身。
 Quality: pure formulas, weighted calibration fixtures, JSD/MATTR; fixtures are not real reference evidence. 品質：純公式、等來源校準範例及JSD/MATTR；範例不代表實際語料。
 Maintenance: real SQLite/Python deletion, HTML/PDF and inline images. 維護：真實SQLite／Python刪除、HTML／PDF及內嵌圖片。
-Bug regressions: collision replay, edited snapshots, decoded pixels, upload retries and >2MiB HTTP imports. 回歸：碰撞重播、編輯快照、像素解碼、上傳重試及大型HTTP匯入。
 Cache: real SQLite/services; gated loaders simulate overlap in concurrency tests. 快取：真實SQLite／服務，載入閘模擬請求重疊。
+
+Hidden: real codecs, edits/restores, SQLite transfer history, renderer/PDF, analysis and Firefox; calibrated corpora are fixtures. 隱藏：真實編碼、編輯／還原、轉移歷史、渲染與介面；校準使用範例。

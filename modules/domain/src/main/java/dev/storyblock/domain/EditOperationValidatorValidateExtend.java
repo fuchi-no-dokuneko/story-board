@@ -8,6 +8,9 @@ final class EditOperationValidatorValidateExtend {
         RangeLocation range = EditOperationValidator.validateRange(base, extend.block());
         NarrativeBlock original = range.blocks().getFirst();
         BlockDraft replacement = extend.replacement();
+        if (original.isHidden() || replacement.isHidden()) {
+            throw BlockHidden.unsupported("extend_block does not support hidden blocks");
+        }
         if (original.image().isPresent() || replacement.image().isPresent()) {
             throw EditOperationValidatorInvalid.invalid("extend_block does not support image blocks");
         }

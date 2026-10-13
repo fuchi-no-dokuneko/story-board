@@ -1,15 +1,36 @@
-        "chapter_id": {"$ref": "#/$defs/chapterId"},
-        "order_key": {"$ref": "#/$defs/orderKey"},
-        "title": {"type": "string"},
-        "transition_mode": {
-          "enum": ["opening", "continuous", "cut", "time_skip", "flashback", "parallel"]
+          "$ref": "#/$defs/sceneId"
         },
-        "initial_meta": {"$ref": "#/$defs/initialMeta"},
+        "chapter_id": {
+          "$ref": "#/$defs/chapterId"
+        },
+        "order_key": {
+          "$ref": "#/$defs/orderKey"
+        },
+        "title": {
+          "type": "string"
+        },
+        "transition_mode": {
+          "enum": [
+            "opening",
+            "continuous",
+            "cut",
+            "time_skip",
+            "flashback",
+            "parallel"
+          ]
+        },
+        "initial_meta": {
+          "$ref": "#/$defs/initialMeta"
+        },
         "blocks": {
           "type": "array",
-          "items": {"$ref": "#/$defs/block"}
+          "items": {
+            "$ref": "#/$defs/block"
+          }
         },
-        "extensions": {"$ref": "#/$defs/extensions"}
+        "extensions": {
+          "$ref": "#/$defs/extensions"
+        }
       }
     },
     "initialMeta": {
@@ -21,7 +42,9 @@
         "weather": {},
         "present_character_ids": {
           "type": "array",
-          "items": {"type": "string"},
+          "items": {
+            "type": "string"
+          },
           "uniqueItems": true
         }
       }
@@ -29,35 +52,77 @@
     "block": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["block_version_id", "id", "meta", "order_key", "text"],
+      "required": [
+        "block_version_id",
+        "id",
+        "meta",
+        "order_key",
+        "text"
+      ],
       "properties": {
-        "id": {"$ref": "#/$defs/blockId"},
-        "block_version_id": {"$ref": "#/$defs/blockVersionId"},
-        "order_key": {"$ref": "#/$defs/orderKey"},
+        "id": {
+          "$ref": "#/$defs/blockId"
+        },
+        "block_version_id": {
+          "$ref": "#/$defs/blockVersionId"
+        },
+        "order_key": {
+          "$ref": "#/$defs/orderKey"
+        },
         "text": {
           "type": "string",
-          "minLength": 1,
-          "x-storyblock-max-graphemes": 100,
-          "x-storyblock-sentence-count": [1, 2]
+          "minLength": 1
         },
-        "meta": {"$ref": "#/$defs/blockMeta"},
-        "extensions": {"$ref": "#/$defs/extensions"}
-      }
-    },
-    "blockMeta": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "time": {},
-        "location": {},
-        "weather": {},
-        "speech": {},
-        "actions": {"type": "array"},
-        "presence_events": {"type": "array"},
-        "pov": {},
-        "narrative_mode": {},
-        "provenance": {}
-      }
-    }
-  }
-}
+        "meta": {
+          "$ref": "#/$defs/blockMeta"
+        },
+        "extensions": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/extensions"
+            },
+            {
+              "properties": {
+                "storyblock.hidden": {
+                  "const": true
+                }
+              }
+            }
+          ]
+        }
+      },
+      "if": {
+        "required": [
+          "extensions"
+        ],
+        "properties": {
+          "extensions": {
+            "required": [
+              "storyblock.hidden"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "text": {
+            "x-storyblock-hidden-text": true,
+            "x-storyblock-normalized-stripped": true
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "provenance": {}
+            },
+            "additionalProperties": false
+          },
+          "extensions": {
+            "properties": {
+              "storyblock.image": false
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "text": {

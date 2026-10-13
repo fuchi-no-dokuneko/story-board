@@ -1,5 +1,6 @@
 package dev.storyblock.monitor;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.NarrativeBlock;
 import dev.storyblock.domain.NarrativeChapter;
 import dev.storyblock.domain.NarrativeScene;
@@ -13,7 +14,7 @@ final class MonitorPacketFactoryFlatten {
         List<BlockLocation> result = new ArrayList<>();
         for (NarrativeChapter chapter : revision.novel().chapters()) {
             for (NarrativeScene scene : chapter.scenes()) {
-                for (NarrativeBlock block : scene.blocks()) {
+                for (NarrativeBlock block : NarrativeView.visibleBlocks(scene)) {
                     result.add(new BlockLocation(scene.id(), block));
                 }
             }

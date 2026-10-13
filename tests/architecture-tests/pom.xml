@@ -11,6 +11,12 @@
   <name>StoryBlock Architecture Tests</name>
   <dependencies>
     <dependency>
+      <groupId>dev.storyblock</groupId><artifactId>storyblock-api</artifactId><version>${project.version}</version><scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>dev.storyblock</groupId><artifactId>storyblock-cli</artifactId><version>${project.version}</version><scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>dev.storyblock</groupId>
       <artifactId>storyblock-domain</artifactId>
     </dependency>

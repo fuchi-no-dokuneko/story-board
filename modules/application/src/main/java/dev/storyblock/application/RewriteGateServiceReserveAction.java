@@ -35,6 +35,8 @@ final class RewriteGateServiceReserveAction {
                 self.selectFindings(analysisId, findingIds),
                 auditContext.occurredAt()
         );
+        RewriteVisibleRange.require(self.revisions.getRevision(
+                eligibility.novelId(), eligibility.revisionId()).manifest(), eligibility.affectedBlockIds());
         RewriteWorkerInput input = RewriteGateServiceWorkerInput.workerInput(analysis, eligibility);
         RewriteCandidateReservation reservation = new RewriteCandidateReservation(
                 eligibility,

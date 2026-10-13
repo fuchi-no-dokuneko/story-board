@@ -6,6 +6,9 @@ final class EditOperationValidatorValidateSplit {
     static void validateSplit(RevisionManifest base, EditOperation.SplitBlock split) {
         RangeLocation range = EditOperationValidator.validateRange(base, split.block());
         NarrativeBlock original = range.blocks().getFirst();
+        if (original.isHidden() || split.newBlocks().stream().anyMatch(BlockDraft::isHidden)) {
+            throw BlockHidden.unsupported("split_block does not support hidden blocks");
+        }
         if (original.image().isPresent()
                 || split.newBlocks().stream().anyMatch(draft -> draft.image().isPresent())) {
             throw EditOperationValidatorInvalid.invalid("split_block does not support image blocks");

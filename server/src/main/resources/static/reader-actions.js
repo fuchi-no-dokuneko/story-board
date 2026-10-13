@@ -25,7 +25,7 @@
       let blob;
       if (format === 'txt') {
         const text = revision.chapters.map(chapter => [chapter.title || '',
-          ...chapter.scenes.map(scene => scene.blocks.map(block => block.text).join('\n')),
+          ...chapter.scenes.map(scene => scene.blocks.filter(block => block.extensions?.['storyblock.hidden'] !== true).map(block => block.text).join('\n')),
         ].join('\n\n')).join('\n\n');
         blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
       } else {

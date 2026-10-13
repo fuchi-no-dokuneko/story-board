@@ -1,6 +1,7 @@
 StoryBlock maintenance and quality / 維護與品質分析
 
 Completed / 已完成:
+- Hidden meaning blocks: canonical history, guarded edits, prose exclusion and both readers. 隱藏含義區塊：正式歷史、編輯守衛、正文排除及雙版閱讀器。
 - ZIP F1–F6 UI fixes and bounded, input-aware server caches. 原稿 F1–F6 介面修正及依輸入更新的有上限伺服器快取。
 - V2 bookshelf, reader and analysis coexist with the original UI; packaged Firefox UAT passed. 新版書架、閱讀與分析和原版共存，封裝後Firefox驗收通過。
 - Five replay, transfer and image fixes. 五項重播、傳輸及圖片修正。

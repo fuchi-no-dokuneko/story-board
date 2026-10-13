@@ -1,5 +1,6 @@
 package dev.storyblock.style;
 
+import dev.storyblock.domain.NarrativeView;
 import dev.storyblock.domain.NarrativeChapter;
 import dev.storyblock.domain.NarrativeScene;
 import dev.storyblock.domain.RevisionManifest;
@@ -14,7 +15,7 @@ final class StyleWindowPlannerPlanAction {
         List<StyleAnalysisBlock> blocks = new ArrayList<>();
         for (NarrativeChapter chapter : revision.novel().chapters()) {
             for (NarrativeScene scene : chapter.scenes()) {
-                scene.blocks().forEach(block ->
+                NarrativeView.visibleBlocks(scene).forEach(block ->
                         blocks.add(StyleAnalysisBlock.from(scene, block))
                 );
             }

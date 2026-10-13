@@ -26,7 +26,7 @@
         );
     }
 
-    private record ReadyProfile(
+    record ReadyProfile(
             StyleProfileVersionView view,
             StyleCorpusSource source
     ) {

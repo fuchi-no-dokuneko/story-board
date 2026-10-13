@@ -29,6 +29,8 @@ public record StyleAnalysisBlock(
     public StyleAnalysisBlock {
         Objects.requireNonNull(sceneId, "sceneId");
         Objects.requireNonNull(block, "block");
+        if (block.isHidden()) throw dev.storyblock.domain.BlockHidden.unsupported(
+                "Hidden blocks cannot enter a style snapshot");
         Objects.requireNonNull(stratumKind, "stratumKind");
         if (speakerId != null && !SUBJECT.matcher(speakerId).matches()) {
             throw new IllegalArgumentException("Style analysis speaker ID is invalid");

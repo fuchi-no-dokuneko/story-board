@@ -27,7 +27,7 @@
     inWindow(novelId, w, blockIndex) {
       let g = 0;
       for (const [ci, c] of H.body(novelId).entries()) {
-        const k = c.scenes.reduce((a, s) => a + s.blocks.length, 0);
+        const k = c.scenes.reduce((a, s) => a + visibleTextBlocks(s.blocks).length, 0);
         if (blockIndex < g + k) {
           const ch = ci + 1, p = blockIndex - g + 1;
           const afterStart = ch > w.chFrom || (ch === w.chFrom && p >= w.pFrom);
@@ -42,7 +42,7 @@
     blockIndex(novelId, ch, p) {
       let g = 0;
       for (const [ci, c] of H.body(novelId).entries()) {
-        const k = c.scenes.reduce((a, s) => a + s.blocks.length, 0);
+        const k = c.scenes.reduce((a, s) => a + visibleTextBlocks(s.blocks).length, 0);
         if (ci + 1 === ch) return p <= k ? g + p - 1 : -1;
         g += k;
       }
